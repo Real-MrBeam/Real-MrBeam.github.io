@@ -1,6 +1,6 @@
 ## Opening Notes
 This article is dedicated to the people who made Mannequin possible. 
-Such an amazing team that was never afraid of testing new ways of doing things. Without that mindset we would not have created the Lumen to GPU bake lighting workflow, or any of the other ideas you will see here.
+Such an amazing team that was never afraid of testing new ways of doing things. Without that mindset we would not have created the Lumen to GPU bake lighting workflow, or any of the other ideas and solutions you'll see here.
 
 ## Lighting Goals for Mannequin
 When we were developing the multiplayer VR title **Mannequin** for the Quest 2, we realized early in production that lighting design would play a crucial role in the project.
@@ -79,13 +79,13 @@ After carefully investigating and tweaking **Bloom**, **Color Grading Tone Curve
 
 **At last, we had a result that was almost identical!**
 
-![](/assets/slides.png)
+![](/assets/Slides.png)
 
 *Comparing Lumen and Static lighting. Lumen on the right.* 
 
 ## Light Shafts without Volumetric Fog
 
-Forward rendering doesn't support **local volumetric fog**, but we still wanted good looking sun shafts in our project. We also had another challenge: we didn't want a single global sunlight direction. We wanted the freedom to let the "sun" "shine in different directions in different areas of the levels, simply because it gave art direction more control over how each space was lit.
+Forward rendering doesn't support **local volumetric fog**, but we still wanted good looking sun shafts in our project. We also had another challenge: we didn't want a single global sunlight direction. We wanted the freedom to let the "sun" shine in different directions in different areas of the levels, simply because it gave art direction more control over how each space was lit.
 To solve this, I built a small **Geometry Script** tool that creates a mesh and extrudes it based on the rotation of a directional light.
 
 <video controls autoplay loop muted playsinline>
@@ -111,14 +111,12 @@ The material relies on distance *(I used distance fields on PC for better precis
 
 **With careful use, it looks convincing and costs almost nothing. You can use any material as long as it doesn't rely on vertex color, since the GPU version of the plugin uses vertex color for the folding system.**
 
-We placed these quads on emissive features, kept the intensity subtle, and favored convex or flat emissive shapes.
-
 ![](/assets/blog_flares_04.gif)
 
 *Showing the folding technique.*  
 *Image source: [https://simonschreibt.de](https://simonschreibt.de)*
 
-The technique is simple to implement, and we ended up using it on many lights, screens, and more. I love when old-school tricks like this make a comeback.
+The technique was simple to implement. We used this on emissive features like screens and lights, kept the intensity subtle, and favored  flat shapes. I love it when old-school tricks like this makes a comeback.
 
 ![](/assets/BloomLink.png)
 ![](/assets/BloomDevice.png)
@@ -134,7 +132,7 @@ For round features like the glowing eyes on the time-frozen characters, we used 
 ## Fake Reflections on Fully Rough Materials
 
 We used fully rough materials to save instructions and reduce shading cost on the device. On top of that, we turned off reflection captures on the device to save memory. Instead, we sampled a **custom cubemap** inside a material function.
-&nbsp;&nbsp;&nbsp;&nbsp; One nice side effect was that we could use the same function to reduce the specular flickering you usually get on reflective materials in the distance on low-resolution devices.
+One nice side effect was that we could use the same function to reduce the specular flickering you usually get on reflective materials in the distance on low-resolution devices, by inverting the specular fresnel based on camera distance.
 
 ![](/assets/AgentFakeRefl.gif)
 ![|465](/assets/Slides-art-2.png){: width="465" }

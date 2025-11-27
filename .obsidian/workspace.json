@@ -78,7 +78,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 300,
+    "collapsed": true
   },
   "right": {
     "id": "6df62319635c84b1",
@@ -185,6 +186,8 @@
   },
   "active": "1b5a0e5d781621d6",
   "lastOpenFiles": [
+    "_layouts/home.html",
+    "_layouts",
     "assets/Slides-art-2.png",
     "assets/AgentFakeRefl.gif",
     "assets/02.png",
@@ -195,7 +198,6 @@
     "assets/light02.gif",
     "assets/Slides.png",
     "assets/VulkalooksPC.gif",
-    "assets/VulkanvsPCcolor.gif",
     "_posts/2025-10-28-LightingMannequin.md",
     "_posts/2025-10-28-Lighting Mannequin.md"
   ]
