@@ -150,7 +150,7 @@ The downside of this approach is that you get the same reflection strength in al
 
 **To solve this, I extended the light tool so it could sample the virtual lightmap points.**
 
-The tool sampled the point’s Z-up value nearest the mesh’s bounding-box center, then I applied the point value to the actor's custom primitive data. I used this value to drive the reflection strength per actor.
+The tool sampled the VLM point nearest the mesh’s bounding-box center, specifically the point's Z-up value. Then I applied that value to the actor's custom primitive data. I used this value to drive the reflection strength per actor.
 
 <video controls autoplay loop muted playsinline>
   <source src="/assets/VLMtoCPD.mp4" type="video/mp4">
