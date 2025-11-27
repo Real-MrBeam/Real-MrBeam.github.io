@@ -152,7 +152,7 @@ The downside of this approach is that you get the same reflection strength in al
 
 It wasn't the most elegant solution, but it worked well most of the time as long as the object wasn't too big.
 
-## Lighting scenarios to serve two targets
+## Lighting Scenarios for Different Hardware
 
 When the headset was linked to a PC, we wanted dynamic shadows without breaking our device bake. The solution was **Lighting Scenarios**. Each scenario held its own bake and targeted a different hardware. We then loaded a specific light scenario by identifying what device the player was using.
 
