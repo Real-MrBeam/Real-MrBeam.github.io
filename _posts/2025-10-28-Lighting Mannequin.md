@@ -18,7 +18,7 @@ The game is built from many modular pieces *(which is a challenge on the Quest 2
 
  <!--more-->
 
-**We also knew that baked lighting is tedious to iterate on and incredibly slow. We learned this during the development of the Quest 2 title Vampire: The Masquerade - Justice. **
+**We also knew that baked lighting is tedious to iterate on and incredibly slow. We learned this during the development of the Quest 2 title Vampire: The Masquerade - Justice.**
 
 ![](/assets/amanda-gyllin-justice-art-phonecall-01.jpg)
 
