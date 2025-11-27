@@ -1,0 +1,19 @@
+<header class="site-header" role="banner">
+  <div class="wrapper">
+    <a class="site-title" rel="author" href="{{ '/' | relative_url }}">{{ site.title | escape }}</a>
+
+    <nav class="site-nav">
+      {%- if site.pages -%}
+        {%- for my_page in site.header_pages -%}
+          {%- assign my_page = site.pages | where: "path", my_page | first -%}
+          {%- if my_page -%}
+            <a class="page-link" href="{{ my_page.url | relative_url }}">{{ my_page.title | escape }}</a>
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
+
+      <!-- Your external link -->
+      <a class="page-link" href="https://peterstrahle.dev" target="_blank" rel="noopener">Portfolio</a>
+    </nav>
+  </div>
+</header>
