@@ -20,6 +20,10 @@ h1, h2, h3, h4, h5 {
     color: #e7e7e7;
 }
 
+h1, h2 {
+    color: #ffa200;
+}
+
 /* Bright blue links, Things-style */
 a {
     color: #4da3ff;
