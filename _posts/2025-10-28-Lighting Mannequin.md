@@ -138,7 +138,8 @@ For round features like the glowing eyes on the time-frozen characters, we used 
 ## Fake Reflections on Fully Rough Materials
 
 We used fully rough materials to save instructions and reduce shading cost on the device. On top of that, we turned off reflection captures on the device to save memory. Instead, we sampled a **custom cubemap** inside a material function.
-One nice side effect was that we could use the same function to reduce the specular flickering you usually get on reflective materials in the distance on low-resolution devices, by inverting the specular fresnel based on camera distance.
+
+One nice side effect was that we could use the same function to reduce the specular flickering, you usually get on reflective materials in the distance on low-resolution devices. We did this by inverting the specular fresnel based on camera distance.
 
 ![](/assets/AgentFakeRefl.gif)
 ![|465](/assets/Slides-art-2.png){: width="465" }
@@ -165,7 +166,7 @@ When the headset was linked to a PC, we wanted dynamic shadows without breaking 
 - **Quest scenario**, used fully static lighting.
 - **PC scenario**, reused the same level but enabled dynamic shadows where they mattered.
 
-The content stayed the same. The primary difference was light mobility. Many lights that were **Static** in the device scenario were set to **Movable** in the PC scenario, which gave us dynamic shadows during PC play while keeping the Quest build lean and stable.
+The content stayed the same. The primary difference was light mobility. Many lights that were **Static** in the device scenario were set to **Movable** in the PC scenario, which gave us dynamic shadows during PC play while keeping the Quest build static.
 
 ## Ending Notes
 In the end, Mannequin's lighting was not about one solution. It was a handful of practical choices that worked together, tools **and a lot of teamwork**. I hope you found this helpful or at least interesting. Next time I will write about how we optimized our titles for VR.
