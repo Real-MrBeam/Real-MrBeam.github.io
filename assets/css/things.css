@@ -122,5 +122,17 @@ i {
     color: #a0a0a0;
 }
 
+/* Header links: always blue (idle + hover + focus + visited) */
+.site-title,
+.site-title:visited,
+.site-title:hover,
+.site-title:focus,
+.site-nav .page-link,
+.site-nav .page-link:visited,
+.site-nav .page-link:hover,
+.site-nav .page-link:focus {
+  color: #4da3ff;
+  text-decoration: none;
+}
 
 
