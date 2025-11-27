@@ -42,13 +42,19 @@ Mannequin's lighting design uses a saturated color scheme that communicates game
 *Images from [Amanda Gyllin](https://www.artstation.com/amsoca)*
 
 Around this time Lumen became available. The team started evaluating it, not because we expected to use it in a VR production, but because the workflow speed was incredibly appealing. That sparked an idea: what if we could use Lumen during development and then switch to baked lighting while keeping a similar look?
+
 Since we didn't have anyone working full time on lighting design, Lumen's quick workflow was even more tempting.
 
 **At first, this seemed impossible. CPU Lightmass and Lumen behaved too differently, and the results weren't close enough. After several tests, we dropped the idea.**
 
-Later, we decided to switch to **GPU Lightmass**. The small quality loss from GPU baking wasn't noticeable with our stylized look, so the timing was perfect. Epic also made it clear that GPU Lightmass would be supported going forward and that CPU baking was slowly becoming outdated.
+Later, we decided to switch to **GPU Lightmass** for the speed. The small quality loss from GPU baking wasn't noticeable with our stylized look, so the timing was perfect.
+
+Epic also made it clear that GPU Lightmass would be supported going forward and that CPU baking was slowly becoming outdated.
+
 Switching to GPU Lightmass was almost frictionless *(aside from the need to upgrade our graphics cards)*, and everyone appreciated the much faster bake times.
-Lucky for us, we had an AD who was technically inclined and decided to revisit the issue. He tried working with Lumen again before baking with GPU Lightmass, and this time the results were much closer!
+
+Lucky for us, we had an AD who was technically inclined and decided to revisit the mismatch issue with Lumen and baked light again. And this time the results were much closer!
+
 That's when we began building a pipeline that used Lumen's fast iteration during development and GPU Lightmass for final baking.
 
 ## Lumen and GPU Lightmass
