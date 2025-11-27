@@ -148,9 +148,9 @@ One nice side effect was that we could use the same function to reduce the specu
 
 The downside of this approach is that you get the same reflection strength in all lighting conditions.
 
-**To solve this, I extended the light tool so it could sample the virtual lightmap points value for any actor using reflections.**
+**To solve this, I extended the light tool so it could sample the virtual lightmap points.**
 
-The tool sampled the point’s value based on the mesh’s bounding-box center, then applied that value to the actor's custom primitive data. I used this value to drive the reflection strength per actor.
+The tool sampled the point’s Z-up value nearest the mesh’s bounding-box center, then I applied the point value to the actor's custom primitive data. I used this value to drive the reflection strength per actor.
 
 <video controls autoplay loop muted playsinline>
   <source src="/assets/VLMtoCPD.mp4" type="video/mp4">
