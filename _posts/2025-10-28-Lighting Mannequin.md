@@ -25,7 +25,7 @@ The game is built from many modular pieces *(which is a challenge on the Quest 2
 *Screenshot showing baked lighting from Vampire Justice.*
 *Images from [Amanda Gyllin](https://www.artstation.com/amsoca)*
 
-Heavy use of HLODs made iteration even more painful. During that project, I pushed to switch from CPU to GPU baking, since CPU bakes took far too much time. But I joined mid-production, and GPU Lightmass didn't support manually edited HLODs at the time, that was one of the reasons we had to drop the idea.
+Heavy use of HLODs made iteration even more painful. During that project, I pushed to switch from CPU to GPU baking, since CPU bakes took far too much time. But I joined mid-production, and GPU Lightmass didn't support manually edited HLODs at the time, that was one of the reasons we had to drop the idea for now.
 
 ![](/assets/BakeWhatYouSee.gif)
 
@@ -53,7 +53,7 @@ Epic also made it clear that GPU Lightmass would be supported going forward and 
 
 Switching to GPU Lightmass was almost frictionless *(aside from the need to upgrade our graphics cards)*, and everyone appreciated the much faster bake times.
 
-Lucky for us, we had an AD who was technically inclined and decided to revisit the mismatch issue with Lumen and baked light again. And this time the results were much closer!
+Lucky for us, we had an AD who was technically inclined and decided to revisit the mismatch issue with Lumen and baked light again. And this time, thanks to GPU Lightmass, the results were much closer!
 
 That's when we began building a pipeline that used Lumen's fast iteration during development and GPU Lightmass for final baking.
 
@@ -83,7 +83,7 @@ After carefully investigating and tweaking **Bloom**, **Color Grading Tone Curve
 
 *Comparing Vulkan and native Forward Renderer with tweaked post-process settings.* 
 
-**At last, we had a result that was almost identical!**
+**At last, a result that was almost identical and a smooth workflow!**
 
 ![](/assets/Slides.png)
 
@@ -91,7 +91,7 @@ After carefully investigating and tweaking **Bloom**, **Color Grading Tone Curve
 
 ## Light Shafts without Volumetric Fog
 
-Forward rendering doesn't support **local volumetric fog**, but we still wanted good looking sun shafts in our project. We also had another challenge: we didn't want a single global sunlight direction. We wanted the freedom to let the "sun" shine in different directions in different areas of the levels, simply because it gave art direction more control over how each space was lit.
+Forward rendering doesn't support **local volumetric fog**, but we still wanted good looking sun shafts in our project. We also had another challenge; we didn't want a single global sunlight direction. We wanted the freedom to let the "sun" shine in different directions in different areas of the levels, simply because it gave art direction more control over how each space was lit.
 To solve this, I built a small **Geometry Script** tool that creates a mesh and extrudes it based on the rotation of a directional light.
 
 <video controls autoplay loop muted playsinline>
@@ -171,6 +171,6 @@ When the headset was linked to a PC, we wanted dynamic shadows without breaking 
 The content stayed the same. The primary difference was light mobility. Many lights that were **Static** in the device scenario were set to **Movable** in the PC scenario, which gave us dynamic shadows during PC play while keeping the Quest build static.
 
 ## Ending Notes
-In the end, Mannequin's lighting was not about one solution. It was a handful of practical choices that worked together, tools **and a lot of teamwork**. I hope you found this helpful or at least interesting. Next time I will write about how we optimized our titles for VR.
+In the end, Mannequin's lighting was not about one solution. It was a handful of practical choices that worked together, tools **and a lot of teamwork**. I hope you found this helpful or at least interesting. Next time I will write about VR again about how we optimized our titles for the Quest 2.
 
 If you are interested in the tools mentioned in this blog post you can find most of them in my [ue tool repository](https://codeberg.org/MrBeam/ue_tools).
