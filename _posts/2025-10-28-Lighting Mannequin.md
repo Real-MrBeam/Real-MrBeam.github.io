@@ -173,4 +173,4 @@ The content stayed the same. The primary difference was light mobility. Many lig
 ## Ending Notes
 In the end, Mannequin's lighting was not about one solution. It was a handful of practical choices that worked together, tools **and a lot of teamwork**. I hope you found this helpful or at least interesting. Next time I will write about VR again about how we optimized our titles for the Quest 2.
 
-If you are interested in the tools mentioned in this blog post you can find most of them in my [ue tool repository](https://codeberg.org/MrBeam/ue_tools).
+If you are interested in the tools mentioned in this blog post you can find most of them in my [repository](https://codeberg.org/MrBeam).
