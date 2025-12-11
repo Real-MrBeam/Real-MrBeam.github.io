@@ -71,9 +71,10 @@ It became clear we couldn’t rely solely on precomputed visibility. There were 
 
 ### Snow Occlusion (software occlusion in UE5)
 
-**Fortunately, our CTO ported and extended UE4’s Software Occlusion Queries to UE5.** It keeps the original foundation but adds the features we needed, because the stock implementation was too limited for our use.
+**Fortunately our CTO ported and extended UE4’s Software Occlusion Queries to UE5; [Snow Occlusion Plugin](https://github.com/MrBenj4min/UnrealEngine-Epic/tree/SnowOcclusion)**.
+It keeps the original foundation but adds the features we needed, because the original implementation was too limited for our use.
 
-One of the biggest additions was better **debug views**:
+One of the additions was better **debug views**:
 
 ![](/assets/buffervis1.png)
 *Depth visualization.*
@@ -140,7 +141,7 @@ With that in mind, and given the timeline, we adopted the plugin **[Instance Too
 
 The plugin hides the original actors and replaces them with instances, which fit our workflow well. Going back to the original actors wasn’t as straightforward as you’d think, since most of our actors were Blueprint classes. To remedy this, we added functionality to our master tool *(the light tool from the previous post evolved into this)* to make that workflow straightforward.
 
-![](/assets/Slides-optimization-2.png){: width="345" }![](/assets/Slides-optimization-1.png){: width="345" }  
+![](/assets/Slides-optimization-2.png){: height="345" }![](/assets/Slides-optimization-1.png){: height="345" }  
 *To the left the floor tiles are not instanced, 275 draws. To the right the tiles are ISM, reducing the scene to 215 draws.*
 
 **After converting groups of static meshes to instances we finally got the amount of draw calls down to an acceptable amount for the Quest 2.**
@@ -180,4 +181,4 @@ The function adjusts the editor’s render resolution and applies a set of cvars
 
 **Fixing performance was a long chain of small changes, and I have not covered all of them here. But I tried to cover the most impactful fixes here. Different culling solutions, instancing, LOD tuning, detail modes, CPD, color atlases, and most importantly, engineering taking the time to turn Snow Occlusion into a proper tool.**
 
-I hope this post was interesting and maybe gave you a few ideas on how you can keep performance under control in your own projects.
+I hope this post was interesting and maybe gave you a few ideas on how you can keep performance under control in your own VR projects.
