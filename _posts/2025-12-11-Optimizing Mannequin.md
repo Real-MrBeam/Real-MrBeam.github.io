@@ -1,7 +1,6 @@
 ## Opening Notes
-This post is for the people who squeezed every last millisecond with me on **Vampire: The Masquerade - Justice** and later on **Mannequin**.
-Art rebuilt assets to keep them performant, and level design dressed and built spaces with occlusion in mind. Last, but definitely not least, thanks to engineering for turning a dead end into the **Snow Occlusion** plugin.  
-Thank you.
+This post is for the people who squeezed every last millisecond with me on **Vampire: The Masquerade - Justice** and on **Mannequin**.
+Special thanks to engineering for turning a dead end into the **Snow Occlusion** plugin.  
 
 ## Indirect Light Memory Bloat
 
@@ -179,6 +178,6 @@ The function adjusts the editor’s render resolution and applies a set of cvars
 
 ## Ending Notes
 
-**Fixing performance was a long chain of small changes that added up, and I have not covered all of them here. But I tried to cover the most impactful fixes here. Different culling solutions, instancing, LOD tuning, detail modes, CPD, color atlases, and most importantly, engineering taking the time to turn Snow Occlusion into a proper tool.**
+**Fixing performance was a long chain of small changes, and I have not covered all of them here. But I tried to cover the most impactful fixes here. Different culling solutions, instancing, LOD tuning, detail modes, CPD, color atlases, and most importantly, engineering taking the time to turn Snow Occlusion into a proper tool.**
 
 I hope this post was interesting and maybe gave you a few ideas on how you can keep performance under control in your own projects.
