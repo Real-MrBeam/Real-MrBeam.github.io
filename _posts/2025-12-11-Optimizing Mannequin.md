@@ -27,7 +27,7 @@ Lesson learned. We carried that approach into **Mannequin**.
 
 ## Culling
 
-**Because most of our assets were modular, draw calls spiked early in production.**
+**Because most of our assets in Mannequin were modular, draw calls spiked early in production.**
 
 ![](/assets/MQWalls.png)  
 *A scene in **Mannequin** built from many modular pieces, one of the reasons draw calls became a problem.*
@@ -70,7 +70,7 @@ It became clear we couldn’t rely solely on precomputed visibility. There were 
 
 ### Snow Occlusion (software occlusion in UE5)
 
-**Fortunately our CTO ported and extended UE4’s Software Occlusion Queries to UE5; [Snow Occlusion Plugin](https://github.com/MrBenj4min/UnrealEngine-Epic/tree/SnowOcclusion)**.
+**Fortunately our CTO ported and extended UE4’s Software Occlusion Queries to UE5, this evolved into the [Snow Occlusion Plugin](https://github.com/MrBenj4min/UnrealEngine-Epic/tree/SnowOcclusion)**.
 It keeps the original foundation but adds the features we needed, because the original implementation was too limited for our use.
 
 One of the additions was better **debug views**:
