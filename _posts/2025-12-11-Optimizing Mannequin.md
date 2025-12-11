@@ -12,6 +12,8 @@ When I joined the company and landed on **Vampire: The Masquerade - Justice**, I
 
 **During the investigation, MapBuildData stood out. It was huge, eating disk space and VRAM.**
 
+ <!--more-->
+ 
 Running `stat MapBuildData` made the culprit obvious: **Volumetric Lightmap** memory. The debug view confirmed why; the sample points were dense and everywhere.
 
 ![](/assets/VLMCluster.png){: width="425" }  
