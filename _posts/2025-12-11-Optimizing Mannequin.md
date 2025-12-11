@@ -1,9 +1,10 @@
 ## Opening Notes
-This post is for the people who squeezed every last millisecond with me on **Vampire: The Masquerade - Justice** and on **Mannequin**.
+This post is for the people who squeezed every last millisecond with me both on **Vampire: The Masquerade - Justice** and **Mannequin**.
 Special thanks to engineering for turning a dead end into the **Snow Occlusion** plugin.  
 
 ## Indirect Light Memory Bloat
 
+Even though this post is mainly about performance on **Mannequin**, we need to start with a small detour.  
 When I joined the company and landed on **Vampire: The Masquerade - Justice**, I was surprised to learn that baking the lighting for a single level took most of a day. This was before we switched to GPU bakes, but even for CPU Lightmass it felt painfully slow.
 
 ![](/assets/johanna-pettersson-vtmjustice-sidemission-johannapettersson-08.jpg)  
