@@ -118,19 +118,6 @@ Based on their size category they get different default settings like max draw d
 
 Culling solved most draw-call problems, but in the end it wasn’t enough. We turned to other solutions to keep draw calls down and rendering cost low.
 
-### Detail Props
-
-We also built a **Mesh Detail Tool** that uses Unreal’s **Detail Mode** on components to set visibility per platform.
-On device we run with `r.DetailMode=Low`, while PC runs `High`, so anything marked High will be culled on Quest. It's purpose was to quickly be able to scale back and forth how much of the detail meshes *(paper, gravel, rubble)*  that should be culled on device to save render cost.
-
-It **assigns Detail Mode** on the selected actors render components based on a slider that controls how high percentage of the actors that will get the High tier.
-
-![](/assets/01.gif)
-
-- Set a level, then click **Detail Scramble**: the tool assigns some percentage of the selected meshes to **High** (hidden on device) and leaves the rest at **Low** (visible on device).  
-- Click **Reset** to put all selected meshes back to **Low**, making them always visible on device.  
-- An **icon overlay toggle** lets you preview which meshes will disappear on device without switching project-wide scalability.
-
 ### Instance Tool
 
 **Unreal’s auto-instancing looked good on paper, but on Quest the overhead wasn’t worth it in our tests.**
@@ -148,7 +135,7 @@ The plugin hides the original actors and replaces them with instances, which fit
 
 ### CPD and Color Atlas
 
-**We used Custom Primitive Data everywhere we could, to keep draw calls down.**  
+**Oh I almost forgot but we used Custom Primitive Data everywhere we could, to keep draw calls down.**  
 
 Instead of creating separate material instances we drove variations through CPD; color tints on small and detail props, variations on screens, etc.
 
@@ -176,6 +163,19 @@ This comes from differences in per-eye resolution and pixel density. To fix this
 *Blueprint snippet showing the key settings needed to simulate HMD LOD behavior inside the editor.*
 
 The function adjusts the editor’s render resolution and applies a set of cvars so that **LOD switch distances in the viewport match what the headset actually shows**. With this in place, artists could view LODs directly in the editor without constantly jumping in and out of VR to verify distances.
+
+### Detail Props
+
+Further attempts to get the fragmentation pass down resulted in the **Mesh Detail Tool** that uses Unreal’s **Detail Mode** on components to set visibility per platform.
+On device we run with `r.DetailMode=Low`, while PC runs `High`, so anything marked High will be culled on Quest. It's purpose was to quickly be able to scale back and forth how many of the detail meshes *(paper, gravel, rubble)*  that should be culled on device to save render cost.
+
+It **assigns Detail Mode** on the selected actors render components based on a slider that controls how high percentage of the actors that will get the High tier.
+
+![](/assets/01.gif)
+
+- Set a level, then click **Detail Scramble**: the tool assigns some percentage of the selected meshes to **High** (hidden on device) and leaves the rest at **Low** (visible on device).  
+- Click **Reset** to put all selected meshes back to **Low**, making them always visible on device.  
+- An **icon overlay toggle** lets you preview which meshes will disappear on device without switching project-wide scalability.
 
 ## Ending Notes
 
