@@ -91,9 +91,9 @@ Another major upgrade we added was support for a **custom occluder mesh**, not j
 
 **We discovered that actors often popped in too late around corners and behind obstacles due to frame latency and tight tests.**
 
-This called for tuning `ftg.so.ExpandOccludeeBoxes`, which expands the screen-space bounding boxes used for occludee tests. It makes culling less tight and reduces false occlusion and late pop-in, at the cost of some CPU time.
+This called for the cvar `ftg.so.ExpandOccludeeBoxes`, which expands the screen-space bounding boxes used for occludee tests. It makes culling less tight and reduces false occlusion and late pop-in, at the cost of some CPU time.
 
-We also saw large floor meshes get culled because their bounds center fell behind the camera. Another setting helped: `ftg.so.DotPush`. It virtually pushes objects forward along the view vector before the dot-product cull, so they’re less likely to be culled too early.
+We also saw large floor meshes get culled because their bounds center fell behind the camera. Another setting created; `ftg.so.DotPush`. It virtually pushes objects forward along the view vector before the dot-product cull, so they’re less likely to be culled too early.
 
 In a VR thriller shooter you rotate the camera rapidly, which exposed late pop-in from frustum-culled meshes. Previously, the occlusion pass also tried to reject off-screen objects instead of letting Unreal’s normal frustum culling handle that. With `ftg.so.FrustumCull` you can turn that behavior off. It adds a few extra draw calls, but it reduces visible artifacts during quick turns.
 
