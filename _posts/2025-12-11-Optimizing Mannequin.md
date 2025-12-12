@@ -16,7 +16,7 @@ When I joined the company and landed on **Vampire: The Masquerade - Justice**, I
  
 Running `stat MapBuildData` made the culprit obvious: **Volumetric Lightmap** memory. The debug view confirmed why; the sample points were dense and everywhere.
 
-![](/assets/VLMCluster.png){: width="425" }  
+![](/assets/VLMCluster.png) 
 *This image is unrelated to the Vampire project, but it illustrates the problem clearly: a dense field of VLM samples, much of it outside the playable space.*
 
 A single **Lightmass Importance Volume** wrapped the entire level, and the **Volumetric Lighting Detail Cell Size** was set very small. The result was a sea of samples, even in empty, unplayable space. Our Vampire levels were much larger than the example above, so the waste scaled even worse.
@@ -75,13 +75,13 @@ It keeps the original foundation but adds the features we needed, because the or
 
 One of the additions was better **debug views**:
 
-![](/assets/buffervis1.png)
+![](/assets/buffervis1.png)<br>
 *Depth visualization.*
 
-![](/assets/buffervis5.png)
+![](/assets/buffervis5.png)<br>
 *Instance visualization.*
 
-![](/assets/buffervis2.png)
+![](/assets/buffervis2.png)<br>
 *Depth buffer with occludees overlaid and colored by visibility.*
 
 Another major upgrade we added was support for a **custom occluder mesh**, not just a chosen LOD. This was critical for us. Auto-generated LODs of our modular walls left gaps and other inconsistencies that made culling worse. With custom occluders we could seal those gaps and keep the pass cheap by using very simple meshes.
