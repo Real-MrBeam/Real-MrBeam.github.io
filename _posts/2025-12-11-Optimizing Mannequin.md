@@ -14,7 +14,7 @@ When I joined the company and landed on **Vampire: The Masquerade - Justice**, I
 
  <!--more-->
  
-Running `stat MapBuildData` made the culprit obvious, it was the **Volumetric Lightmap** memory that was the biggest offender. And the debug view confirmed why, the sample points were dense and everywhere in the scenes.
+Running `stat MapBuildData` made the culprit obvious, it was **Volumetric Lightmap Memory** that was the biggest offender. And the debug view confirmed why, the sample points were dense and everywhere in the scenes.
 
 ![](/assets/VLMCluster.png) 
 *This image is unrelated to the Vampire project, but it illustrates the problem clearly: a dense field of VLM samples, much of it outside the playable space.*
