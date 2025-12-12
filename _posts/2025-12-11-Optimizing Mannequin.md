@@ -179,6 +179,6 @@ It **assigns Detail Mode** on the selected actors render components based on a s
 
 ## Ending Notes
 
-**Fixing performance was a long chain of small changes, and I have not covered all of them here. But I tried to cover the most impactful fixes here. Different culling solutions, instancing, LOD tuning, detail modes, CPD, color atlases, and most importantly, engineering taking the time to turn Snow Occlusion into a proper tool.**
+**Fixing performance was a long chain of small changes, and I have not covered all of them here. But I tried to cover the most impactful fixes.**
 
-I hope this post was interesting and maybe gave you a few ideas on how you can keep performance under control in your own VR projects.
+I hope this post was interesting and maybe gave you some insight on how you can keep performance under control in your own VR projects.
