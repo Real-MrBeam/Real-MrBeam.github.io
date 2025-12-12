@@ -135,7 +135,7 @@ The plugin hides the original actors and replaces them with instances, which fit
 
 ### CPD and Color Atlas
 
-**Oh I almost forgot but we used Custom Primitive Data everywhere we could, to keep draw calls down.**  
+**Oh I almost forgot but we used Custom Primitive Data and color atlases, *(to keep draw calls down)*, everywhere we could.**  
 
 Instead of creating separate material instances we drove variations through CPD; color tints on small and detail props, variations on screens, etc.
 
