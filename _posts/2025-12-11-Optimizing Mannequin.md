@@ -90,12 +90,13 @@ Another major upgrade we added was support for a **custom occluder mesh**, not j
 *Modular wall assets with the new depth debug view. Occluder gaps between walls are clearly visible, that makes the culling pass ineffective.*
 
 **We discovered that actors often popped in too late around corners and behind obstacles due to frame latency and tight tests.**
+This called for the cvar `ftg.so.ExpandOccludeeBoxes`, which expands the bounding boxes used for occludee tests. It makes culling less tight and reduces late pop-in, at the cost of some CPU time.
 
-This called for the cvar `ftg.so.ExpandOccludeeBoxes`, which expands the screen-space bounding boxes used for occludee tests. It makes culling less tight and reduces false occlusion and late pop-in, at the cost of some CPU time.
+**We also experienced large floor meshes getting culled, even when standing on them. After some investigating it became clear that the reason was that their bounds center was too far behind the camera.**
+Another setting created; `ftg.so.DotPush`. It virtually pushes objects forward along the view vector, so they’re less likely to be culled too early.
 
-We also saw large floor meshes get culled because their bounds center fell behind the camera. Another setting created; `ftg.so.DotPush`. It virtually pushes objects forward along the view vector before the dot-product cull, so they’re less likely to be culled too early.
-
-In a VR thriller shooter you rotate the camera rapidly, which exposed late pop-in from frustum-culled meshes. Previously, the occlusion pass also tried to reject off-screen objects instead of letting Unreal’s normal frustum culling handle that. With `ftg.so.FrustumCull` you can turn that behavior off. It adds a few extra draw calls, but it reduces visible artifacts during quick turns.
+**In a VR thriller shooter you rotate the camera rapidly, which exposed yet again late pop-in. But this time from frustum-culled meshes.**
+Previously, the occlusion pass also tried to reject off-screen objects instead of letting Unreal’s normal frustum culling handle that. With `ftg.so.FrustumCull` you can turn that behavior off. It adds a few extra draw calls, but it reduces visible pop-in during quick turns.
 
 **With all of this settled, we finally got rid of all the strange occlusion behavior.**
 
