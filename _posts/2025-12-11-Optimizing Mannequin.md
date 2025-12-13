@@ -107,7 +107,7 @@ But there were spots in the project that still had issues with too many draw cal
 
 ### Distance Culling
 
-The very first culling we defined was distance culling. I'm putting it here after the other culling systems for one reason; everyone does it. Our approach was to sort actors in different size categories based on a size guide. 
+The very first culling we defined was distance culling. I'm putting it here after the other culling systems for one reason; it's almost always taken for granted. Our approach was to sort actors in different size categories based on a size guide. 
 
 ![](/assets/Prop%20Size%20Definitions.png)
 
