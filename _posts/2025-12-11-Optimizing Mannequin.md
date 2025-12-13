@@ -166,7 +166,7 @@ The function adjusts the editor’s render resolution and applies a set of cvars
 
 ### Detail Props
 
-Further attempts to get the fragmentation pass down resulted in the **Mesh Detail Tool** that uses Unreal’s **Detail Mode** on components to set visibility per platform.
+To be able to keep the detail density high on PC while keeping the Quest budget under control, I created a simple **Mesh Detail Tool**. It uses Unreal’s **Detail Mode** on components to set visibility per platform.
 On device we run with `r.DetailMode=Low`, while PC runs `High`, so anything marked High will be culled on Quest. It's purpose was to quickly be able to scale back and forth how many of the detail meshes *(paper, gravel, rubble)*  that should be culled on device to save render cost.
 
 It **assigns Detail Mode** on the selected actors render components based on a slider that controls how high percentage of the actors that will get the High tier.
