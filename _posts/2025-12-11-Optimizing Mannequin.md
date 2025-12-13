@@ -174,8 +174,7 @@ It **assigns Detail Mode** on the selected actors render components based on a s
 ![](/assets/01.gif)
 
 - Set a level, then click **Detail Scramble**: the tool assigns some percentage of the selected meshes to **High** (hidden on device) and leaves the rest at **Low** (visible on device).  
-- Click **Reset** to put all selected meshes back to **Low**, making them always visible on device.  
-- An **icon overlay toggle** lets you preview which meshes will disappear on device without switching project-wide scalability.
+- Click **Reset** to put all selected meshes back to **Low**, making them always visible on device.
 
 ## Ending Notes
 
