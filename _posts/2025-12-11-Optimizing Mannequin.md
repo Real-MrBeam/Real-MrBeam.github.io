@@ -1,3 +1,7 @@
+---
+title: "Optimizing Mannequin"
+---
+
 ## Opening Notes
 This post is for the people who squeezed every last millisecond with me on **Vampire: The Masquerade - Justice** and on **Mannequin**.
 Special thanks to engineering for turning a dead end into the **Snow Occlusion** plugin.  
