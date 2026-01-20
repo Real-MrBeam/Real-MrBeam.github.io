@@ -29,6 +29,8 @@ Another thing that grew, was `LumenReflections`. It could get as high as ~2.4 ms
 ![](/assets/OptimizingHWRT/HWRT%20Culling.png)  
 *Comparing the cost of `RenderDeferredLighting` SWRT to HWRT in a rather GPU taxing scene. HWRT to the right.*
 
+ <!--more-->
+ 
 ![](/assets/OptimizingHWRT/LumenReflectionHigh.png)  
 *`LumenReflections` grew with 0.5 - 2ms.*
 
