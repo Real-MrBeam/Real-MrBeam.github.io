@@ -1,3 +1,7 @@
+---
+title: "Lighting Mannequin"
+---
+
 ## Opening Notes
 This article is dedicated to the people who made Mannequin possible. 
 Such an amazing team that was never afraid of testing new ways of doing things. Without that mindset we would not have created the Lumen to GPU bake lighting workflow, or any of the other ideas and solutions you'll see here.
