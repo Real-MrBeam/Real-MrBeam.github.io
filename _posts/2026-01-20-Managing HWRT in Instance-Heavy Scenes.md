@@ -1,5 +1,6 @@
 ---
 title: "Managing HWRT in Instance-Heavy Scenes"
+image: /assets/OptimizingHWRT/TLAS01.png
 ---
 
 ## Opening Notes
