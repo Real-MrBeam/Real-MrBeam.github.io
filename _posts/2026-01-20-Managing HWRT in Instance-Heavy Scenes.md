@@ -16,6 +16,8 @@ Nested under `MapOcclusionResults` we could see `STAT_MapHZBResults`, telling us
 
 `MapOcclusionResults` is essentially the point where the engine collects occlusion results, and why this suddenly exploded when we turned on HWRT had to be investigated. 
 
+ <!--more-->
+ 
 Most of the +40 ms turned out to be the game thread waiting for the GPU to finish its work. When the CPU reaches this point it waits for the GPU to catch up, which is why this number can grow when the frame is GPU bound.
 
 To verify this, I opted out of HWRT to check if the cost of `MapOcclusionResults` was the same. And it was but with no spikes, what changed with HWRT was the overall GPU pressure.
@@ -28,8 +30,6 @@ Another thing that grew, was `LumenReflections`. It could get as high as ~2.4 ms
 
 ![](/assets/OptimizingHWRT/HWRT%20Culling.png)  
 *Comparing the cost of `RenderDeferredLighting` SWRT to HWRT in a rather GPU taxing scene. HWRT to the right.*
-
- <!--more-->
  
 ![](/assets/OptimizingHWRT/LumenReflectionHigh.png)  
 *`LumenReflections` grew with 0.5 - 2ms.*
