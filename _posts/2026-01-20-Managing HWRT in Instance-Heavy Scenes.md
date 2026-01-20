@@ -4,7 +4,7 @@ title: "Managing HWRT in Instance-Heavy Scenes"
 
 ## Opening Notes
 
-On our current project, we’re building a dense open-world forest using our own Nanite assemblies created with Blender Geometry Nodes and then spawned in the world through [PCG](https://dev.epicgames.com/documentation/en-us/unreal-engine/pcg-development-guides?application_version=5.5). Trees, branches, and foliage are heavily instanced, and at any given time the scene contains a very large number of visible ray-traceable objects.
+We’re building a dense open-world forest using our own Nanite assemblies created with Blender Geometry Nodes and then spawned in the world through [PCG](https://dev.epicgames.com/documentation/en-us/unreal-engine/pcg-development-guides?application_version=5.5). Trees, branches, and foliage are heavily instanced, and at any given time the scene contains a very large number of visible ray-traceable objects.
 
 **When we began evaluating hardware ray tracing as an option alongside virtual shadows, some costs went down and other went way up. What seemed like a straightforward quality upgrade turned into a deeper investigation into culling, acceleration structure management, and GPU pressure.**
 
