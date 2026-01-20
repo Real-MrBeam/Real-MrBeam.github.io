@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "_posts/2025-10-28-Lighting Mannequin.md",
+                "file": "_posts/2026-01-20-Managing HWRT in Instance-Heavy Scenes.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "2025-10-28-Lighting Mannequin"
+              "title": "2026-01-20-Managing HWRT in Instance-Heavy Scenes"
             }
           }
         ]
@@ -74,11 +74,12 @@
               "title": "Bookmarks"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 521.5
   },
   "right": {
     "id": "4475df239d7437a6",
@@ -183,6 +184,23 @@
       "bases:Create new base": false
     }
   },
-  "active": "c38a19e5396c8cbc",
-  "lastOpenFiles": []
+  "active": "5152022c214a4326",
+  "lastOpenFiles": [
+    "assets/OptimizingHWRT/GroupIds2.gif",
+    "assets/OptimizingHWRT/GroupIds1.gif",
+    "_posts/2026-01-20-Managing HWRT in Instance-Heavy Scenes 1.md",
+    "_posts/2026-01-20-Managing HWRT in Instance-Heavy Scenes.md",
+    "assets/01.gif",
+    "assets/02.png",
+    "assets/amanda-gyllin-justice-art-phonecall-01.jpg",
+    "assets/amanda-gyllin-mq-art-horizontal-25.jpg",
+    "assets/OptimizingHWRT/TLAS01.png",
+    "assets/Pasted image 20251209143334.png",
+    "assets/occluaionStall.png",
+    "_posts/next.md",
+    "assets/OptimizingHWRT/hzbOff.png",
+    "assets/OptimizingHWRT/HWRT Culling-3.png",
+    "_posts/2025-10-28-Lighting Mannequin.md",
+    "_posts/2026-01-20-Optimizing HWRT in instance-heavy scenes.md"
+  ]
 }
