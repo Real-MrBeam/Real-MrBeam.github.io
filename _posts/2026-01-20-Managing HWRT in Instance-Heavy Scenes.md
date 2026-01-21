@@ -51,7 +51,7 @@ Suspicion rose that our ray tracing hit evaluation were simply too expensive. Wh
 
 ### Optimizing Ray Hit Shading
 
-First I went for some quick wins and switched ray lighting mode to **surface caEche** instead of **hit lighting mode**, since most of the surfaces in the scene was rough the visual impact was minimal.
+First I went for some quick wins and switched ray lighting mode to **surface cache** instead of **hit lighting mode**, since most of the surfaces in the scene was rough the visual impact was minimal. You can read about the difference between these settings in the [documentation](https://dev.epicgames.com/documentation/en-us/unreal-engine/lumen-technical-details-in-unreal-engine?application_version=5.7). In short, hit lighting evaluates the lighting at the ray hit instead of sampling the lower quality surface cache and thus is more expensive.
 I also turned on **texture LODs for ray tracing**, this enables automatic mip selection in ray tracing materials instead of always sampling the highest-resolution textures. These two options alone gave me ~2 ms.
 
 Now I made sure that only actors of a certain size was included in the ray tracing scene. I wrote a editor script that evaluated our assets bounding size, and automatically excluded anything below a defined threshold.
