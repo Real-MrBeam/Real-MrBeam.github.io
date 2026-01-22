@@ -69,12 +69,12 @@ But right now I was focused on getting the GPU pressure down and making the ray 
 
 ### Ray Tracing Quality Switch
 
-This made me revisit our materials. I started going through the worst offenders and wiring them up properly to the **RayTracingQualitySwitchReplace** node, making sure that our ray traced evaluation path was cheaper wherever possible.
+This made me revisit our materials. I started going through the worst offenders and wiring them to the **RayTracingQualitySwitchReplace** node, making sure that our ray traced evaluation path was cheaper wherever possible.
 
 ![](/assets/OptimizingHWRT/Pasted%20image%2020260108223640.png)  
 
 I stripped the ray tracing branch down to the essentials. In addition to removing normal maps, subsurface, and ambient occlusion, I tried to remove as many texture lookups as possible and replace them with constants.
-Although I kept the triplanar effect in the albedo channel, since removing it made the ray traced reflections look noticeably off.
+Although I kept the triplanar effect in the albedo channel, since removing it made the reflections look off.
 
 ### Reflection Cost
 
