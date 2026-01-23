@@ -13,7 +13,7 @@ When I joined the company and landed on **Vampire: The Masquerade - Justice**, I
 ![](/assets/johanna-pettersson-vtmjustice-sidemission-johannapettersson-08.jpg)  
 *Image from [Johanna Petterson](https://mi0ne.artstation.com/).*
 
-**During the investigation, MapBuildData stood out. It was huge, eating disk space and VRAM.**
+**When investigating the reason for this, I noticed that MapBuildData stood out. It was huge, eating disk space and VRAM.**
 
  <!--more-->
  
@@ -43,7 +43,7 @@ In earlier titles we leaned on Unreal’s **Software Occlusion Queries**. It’s
 ![](/assets/Pasted%20image%2020251207225905.png)
 *The Software Occlusion Queries debug view. The image in the lower-right shows occluder meshes being rasterized and used for culling.*
 
-With UE5, that option disappeared, which hurt on Quest where we’re usually GPU bound. We needed alternatives that didn’t use the GPU.
+With UE5 that option disappeared, which was a major issue for us since we’re usually GPU bound on the Quest. We needed alternatives that didn’t use the GPU.
 
 ### Precomputed Visibility Culling
 
@@ -59,10 +59,12 @@ At a glance it looked good. In practice it comes with strict limits. Everything 
 
 When the player stands in a visibility grid cell close to a wall, and the cell extends through the wall, the visibility pass treats the space behind the wall as visible and draws everything on the other side.
 
-**We used a 50 cm grid, which forced a redesign of many walls. The bigger issue was our use of modular walls.** 
+**We used a 50 cm grid, which forced a redesign of many walls.
+The bigger issue was our use of modular walls.** 
 
-The levels were meant to be dressed quickly by responders investigating the alien presence, and many wall modules were very thin with negative space. You could see through them from many angles.  
-We redesigned most of the wall kit to fix this, but the nature of modular walls remained. You can often see over them, which keeps visibility open even after the redesign.  
+The narrative of the game was that the levels were dressed quickly, by responders investigating the alien presence. And they used wall modules everywhere to make rooms ad hoc.
+These modules are thin and has a lot of negative space. You could see through them from many angles.  
+We redesigned most of the wall module kit to fix this, but the nature of modular walls remained. You can often see over them, which keeps visibility open even after the redesign.  
 Level design would get very boring if everything became a maze with enclosed walls and no sightlines.
 
 **Another issue was that cells are only generated on static, shadow-casting meshes.**
