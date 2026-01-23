@@ -86,7 +86,7 @@ This prevents Lumen from tracing reflections with dedicated rays on pixels with 
 I also downsampled the reflection quality by half with `r.Lumen.Reflections.DownsampleFactor = 2`.
 
 ![](/assets/OptimizingHWRT/HWRT%20Culling-2.png){: width="300" } ![](/assets/OptimizingHWRT/HWRT%20Culling-3.png){: width="354" }  
-*Dedicated reflection rays being traced on rough foliage and rocks, which accounted for most of the reflection cost when left on default settings.*
+*Debug view showing areas where dedicated reflection rays is being traced on. In this case; pretty rough foliage and rocks, which accounted for most of the reflection cost when left on default settings.*
 
 **With these changes in place, the reflection pass dropped to roughly ~0.4 a big reduction compared to the earlier ~1 ms**
 
