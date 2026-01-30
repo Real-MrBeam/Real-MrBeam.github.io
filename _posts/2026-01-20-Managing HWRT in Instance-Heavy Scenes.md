@@ -5,15 +5,16 @@ image: /assets/OptimizingHWRT/TLAS01.png
 
 ## Opening Notes
 
-We’re building a dense open-world forest using our own Nanite assemblies created with Blender Geometry Nodes and then spawned in the world through [PCG](https://dev.epicgames.com/documentation/en-us/unreal-engine/pcg-development-guides?application_version=5.5). Trees, branches, and foliage are heavily instanced, and at any given time the scene contains a very large number of visible ray-traceable objects.
+We’re building a dense open-world forest using our own Nanite assemblies created with Blender Geometry Nodes and then we spawn those in our open world using [PCG](https://dev.epicgames.com/documentation/en-us/unreal-engine/pcg-development-guides?application_version=5.5).
+Trees, branches, foliage, etc, are heavily instanced, so at any given time the scene contains a very large number of visible instances. 
 
-**When we began evaluating hardware ray tracing as an option alongside virtual shadows, some costs went down and other went way up. What seemed like a straightforward quality upgrade turned into a deeper investigation into culling, acceleration structure management, and GPU pressure.**
+**When we began evaluating hardware ray tracing as an option alongside virtual shadows, some costs went down and other went way up. What seemed like a simple quality upgrade turned into a deeper investigation into culling, acceleration structure management, and GPU pressure.**
 
 This post covers how we approached getting ray tracing performace back under control in an instance-heavy environment.
 
 ## Switching to HWRT
 
-**When we investigated these matters in Unreal Insights, one thing really stood out; `MapOcclusionResults`. It could spike to +40 ms on occasions!**
+**When we started to investigate these costs in Unreal Insights, one thing really stood out; `MapOcclusionResults`. It could spike to +40 ms on occasions!**
 
 ![](/assets/OptimizingHWRT/Pasted%20image%2020260120073151.png)
 
@@ -23,9 +24,9 @@ Nested under `MapOcclusionResults` we could see `STAT_MapHZBResults`, telling us
 
  <!--more-->
  
-Most of the +40 ms turned out to be the game thread waiting for the GPU to finish its work. When the CPU reaches this point it waits for the GPU to catch up, which is why this number can grow when the frame is GPU bound.
+Most of the +40 ms turned out to be the game thread waiting for the GPU to finish its work. When the CPU reached this point it waited for the GPU to catch up, which is why the number grew when the frame is GPU bound.
 
-To verify this, I opted out of HWRT to check if the cost of `MapOcclusionResults` was the same. And it was but with no spikes, what changed with HWRT was the overall GPU pressure.
+To verify this, I opted out of HWRT to check if the cost of `MapOcclusionResults` was the same and it was but with no spikes. What changed with HWRT was the overall GPU pressure.
 
 **So why did the GPU suddenly become so busy when we switched to HWRT?**
 
@@ -51,7 +52,8 @@ Suspicion rose that our ray tracing hit evaluation were simply too expensive. Wh
 
 ### Optimizing Ray Hit Shading
 
-First I went for some quick wins and switched ray lighting mode to **surface cache** instead of **hit lighting mode**, since most of the surfaces in the scene was rough the visual impact was minimal. You can read about the difference between these settings in the [documentation](https://dev.epicgames.com/documentation/en-us/unreal-engine/lumen-technical-details-in-unreal-engine?application_version=5.7). In short, hit lighting evaluates the lighting at the ray hit instead of sampling the lower quality surface cache and thus is more expensive.
+First I went for some quick wins and switched ray lighting mode to **surface cache** instead of **hit lighting mode**, since most of the surfaces in the scene was rough the visual impact was minimal. You can read about the difference between these settings in the [documentation](https://dev.epicgames.com/documentation/en-us/unreal-engine/lumen-technical-details-in-unreal-engine?application_version=5.7).
+In short; hit lighting evaluates the lighting at the actual ray hit, instead of sampling the lower quality surface cache and thus is more expensive.
 I also turned on **texture LODs for ray tracing**, this enables automatic mip selection in ray tracing materials instead of always sampling the highest-resolution textures. These two options alone gave me ~2 ms.
 
 Now I made sure that only actors of a certain size was included in the ray tracing scene. I wrote a editor script that evaluated our assets bounding size, and automatically excluded anything below a defined threshold.
@@ -64,8 +66,9 @@ The actors that was too small got [contact shadows](https://dev.epicgames.com/do
 ![](/assets/OptimizingHWRT/gpu31.png)  
 *GPU time was still very high.*
 
-While this was clear progress, the GPU was still under heavy pressure, and ~17 ms was still more than we could afford, even if the cost was now stable. 
-But right now I was focused on getting the GPU pressure down and making the ray hit cost lower.
+While this was clear progress, the GPU was still under heavy pressure, and ~17 ms was still more than we could afford, even if the cost was now stable.
+
+Now I wanted to get back on track and focus on getting the GPU pressure down and making the ray hit cost lower.
 
 ### Ray Tracing Quality Switch
 
