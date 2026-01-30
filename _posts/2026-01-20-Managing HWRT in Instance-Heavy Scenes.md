@@ -91,14 +91,14 @@ I also downsampled the reflection quality by half with `r.Lumen.Reflections.Down
 ![](/assets/OptimizingHWRT/HWRT%20Culling-2.png){: width="300" } ![](/assets/OptimizingHWRT/HWRT%20Culling-3.png){: width="354" }  
 *Debug view showing areas where dedicated reflection rays is being traced on. In this case; pretty rough foliage and rocks, which accounted for most of the reflection cost when left on default settings.*
 
-**With these changes in place, the reflection pass dropped to roughly ~0.4 a big reduction compared to the earlier ~1 ms**
+**With these changes in place, the reflection pass dropped to roughly ~0.4, a big reduction compared to the earlier ~1 ms**
 
 After confirming that the reflection workload was now under control, I enabled asynchronous compute for reflections. This allows parts of the reflection work to overlap with other GPU tasks instead of blocking the graphics queue, helping to further reduce overall GPU stalls.
 
 
 ### Screen Probe Gathering
 
-Screen probe gathering is lumens way of calculating diffuse indirect lighting. It traces rays from a grid of screen-space probes and integrates the lighting over time. In scenes with dense, aggregate geometry, like our forest, probe density and tracing settings have a major impact visually and performance wise.
+*Screen probe gathering is lumens way of calculating diffuse indirect lighting. It traces rays from a grid of screen-space probes and integrates the lighting over time. In scenes with dense, aggregate geometry, like our forest, probe density and tracing settings have a major impact visually and performance wise.*
 
 Early on, we decided to enable `r.Lumen.ScreenProbeGather.ScreenTraces.HZBTraversal=1`.
 Given the amount of thin geometry in our forest, activating HZB traversal significantly reduced light leaking, giving foliage more depth.
