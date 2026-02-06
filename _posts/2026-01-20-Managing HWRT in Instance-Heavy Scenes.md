@@ -5,14 +5,15 @@ image: /assets/OptimizingHWRT/TLAS01.png
 
 ## Opening Notes
 
-We’re building a dense open-world forest using our own Nanite assemblies created with Blender Geometry Nodes and then we spawn those in our open world using [PCG](https://dev.epicgames.com/documentation/en-us/unreal-engine/pcg-development-guides?application_version=5.5).
-Trees, branches, foliage, etc, are heavily instanced, so at any given time the scene contains a very large number of visible instances. 
+For context it's important to know that we’re building a dense open-world forest. By using our own Nanite assemblies created with Blender Geometry Nodes and then spawning those at scale in an open world using [PCG](https://dev.epicgames.com/documentation/en-us/unreal-engine/pcg-development-guides?application_version=5.5).
+Trees, branches, foliage, etc, are heavily instanced, so at any given time the scene contains a very large number of visible instances.
+Since the start of the project we've used virtual shadows and software ray tracing lumen.
 
-**When we began evaluating hardware ray tracing as an option alongside virtual shadows, some costs went down and other went way up. What seemed like a simple quality upgrade turned into a deeper investigation into culling, acceleration structure management, and GPU pressure.**
+**Later when we began evaluating hardware ray tracing as an option alongside virtual shadows, we saw that some costs went down and other went way up. What first seemed like a simple quality upgrade turned into a deeper investigation into culling, acceleration structure management, and GPU pressure.**
 
 This post covers how we approached getting ray tracing performace back under control in an instance-heavy environment.
 
-## Switching to HWRT
+## Switching to Hardware Ray Tracing
 
 **When we started to investigate these costs in Unreal Insights, one thing really stood out; `MapOcclusionResults`. It could spike to +40 ms on occasions!**
 
@@ -115,7 +116,7 @@ To counter the expensive traversal cost, we changed `r.Lumen.ScreenProbeGather.D
 
 Ideally, these settings should be exposed through a graphics options menu, allowing players to decide how high indirect lighting quality they want versus performance.
 
-### AS Cost
+### Acceleration Structure Cost
 
 Looking at the stats more closely, it became clear that the ray tracing scene itself was expensive. TLAS and BLAS memory alone could reach up to ~250 MB and the `Finish Gather Ray Tracing Instances` cost was ~2.7 ms.
 Which raised the next question; why was the ray tracing acceleration structure consuming so much memory and how come it takes almost 3 ms to gather the instances?
@@ -126,7 +127,7 @@ Which raised the next question; why was the ray tracing acceleration structure c
 *If you want to read more about the details you can visit [Epics documentation](https://dev.epicgames.com/documentation/en-us/unreal-engine/ray-tracing-performance-guide-in-unreal-engine).*
 
 
-### Why the AS Was So Expensive
+### Why the Acceleration Structure Was So Expensive
 
 A quick look at the TLAS in the debug view explained why the acceleration structure consumed a lot in memory, but also why the occlusion cost was so high.
 
