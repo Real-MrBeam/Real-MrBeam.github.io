@@ -7,9 +7,9 @@ image: /assets/OptimizingHWRT/TLAS01.png
 
 For context it's important to know that we’re building a dense open-world forest. By using our own Nanite assemblies created with Blender Geometry Nodes and then spawning those at scale in an open world using [PCG](https://dev.epicgames.com/documentation/en-us/unreal-engine/pcg-development-guides?application_version=5.5).
 Trees, branches, foliage, etc, are heavily instanced, so at any given time the scene contains a very large number of visible instances.
-Since the start of the project we've used virtual shadows and software ray tracing lumen.
+Since the start of the project we've used virtual shadows and software ray tracing lumen as our lighting solution.
 
-**Later when we began evaluating hardware ray tracing as an option alongside virtual shadows, we saw that some costs went down and other went way up. What first seemed like a simple quality upgrade turned into a deeper investigation into culling, acceleration structure management, and GPU pressure.**
+**Later when we began evaluating hardware ray tracing as an option, we saw that some costs went way up! What first seemed like a simple quality upgrade turned into a deeper investigation into culling, acceleration structure management, and GPU pressure.**
 
 This post covers how we approached getting ray tracing performace back under control in an instance-heavy environment.
 
@@ -19,21 +19,22 @@ This post covers how we approached getting ray tracing performace back under con
 
 ![](/assets/OptimizingHWRT/Pasted%20image%2020260120073151.png)
 
-Nested under `MapOcclusionResults` we could see `STAT_MapHZBResults`, telling us what was actually being worked on. In this case, the [Hierarchical Z-Buffer](https://dev.epicgames.com/documentation/en-us/unreal-engine/visibility-and-occlusion-culling-in-unreal-engine) occlusion processing.
+Nested under `MapOcclusionResults` we could see `STAT_MapHZBResults`, telling us what was actually being worked on, the [Hierarchical Z-Buffer](https://dev.epicgames.com/documentation/en-us/unreal-engine/visibility-and-occlusion-culling-in-unreal-engine) occlusion processing.
 
 `MapOcclusionResults` is essentially the point where the engine collects occlusion results, and why this suddenly exploded when we turned on HWRT had to be investigated. 
 
  <!--more-->
  
-Most of the +40 ms turned out to be the game thread waiting for the GPU to finish its work. When the CPU reached this point it waited for the GPU to catch up, which is why the number grew when the frame is GPU bound.
-
-To verify this, I opted out of HWRT to check if the cost of `MapOcclusionResults` was the same and it was but with no spikes. What changed with HWRT was the overall GPU pressure.
+Most of the +40 ms turned out to be the game thread waiting for the GPU to finish its work. When the CPU reached this point it waited for the GPU to catch up.
+To verify this, I opted out of HWRT to check if the cost of `MapOcclusionResults` was the same without HWRT. And it was, around 17 ms but without the +40 ms spikes. What changed with HWRT was that the overall GPU pressure grew.
 
 **So why did the GPU suddenly become so busy when we switched to HWRT?**
 
 ### Ray Hit Cost
 Looking at the GPU stats we could see that it indeed had become very busy, the GPU Time was ~30 ms and the most significant increase was `RenderDeferredLighting`, which climbed to roughly ~11 ms.
-Another thing that grew, was `LumenReflections`. It could get as high as ~2.4 ms and this is higher than expected given that the scene is dominated by rough materials. The `LumenScreenProbeGather` grew to ~6 ms.
+Another thing that grew, was `LumenReflections`. It could get as high as ~2.4 ms and this is higher than expected given that the scene is dominated by rough materials with no visible reflections. And lastly the `LumenScreenProbeGather` grew to ~6 ms.
+
+_I will go into detail of what these stats represents further down._
 
 ![](/assets/OptimizingHWRT/HWRT%20Culling.png)  
 *Comparing the cost of `RenderDeferredLighting` SWRT to HWRT in a rather GPU taxing scene. HWRT to the right.*
@@ -47,29 +48,32 @@ Another thing that grew, was `LumenReflections`. It could get as high as ~2.4 ms
 ![](/assets/OptimizingHWRT/Pasted%20image%2020260120074624.png)  
 *On our target hardware, `LumenScreenProbeGather` could spike beyond 11 ms.*
 
-Suspicion rose that our ray tracing hit evaluation were simply too expensive. Which wasn't too surprising since our materials use a lot of virtual texture lookups, effects and triplanar mapping.
+Suspicion grew that our ray tracing hit evaluation were simply too expensive. Which wasn't too surprising since our materials use a lot of virtual texture lookups, effects and triplanar mapping.
 
-**So how do we reduce GPU pressure and lowering the ray hit costs, so we get rid of these stalls?**
+**So how do we reduce GPU pressure by lowering the ray hit cost?**
 
 ### Optimizing Ray Hit Shading
 
-First I went for some quick wins and switched ray lighting mode to **surface cache** instead of **hit lighting mode**, since most of the surfaces in the scene was rough the visual impact was minimal. You can read about the difference between these settings in the [documentation](https://dev.epicgames.com/documentation/en-us/unreal-engine/lumen-technical-details-in-unreal-engine?application_version=5.7).
-In short; hit lighting evaluates the lighting at the actual ray hit, instead of sampling the lower quality surface cache and thus is more expensive.
+First I went for some quick wins and switched ray lighting mode to **surface cache** instead of **hit lighting mode**, since most of the surfaces in the scene was rough the visual impact was minimal.
+
+_You can read about the difference between surface cache and hit lighting in the [unreal documentation](https://dev.epicgames.com/documentation/en-us/unreal-engine/lumen-technical-details-in-unreal-engine?application_version=5.7).
+But in short; hit lighting evaluates the lighting at the actual ray hit instead of sampling the lower quality surface cache and thus is more expensive._
+
 I also turned on **texture LODs for ray tracing**, this enables automatic mip selection in ray tracing materials instead of always sampling the highest-resolution textures. These two options alone gave me ~2 ms.
 
 Now I made sure that only actors of a certain size was included in the ray tracing scene. I wrote a editor script that evaluated our assets bounding size, and automatically excluded anything below a defined threshold.
 The actors that was too small got [contact shadows](https://dev.epicgames.com/documentation/en-us/unreal-engine/contact-shadows-in-unreal-engine) instead. This significantly reduced the number of ray-traced instances.
 
-**Progress, after these changes `MapOcclusionResults` stayed stable at ~17 ms.**
+**Progress! After these changes `MapOcclusionResults` stayed stable at ~17 ms.**
 ![](/assets/OptimizingHWRT/17ms.png)  
 *Capture with `MapOcclusionResults` reduced to roughly 17 ms.*
+
+While this was clear progress, the GPU was still under heavy pressure, and ~17 ms was still more than we could afford, even if the cost was now stable.
 
 ![](/assets/OptimizingHWRT/gpu31.png)  
 *GPU time was still very high.*
 
-While this was clear progress, the GPU was still under heavy pressure, and ~17 ms was still more than we could afford, even if the cost was now stable.
-
-Now I wanted to get back on track and focus on getting the GPU pressure down and making the ray hit cost lower.
+Now I wanted to get back on track and focus on getting the GPU pressure down and making the ray hit cost even lower.
 
 ### Ray Tracing Quality Switch
 
@@ -78,7 +82,6 @@ This made me revisit our materials. I started going through the worst offenders 
 ![](/assets/OptimizingHWRT/Pasted%20image%2020260108223640.png)  
 
 I stripped the ray tracing branch down to the essentials. In addition to removing normal maps, subsurface, and ambient occlusion, I tried to remove as many texture lookups as possible and replace them with constants.
-Although I kept the triplanar effect in the albedo channel, since removing it made the reflections look off.
 
 ### Reflection Cost
 
