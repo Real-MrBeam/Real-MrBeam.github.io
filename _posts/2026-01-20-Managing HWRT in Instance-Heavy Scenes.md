@@ -151,7 +151,7 @@ Not surprising then that culling, instance gathering and TLAS-related work start
 ![](/assets/OptimizingHWRT/cull1gather.png)  
 *Capture of the stat scenerendering showing the gathering cost of ray trace instances and the amount of active instances.*
 
-In an attempt to get the active instance count down, I changed the culling setting to `r.raytracingculling 3`, which is the most aggressive culling setting. It uses both distance culling and frustum culling, with settings you can tweak. Again, since we do not have that much reflective surfaces, frustrum culling instances sounded like a good idea. And now, after culling, only ~18k instances survives and the cost of gathering them has gone down to ~0.03 ms! 
+In an attempt to get the active instance count down, I changed the culling setting to `r.raytracingculling 3`, which is the most aggressive culling setting. It uses both distance culling and frustum culling. Since we do not have that much reflective surfaces, frustrum culling the RT-instances sounded like a good idea. And now after culling only ~18k instances survives and the cost of gathering them has gone down to ~0.03 ms! 
 
 ![](/assets/OptimizingHWRT/cull3.png)
 ![](/assets/OptimizingHWRT/cull3gather.png)  
@@ -181,7 +181,7 @@ The trade-off is that compaction introduces a small amount of latency when the a
 
 ### Buffering Occlusion Queries
 
-I also changed `r.NumBufferedOcclusionQueries` to 3, default is 1. It controls how many frames of occlusion query results are buffered before the CPU reads them back from the GPU. Increasing this value can reduce stalls by allowing the CPU to run slightly further ahead, but it also increases the latency of occlusion results. So far I haven't seen any visible latency. But this is exactly the kind of setting that can look “fine” in a calm test and then reveal edge cases later. For now it looks promising.
+I also changed `r.NumBufferedOcclusionQueries` to 3, default is 1. It controls how many frames of occlusion query results are buffered before the CPU reads them back from the GPU. Increasing this value can reduce stalls by allowing the CPU to run slightly further ahead, but it also increases the latency of occlusion results. So far I haven't seen any visible latency.
 
 
 ## Results
@@ -203,4 +203,4 @@ The main takeaway for me was that switching to HWRT is not as straight forward a
 
 If you’re interested in reading more like this, I highly recommend [Iri Shinsoj’s](https://medium.com/@shinsoj/notes-on-foliage-in-unreal-5-3522b6eb159f) and [Nikhil Maurya](https://medium.com/%40GroundZer0/nanite-optimizations-in-unreal-engine-5-diving-into-nanite-performance-a5e6cd19920c) blog posts on Nanite performance.
 
-I hope you found this post useful, or at least picked up a few ideas that might help when working with HWRT in large, instance-heavy scene.
+I hope you found this post useful, or at least picked up a few ideas that might help when working with HWRT in a large instance-heavy scene.
