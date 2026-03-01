@@ -11,19 +11,19 @@ Since the start of the project we've used virtual shadows and software ray traci
 
 **Later when we began evaluating hardware ray tracing as an option, we saw that some costs went way up! What first seemed like a simple quality upgrade turned into a deeper investigation into culling, acceleration structure management, and GPU pressure.**
 
-This post covers how we approached getting ray tracing performace back under control in an instance-heavy environment.
-
-## Switching to Hardware Ray Tracing
-
 **When we started to investigate these costs in Unreal Insights, one thing really stood out; `MapOcclusionResults`. It could spike to +40 ms on occasions!**
 
 ![](/assets/OptimizingHWRT/Pasted%20image%2020260120073151.png)
 
+This post covers how we approached getting ray tracing performace back under control in an instance-heavy environment.
+
+ <!--more-->
+ 
+## Switching to Hardware Ray Tracing
+
 Nested under `MapOcclusionResults` we could see `STAT_MapHZBResults`, telling us what was actually being worked on, the [Hierarchical Z-Buffer](https://dev.epicgames.com/documentation/en-us/unreal-engine/visibility-and-occlusion-culling-in-unreal-engine) occlusion processing.
 
 `MapOcclusionResults` is essentially the point where the engine collects occlusion results, and why this suddenly exploded when we turned on HWRT had to be investigated. 
-
- <!--more-->
  
 Most of the +40 ms turned out to be the game thread waiting for the GPU to finish its work. When the CPU reached this point it waited for the GPU to catch up.
 To verify this, I opted out of HWRT to check if the cost of `MapOcclusionResults` was the same without HWRT. And it was, around 17 ms but without the +40 ms spikes. What changed with HWRT was that the overall GPU pressure grew.
