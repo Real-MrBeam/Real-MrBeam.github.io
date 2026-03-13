@@ -139,7 +139,7 @@ A quick look at the TLAS in the debug view explained why the acceleration struct
 
 As you can see, the number of bounding volumes is massive. What you are looking at is the bounds for a bunch of Nanite-assembled trees. Each branch with its own bounding volume.
 Culling those instances is essential for ray traversal performance, but the culling process itself comes with overhead, especially at this scale.
-Merging these instances would be good for TLAS but very bad for BLAS, streaming, culling and ray traversal cost. An on top of that we have game feature requirements that needs them separated.
+Merging these instances would be good for TLAS but very bad for BLAS, streaming, culling and ray traversal cost. And on top of that we have game feature requirements that needs them separated.
 
 **In some frames, the `Finish Gather Ray Tracing Instances` cost alone reached ~2.7 ms.**
 
