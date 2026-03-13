@@ -83,13 +83,13 @@ It keeps the original foundation but adds the features we needed, because the or
 
 One of the additions was better **debug views**:
 
-![](/assets/buffervis1.png)
+![](/assets/buffervis1.png)<br>
 *Depth visualization.*
 
-![](/assets/buffervis5.png)
+![](/assets/buffervis5.png)<br>
 *Instance visualization.*
 
-![](/assets/buffervis2.png)
+![](/assets/buffervis2.png)<br>
 *Depth buffer with occludees overlaid and colored by visibility.*
 
 Another major upgrade we added was support for a **custom occluder mesh**, not just a chosen LOD. This was critical for us. Auto-generated LODs of our modular walls left gaps and other inconsistencies that made culling worse. With custom occluders we could seal those gaps and keep the pass cheap by using very simple meshes.
