@@ -20,14 +20,14 @@ When I joined the company and landed on **Vampire: The Masquerade - Justice**, I
 Running `stat MapBuildData` made the culprit obvious, it was **Volumetric Lightmap** memory that took all the space.
 The debug view confirmed why; the sample points were dense and everywhere.
 
-![](/assets/VLMCluster.png){: width="425" }  
+![](/assets/VLMCluster.png) 
 *This image is unrelated to the Vampire project, but it illustrates the problem clearly: a dense field of VLM samples, much of it outside the playable space.*
 
 A single **Lightmass Importance Volume** wrapped the entire level, and the **Volumetric Lighting Detail Cell Size** was set very small. The result was a sea of samples, even in empty, unplayable space. Our Vampire levels were much larger than the example above, so the waste scaled even worse.
 
 **To solve this, we removed the single volume and instead used multiple importance volumes that hugged actual playable areas. Then we scaled up the detail cell size where we could.**
 
-Bake time dropped by hours. **Volumetric Lightmap memory fell by about 60–70 percent**. Indirect quality stayed about the same in the spaces that matter. The only drawback was that level design had to place the volumes manually. 
+Bake time dropped by hours. **Volumetric Lightmap memory fell by about 60–70 percent**. Indirect light quality stayed about the same in the spaces that matter. The only drawback was that level design had to place the volumes manually. 
 
 Lesson learned. We carried that approach into **Mannequin** from day one.
 
