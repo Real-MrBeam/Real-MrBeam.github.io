@@ -146,7 +146,7 @@ We switched to manual instancing instead. It meant some manual work, so our goal
 
 With that in mind, and given the timeline, we adopted the plugin **[Instance Tool](https://www.fab.com/listings/2402ff9e-8f84-4b97-863f-3c7427ea0f8a)**.
 
-The plugin hides the original actors and replaces them with instances, which fit our workflow well. Going back to the original actors wasn’t as straightforward as you’d think, since most of our actors were Blueprint classes. To remedy this, we added functionality to our master tool *(the light tool from the previous post evolved into this)* to make that workflow straightforward.
+The plugin hides the original actors and replaces them with instances, which fit our workflow well. Going back to the original actors wasn’t as straightforward as you’d think, since most of our actors were Blueprint classes. To remedy this, we added functionality to our tools to make that workflow straightforward.
 
 ![](/assets/Slides-optimization-2.png){: height="345" }![](/assets/Slides-optimization-1.png){: height="345" }  
 *To the left the floor tiles are not instanced, 275 draws. To the right the tiles are ISM, reducing the scene to 215 draws.*
