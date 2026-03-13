@@ -161,7 +161,7 @@ Instead of creating separate material instances we drove variations through CPD;
 
 To make this practical at scale, I created a tool that allowed artists to edit CPD values on large selections of meshes at once. It makes it easier to batch set cpd values and randomize them between predefined values.
 
-![](/assets/Pasted%20image%2020251207225508.png)
+![](/assets/CPDRandom.gif)
 
 We mainly used this technique on small and detail props that shared the same shader, where instancing and CPD gave us the most benefit for the least complexity.
 
