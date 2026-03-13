@@ -109,10 +109,11 @@ To solve this, I built a small **Geometry Script** tool that creates a mesh and 
 
 The material relies on distance *(I used distance fields on PC for better precision)* and uses fresnel for fading. This prevented clipping and kept the effect from looking flat or two-dimensional. The result turned out better than expected, so we used the technique in the PC version as well.
 
-![](/assets/light02.gif)
-![|520](/assets/light01.gif){: width="520" }
+![](/assets/light02.gif)<br>
+*Showing the light shaft tool automatically updating with a directional light's rotation.* 
 
-*Showing the light shaft tool automatically updating with a directional light's rotation.*  
+![|520](/assets/light01.gif){: width="520" }<br>
+*Light shaft final look.* 
 
 ## Bloom without Mobile HDR
 
