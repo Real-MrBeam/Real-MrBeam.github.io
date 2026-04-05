@@ -1,0 +1,73 @@
+---
+layout: default
+---
+<article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">{{ page.title | escape }}</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="{{ page.date | date_to_xmlschema }}" itemprop="datePublished">
+        {%- assign date_format = site.minima.date_format | default: "%b %-d, %Y" -%}
+        {{ page.date | date: date_format }}
+      </time>
+    </p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    {{ content }}
+  </div>
+
+  {%- if page.bluesky_post -%}
+  <section id="comments">
+    <h2>Comments</h2>
+    <p>
+      Reply on <a href="{{ page.bluesky_post }}" target="_blank">Bluesky</a> to leave a comment.
+    </p>
+    <div id="bluesky-comments">Loading comments...</div>
+  </section>
+<script>
+  (async () => {
+    const postUrl = "{{ page.bluesky_post }}";
+    const match = postUrl.match(/profile\/([^/]+)\/post\/([^/]+)/);
+    if (!match) return;
+    const [, handle, rkey] = match;
+
+    const didRes = await fetch(`https://public.api.bsky.app/xrpc/com.atproto.identity.resolveHandle?handle=${handle}`);
+    const { did } = await didRes.json();
+    const uri = `at://${did}/app.bsky.feed.post/${rkey}`;
+
+    const res = await fetch(`https://public.api.bsky.app/xrpc/app.bsky.feed.getPostThread?uri=${encodeURIComponent(uri)}&depth=5`);
+    const data = await res.json();
+    const replies = data?.thread?.replies ?? [];
+    const container = document.getElementById("bluesky-comments");
+
+    if (replies.length === 0) {
+      container.innerHTML = "<p>No comments yet. Be the first to reply on Bluesky!</p>";
+      return;
+    }
+
+    function renderReply(reply) {
+      const author = reply.post?.author;
+      const record = reply.post?.record;
+      if (!author || !record) return "";
+      const postId = reply.post.uri.split("/").pop();
+      const link = `https://bsky.app/profile/${author.handle}/post/${postId}`;
+      const subReplies = (reply.replies ?? []).map(renderReply).join("");
+      return `
+        <div class="bsky-comment">
+          <p>
+            <strong><a href="https://bsky.app/profile/${author.handle}" target="_blank">${author.displayName || author.handle}</a></strong>
+            <a href="${link}" target="_blank" style="opacity:0.6; font-size:0.85em;">@${author.handle}</a>
+          </p>
+          <p>${record.text}</p>
+          ${subReplies}
+        </div>`;
+    }
+
+    container.innerHTML = replies.map(renderReply).join("");
+  })();
+  </script>
+  {%- endif -%}
+
+  <a class="u-url" href="{{ page.url | relative_url }}" hidden></a>
+</article>  
