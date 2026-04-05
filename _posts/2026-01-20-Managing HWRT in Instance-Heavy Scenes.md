@@ -1,6 +1,7 @@
 ---
+layout: post
 title: "Managing HWRT in Instance-Heavy Scenes"
-image: /assets/OptimizingHWRT/TLAS01.png
+bluesky_post: "https://bsky.app/profile/peterstrahle.dev/post/3mcuxjb5qg22h"
 ---
 
 ## Opening Notes
