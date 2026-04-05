@@ -1,5 +1,7 @@
 ---
+layout: post
 title: "Optimizing Mannequin"
+bluesky_post: "https://bsky.app/profile/peterstrahle.dev/post/3m7rtwtv3ac27"
 ---
 
 ## Opening Notes
