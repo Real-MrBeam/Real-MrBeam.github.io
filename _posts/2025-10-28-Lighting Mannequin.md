@@ -1,5 +1,6 @@
 ---
 title: "Lighting Mannequin"
+bluesky_post: "https://bsky.app/profile/peterstrahle.dev/post/3m76drfzo4c2v"
 ---
 
 ## Opening Notes
