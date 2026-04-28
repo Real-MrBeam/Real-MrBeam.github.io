@@ -1,5 +1,7 @@
 ---
+layout: post
 title: "Optimizing Mannequin"
+bluesky_post: "https://bsky.app/profile/peterstrahle.dev/post/3m7rtwtv3ac27"
 ---
 
 ## Opening Notes
@@ -13,20 +15,21 @@ When I joined the company and landed on **Vampire: The Masquerade - Justice**, I
 ![](/assets/johanna-pettersson-vtmjustice-sidemission-johannapettersson-08.jpg)  
 *Image from [Johanna Petterson](https://mi0ne.artstation.com/).*
 
-**During the investigation, MapBuildData stood out. It was huge, eating disk space and VRAM.**
+**When investigating the reason for this, I noticed that MapBuildData stood out. It was huge, eating disk space and VRAM.**
 
  <!--more-->
  
-Running `stat MapBuildData` made the culprit obvious: **Volumetric Lightmap** memory. The debug view confirmed why; the sample points were dense and everywhere.
+Running `stat MapBuildData` made the culprit obvious, it was **Volumetric Lightmap** memory that took all the space.
+The debug view confirmed why; the sample points were dense and everywhere.
 
-![](/assets/VLMCluster.png){: width="425" }  
+![](/assets/VLMCluster.png) 
 *This image is unrelated to the Vampire project, but it illustrates the problem clearly: a dense field of VLM samples, much of it outside the playable space.*
 
 A single **Lightmass Importance Volume** wrapped the entire level, and the **Volumetric Lighting Detail Cell Size** was set very small. The result was a sea of samples, even in empty, unplayable space. Our Vampire levels were much larger than the example above, so the waste scaled even worse.
 
 **To solve this, we removed the single volume and instead used multiple importance volumes that hugged actual playable areas. Then we scaled up the detail cell size where we could.**
 
-Bake time dropped by hours. **Volumetric Lightmap memory fell by about 60–70 percent**. Indirect quality stayed about the same in the spaces that matter. The only drawback was that level design had to place the volumes manually. 
+Bake time dropped by hours. **Volumetric Lightmap memory fell by about 60–70 percent**. Indirect light quality stayed about the same in the spaces that matter. The only drawback was that level design had to place the volumes manually. 
 
 Lesson learned. We carried that approach into **Mannequin** from day one.
 
@@ -42,7 +45,7 @@ In earlier titles we leaned on Unreal’s **Software Occlusion Queries**. It’s
 ![](/assets/Pasted%20image%2020251207225905.png)
 *The Software Occlusion Queries debug view. The image in the lower-right shows occluder meshes being rasterized and used for culling.*
 
-With UE5, that option disappeared, which hurt on Quest where we’re usually GPU bound. We needed alternatives that didn’t use the GPU.
+With UE5 that option disappeared, which was a major issue for us since we’re usually GPU bound on the Quest. We needed alternatives that didn’t use the GPU.
 
 ### Precomputed Visibility Culling
 
@@ -58,10 +61,12 @@ At a glance it looked good. In practice it comes with strict limits. Everything 
 
 When the player stands in a visibility grid cell close to a wall, and the cell extends through the wall, the visibility pass treats the space behind the wall as visible and draws everything on the other side.
 
-**We used a 50 cm grid, which forced a redesign of many walls. The bigger issue was our use of modular walls.** 
+**We used a 50 cm grid, which forced a redesign of many walls.
+The bigger issue was our use of modular walls.** 
 
-The levels were meant to be dressed quickly by responders investigating the alien presence, and many wall modules were very thin with negative space. You could see through them from many angles.  
-We redesigned most of the wall kit to fix this, but the nature of modular walls remained. You can often see over them, which keeps visibility open even after the redesign.  
+The narrative of the game was that the levels were dressed quickly, by responders investigating the alien presence. And they used wall modules everywhere to make rooms ad hoc.
+These modules are thin and has a lot of negative space. You could see through them from many angles.  
+We redesigned most of the wall module kit to fix this, but the nature of modular walls remained. You can often see over them, which keeps visibility open even after the redesign.  
 Level design would get very boring if everything became a maze with enclosed walls and no sightlines.
 
 **Another issue was that cells are only generated on static, shadow-casting meshes.**
@@ -80,13 +85,13 @@ It keeps the original foundation but adds the features we needed, because the or
 
 One of the additions was better **debug views**:
 
-![](/assets/buffervis1.png)
+![](/assets/buffervis1.png)<br>
 *Depth visualization.*
 
-![](/assets/buffervis5.png)
+![](/assets/buffervis5.png)<br>
 *Instance visualization.*
 
-![](/assets/buffervis2.png)
+![](/assets/buffervis2.png)<br>
 *Depth buffer with occludees overlaid and colored by visibility.*
 
 Another major upgrade we added was support for a **custom occluder mesh**, not just a chosen LOD. This was critical for us. Auto-generated LODs of our modular walls left gaps and other inconsistencies that made culling worse. With custom occluders we could seal those gaps and keep the pass cheap by using very simple meshes.
@@ -143,7 +148,7 @@ We switched to manual instancing instead. It meant some manual work, so our goal
 
 With that in mind, and given the timeline, we adopted the plugin **[Instance Tool](https://www.fab.com/listings/2402ff9e-8f84-4b97-863f-3c7427ea0f8a)**.
 
-The plugin hides the original actors and replaces them with instances, which fit our workflow well. Going back to the original actors wasn’t as straightforward as you’d think, since most of our actors were Blueprint classes. To remedy this, we added functionality to our master tool *(the light tool from the previous post evolved into this)* to make that workflow straightforward.
+The plugin hides the original actors and replaces them with instances, which fit our workflow well. Going back to the original actors wasn’t as straightforward as you’d think, since most of our actors were Blueprint classes. To remedy this, we added functionality to our tools to make that workflow straightforward.
 
 ![](/assets/Slides-optimization-2.png){: height="345" }![](/assets/Slides-optimization-1.png){: height="345" }  
 *To the left the floor tiles are not instanced, 275 draws. To the right the tiles are ISM, reducing the scene to 215 draws.*
@@ -158,7 +163,7 @@ Instead of creating separate material instances we drove variations through CPD;
 
 To make this practical at scale, I created a tool that allowed artists to edit CPD values on large selections of meshes at once. It makes it easier to batch set cpd values and randomize them between predefined values.
 
-![](/assets/Pasted%20image%2020251207225508.png)
+![](/assets/CPDRandom.gif)
 
 We mainly used this technique on small and detail props that shared the same shader, where instancing and CPD gave us the most benefit for the least complexity.
 
