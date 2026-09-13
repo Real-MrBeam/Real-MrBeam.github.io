@@ -158,7 +158,7 @@ With these changes we managed to reduce clusters by 70%. This ends up at 125k cl
 
 ![](/assets/NaniteCluster/Pasted%20image%2020260121172601.png)
 
-*Cluster amount was as high as 450k before the changes.*
+*Cluster amount was as high as ~425k before the changes.*
 
 ![](/assets/NaniteCluster/Pasted%20image%2020260121172543.png)
 
@@ -173,7 +173,7 @@ The moss patches are suddenly covering the entire sightline. Since they're so cl
 
 After trying different things, I figured: why bother with Nanite rendering on these actors at all?
 
-*This is generally not advised since you'll create a separate render pass to handle the traditional meshes, if everything else is Nanite.*
+*This is generally not advised if everything else in the scene is Nanite, since it creates a separate render pass just to handle the traditional meshes.*
 
 We simply turned off Nanite rendering on these assets and created LODs for them.
 
@@ -198,7 +198,7 @@ Thankfully, this large cost disappeared once we reduced the moss's triangle coun
 
 Even though we were hesitant to introduce a separate render pass just for the moss we decided to keep it.
 
-One reason being that this let us switch to masked materials without too much overhead. By making LOD 0 masked lets it fade out smoothly as the camera clips into it, and making the last LOD in the chain masked lets it fade out at max draw distance instead of popping away abruptly.
+One reason being that this let us switch to masked materials without too much overhead. Making LOD 0 masked lets it fade out smoothly as the camera clips into it, and making the last LOD in the chain masked lets it fade out at max draw distance instead of popping away abruptly.
 On top of that, we also removed the vertex interaction function on the higher LODs to further optimize it.
 
 ![](/assets/NaniteCluster/afterMossOptimization.png)
@@ -224,7 +224,7 @@ In short, voxelization swaps distant Nanite clusters for voxels, preserving silh
 
 *The Nanite overdraw debug visualization view looks much more purple than before voxelization.*
 
-As a bonus, we could now remove our custom max edge length setting we had on all fir trees. Since it swaps over to voxels in the distance instead.
+As a bonus, we could now remove our custom Max Edge Length setting on all fir trees, since it swaps over to voxels in the distance instead.
 This meant further reduction of Nanite clusters!
 
 ### Result
