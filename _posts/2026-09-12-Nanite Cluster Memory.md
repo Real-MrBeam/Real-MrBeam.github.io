@@ -112,6 +112,8 @@ By changing the Max Edge Length from the custom 0.1 to 0 (the default) on fir tr
 
 In the end we landed on using 0.2 - 0.4 on some of our fir tree assets that still looked oversimplified in the distance. This setting increases cluster count, but we felt it was necessary to maintain acceptable canopy silhouette detail at range.
 
+*Later, when LOD voxelization was introduced in UE 5.7 this became a non-issue. I'll come back to this.*
+
 ### Material Quality Settings And Runtime Displacement
 
 We use runtime displacement on different material surfaces depending on what quality level you run.
@@ -215,6 +217,9 @@ In short, voxelization swaps distant Nanite clusters for voxels, preserving silh
 ![](/assets/NaniteCluster/afterVox2.jpg)
 
 *The Nanite overdraw debug visualization view looks much more purple than before voxelization.*
+
+As a bonus, we could now remove our custom max edge length setting we had on all fir trees. Since it swaps over to voxels in the distance instead.
+This meant further reduction of Nanite clusters!
 
 ### Result
 
