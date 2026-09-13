@@ -172,6 +172,9 @@ As shown earlier, one of the biggest culprits of cluster amount and overdraw was
 The moss patches are suddenly covering the entire sightline. Since they're so close to the camera, they need to be high detail, and on top of that they're rendering on top of each other, creating overdraw.
 
 After trying different things, I figured: why bother with Nanite rendering on these actors at all?
+
+*This is generally not advised since you'll create a separate render pass to handle the traditional meshes, if everything else is Nanite.*
+
 We simply turned off Nanite rendering on these assets and created LODs for them.
 
 ![](/assets/NaniteCluster/startPoiNaniteOnVizCloseup.png)
@@ -183,23 +186,26 @@ We simply turned off Nanite rendering on these assets and created LODs for them.
 *Notice that the overdraw is almost completely gone after the change.*
 
 The cluster count went from 165k to 32k, and almost all overdraw on the ground level disappeared, releasing 0.4ms from the Nanite visible buffer.
-But the gain in overall GPU frame time was nowhere to be seen, since the cost simply moved elsewhere: the prepass *DDM_AllOpaqueNoVelocity* grew by roughly the same amount the Nanite base pass had lost.
+But the gain in overall GPU frame time was nowhere to be seen, since the cost simply moved elsewhere: a new prepass *DDM_AllOpaqueNoVelocity* grew by roughly the same amount the Nanite base pass had lost.
 
 ![](/assets/NaniteCluster/afterVoxStat.png)
 
 *ProfileGPU stats showing that the prepass DDM_AllOpaqueNoVelocity now takes ~16 ms.*
 
-*A prepass is a depth-only pass that runs before the main shading pass, rendering just the depth of opaque geometry into the depth buffer first. This lets the GPU early-reject any pixel that will end up hidden behind something closer, so the expensive base pass never has to shade it. **DDM_AllOpaqueNoVelocity** contains almost every actor except those with materials that also output motion vectors, which are handled elsewhere.*
+*A prepass is a depth-only pass that runs before the main shading pass, rendering just the depth of opaque geometry into the depth buffer first. **DDM_AllOpaqueNoVelocity** contains almost every traditional rendered mesh except those with materials that also output motion vectors, which are handled elsewhere.*
 
 Thankfully, this large cost disappeared once we reduced the moss's triangle count down to something reasonable for a non-Nanite mesh.
-As a bonus, this also let us switch to masked materials: making LOD 0 masked lets it fade out smoothly as the camera clips into it, and making the last LOD in the chain masked lets it fade out at max draw distance instead of popping away abruptly.
+
+Even though we were hesitant to introduce a separate render pass just for the moss we decided to keep it.
+
+One reason being that this let us switch to masked materials without too much overhead. By making LOD 0 masked lets it fade out smoothly as the camera clips into it, and making the last LOD in the chain masked lets it fade out at max draw distance instead of popping away abruptly.
 On top of that, we also removed the vertex interaction function on the higher LODs to further optimize it.
 
 ![](/assets/NaniteCluster/afterMossOptimization.png)
 
 *After the moss optimization we got the prepass down to 0.43 ms.*
 
-And finally the cost was reduced to something that we could live with.
+And finally the cost was reduced to something that we could live with. Although I want to revisit this at a later time and see if we can somehow move it over to the Nanite pass and get it performant, so we can lose the extra render pass.
 
 The treeline was still an issue: a lot of overdraw and clusters in the canopy. But thankfully UE 5.7 came and made that issue easy to fix.
 
