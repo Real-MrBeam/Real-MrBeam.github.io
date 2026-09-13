@@ -82,13 +82,15 @@ So how can we solve this without losing all the canopy and moss detail?
 
 There are two ways to bring that density down: optimize the original mesh, or simply lower the *"Keep Triangle Percent"* build setting to something you're comfortable with. Optimizing the mesh manually is obviously the better option, since it gives you full control over where the triangle budget goes, keeping detail where it matters for the silhouette and cutting it everywhere else, rather than having the engine do it for you.
 
-![](/assets/NaniteCluster/Pasted%20image%2020260121172247.png){: height="200" }
-![](/assets/NaniteCluster/Pasted%20image%2020260121172255.png){: height="200" }
+![](/assets/NaniteCluster/Pasted%20image%2020260121172247.png)
+
+![](/assets/NaniteCluster/Pasted%20image%2020260121172255.png)
 
 *A bush's cluster amount, before and after reducing the amount of triangles.*
 
-![](/assets/NaniteCluster/Pasted%20image%2020260121172305.png){: height="200" }
-![](/assets/NaniteCluster/Pasted%20image%2020260121172313.png){: height="200" }
+![](/assets/NaniteCluster/Pasted%20image%2020260121172305.png)
+
+![](/assets/NaniteCluster/Pasted%20image%2020260121172313.png)
 
 *A moss patch's cluster amount, before and after reducing the amount of triangles.*
 
@@ -99,8 +101,9 @@ As you can see above, reducing the mesh's tri count brings the Nanite cluster co
 As mentioned earlier, we used a custom Max Edge Length value to stop the trees from becoming oversimplified. **But now we know that the drawback of this is that it greatly affects how many clusters we render in the distance.**
 A smaller value forces Nanite to maintain shorter edges in the cluster hierarchy, generating more clusters. Increasing it allows Nanite to simplify more aggressively.
 
-![](/assets/NaniteCluster/Pasted%20image%2020260121172339.png){: height="300" }
-![](/assets/NaniteCluster/Pasted%20image%2020260121172345.png){: height="300" }
+![](/assets/NaniteCluster/Pasted%20image%2020260121172339.png)
+
+![](/assets/NaniteCluster/Pasted%20image%2020260121172345.png)
 
 *Images showing the major difference in cluster amount created on a fir tree when using the custom 0.1 value compared to 0 (default).*
 
