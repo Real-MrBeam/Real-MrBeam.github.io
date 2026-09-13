@@ -101,9 +101,9 @@ As you can see above, reducing the mesh's tri count brings the Nanite cluster co
 As mentioned earlier, we used a custom Max Edge Length value to stop the trees from becoming oversimplified. **But now we know that the drawback of this is that it greatly affects how many clusters we render in the distance.**
 A smaller value forces Nanite to maintain shorter edges in the cluster hierarchy, generating more clusters. Increasing it allows Nanite to simplify more aggressively.
 
-![](/assets/NaniteCluster/Pasted%20image%2020260121172339.png)
+![](/assets/NaniteCluster/Pasted%20image%2020260121172339.png){: width="600" }
 
-![](/assets/NaniteCluster/Pasted%20image%2020260121172345.png)
+![](/assets/NaniteCluster/Pasted%20image%2020260121172345.png){: width="600" }
 
 *Images showing the major difference in cluster amount created on a fir tree when using the custom 0.1 value compared to 0 (default).*
 
