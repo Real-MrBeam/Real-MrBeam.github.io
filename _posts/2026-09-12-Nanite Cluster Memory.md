@@ -48,7 +48,7 @@ When you work with Nanite trees you soon discover that the canopy gets reduced t
 
 So the next step for us was to edit the [Maximum Edge Length setting](https://dev.epicgames.com/documentation/unreal-engine/nanite-technical-details) on these assets. This setting defines the maximum screen-space pixel distance between vertices in the simplified mesh, which effectively puts a cap on how large the triangles can get in the distance. By keeping edges shorter, Nanite is forced to maintain more triangles in the distant cluster hierarchy, preserving the silhouette of the canopy.
 The setting comes with a warning: *"The default is 0 and should be kept there unless you have issues caused by over-simplification."*
-Pushing it lower produces more clusters, as we will find out.
+Pushing it lower produces more clusters, except 0 that turns it off, as we will find out.
 
 ### Aggregate Geometry And Overdraw
 
