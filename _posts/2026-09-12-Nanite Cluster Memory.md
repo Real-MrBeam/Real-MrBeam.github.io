@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Nanite Cluster Memory"
+title: "Solving Nanite Cluster Buffer Overflow"
 ---
 
 ### Opening Notes
