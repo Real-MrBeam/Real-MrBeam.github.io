@@ -1,6 +1,7 @@
 ---
 layout: post
 title: "Solving Nanite Cluster Buffer Overflow"
+bluesky_post: "https://bsky.app/profile/peterstrahle.dev/post/3mviise6des25"
 ---
 
 ### Opening Notes
