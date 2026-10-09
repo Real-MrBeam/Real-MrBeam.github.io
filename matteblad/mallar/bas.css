@@ -1,0 +1,195 @@
+/* Shared layout for all worksheets. Theme files set the color variables. */
+
+@page { size: A4; margin: 0; }
+
+* { box-sizing: border-box; }
+
+html, body { margin: 0; padding: 0; }
+
+body {
+  font-family: "Segoe UI", Arial, sans-serif;
+  color: #1d1d1f;
+  font-size: 12pt;
+  line-height: 1.35;
+  background: #d9d9d9;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+@media print { body { background: none; } }
+
+.page {
+  position: relative;
+  width: 210mm;
+  height: 297mm;
+  overflow: hidden;
+  background: #fff;
+  margin: 0 auto;
+  break-after: page;
+}
+.page:last-child { break-after: auto; }
+
+@media screen {
+  .page { margin: 10mm auto; box-shadow: 0 2mm 6mm rgba(0, 0, 0, .25); }
+}
+
+/* Frame and corners */
+.frame {
+  position: absolute;
+  inset: 7mm;
+  border: 2.5mm solid var(--frame);
+  border-radius: 7mm;
+  box-shadow: inset 0 0 0 1mm #fff, inset 0 0 0 2.2mm var(--frame-inner);
+}
+.corner { position: absolute; width: 15mm; height: 15mm; }
+.corner.tl { top: 2mm; left: 2mm; }
+.corner.tr { top: 2mm; right: 2mm; }
+.corner.bl { bottom: 2mm; left: 2mm; }
+.corner.br { bottom: 2mm; right: 2mm; }
+
+.content {
+  position: absolute;
+  inset: 13mm 16mm 18mm 16mm;
+}
+
+.foot {
+  position: absolute;
+  bottom: 5.6mm;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff;
+  padding: 0 4mm;
+  font-size: 9pt;
+  line-height: 5mm;
+  font-weight: 700;
+  color: var(--frame);
+  white-space: nowrap;
+}
+
+/* Header */
+.sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5mm;
+}
+.sheet-head h1 {
+  margin: 0;
+  font-size: 30pt;
+  line-height: 1.1;
+  font-weight: 900;
+  text-align: center;
+}
+.sheet-head .sub {
+  margin: 1mm 0 0;
+  text-align: center;
+  font-size: 12pt;
+  font-weight: 600;
+}
+.sheet-head.small h1 { font-size: 18pt; }
+.bolt { height: 17mm; }
+.bolt.flip { transform: scaleX(-1); }
+
+.meta {
+  display: flex;
+  gap: 8mm;
+  margin: 4mm 0 1mm;
+}
+.meta label { display: flex; align-items: flex-end; gap: 2mm; flex: 1; }
+.meta label.date { flex: 0 0 55mm; }
+.line { flex: 1; height: 6mm; border-bottom: .4mm solid #333; }
+
+/* Parts: warm-up, main, challenge */
+.part { margin-top: 3mm; }
+.part h2 {
+  display: flex;
+  align-items: center;
+  gap: 3mm;
+  margin: 0 0 2.5mm;
+  font-size: 13pt;
+}
+.part h2 .tag {
+  background: var(--part-color);
+  color: #fff;
+  padding: .8mm 4mm;
+  border-radius: 10mm;
+}
+.part h2 .type { font-size: 10pt; font-weight: 600; color: var(--part-color); }
+.part h2::after {
+  content: "";
+  flex: 1;
+  height: .6mm;
+  background: var(--part-color);
+  opacity: .45;
+}
+.p1 { --part-color: var(--part-1); }
+.p2 { --part-color: var(--part-2); }
+.p3 { --part-color: var(--part-3); }
+
+/* Tasks */
+.task { display: flex; gap: 3mm; margin: 0 0 3.5mm; break-inside: avoid; }
+.num {
+  flex: 0 0 7.5mm;
+  height: 7.5mm;
+  border-radius: 50%;
+  background: var(--part-color);
+  color: #fff;
+  font-weight: 800;
+  font-size: 11pt;
+  display: grid;
+  place-items: center;
+}
+.body { flex: 1; min-width: 0; }
+.body p { margin: .8mm 0 2mm; }
+
+.calc-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4mm;
+  font-size: 13pt;
+}
+.blank {
+  display: inline-block;
+  width: 16mm;
+  border-bottom: .4mm solid #333;
+}
+.blank.wide { width: 26mm; }
+
+.rows { display: grid; gap: 3.5mm; }
+.rows > div { display: flex; align-items: flex-end; gap: 2mm; }
+.rows > div .grow { flex: 1; border-bottom: .4mm solid #333; }
+
+.cols2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; }
+.cols2 .label { font-weight: 600; margin-bottom: 1.5mm; font-size: 13pt; }
+
+/* Squared paper for working */
+.rutor {
+  height: 30mm;
+  border: .3mm solid var(--grid-edge);
+  border-radius: 2mm;
+  background-image:
+    linear-gradient(var(--grid) .25mm, transparent .25mm),
+    linear-gradient(90deg, var(--grid) .25mm, transparent .25mm);
+  background-size: 5mm 5mm;
+}
+
+.svar { margin-top: 2mm; text-align: right; font-weight: 600; white-space: nowrap; }
+.svar .blank { width: 28mm; }
+
+/* Feedback box at the end of a sheet */
+.feedback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6mm;
+  margin-top: 1mm;
+  padding: 2mm;
+  border: .5mm dashed var(--accent);
+  border-radius: 4mm;
+  font-weight: 600;
+}
+.feedback .opt {
+  padding: 1mm 5mm;
+  border: .4mm solid #999;
+  border-radius: 10mm;
+}

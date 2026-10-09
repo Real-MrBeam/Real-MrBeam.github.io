@@ -1,0 +1,98 @@
+/* Styles for the fillable on-screen version. Loaded by every worksheet. */
+
+/* Text fields replace the answer lines and keep the same look */
+input.field {
+  font: inherit;
+  color: #1d4ed8;
+  text-align: center;
+  background: transparent;
+  border: 0;
+  border-bottom: .4mm solid #333;
+  border-radius: 0;
+  padding: 0 1mm;
+  margin: 0;
+  outline: none;
+  height: 1.35em;
+}
+input.field.grow, input.field.line { text-align: left; min-width: 0; }
+input.field.line { height: 6mm; }
+
+/* Drawing areas */
+.rutor { position: relative; }
+.rutor canvas {
+  position: absolute;
+  inset: 0;
+  touch-action: none;
+  cursor: crosshair;
+}
+body.erasing .rutor canvas { cursor: cell; }
+
+/* Circled feedback option */
+.feedback .opt { cursor: pointer; user-select: none; }
+.feedback .opt.chosen { border: .7mm solid #1d4ed8; color: #1d4ed8; }
+
+@media screen {
+  body { padding-top: 16mm; }
+
+  input.field:focus { background: #fff6c8; }
+
+  .fill-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 10px 16px;
+    background: #fff;
+    border-bottom: 1px solid #ccc;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .12);
+    font-size: 15px;
+  }
+  .fill-bar .tools { display: flex; gap: 8px; }
+  .fill-bar { flex-wrap: wrap; }
+  .fill-bar .hint { flex: 1; color: #555; font-size: 14px; }
+  @media (max-width: 1100px) { .fill-bar .hint { display: none; } }
+  @media (max-width: 1100px) { .fill-bar .done { margin-left: auto; } }
+
+  /* Shrink the sheet to fit narrow windows (set from ifyllbar.js) */
+  .page { zoom: var(--fit, 1); }
+  .fill-bar .status { color: #3f9a3a; font-weight: 600; margin-left: 6px; }
+
+  .fill-bar button, .fill-dialog button {
+    font: inherit;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 999px;
+    border: 2px solid #2a75bb;
+    background: #fff;
+    color: #2a75bb;
+    cursor: pointer;
+  }
+  .fill-bar button.on { background: #2a75bb; color: #fff; }
+  .fill-bar button.quiet, .fill-dialog button.quiet { border-color: #bbb; color: #666; }
+  .fill-bar button.done, .fill-dialog button.done {
+    background: #3f9a3a;
+    border-color: #3f9a3a;
+    color: #fff;
+  }
+
+  .fill-dialog {
+    border: 0;
+    border-radius: 16px;
+    padding: 24px 28px;
+    max-width: 440px;
+    font-size: 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, .3);
+  }
+  .fill-dialog::backdrop { background: rgba(0, 0, 0, .4); }
+  .fill-dialog h2 { margin: 0 0 8px; color: #2a75bb; }
+  .fill-dialog li { margin: 6px 0; }
+  .fill-dialog .row { display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; }
+}
+
+@media print {
+  .fill-bar, .fill-dialog { display: none !important; }
+}

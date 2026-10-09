@@ -1,0 +1,37 @@
+/* Pokémon theme: red and yellow frame, grass/water/fire colors for the three parts. */
+
+:root {
+  --frame: #e3350d;
+  --frame-inner: #ffcb05;
+  --accent: #2a75bb;
+  --part-1: #3f9a3a;
+  --part-2: #2a75bb;
+  --part-3: #e3350d;
+  --grid: #cfe0f1;
+  --grid-edge: #9fbfe0;
+}
+
+.sheet-head h1 {
+  color: #ffcb05;
+  text-shadow:
+    .6mm 0 0 #2a75bb, -.6mm 0 0 #2a75bb, 0 .6mm 0 #2a75bb, 0 -.6mm 0 #2a75bb,
+    .45mm .45mm 0 #2a75bb, -.45mm .45mm 0 #2a75bb, .45mm -.45mm 0 #2a75bb, -.45mm -.45mm 0 #2a75bb,
+    .9mm 1.1mm 0 #1b4f80;
+}
+.sheet-head .sub { color: #2a75bb; }
+
+.cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3mm; margin-bottom: 3mm; }
+.card {
+  border: .5mm solid #2a75bb;
+  border-radius: 2.5mm;
+  padding: 1.5mm;
+  text-align: center;
+  background: #f3f8fd;
+}
+.card b { display: block; font-size: 13pt; }
+
+.chips { display: flex; gap: 3mm; margin: 1mm 0 2mm; }
+.chip { padding: .2mm 2.5mm; border-radius: 10mm; color: #fff; font-weight: 700; font-size: 11pt; }
+.chip.grass { background: #3f9a3a; }
+.chip.fire { background: #e3350d; }
+.chip.water { background: #2a75bb; }
