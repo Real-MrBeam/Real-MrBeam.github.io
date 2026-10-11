@@ -12,9 +12,11 @@
   let tool = "pen";
 
   // Text fields
-  const fields = [...document.querySelectorAll(".blank, .grow, .meta .line")].map((el, i) => {
-    const input = document.createElement("input");
-    input.type = "text";
+  const fields = [...document.querySelectorAll(".blank, .grow, .meta .line, .skrivrader")].map((el, i) => {
+    const multiline = el.classList.contains("skrivrader");
+    const input = document.createElement(multiline ? "textarea" : "input");
+    if (!multiline) input.type = "text";
+    input.style.cssText = el.style.cssText;
     input.className = el.className + " field";
     input.autocomplete = "off";
     input.spellcheck = false;

@@ -176,9 +176,41 @@ body {
 .svar { margin-top: 2mm; text-align: right; font-weight: 600; white-space: nowrap; }
 .svar .blank { width: 28mm; }
 
+/* Stacked fraction: <span class="frac"><span>3</span><span>4</span></span> */
+.frac {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  vertical-align: middle;
+  font-size: .85em;
+  line-height: 1.05;
+  margin: 0 .5mm;
+}
+.frac > span:first-child { border-bottom: .3mm solid currentColor; padding: 0 .6mm; }
+
+/* Small hint box */
+.tips {
+  margin: 0 0 2.5mm;
+  padding: 1.5mm 3mm;
+  font-size: 10.5pt;
+  border: .4mm solid #ccc;
+  border-radius: 2mm;
+  background: #f7f7f7;
+}
+
+/* Ruled lines for written explanations */
+.skrivrader {
+  display: block;
+  width: 100%;
+  height: 24mm;
+  background: repeating-linear-gradient(transparent 0 7.6mm, #999 7.6mm 8mm);
+}
+
 /* Feedback box at the end of a sheet */
 .feedback {
   display: flex;
+  flex-wrap: wrap;
+  row-gap: 2mm;
   align-items: center;
   justify-content: center;
   gap: 6mm;
@@ -193,3 +225,5 @@ body {
   border: .4mm solid #999;
   border-radius: 10mm;
 }
+.feedback .wish { flex: 1 0 100%; display: flex; align-items: flex-end; gap: 2mm; padding: 0 4mm; }
+.feedback .wish .grow { flex: 1; height: 6mm; border-bottom: .4mm solid #333; }

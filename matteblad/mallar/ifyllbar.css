@@ -16,6 +16,17 @@ input.field {
 }
 input.field.grow, input.field.line { text-align: left; min-width: 0; }
 input.field.line { height: 6mm; }
+textarea.field.skrivrader {
+  font: inherit;
+  color: #1d4ed8;
+  line-height: 8mm;
+  padding: 0 1mm;
+  margin: 0;
+  border: 0;
+  outline: none;
+  resize: none;
+  overflow: hidden;
+}
 
 /* Drawing areas */
 .rutor { position: relative; }

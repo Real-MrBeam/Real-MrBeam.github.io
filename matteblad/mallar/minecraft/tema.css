@@ -1,0 +1,86 @@
+/* Minecraft theme: dirt and grass frame, pixel font, wood/iron/diamond levels. */
+@import url("https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&display=block");
+
+:root {
+  --frame: #5e3d22;
+  --frame-inner: #5d9b38;
+  --accent: #3c8527;
+  --part-1: #8f6440; /* wood */
+  --part-2: #6b7785; /* iron */
+  --part-3: #1fa39a; /* diamond */
+  --grid: #d9e6d0;
+  --grid-edge: #a3bf92;
+}
+
+/* Frame: tiled dirt with a grass top and a grass line around the paper */
+.frame {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: url("jord.svg") 0 0 / 6mm 6mm repeat;
+  image-rendering: pixelated;
+}
+.frame::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3mm;
+  background: url("gras.svg") 0 0 / 6mm 3mm repeat-x;
+  image-rendering: pixelated;
+}
+.frame::after {
+  content: "";
+  position: absolute;
+  inset: 4mm;
+  background: #fff;
+  box-shadow: 0 0 0 .8mm #5d9b38, 0 0 0 1.4mm #2b1d12;
+}
+.corner { image-rendering: pixelated; }
+
+.foot {
+  font-family: "Silkscreen", monospace;
+  font-weight: 400;
+  background: #5d9b38;
+  color: #fff;
+  border: .5mm solid #2b1d12;
+  bottom: 6.4mm;
+  line-height: 4.4mm;
+}
+
+/* Pixel font and blocky look */
+.sheet-head h1 {
+  font-family: "Silkscreen", monospace;
+  font-weight: 700;
+  font-size: 27pt;
+  color: #8b8b8b;
+  text-shadow: .7mm .7mm 0 #3a3a3a;
+  letter-spacing: .5pt;
+}
+.sheet-head.small h1 { font-size: 16pt; text-shadow: .5mm .5mm 0 #3a3a3a; }
+.sheet-head .sub { color: #3c8527; }
+.sheet-head .icon { height: 15mm; image-rendering: pixelated; }
+.sheet-head.small .icon { height: 9mm; }
+
+.part h2 .tag {
+  font-family: "Silkscreen", monospace;
+  font-weight: 400;
+  font-size: 12pt;
+  border-radius: 0;
+  border: .5mm solid #1b1b1b;
+  box-shadow: inset .6mm .6mm 0 rgba(255, 255, 255, .3), inset -.6mm -.6mm 0 rgba(0, 0, 0, .3);
+}
+.part h2::after { height: 1mm; opacity: .35; }
+
+.num {
+  border-radius: 0;
+  border: .4mm solid #1b1b1b;
+  box-shadow: inset .5mm .5mm 0 rgba(255, 255, 255, .3), inset -.5mm -.5mm 0 rgba(0, 0, 0, .3);
+}
+
+.rutor { border-radius: 0; }
+
+.tips { background: #f6eed9; border-color: #b8a07a; }
+
+.feedback { border-radius: 0; border-color: #5d9b38; }
