@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Resultat: Pokémon-matte, blad 1</title>
+<base href="../../">
+<style>
+  body { margin: 0; font-family: "Segoe UI", Arial, sans-serif; background: #f3f6fa; color: #1d1d1f; }
+  main { max-width: 760px; margin: 0 auto; padding: 32px 16px; }
+  .back { color: #2a75bb; font-weight: 600; text-decoration: none; }
+  h1 { margin: 12px 0 4px; color: #2a75bb; font-size: 28px; }
+  .sub { margin: 0 0 20px; color: #666; }
+  .summary { display: grid; grid-template-columns: 1fr 180px; gap: 20px; align-items: center;
+             background: #fff; border-radius: 16px; padding: 20px 24px; box-shadow: 0 2px 8px rgba(0,0,0,.08);
+             border-top: 6px solid #e3350d; }
+  .score { font-size: 40px; font-weight: 800; margin: 0; }
+  .score small { font-size: 20px; font-weight: 600; color: #666; }
+  .message { margin: 6px 0 0; font-size: 18px; }
+  h2 { margin: 28px 0 12px; font-size: 20px; }
+  ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
+  .error { background: #fff; border-radius: 14px; padding: 16px 20px; box-shadow: 0 2px 8px rgba(0,0,0,.06);
+           border-left: 6px solid #2a75bb; }
+  .task { font-weight: 700; color: #2a75bb; }
+  .q { font-size: 18px; margin: 4px 0 8px; }
+  .answers { display: flex; gap: 24px; flex-wrap: wrap; font-size: 18px; }
+  .answers s { color: #b3261e; }
+  .answers .right b { color: #2e7d32; font-size: 22px; }
+  .tip { margin: 10px 0 0; color: #333; }
+  .allright { background: #fff; border-radius: 14px; padding: 16px 20px; font-size: 18px; }
+  .facit { display: inline-block; margin-top: 24px; padding: 12px 20px; border-radius: 999px; background: #2a75bb;
+           color: #fff; text-decoration: none; font-weight: 600; }
+  
+  .prize { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 10px;
+           background: #fff; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,.08);
+           border: 3px solid var(--prize); text-decoration: none; color: #1d1d1f; }
+  .prize .level { background: var(--prize); color: #fff; font-weight: 700; font-size: 12px; padding: 2px 10px;
+                  border-radius: 999px; text-transform: uppercase; letter-spacing: .5px; }
+  .prize img { image-rendering: pixelated; }
+  .prize.small img { width: 56px; height: 56px; }
+  .prize.large img { width: 96px; height: 96px; }
+  .prize .name { font-weight: 700; }
+  .prize.large .name { font-size: 20px; }
+  @media (max-width: 560px) { .summary { grid-template-columns: 1fr; justify-items: start; } }
+</style>
+</head>
+<body>
+<main>
+  <a class="back" href="index.html">← Alla blad</a>
+  <h1>Resultat: Pokémon-matte, blad 1</h1>
+  <p class="sub">Blad 1: Stora tal och de fyra räknesätten</p>
+
+  <section class="summary">
+    <div>
+      <p class="score">9 <small>av 11 uppgifter rätt</small></p>
+      <p class="message">Snyggt jobbat! Du fångade en sällsynt Pokémon.</p>
+    </div>
+    <div class="prize large"  style="--prize: #2a75bb">
+        <span class="level">Sällsynt</span>
+        <img src="mallar/pokemon/pris/superboll.svg" alt="">
+        <span class="name">Charizard</span>
+      </div>
+  </section>
+
+  <h2>Det här blev fel</h2>
+  <ul>
+      <li class="error">
+        <div class="task">Uppgift 1</div>
+        <div class="q">Räkna i huvudet.<br>6 · 50 = ?</div>
+        <div class="answers">
+          <span>Du skrev: <s>250</s></span>
+          <span class="right">Rätt svar: <b>300</b></span>
+        </div>
+        <p class="tip"><b>Tips:</b> Räkna 6 · 5 = 30 och sätt på en nolla. 250 är 5 · 50, så det blev en femtiolapp för lite.</p>
+      </li>
+      <li class="error">
+        <div class="task">Uppgift 11b</div>
+        <div class="q">Jigglypuff sjunger varje dag. Dag 1 somnar 3 Pokémon, dag 2 somnar 6, dag 3 somnar 12. Antalet fortsätter att dubblas.<br>b) Hur många har somnat totalt efter 6 dagar?</div>
+        <div class="answers">
+          <span>Du skrev: <s>186</s></span>
+          <span class="right">Rätt svar: <b>189</b></span>
+        </div>
+        <p class="tip"><b>Tips:</b> 3 + 6 + 12 + 24 + 48 + 96. Skriv delsummorna: 9, 21, 45, 93, 189. Då tappar du inga tal på vägen.</p>
+      </li>
+  </ul>
+
+  <a class="facit" href="blad/2026-10-08-pokemon/facit.pdf">Hela facit (PDF)</a>
+</main>
+</body>
+</html>

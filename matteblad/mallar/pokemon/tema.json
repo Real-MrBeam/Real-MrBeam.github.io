@@ -1,0 +1,11 @@
+{
+  "namn": "Pokémon",
+  "farg": "#2a75bb",
+  "ram": "#e3350d",
+  "pris": [
+    { "maxFel": 0, "niva": "Mytisk", "namn": "Mew", "bild": "pris/mastarboll.svg", "farg": "#7b3fa0", "text": "Alla rätt! Du fångade en mytisk Pokémon." },
+    { "maxFel": 1, "niva": "Legendarisk", "namn": "Lugia", "bild": "pris/ultraboll.svg", "farg": "#c49a1c", "text": "Nästan perfekt! Du fångade en legendarisk Pokémon." },
+    { "maxFel": 3, "niva": "Sällsynt", "namn": "Charizard", "bild": "pris/superboll.svg", "farg": "#2a75bb", "text": "Snyggt jobbat! Du fångade en sällsynt Pokémon." },
+    { "maxFel": 999, "niva": "Vanlig", "namn": "Pikachu", "bild": "pris/pokeboll.svg", "farg": "#e3350d", "text": "Bra kämpat! Du fångade en Pokémon. Kolla tipsen nedan." }
+  ]
+}

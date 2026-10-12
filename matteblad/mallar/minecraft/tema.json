@@ -1,0 +1,11 @@
+{
+  "namn": "Minecraft",
+  "farg": "#3c8527",
+  "ram": "#5e3d22",
+  "pris": [
+    { "maxFel": 0, "niva": "Netherite", "namn": "Netheritesvärd", "bild": "pris/netherite.svg", "farg": "#4d474d", "text": "Alla rätt! Du smidde ett netheritesvärd." },
+    { "maxFel": 1, "niva": "Diamant", "namn": "Diamantsvärd", "bild": "pris/diamant.svg", "farg": "#1fa39a", "text": "Nästan perfekt! Du smidde ett diamantsvärd." },
+    { "maxFel": 3, "niva": "Guld", "namn": "Guldsvärd", "bild": "pris/guld.svg", "farg": "#c49a1c", "text": "Snyggt jobbat! Du smidde ett guldsvärd." },
+    { "maxFel": 999, "niva": "Järn", "namn": "Järnsvärd", "bild": "pris/jarn.svg", "farg": "#6b7785", "text": "Bra kämpat! Du smidde ett järnsvärd. Kolla tipsen nedan." }
+  ]
+}

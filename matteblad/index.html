@@ -7,10 +7,11 @@
 <title>Matteblad</title>
 <style>
   body { margin: 0; font-family: "Segoe UI", Arial, sans-serif; background: #f3f6fa; color: #1d1d1f; }
-  main { max-width: 760px; margin: 0 auto; padding: 32px 16px; }
+  main { max-width: 960px; margin: 0 auto; padding: 32px 16px; }
   h1 { margin: 0 0 4px; color: #2a75bb; font-size: 32px; }
-  .intro { margin: 0 0 24px; color: #555; }
+  .intro { margin: 0 0 24px; color: #555; max-width: 760px; }
   ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 14px; }
+  .row { display: grid; grid-template-columns: 1fr 150px; gap: 16px; align-items: stretch; }
   .card { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;
           background: #fff; border-radius: 14px; padding: 18px 20px; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
   .card h2 { margin: 0; font-size: 20px; }
@@ -20,34 +21,64 @@
   .links a { padding: 10px 16px; border-radius: 999px; border: 2px solid #2a75bb; color: #2a75bb;
              text-decoration: none; font-weight: 600; }
   .links a.primary { background: #3f9a3a; border-color: #3f9a3a; color: #fff; }
+  .links a.result { border-color: #c49a1c; color: #8a6a00; background: #fff8dc; }
+  
+  .prize { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 10px;
+           background: #fff; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,.08);
+           border: 3px solid var(--prize); text-decoration: none; color: #1d1d1f; }
+  .prize .level { background: var(--prize); color: #fff; font-weight: 700; font-size: 12px; padding: 2px 10px;
+                  border-radius: 999px; text-transform: uppercase; letter-spacing: .5px; }
+  .prize img { image-rendering: pixelated; }
+  .prize.small img { width: 56px; height: 56px; }
+  .prize.large img { width: 96px; height: 96px; }
+  .prize .name { font-weight: 700; }
+  .prize.large .name { font-size: 20px; }
+  .prize.empty { border: 2px dashed #c9d3df; color: #8a96a3; font-size: 14px; text-align: center;
+                 justify-content: center; background: transparent; box-shadow: none; }
+  @media (max-width: 640px) {
+    .row { grid-template-columns: 1fr; }
+    .prize.empty { display: none; }
+  }
 </style>
 </head>
 <body>
 <main>
   <h1>Matteblad</h1>
-  <p class="intro">Välj ett blad. Allt du skriver sparas på datorn du använder. Tryck på "Klar! Spara som PDF" när du är färdig och skicka filen hem.</p>
+  <p class="intro">Välj ett blad. Allt du skriver sparas på datorn du använder. Tryck på "Klar! Spara som PDF" när du är färdig och skicka filen hem. När bladet är rättat får du ett pris!</p>
   <ul>
-    <li class="card">
-      <div>
-        <h2>Minecraft-matte, blad 2</h2>
-        <p>Blad 2: Räkna med decimaltal</p>
-        <p class="date">9 oktober 2026</p>
+    <li class="row">
+      <div class="card">
+        <div>
+          <h2>Minecraft-matte, blad 2</h2>
+          <p>Blad 2: Räkna med decimaltal</p>
+          <p class="date">9 oktober 2026</p>
+        </div>
+        <div class="links">
+          <a class="primary" href="blad/2026-10-09-minecraft/blad.html">Öppna och fyll i</a>
+          <a href="blad/2026-10-09-minecraft/blad.pdf">PDF för utskrift</a>
+          
+        </div>
       </div>
-      <div class="links">
-        <a class="primary" href="blad/2026-10-09-minecraft/blad.html">Öppna och fyll i</a>
-        <a href="blad/2026-10-09-minecraft/blad.pdf">PDF för utskrift</a>
-      </div>
+      <div class="prize empty">Pris efter rättning</div>
     </li>
-    <li class="card">
-      <div>
-        <h2>Pokémon-matte, blad 1</h2>
-        <p>Blad 1: Stora tal och de fyra räknesätten</p>
-        <p class="date">8 oktober 2026</p>
+    <li class="row">
+      <div class="card">
+        <div>
+          <h2>Pokémon-matte, blad 1</h2>
+          <p>Blad 1: Stora tal och de fyra räknesätten</p>
+          <p class="date">8 oktober 2026</p>
+        </div>
+        <div class="links">
+          <a class="primary" href="blad/2026-10-08-pokemon/blad.html">Öppna och fyll i</a>
+          <a href="blad/2026-10-08-pokemon/blad.pdf">PDF för utskrift</a>
+          <a class="result" href="blad/2026-10-08-pokemon/resultat.html">Se resultat</a>
+        </div>
       </div>
-      <div class="links">
-        <a class="primary" href="blad/2026-10-08-pokemon/blad.html">Öppna och fyll i</a>
-        <a href="blad/2026-10-08-pokemon/blad.pdf">PDF för utskrift</a>
-      </div>
+      <a class="prize small" href="blad/2026-10-08-pokemon/resultat.html" style="--prize: #2a75bb">
+        <span class="level">Sällsynt</span>
+        <img src="mallar/pokemon/pris/superboll.svg" alt="">
+        <span class="name">Charizard</span>
+      </a>
     </li>
   </ul>
 </main>
