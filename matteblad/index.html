@@ -33,6 +33,10 @@
   .prize.large img { width: 96px; height: 96px; }
   .prize .name { font-weight: 700; }
   .prize.large .name { font-size: 20px; }
+  .prize.secret .name, .prize .pokeimg { display: none; }
+  .prize.secret.opened .name { display: block; }
+  .prize.secret.opened .ballimg { display: none; }
+  .prize.secret.opened .pokeimg { display: block; width: 84px; height: 84px; }
   .prize.empty { border: 2px dashed #c9d3df; color: #8a96a3; font-size: 14px; text-align: center;
                  justify-content: center; background: transparent; box-shadow: none; }
   @media (max-width: 640px) {
@@ -74,13 +78,30 @@
           <a class="result" href="blad/2026-10-08-pokemon/resultat.html">Se resultat</a>
         </div>
       </div>
-      <a class="prize small" href="blad/2026-10-08-pokemon/resultat.html" style="--prize: #2a75bb">
+      <a class="prize small secret" href="blad/2026-10-08-pokemon/resultat.html" style="--prize: #2a75bb" data-key="matteblad:pris:2026-10-08-pokemon" data-poke="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/6.png">
         <span class="level">Sällsynt</span>
-        <img src="mallar/pokemon/pris/superboll.svg" alt="">
+        <img class="ballimg" src="mallar/pokemon/pris/superboll.svg" alt="">
+        <img class="pokeimg" alt="Charizard">
         <span class="name">Charizard</span>
       </a>
     </li>
   </ul>
 </main>
+<script>
+  // Show the Pokémon instead of the ball if it has been opened on the result page in this browser.
+  // Runs on pageshow so it also updates when coming back with the browser's back button.
+  addEventListener("pageshow", () => {
+    document.querySelectorAll(".prize[data-key]").forEach(el => {
+      let open = false;
+      try { open = localStorage.getItem(el.dataset.key) === "open"; } catch {}
+      const img = el.querySelector(".pokeimg");
+      if (open && !img.src) {
+        img.onerror = () => el.classList.remove("opened");
+        img.src = el.dataset.poke;
+      }
+      el.classList.toggle("opened", open);
+    });
+  });
+</script>
 </body>
 </html>

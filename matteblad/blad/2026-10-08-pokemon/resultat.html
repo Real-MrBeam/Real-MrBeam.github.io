@@ -12,7 +12,7 @@
   .back { color: #2a75bb; font-weight: 600; text-decoration: none; }
   h1 { margin: 12px 0 4px; color: #2a75bb; font-size: 28px; }
   .sub { margin: 0 0 20px; color: #666; }
-  .summary { display: grid; grid-template-columns: 1fr 180px; gap: 20px; align-items: center;
+  .summary { display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: center;
              background: #fff; border-radius: 16px; padding: 20px 24px; box-shadow: 0 2px 8px rgba(0,0,0,.08);
              border-top: 6px solid #e3350d; }
   .score { font-size: 40px; font-weight: 800; margin: 0; }
@@ -42,6 +42,59 @@
   .prize.large img { width: 96px; height: 96px; }
   .prize .name { font-weight: 700; }
   .prize.large .name { font-size: 20px; }
+  .prize.secret .name, .prize .pokeimg { display: none; }
+  .prize.secret.opened .name { display: block; }
+  .prize.secret.opened .ballimg { display: none; }
+  .prize.secret.opened .pokeimg { display: block; width: 84px; height: 84px; }
+  
+  .reveal { font: inherit; color: #1d1d1f; cursor: pointer; width: 220px; padding: 10px 10px 12px;
+            display: flex; flex-direction: column; align-items: center; gap: 4px;
+            background: #fff; border: 3px solid var(--prize); border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+  .reveal .level { background: var(--prize); color: #fff; font-weight: 700; font-size: 12px; padding: 2px 10px;
+                   border-radius: 999px; text-transform: uppercase; letter-spacing: .5px; }
+  .reveal .stage { position: relative; width: 190px; height: 170px; }
+  .reveal .ball { position: absolute; left: 45px; top: 35px; width: 100px; height: 100px; transform-origin: 50% 100%;
+                  transition: transform .2s; }
+  .reveal .ball svg { width: 100%; height: 100%; overflow: visible; }
+  .reveal .lid { transform-box: view-box; transform-origin: 6px 50px; }
+  .reveal .poke { position: absolute; left: 20px; top: 0; width: 150px; height: 150px; opacity: 0; transform: scale(0); }
+  .reveal .flash { position: absolute; left: 75px; top: 65px; width: 40px; height: 40px; border-radius: 50%; opacity: 0;
+                   background: radial-gradient(circle, #fff 0%, #fff8c8 40%, rgba(255,255,255,0) 70%); }
+  .reveal .spark { position: absolute; left: 87px; top: 72px; color: #f2c94c; font-size: 18px; opacity: 0; }
+  .reveal .hint { font-weight: 700; color: var(--prize); animation: pulse 1.2s ease-in-out infinite; }
+  .reveal .name { display: none; font-weight: 700; font-size: 22px; }
+  .reveal:hover .ball { transform: rotate(-6deg); }
+
+  .reveal.open .hint { display: none; }
+  .reveal.open .name { display: block; animation: fadein .4s ease-out 2s both; }
+  .reveal.open .ball { animation: shake 1.2s ease-in-out, away .5s ease-in 1.7s forwards; }
+  .reveal.open .lid { animation: lidopen .35s ease-out 1.3s forwards; }
+  .reveal.open .flash { animation: flash .7s ease-out 1.5s forwards; }
+  .reveal.open .spark { animation: spark .8s ease-out 1.6s forwards; }
+  .reveal.open .poke { animation: pop .6s cubic-bezier(.2, 1.6, .4, 1) 1.6s forwards; }
+  .reveal.noimg .poke { display: none; }
+  .reveal.shown * { animation-duration: 0s !important; animation-delay: 0s !important; }
+
+  @keyframes pulse { 50% { opacity: .55; } }
+  @keyframes fadein { from { opacity: 0; transform: translateY(6px); } }
+  @keyframes shake {
+    0%, 30%, 65%, 100% { transform: rotate(0); }
+    10%, 45%, 80% { transform: rotate(-16deg); }
+    20%, 55%, 90% { transform: rotate(16deg); }
+  }
+  @keyframes away { to { transform: translate(-64px, 30px) scale(.35); } }
+  @keyframes lidopen { to { transform: rotate(-65deg); } }
+  @keyframes flash { 0% { opacity: 0; transform: scale(.5); } 25% { opacity: 1; } 100% { opacity: 0; transform: scale(6); } }
+  @keyframes spark {
+    0% { opacity: 1; transform: rotate(var(--a)) translateY(0) scale(.4); }
+    100% { opacity: 0; transform: rotate(var(--a)) translateY(-95px) scale(1.2); }
+  }
+  @keyframes pop { from { opacity: 0; transform: translateY(50px) scale(0); } to { opacity: 1; transform: translateY(-6px) scale(1); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal.open * { animation-duration: .01s !important; animation-delay: 0s !important; }
+    .reveal .hint { animation: none; }
+  }
   @media (max-width: 560px) { .summary { grid-template-columns: 1fr; justify-items: start; } }
 </style>
 </head>
@@ -56,11 +109,36 @@
       <p class="score">9 <small>av 11 uppgifter rätt</small></p>
       <p class="message">Snyggt jobbat! Du fångade en sällsynt Pokémon.</p>
     </div>
-    <div class="prize large"  style="--prize: #2a75bb">
+    <button type="button" class="reveal" style="--prize: #2a75bb" data-key="matteblad:pris:2026-10-08-pokemon" aria-label="Öppna bollen">
         <span class="level">Sällsynt</span>
-        <img src="mallar/pokemon/pris/superboll.svg" alt="">
+        <span class="stage">
+          <span class="flash"></span>
+          <span class="spark" style="--a: 0deg">✦</span><span class="spark" style="--a: 60deg">✦</span><span class="spark" style="--a: 120deg">✦</span><span class="spark" style="--a: 180deg">✦</span><span class="spark" style="--a: 240deg">✦</span><span class="spark" style="--a: 300deg">✦</span>
+          <img class="poke" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/6.png" alt="Charizard"
+               onerror="this.closest('.reveal').classList.add('noimg')">
+          <span class="ball"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" overflow="visible">
+  <defs><clipPath id="lidclip"><path d="M4 50 A46 46 0 0 1 96 50 Z"/></clipPath></defs>
+  <g class="base">
+    <path d="M4 50 A46 46 0 0 0 96 50 Z" fill="#fff" stroke="#222" stroke-width="6"/>
+    <rect x="4" y="50" width="92" height="4" fill="#222"/>
+    <path d="M35 50 A15 15 0 0 0 65 50 Z" fill="#222"/>
+    <path d="M41.5 50 A8.5 8.5 0 0 0 58.5 50 Z" fill="#fff"/>
+  </g>
+  <g class="lid">
+    <path d="M4 50 A46 46 0 0 1 96 50 Z" fill="#2a75bb"/>
+    <g clip-path="url(#lidclip)"><path d="M4 42 L22 10 L32 16 L18 46 Z" fill="#e3350d"/><path d="M96 42 L78 10 L68 16 L82 46 Z" fill="#e3350d"/></g>
+    <path d="M4 50 A46 46 0 0 1 96 50 Z" fill="none" stroke="#222" stroke-width="6"/>
+    <rect x="4" y="46" width="92" height="4" fill="#222"/>
+    <path d="M35 50 A15 15 0 0 1 65 50 Z" fill="#222"/>
+    <path d="M41.5 50 A8.5 8.5 0 0 1 58.5 50 Z" fill="#fff"/>
+    <path d="M22 30 A30 30 0 0 1 40 16" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".5"/>
+  </g>
+</svg>
+</span>
+        </span>
+        <span class="hint">Klicka på bollen!</span>
         <span class="name">Charizard</span>
-      </div>
+      </button>
   </section>
 
   <h2>Det här blev fel</h2>
@@ -87,5 +165,23 @@
 
   <a class="facit" href="blad/2026-10-08-pokemon/facit.pdf">Hela facit (PDF)</a>
 </main>
+<script>
+  // Click opens the ball, a second click closes it. The state is remembered in this browser,
+  // so an opened ball is shown open (without the animation) next time. #oppen plays it without saving.
+  document.querySelectorAll(".reveal").forEach(el => {
+    const key = el.dataset.key;
+    let stored = false;
+    try { stored = localStorage.getItem(key) === "open"; } catch {}
+    if (location.hash === "#oppen") el.classList.add("open");
+    else if (stored) el.classList.add("open", "shown");
+
+    el.addEventListener("click", () => {
+      const open = !el.classList.contains("open");
+      el.classList.remove("shown");
+      el.classList.toggle("open", open);
+      try { open ? localStorage.setItem(key, "open") : localStorage.removeItem(key); } catch {}
+    });
+  });
+</script>
 </body>
 </html>

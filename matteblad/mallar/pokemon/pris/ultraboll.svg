@@ -1,11 +1,18 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <defs><clipPath id="top"><path d="M4 50 A46 46 0 0 1 96 50 Z"/></clipPath></defs>
-  <circle cx="50" cy="50" r="46" fill="#fff" stroke="#222" stroke-width="6"/>
-  <path d="M4 50 A46 46 0 0 1 96 50 Z" fill="#2b2b2b"/>
-  <g clip-path="url(#top)"><rect x="16" y="0" width="14" height="50" fill="#f2c94c"/><rect x="70" y="0" width="14" height="50" fill="#f2c94c"/></g>
-  <path d="M4 50 A46 46 0 0 1 96 50 Z" fill="none" stroke="#222" stroke-width="6"/>
-  <rect x="4" y="46" width="92" height="8" fill="#222"/>
-  <circle cx="50" cy="50" r="15" fill="#222"/>
-  <circle cx="50" cy="50" r="8.5" fill="#fff"/>
-  <path d="M22 30 A30 30 0 0 1 40 16" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".5"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" overflow="visible">
+  <defs><clipPath id="lidclip"><path d="M4 50 A46 46 0 0 1 96 50 Z"/></clipPath></defs>
+  <g class="base">
+    <path d="M4 50 A46 46 0 0 0 96 50 Z" fill="#fff" stroke="#222" stroke-width="6"/>
+    <rect x="4" y="50" width="92" height="4" fill="#222"/>
+    <path d="M35 50 A15 15 0 0 0 65 50 Z" fill="#222"/>
+    <path d="M41.5 50 A8.5 8.5 0 0 0 58.5 50 Z" fill="#fff"/>
+  </g>
+  <g class="lid">
+    <path d="M4 50 A46 46 0 0 1 96 50 Z" fill="#2b2b2b"/>
+    <g clip-path="url(#lidclip)"><rect x="16" y="0" width="14" height="50" fill="#f2c94c"/><rect x="70" y="0" width="14" height="50" fill="#f2c94c"/></g>
+    <path d="M4 50 A46 46 0 0 1 96 50 Z" fill="none" stroke="#222" stroke-width="6"/>
+    <rect x="4" y="46" width="92" height="4" fill="#222"/>
+    <path d="M35 50 A15 15 0 0 1 65 50 Z" fill="#222"/>
+    <path d="M41.5 50 A8.5 8.5 0 0 1 58.5 50 Z" fill="#fff"/>
+    <path d="M22 30 A30 30 0 0 1 40 16" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".5"/>
+  </g>
 </svg>
