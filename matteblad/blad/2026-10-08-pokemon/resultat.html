@@ -40,15 +40,31 @@
            box-shadow: inset 0 0 0 2px #fff, inset 0 0 0 3px #d4a72c, 0 2px 10px rgba(184, 134, 11, .35); }
   .prize .level { background: var(--prize); color: #fff; font-weight: 700; font-size: 12px; padding: 2px 10px;
                   border-radius: 999px; text-transform: uppercase; letter-spacing: .5px; }
+  /* Fixed slots for picture and name, so the box keeps its size when the ball is opened. */
+  .prize .art { display: flex; align-items: center; justify-content: center; }
+  .prize.small .art { width: 80px; height: 68px; }
+  .prize.large .art { width: 110px; height: 100px; }
   .prize img { image-rendering: pixelated; }
-  .prize.small img { width: 56px; height: 56px; }
-  .prize.large img { width: 96px; height: 96px; }
-  .prize .name { font-weight: 700; }
-  .prize.large .name { font-size: 20px; }
-  .prize.secret .name, .prize .pokeimg { display: none; }
-  .prize.secret.opened .name { display: block; }
+  .prize.small .ballimg { width: 56px; height: 56px; }
+  .prize.large .ballimg { width: 96px; height: 96px; }
+  .prize .pokeimg { display: none; width: 100%; height: 100%; object-fit: contain; image-rendering: auto; }
+  .prize .name { font-weight: 700; height: 20px; line-height: 20px; white-space: nowrap; }
+  .prize.large .name { font-size: 20px; height: 26px; line-height: 26px; }
+  .prize.secret .name { visibility: hidden; }
+  .prize.secret.opened .name { visibility: visible; }
   .prize.secret.opened .ballimg { display: none; }
-  .prize.secret.opened .pokeimg { display: block; width: 84px; height: 84px; }
+  .prize.secret.opened .pokeimg { display: block; }
+
+  /* Unopened prize: a light band travels around the gold frame and the glow pulses. */
+  .prize.secret:not(.opened) { background: linear-gradient(#fff, #fff) padding-box,
+                       linear-gradient(110deg, #b8860b 0%, #d4a72c 30%, #fff3b0 43%, #ffffff 50%, #fff3b0 57%, #d4a72c 70%, #b8860b 100%) border-box;
+           background-size: 100% 100%, 300% 100%;
+           animation: goldshine 2.2s linear infinite, goldglow 2.2s ease-in-out infinite; }
+  @keyframes goldshine { from { background-position: 0 0, 100% 0; } to { background-position: 0 0, 0% 0; } }
+  @keyframes goldglow {
+    50% { box-shadow: inset 0 0 0 2px #fff, inset 0 0 0 3px #d4a72c, 0 0 18px 2px rgba(255, 196, 30, .8); }
+  }
+  @media (prefers-reduced-motion: reduce) { .prize { animation: none !important; } }
   
   .reveal { font: inherit; color: #1d1d1f; cursor: pointer; width: 220px; padding: 10px 10px 12px;
             display: flex; flex-direction: column; align-items: center; gap: 4px;
@@ -66,20 +82,40 @@
   .reveal .poke { position: absolute; left: 20px; top: 0; width: 150px; height: 150px; opacity: 0; transform: scale(0); }
   .reveal .flash { position: absolute; left: 75px; top: 65px; width: 40px; height: 40px; border-radius: 50%; opacity: 0;
                    background: radial-gradient(circle, #fff 0%, #fff8c8 40%, rgba(255,255,255,0) 70%); }
-  .reveal .spark { position: absolute; left: 87px; top: 72px; color: #f2c94c; font-size: 18px; opacity: 0; }
+  /* Stars start at the centre of the ball. Size, colour, angle and distance come from --s, --c, --a and --d. */
+  .reveal .spark { position: absolute; z-index: 2; left: 95px; top: 85px; width: var(--s); height: var(--s);
+                   margin: calc(var(--s) / -2) 0 0 calc(var(--s) / -2); font-size: var(--s); line-height: var(--s);
+                   text-align: center; color: var(--c); opacity: 0; pointer-events: none;
+                   text-shadow: 0 0 4px #d4a72c, 0 0 12px #ffd23f; }
+  .reveal .caption { height: 32px; display: flex; align-items: center; justify-content: center; }
   .reveal .hint { font-weight: 700; color: var(--prize); animation: pulse 1.2s ease-in-out infinite; }
-  .reveal .name { display: none; font-weight: 700; font-size: 22px; }
+  .reveal .name { display: none; font-weight: 700; font-size: 22px; line-height: 32px; }
   .reveal:hover .ball { transform: rotate(-6deg); }
 
   .reveal.open .hint { display: none; }
-  .reveal.open .name { display: block; animation: fadein .4s ease-out 2s both; }
-  .reveal.open .ball { animation: shake 1.2s ease-in-out, away .5s ease-in 1.7s forwards; }
-  .reveal.open .lid { animation: lidopen .35s ease-out 1.3s forwards; }
-  .reveal.open .flash { animation: flash .7s ease-out 1.5s forwards; }
-  .reveal.open .spark { animation: spark .8s ease-out 1.6s forwards; }
-  .reveal.open .poke { animation: pop .6s cubic-bezier(.2, 1.6, .4, 1) 1.6s forwards; }
+  .reveal.open .name { display: block; animation: fadein .4s ease-out 1.8s both; }
+  .reveal.open .ball { animation: shake 1.2s ease-in-out, away .4s ease-in 1.55s forwards; }
+  .reveal.open .lid { animation: lidopen .2s cubic-bezier(.2, .9, .3, 1.2) 1.25s forwards; }
+  .reveal.open .flash { animation: flash .5s ease-out 1.3s forwards; }
+  .reveal.open .spark { animation: spark .6s cubic-bezier(.1, .9, .2, 1) 1.3s forwards; }
+  .reveal.open .poke { animation: pop .5s cubic-bezier(.2, 1.6, .4, 1) 1.35s forwards; }
   .reveal.noimg .poke { display: none; }
   .reveal.shown * { animation-duration: 0s !important; animation-delay: 0s !important; }
+
+  /* Closed and while the ball shakes (.charging): the gold frame shines. At the bang (.bang, set by the
+     script 1.3 s after the click) the frame shakes once and then stands still. */
+  .reveal:not(.open), .reveal.charging { background: linear-gradient(#fff, #fff) padding-box,
+                       linear-gradient(110deg, #b8860b 0%, #d4a72c 30%, #fff3b0 43%, #ffffff 50%, #fff3b0 57%, #d4a72c 70%, #b8860b 100%) border-box;
+           background-size: 100% 100%, 300% 100%;
+           animation: goldshine 2.2s linear infinite, goldglow 2.2s ease-in-out infinite; }
+  .reveal.bang { animation: frameshake .45s ease-in-out; }
+  @keyframes frameshake {
+    0%, 100% { transform: none; }
+    15% { transform: translateX(-5px) rotate(-2.5deg); }
+    35% { transform: translateX(5px) rotate(2.5deg); box-shadow: inset 0 0 0 2px #fff, inset 0 0 0 3px #d4a72c, 0 0 26px 4px rgba(255, 196, 30, .9); }
+    55% { transform: translateX(-3px) rotate(-1.5deg); }
+    75% { transform: translateX(2px) rotate(1deg); }
+  }
 
   @keyframes pulse { 50% { opacity: .55; } }
   @keyframes fadein { from { opacity: 0; transform: translateY(6px); } }
@@ -92,14 +128,15 @@
   @keyframes lidopen { to { transform: rotate(-65deg); } }
   @keyframes flash { 0% { opacity: 0; transform: scale(.5); } 25% { opacity: 1; } 100% { opacity: 0; transform: scale(6); } }
   @keyframes spark {
-    0% { opacity: 1; transform: rotate(var(--a)) translateY(0) scale(.4); }
-    100% { opacity: 0; transform: rotate(var(--a)) translateY(-95px) scale(1.2); }
+    0% { opacity: 1; transform: rotate(var(--a)) translateY(0) scale(.3); }
+    70% { opacity: 1; }
+    100% { opacity: 0; transform: rotate(var(--a)) translateY(calc(var(--d) * -1)) scale(1); }
   }
   @keyframes pop { from { opacity: 0; transform: translateY(50px) scale(0); } to { opacity: 1; transform: translateY(-6px) scale(1); } }
 
   @media (prefers-reduced-motion: reduce) {
     .reveal.open * { animation-duration: .01s !important; animation-delay: 0s !important; }
-    .reveal .hint { animation: none; }
+    .reveal, .reveal .hint { animation: none !important; }
   }
   @media (max-width: 560px) { .summary { grid-template-columns: 1fr; justify-items: start; } }
 </style>
@@ -119,7 +156,7 @@
         <span class="level">Sällsynt</span>
         <span class="stage">
           <span class="flash"></span>
-          <span class="spark" style="--a: 0deg">✦</span><span class="spark" style="--a: 60deg">✦</span><span class="spark" style="--a: 120deg">✦</span><span class="spark" style="--a: 180deg">✦</span><span class="spark" style="--a: 240deg">✦</span><span class="spark" style="--a: 300deg">✦</span>
+          <span class="spark" style="--a: 0deg; --d: 125px; --s: 32px; --c: #f2c94c">★</span><span class="spark" style="--a: 42deg; --d: 95px; --s: 22px; --c: #fff3a8">✦</span><span class="spark" style="--a: 60deg; --d: 112px; --s: 32px; --c: #ffd23f">★</span><span class="spark" style="--a: 102deg; --d: 125px; --s: 22px; --c: #ffffff">✦</span><span class="spark" style="--a: 120deg; --d: 95px; --s: 32px; --c: #f2c94c">★</span><span class="spark" style="--a: 162deg; --d: 112px; --s: 22px; --c: #fff3a8">✦</span><span class="spark" style="--a: 180deg; --d: 125px; --s: 32px; --c: #ffd23f">★</span><span class="spark" style="--a: 222deg; --d: 95px; --s: 22px; --c: #ffffff">✦</span><span class="spark" style="--a: 240deg; --d: 112px; --s: 32px; --c: #f2c94c">★</span><span class="spark" style="--a: 282deg; --d: 125px; --s: 22px; --c: #fff3a8">✦</span><span class="spark" style="--a: 300deg; --d: 95px; --s: 32px; --c: #ffd23f">★</span><span class="spark" style="--a: 342deg; --d: 112px; --s: 22px; --c: #ffffff">✦</span>
           <img class="poke" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/6.png" alt="Charizard"
                onerror="this.closest('.reveal').classList.add('noimg')">
           <span class="ball"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" overflow="visible">
@@ -142,8 +179,10 @@
 </svg>
 </span>
         </span>
-        <span class="hint">Klicka på bollen!</span>
-        <span class="name">Charizard</span>
+        <span class="caption">
+          <span class="hint">Klicka på bollen!</span>
+          <span class="name">Charizard</span>
+        </span>
       </button>
   </section>
 
@@ -174,18 +213,28 @@
 <script>
   // Click opens the ball, a second click closes it. The state is remembered in this browser,
   // so an opened ball is shown open (without the animation) next time. #oppen plays it without saving.
+  // While the ball shakes the frame keeps shining (.charging); at the bang, 1.3 s in, it shakes once (.bang).
+  const BANG_MS = 1300;
   document.querySelectorAll(".reveal").forEach(el => {
     const key = el.dataset.key;
+    let timer;
+    const open = () => {
+      el.classList.add("open", "charging");
+      timer = setTimeout(() => el.classList.replace("charging", "bang"), BANG_MS);
+    };
+    const close = () => el.classList.remove("open", "shown", "charging", "bang");
+
     let stored = false;
     try { stored = localStorage.getItem(key) === "open"; } catch {}
-    if (location.hash === "#oppen") el.classList.add("open");
+    if (location.hash === "#oppen") open();
     else if (stored) el.classList.add("open", "shown");
 
     el.addEventListener("click", () => {
-      const open = !el.classList.contains("open");
-      el.classList.remove("shown");
-      el.classList.toggle("open", open);
-      try { open ? localStorage.setItem(key, "open") : localStorage.removeItem(key); } catch {}
+      clearTimeout(timer);
+      const opening = !el.classList.contains("open");
+      close();
+      if (opening) open();
+      try { opening ? localStorage.setItem(key, "open") : localStorage.removeItem(key); } catch {}
     });
   });
 </script>
