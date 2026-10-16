@@ -1,0 +1,28 @@
+{
+  "namn": "Minecraft",
+  "farg": "#3c8527",
+  "ram": "#5e3d22",
+  "avslojning": {
+    "typ": "kista",
+    "hint": "Klicka på kistan!",
+    "behallare": "pris/kista.svg",
+    "gnistor": {
+      "farger": [
+        "#7cfc00",
+        "#c6ff4d",
+        "#ffff66",
+        "#3fbf3f"
+      ],
+      "tecken": [
+        "◆",
+        "■"
+      ]
+    }
+  },
+  "pris": [
+    { "minProcent": 100, "niva": "Netherite", "namn": "Netheritesvärd", "bild": "pris/netherite.svg", "farg": "#4d474d", "text": "Alla rätt! Öppna kistan och se vad för netherite du hittat!" },
+    { "minProcent": 95, "niva": "Diamant", "namn": "Diamantsvärd", "bild": "pris/diamant.svg", "farg": "#1fa39a", "text": "Nästan perfekt! Öppna kistan och se vad för diamant du hittat!" },
+    { "minProcent": 70, "niva": "Guld", "namn": "Guldsvärd", "bild": "pris/guld.svg", "farg": "#c49a1c", "text": "Snyggt jobbat! Öppna kistan och se vad för guld du hittat!" },
+    { "minProcent": 0, "niva": "Järn", "namn": "Järnsvärd", "bild": "pris/jarn.svg", "farg": "#6b7785", "text": "Bra kämpat! Öppna kistan och se vad för järn du hittat! Kolla tipsen nedan." }
+  ]
+}

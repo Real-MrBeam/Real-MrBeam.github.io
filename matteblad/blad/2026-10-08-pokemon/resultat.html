@@ -17,13 +17,7 @@
              border-top: 6px solid #e3350d; }
   .score { font-size: 40px; font-weight: 800; margin: 0; }
   .score small { font-size: 20px; font-weight: 600; color: #666; }
-  .message { margin: 6px 0 0; font-size: 18px; }
-  /* Before the prize is opened the message only praises; it names the prize once opened. */
-  /* It switches at the bang (or directly when the prize was already opened before). */
-  .msg-open { display: none; }
-  .summary:has(.reveal.bang) .msg-open, .summary:has(.reveal.shown) .msg-open { display: inline; }
-  .summary:has(.reveal.bang) .msg-closed, .summary:has(.reveal.shown) .msg-closed { display: none; }
-  h2 { margin: 28px 0 12px; font-size: 20px; }
+  .message { margin: 6px 0 0; font-size: 18px; }  h2 { margin: 28px 0 12px; font-size: 20px; }
   ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
   .error { background: #fff; border-radius: 14px; padding: 16px 20px; box-shadow: 0 2px 8px rgba(0,0,0,.06);
            border-left: 6px solid #2a75bb; }
@@ -60,9 +54,6 @@
   .prize.secret.opened .name { visibility: visible; }
   .prize.secret.opened .ballimg { display: none; }
   .prize.secret.opened .pokeimg { display: block; }
-  /* Themes where the level names the prize (Guld, Diamant ...) hide it until the prize is opened. */
-  .prize.secret.hide-level:not(.opened) .level { visibility: hidden; }
-
   /* Unopened prize: a light band travels around the gold frame and the glow pulses. */
   .prize.secret:not(.opened) { background: linear-gradient(#fff, #fff) padding-box,
                        linear-gradient(110deg, #b8860b 0%, #d4a72c 30%, #fff3b0 43%, #ffffff 50%, #fff3b0 57%, #d4a72c 70%, #b8860b 100%) border-box;
@@ -89,7 +80,6 @@
   .reveal .lid { transform-box: view-box; transform-origin: 6px 50px; }
   .reveal[data-typ="kista"] .lid { transform-origin: 1px 7px; }
   .reveal[data-typ="kista"] .poke { image-rendering: pixelated; }
-  .reveal.hide-level:not(.bang):not(.shown) .level { visibility: hidden; }
   .reveal[data-typ="dagbok"] .lid { transform-origin: 14px 50px; }
   .reveal[data-typ="dagbok"].open .lid { animation-name: coverflip; }
   /* Halfway through the flip the front of the cover is hidden and its light inside shows. */
@@ -169,7 +159,7 @@
   <section class="summary">
     <div>
       <p class="score">24 <small>av 26 rätt</small></p>
-      <p class="message"><span class="msg-closed">Snyggt jobbat! Klicka på bollen och se vem du fångade!</span><span class="msg-open">Snyggt jobbat! Du fångade en sällsynt Pokémon.</span></p>
+      <p class="message">Snyggt jobbat! Du fångade en sällsynt Pokémon.</p>
     </div>
     <button type="button" class="reveal" data-typ="boll" style="--prize: #2a75bb" data-key="matteblad:pris:2026-10-08-pokemon" aria-label="Klicka på bollen!">
         <span class="level">Sällsynt</span>
