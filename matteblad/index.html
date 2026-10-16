@@ -46,6 +46,8 @@
   .prize.secret.opened .name { visibility: visible; }
   .prize.secret.opened .ballimg { display: none; }
   .prize.secret.opened .pokeimg { display: block; }
+  /* Themes where the level names the prize (Guld, Diamant ...) hide it until the prize is opened. */
+  .prize.secret.hide-level:not(.opened) .level { visibility: hidden; }
 
   /* Unopened prize: a light band travels around the gold frame and the glow pulses. */
   .prize.secret:not(.opened) { background: linear-gradient(#fff, #fff) padding-box,
@@ -98,7 +100,7 @@
           <a class="result" href="blad/2026-10-09-minecraft/resultat.html">Se resultat</a>
         </div>
       </div>
-      <a class="prize small secret" href="blad/2026-10-09-minecraft/resultat.html" style="--prize: #c49a1c" data-key="matteblad:pris:2026-10-09-minecraft" data-poke="mallar/minecraft/pris/guld.svg">
+      <a class="prize small secret hide-level" href="blad/2026-10-09-minecraft/resultat.html" style="--prize: #c49a1c" data-key="matteblad:pris:2026-10-09-minecraft" data-poke="mallar/minecraft/pris/guld.svg">
         <span class="level">Guld</span>
         <span class="art">
           <img class="ballimg" src="mallar/minecraft/pris/kista.svg" alt="">
