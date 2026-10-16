@@ -1,0 +1,83 @@
+/* Diary theme: a spiral notebook with faint ruled lines, a red margin, handwriting and doodles. */
+@import url("https://fonts.googleapis.com/css2?family=Patrick+Hand&display=block");
+
+:root {
+  --frame: #2b2b2b;
+  --frame-inner: #2b2b2b;
+  --accent: #2b4c7e;
+  --part-1: #2a75bb; /* blue pen */
+  --part-2: #d1495b; /* red pen */
+  --part-3: #2a9d8f; /* green pen */
+  --grid: #d6e2ee;
+  --grid-edge: #9fb6cc;
+}
+
+/* Notebook page: ink outline with an offset shadow, ruled lines, red margin and spiral binding. */
+.frame {
+  border: .8mm solid #2b2b2b;
+  border-radius: 1.5mm;
+  box-shadow: 1.2mm 1.2mm 0 #2b2b2b;
+  background: #fff;
+}
+.frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to right, transparent 7mm, #f1b4b4 7mm, #f1b4b4 7.4mm, transparent 7.4mm),
+    repeating-linear-gradient(to bottom, transparent 0, transparent 7.6mm, #e3ebf4 7.6mm, #e3ebf4 8mm);
+}
+.frame::before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  left: -5mm;
+  top: 5mm;
+  bottom: 5mm;
+  width: 10mm;
+  background: url("spiral.svg") center top / 10mm 9mm repeat-y;
+}
+
+.rutor, .skrivrader, .feedback, .tips { background-color: #fff; }
+
+/* Handwriting for headings, tags, numbers and footer. */
+.sheet-head h1, .part h2 .tag, .num, .foot, .sheet-head .sub, .feedback > span:first-child, .feedback .wish {
+  font-family: "Patrick Hand", "Segoe Print", cursive;
+  font-weight: 400;
+}
+.sheet-head h1 { font-size: 30pt; color: #2b2b2b; }
+.sheet-head h1 .u { text-decoration: underline wavy #d1495b; text-underline-offset: 2mm; text-decoration-thickness: .6mm; }
+.sheet-head.small h1 { font-size: 20pt; }
+.sheet-head .sub { font-size: 15pt; color: #2b4c7e; }
+.sheet-head .doodle { height: 16mm; }
+.sheet-head.small .doodle { height: 10mm; }
+
+/* Section tags look like sticky notes. */
+.part h2 .tag {
+  color: #2b2b2b;
+  font-size: 15pt;
+  border-radius: 0;
+  padding: .3mm 4mm;
+  transform: rotate(-1.5deg);
+  box-shadow: .6mm .8mm 0 rgba(0, 0, 0, .18);
+}
+.p1 h2 .tag { background: #fff27a; }
+.p2 h2 .tag { background: #ffc2d6; }
+.p3 h2 .tag { background: #c8f7c5; }
+.part h2 .type { font-size: 11pt; }
+.part h2::after { height: .5mm; opacity: .6; }
+
+/* Task numbers drawn as ink circles. */
+.num {
+  background: #fff;
+  color: var(--part-color);
+  border: .5mm solid var(--part-color);
+  font-size: 13pt;
+}
+
+.foot {
+  font-size: 12pt;
+  color: #2b2b2b;
+  background: #fff;
+  bottom: 5mm;
+}

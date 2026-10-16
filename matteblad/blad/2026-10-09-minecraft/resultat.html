@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Resultat: Minecraft-matte, blad 2</title>
+<base href="../../">
+<style>
+  body { margin: 0; font-family: "Segoe UI", Arial, sans-serif; background: #f3f6fa; color: #1d1d1f; }
+  main { max-width: 760px; margin: 0 auto; padding: 32px 16px; }
+  .back { color: #3c8527; font-weight: 600; text-decoration: none; }
+  h1 { margin: 12px 0 4px; color: #3c8527; font-size: 28px; }
+  .sub { margin: 0 0 20px; color: #666; }
+  .summary { display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: center;
+             background: #fff; border-radius: 16px; padding: 20px 24px; box-shadow: 0 2px 8px rgba(0,0,0,.08);
+             border-top: 6px solid #5e3d22; }
+  .score { font-size: 40px; font-weight: 800; margin: 0; }
+  .score small { font-size: 20px; font-weight: 600; color: #666; }
+  .message { margin: 6px 0 0; font-size: 18px; }
+  h2 { margin: 28px 0 12px; font-size: 20px; }
+  ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
+  .error { background: #fff; border-radius: 14px; padding: 16px 20px; box-shadow: 0 2px 8px rgba(0,0,0,.06);
+           border-left: 6px solid #3c8527; }
+  .task { font-weight: 700; color: #3c8527; }
+  .q { font-size: 18px; margin: 4px 0 8px; }
+  .answers { display: flex; gap: 24px; flex-wrap: wrap; font-size: 18px; }
+  .answers s { color: #b3261e; }
+  .answers .right b { color: #2e7d32; font-size: 22px; }
+  .tip { margin: 10px 0 0; color: #333; }
+  .allright { background: #fff; border-radius: 14px; padding: 16px 20px; font-size: 18px; }
+  .facit { display: inline-block; margin-top: 24px; padding: 12px 20px; border-radius: 999px; background: #3c8527;
+           color: #fff; text-decoration: none; font-weight: 600; }
+  
+  .prize { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 10px;
+           border-radius: 14px; text-decoration: none; color: #1d1d1f;
+           border: 5px solid transparent;
+           background: linear-gradient(#fff, #fff) padding-box,
+                       linear-gradient(135deg, #fff3a8 0%, #d4a72c 25%, #fff1a0 50%, #b8860b 75%, #f6dc72 100%) border-box;
+           box-shadow: inset 0 0 0 2px #fff, inset 0 0 0 3px #d4a72c, 0 2px 10px rgba(184, 134, 11, .35); }
+  .prize .level { background: var(--prize); color: #fff; font-weight: 700; font-size: 12px; padding: 2px 10px;
+                  border-radius: 999px; text-transform: uppercase; letter-spacing: .5px; }
+  /* Fixed slots for picture and name, so the box keeps its size when the ball is opened. */
+  .prize .art { display: flex; align-items: center; justify-content: center; }
+  .prize.small .art { width: 80px; height: 68px; }
+  .prize.large .art { width: 110px; height: 100px; }
+  .prize img { image-rendering: pixelated; }
+  .prize.small .ballimg { width: 56px; height: 56px; }
+  .prize.large .ballimg { width: 96px; height: 96px; }
+  .prize .pokeimg { display: none; width: 100%; height: 100%; object-fit: contain; image-rendering: auto; }
+  .prize .pokeimg[src$=".svg"] { image-rendering: pixelated; }
+  .prize .name { font-weight: 700; height: 20px; line-height: 20px; white-space: nowrap; }
+  .prize.large .name { font-size: 20px; height: 26px; line-height: 26px; }
+  .prize.secret .name { visibility: hidden; }
+  .prize.secret.opened .name { visibility: visible; }
+  .prize.secret.opened .ballimg { display: none; }
+  .prize.secret.opened .pokeimg { display: block; }
+
+  /* Unopened prize: a light band travels around the gold frame and the glow pulses. */
+  .prize.secret:not(.opened) { background: linear-gradient(#fff, #fff) padding-box,
+                       linear-gradient(110deg, #b8860b 0%, #d4a72c 30%, #fff3b0 43%, #ffffff 50%, #fff3b0 57%, #d4a72c 70%, #b8860b 100%) border-box;
+           background-size: 100% 100%, 300% 100%;
+           animation: goldshine 2.2s linear infinite, goldglow 2.2s ease-in-out infinite; }
+  @keyframes goldshine { from { background-position: 0 0, 100% 0; } to { background-position: 0 0, 0% 0; } }
+  @keyframes goldglow {
+    50% { box-shadow: inset 0 0 0 2px #fff, inset 0 0 0 3px #d4a72c, 0 0 18px 2px rgba(255, 196, 30, .8); }
+  }
+  @media (prefers-reduced-motion: reduce) { .prize { animation: none !important; } }
+  
+  .reveal { font: inherit; color: #1d1d1f; cursor: pointer; width: 220px; padding: 10px 10px 12px;
+            display: flex; flex-direction: column; align-items: center; gap: 4px;
+            border-radius: 14px; border: 5px solid transparent;
+           background: linear-gradient(#fff, #fff) padding-box,
+                       linear-gradient(135deg, #fff3a8 0%, #d4a72c 25%, #fff1a0 50%, #b8860b 75%, #f6dc72 100%) border-box;
+           box-shadow: inset 0 0 0 2px #fff, inset 0 0 0 3px #d4a72c, 0 2px 10px rgba(184, 134, 11, .35); }
+  .reveal .level { background: var(--prize); color: #fff; font-weight: 700; font-size: 12px; padding: 2px 10px;
+                   border-radius: 999px; text-transform: uppercase; letter-spacing: .5px; }
+  .reveal .stage { position: relative; width: 190px; height: 170px; }
+  .reveal .ball { position: absolute; left: 45px; top: 35px; width: 100px; height: 100px; transform-origin: 50% 100%;
+                  transition: transform .2s; }
+  .reveal .ball svg { width: 100%; height: 100%; overflow: visible; }
+  .reveal .lid { transform-box: view-box; transform-origin: 6px 50px; }
+  .reveal[data-typ="kista"] .lid { transform-origin: 1px 7px; }
+  .reveal[data-typ="kista"] .poke { image-rendering: pixelated; }
+  .reveal[data-typ="dagbok"] .lid { transform-origin: 14px 50px; }
+  .reveal[data-typ="dagbok"].open .lid { animation-name: coverflip; }
+  /* Halfway through the flip the front of the cover is hidden and its light inside shows. */
+  .reveal[data-typ="dagbok"].open .lid .front { animation: coverfront .2s linear 1.25s forwards; }
+  .reveal[data-typ="dagbok"].open .lid .inside { animation: coverinside .2s linear 1.25s forwards; }
+  @keyframes coverflip { to { transform: scaleX(-1); } }
+  @keyframes coverfront { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+  @keyframes coverinside { 0%, 49% { opacity: 0; } 50%, 100% { opacity: 1; } }
+  .reveal .poke { position: absolute; left: 20px; top: 0; width: 150px; height: 150px; opacity: 0; transform: scale(0); }
+  .reveal .flash { position: absolute; left: 75px; top: 65px; width: 40px; height: 40px; border-radius: 50%; opacity: 0;
+                   background: radial-gradient(circle, #fff 0%, #fff8c8 40%, rgba(255,255,255,0) 70%); }
+  /* Stars start at the centre of the ball. Size, colour, angle and distance come from --s, --c, --a and --d. */
+  .reveal .spark { position: absolute; z-index: 2; left: 95px; top: 85px; width: var(--s); height: var(--s);
+                   margin: calc(var(--s) / -2) 0 0 calc(var(--s) / -2); font-size: var(--s); line-height: var(--s);
+                   text-align: center; color: var(--c); opacity: 0; pointer-events: none;
+                   text-shadow: 0 0 4px #d4a72c, 0 0 12px #ffd23f; }
+  .reveal .caption { height: 32px; display: flex; align-items: center; justify-content: center; }
+  .reveal .hint { font-weight: 700; color: var(--prize); animation: pulse 1.2s ease-in-out infinite; }
+  .reveal .name { display: none; font-weight: 700; font-size: 22px; line-height: 32px; }
+  .reveal:hover .ball { transform: rotate(-6deg); }
+
+  .reveal.open .hint { display: none; }
+  .reveal.open .name { display: block; animation: fadein .4s ease-out 1.8s both; }
+  .reveal.open .ball { animation: shake 1.2s ease-in-out, away .4s ease-in 1.55s forwards; }
+  .reveal.open .lid { animation: lidopen .2s cubic-bezier(.2, .9, .3, 1.2) 1.25s forwards; }
+  .reveal.open .flash { animation: flash .5s ease-out 1.3s forwards; }
+  .reveal.open .spark { animation: spark .6s cubic-bezier(.1, .9, .2, 1) 1.3s forwards; }
+  .reveal.open .poke { animation: pop .5s cubic-bezier(.2, 1.6, .4, 1) 1.35s forwards; }
+  .reveal.noimg .poke { display: none; }
+  .reveal.shown * { animation-duration: 0s !important; animation-delay: 0s !important; }
+
+  /* Closed and while the ball shakes (.charging): the gold frame shines. At the bang (.bang, set by the
+     script 1.3 s after the click) the frame shakes once and then stands still. */
+  .reveal:not(.open), .reveal.charging { background: linear-gradient(#fff, #fff) padding-box,
+                       linear-gradient(110deg, #b8860b 0%, #d4a72c 30%, #fff3b0 43%, #ffffff 50%, #fff3b0 57%, #d4a72c 70%, #b8860b 100%) border-box;
+           background-size: 100% 100%, 300% 100%;
+           animation: goldshine 2.2s linear infinite, goldglow 2.2s ease-in-out infinite; }
+  .reveal.bang { animation: frameshake .45s ease-in-out; }
+  @keyframes frameshake {
+    0%, 100% { transform: none; }
+    15% { transform: translateX(-5px) rotate(-2.5deg); }
+    35% { transform: translateX(5px) rotate(2.5deg); box-shadow: inset 0 0 0 2px #fff, inset 0 0 0 3px #d4a72c, 0 0 26px 4px rgba(255, 196, 30, .9); }
+    55% { transform: translateX(-3px) rotate(-1.5deg); }
+    75% { transform: translateX(2px) rotate(1deg); }
+  }
+
+  @keyframes pulse { 50% { opacity: .55; } }
+  @keyframes fadein { from { opacity: 0; transform: translateY(6px); } }
+  @keyframes shake {
+    0%, 30%, 65%, 100% { transform: rotate(0); }
+    10%, 45%, 80% { transform: rotate(-16deg); }
+    20%, 55%, 90% { transform: rotate(16deg); }
+  }
+  @keyframes away { to { transform: translate(-64px, 30px) scale(.35); } }
+  @keyframes lidopen { to { transform: rotate(-65deg); } }
+  @keyframes flash { 0% { opacity: 0; transform: scale(.5); } 25% { opacity: 1; } 100% { opacity: 0; transform: scale(6); } }
+  @keyframes spark {
+    0% { opacity: 1; transform: rotate(var(--a)) translateY(0) scale(.3); }
+    70% { opacity: 1; }
+    100% { opacity: 0; transform: rotate(var(--a)) translateY(calc(var(--d) * -1)) scale(1); }
+  }
+  @keyframes pop { from { opacity: 0; transform: translateY(50px) scale(0); } to { opacity: 1; transform: translateY(-6px) scale(1); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal.open * { animation-duration: .01s !important; animation-delay: 0s !important; }
+    .reveal, .reveal .hint { animation: none !important; }
+  }
+  @media (max-width: 560px) { .summary { grid-template-columns: 1fr; justify-items: start; } }
+</style>
+</head>
+<body>
+<main>
+  <a class="back" href="index.html">← Alla blad</a>
+  <h1>Resultat: Minecraft-matte, blad 2</h1>
+  <p class="sub">Blad 2: Räkna med decimaltal</p>
+
+  <section class="summary">
+    <div>
+      <p class="score">22 <small>av 30 rätt</small></p>
+      <p class="message">Snyggt jobbat! Du smidde ett guldsvärd.</p>
+    </div>
+    <button type="button" class="reveal" data-typ="kista" style="--prize: #c49a1c" data-key="matteblad:pris:2026-10-09-minecraft" aria-label="Klicka på kistan!">
+        <span class="level">Guld</span>
+        <span class="stage">
+          <span class="flash"></span>
+          <span class="spark" style="--a: 0deg; --d: 125px; --s: 32px; --c: #7cfc00">◆</span><span class="spark" style="--a: 42deg; --d: 95px; --s: 22px; --c: #c6ff4d">■</span><span class="spark" style="--a: 60deg; --d: 112px; --s: 32px; --c: #ffff66">◆</span><span class="spark" style="--a: 102deg; --d: 125px; --s: 22px; --c: #3fbf3f">■</span><span class="spark" style="--a: 120deg; --d: 95px; --s: 32px; --c: #7cfc00">◆</span><span class="spark" style="--a: 162deg; --d: 112px; --s: 22px; --c: #c6ff4d">■</span><span class="spark" style="--a: 180deg; --d: 125px; --s: 32px; --c: #ffff66">◆</span><span class="spark" style="--a: 222deg; --d: 95px; --s: 22px; --c: #3fbf3f">■</span><span class="spark" style="--a: 240deg; --d: 112px; --s: 32px; --c: #7cfc00">◆</span><span class="spark" style="--a: 282deg; --d: 125px; --s: 22px; --c: #c6ff4d">■</span><span class="spark" style="--a: 300deg; --d: 95px; --s: 32px; --c: #ffff66">◆</span><span class="spark" style="--a: 342deg; --d: 112px; --s: 22px; --c: #3fbf3f">■</span>
+          <img class="poke" src="mallar/minecraft/pris/guld.svg" alt="Guldsvärd"
+               onerror="this.closest('.reveal').classList.add('noimg')">
+          <span class="ball"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" overflow="visible" shape-rendering="crispEdges">
+  <g class="base"><rect x="1" y="7" width="1" height="1" fill="#2b1a0a"/><rect x="2" y="7" width="1" height="1" fill="#6b4320"/><rect x="3" y="7" width="1" height="1" fill="#6b4320"/><rect x="4" y="7" width="1" height="1" fill="#6b4320"/><rect x="5" y="7" width="1" height="1" fill="#6b4320"/><rect x="6" y="7" width="1" height="1" fill="#2b1a0a"/><rect x="7" y="7" width="1" height="1" fill="#d0d0d0"/><rect x="8" y="7" width="1" height="1" fill="#d0d0d0"/><rect x="9" y="7" width="1" height="1" fill="#2b1a0a"/><rect x="10" y="7" width="1" height="1" fill="#6b4320"/><rect x="11" y="7" width="1" height="1" fill="#6b4320"/><rect x="12" y="7" width="1" height="1" fill="#6b4320"/><rect x="13" y="7" width="1" height="1" fill="#6b4320"/><rect x="14" y="7" width="1" height="1" fill="#2b1a0a"/><rect x="1" y="8" width="1" height="1" fill="#2b1a0a"/><rect x="2" y="8" width="1" height="1" fill="#a0692e"/><rect x="3" y="8" width="1" height="1" fill="#a0692e"/><rect x="4" y="8" width="1" height="1" fill="#a0692e"/><rect x="5" y="8" width="1" height="1" fill="#a0692e"/><rect x="6" y="8" width="1" height="1" fill="#2b1a0a"/><rect x="7" y="8" width="1" height="1" fill="#7a7a7a"/><rect x="8" y="8" width="1" height="1" fill="#7a7a7a"/><rect x="9" y="8" width="1" height="1" fill="#2b1a0a"/><rect x="10" y="8" width="1" height="1" fill="#a0692e"/><rect x="11" y="8" width="1" height="1" fill="#a0692e"/><rect x="12" y="8" width="1" height="1" fill="#a0692e"/><rect x="13" y="8" width="1" height="1" fill="#a0692e"/><rect x="14" y="8" width="1" height="1" fill="#2b1a0a"/><rect x="1" y="9" width="1" height="1" fill="#2b1a0a"/><rect x="2" y="9" width="1" height="1" fill="#a0692e"/><rect x="3" y="9" width="1" height="1" fill="#a0692e"/><rect x="4" y="9" width="1" height="1" fill="#a0692e"/><rect x="5" y="9" width="1" height="1" fill="#a0692e"/><rect x="6" y="9" width="1" height="1" fill="#a0692e"/><rect x="7" y="9" width="1" height="1" fill="#2b1a0a"/><rect x="8" y="9" width="1" height="1" fill="#2b1a0a"/><rect x="9" y="9" width="1" height="1" fill="#a0692e"/><rect x="10" y="9" width="1" height="1" fill="#a0692e"/><rect x="11" y="9" width="1" height="1" fill="#a0692e"/><rect x="12" y="9" width="1" height="1" fill="#a0692e"/><rect x="13" y="9" width="1" height="1" fill="#a0692e"/><rect x="14" y="9" width="1" height="1" fill="#2b1a0a"/><rect x="1" y="10" width="1" height="1" fill="#2b1a0a"/><rect x="2" y="10" width="1" height="1" fill="#7a4d22"/><rect x="3" y="10" width="1" height="1" fill="#7a4d22"/><rect x="4" y="10" width="1" height="1" fill="#7a4d22"/><rect x="5" y="10" width="1" height="1" fill="#7a4d22"/><rect x="6" y="10" width="1" height="1" fill="#7a4d22"/><rect x="7" y="10" width="1" height="1" fill="#7a4d22"/><rect x="8" y="10" width="1" height="1" fill="#7a4d22"/><rect x="9" y="10" width="1" height="1" fill="#7a4d22"/><rect x="10" y="10" width="1" height="1" fill="#7a4d22"/><rect x="11" y="10" width="1" height="1" fill="#7a4d22"/><rect x="12" y="10" width="1" height="1" fill="#7a4d22"/><rect x="13" y="10" width="1" height="1" fill="#7a4d22"/><rect x="14" y="10" width="1" height="1" fill="#2b1a0a"/><rect x="1" y="11" width="1" height="1" fill="#2b1a0a"/><rect x="2" y="11" width="1" height="1" fill="#a0692e"/><rect x="3" y="11" width="1" height="1" fill="#a0692e"/><rect x="4" y="11" width="1" height="1" fill="#a0692e"/><rect x="5" y="11" width="1" height="1" fill="#a0692e"/><rect x="6" y="11" width="1" height="1" fill="#a0692e"/><rect x="7" y="11" width="1" height="1" fill="#a0692e"/><rect x="8" y="11" width="1" height="1" fill="#a0692e"/><rect x="9" y="11" width="1" height="1" fill="#a0692e"/><rect x="10" y="11" width="1" height="1" fill="#a0692e"/><rect x="11" y="11" width="1" height="1" fill="#a0692e"/><rect x="12" y="11" width="1" height="1" fill="#a0692e"/><rect x="13" y="11" width="1" height="1" fill="#a0692e"/><rect x="14" y="11" width="1" height="1" fill="#2b1a0a"/><rect x="1" y="12" width="1" height="1" fill="#2b1a0a"/><rect x="2" y="12" width="1" height="1" fill="#a0692e"/><rect x="3" y="12" width="1" height="1" fill="#a0692e"/><rect x="4" y="12" width="1" height="1" fill="#a0692e"/><rect x="5" y="12" width="1" height="1" fill="#a0692e"/><rect x="6" y="12" width="1" height="1" fill="#a0692e"/><rect x="7" y="12" width="1" height="1" fill="#a0692e"/><rect x="8" y="12" width="1" height="1" fill="#a0692e"/><rect x="9" y="12" width="1" height="1" fill="#a0692e"/><rect x="10" y="12" width="1" height="1" fill="#a0692e"/><rect x="11" y="12" width="1" height="1" fill="#a0692e"/><rect x="12" y="12" width="1" height="1" fill="#a0692e"/><rect x="13" y="12" width="1" height="1" fill="#a0692e"/><rect x="14" y="12" width="1" height="1" fill="#2b1a0a"/><rect x="1" y="13" width="1" height="1" fill="#2b1a0a"/><rect x="2" y="13" width="1" height="1" fill="#a0692e"/><rect x="3" y="13" width="1" height="1" fill="#a0692e"/><rect x="4" y="13" width="1" height="1" fill="#a0692e"/><rect x="5" y="13" width="1" height="1" fill="#a0692e"/><rect x="6" y="13" width="1" height="1" fill="#a0692e"/><rect x="7" y="13" width="1" height="1" fill="#a0692e"/><rect x="8" y="13" width="1" height="1" fill="#a0692e"/><rect x="9" y="13" width="1" height="1" fill="#a0692e"/><rect x="10" y="13" width="1" height="1" fill="#a0692e"/><rect x="11" y="13" width="1" height="1" fill="#a0692e"/><rect x="12" y="13" width="1" height="1" fill="#a0692e"/><rect x="13" y="13" width="1" height="1" fill="#a0692e"/><rect x="14" y="13" width="1" height="1" fill="#2b1a0a"/><rect x="1" y="14" width="1" height="1" fill="#2b1a0a"/><rect x="2" y="14" width="1" height="1" fill="#2b1a0a"/><rect x="3" y="14" width="1" height="1" fill="#2b1a0a"/><rect x="4" y="14" width="1" height="1" fill="#2b1a0a"/><rect x="5" y="14" width="1" height="1" fill="#2b1a0a"/><rect x="6" y="14" width="1" height="1" fill="#2b1a0a"/><rect x="7" y="14" width="1" height="1" fill="#2b1a0a"/><rect x="8" y="14" width="1" height="1" fill="#2b1a0a"/><rect x="9" y="14" width="1" height="1" fill="#2b1a0a"/><rect x="10" y="14" width="1" height="1" fill="#2b1a0a"/><rect x="11" y="14" width="1" height="1" fill="#2b1a0a"/><rect x="12" y="14" width="1" height="1" fill="#2b1a0a"/><rect x="13" y="14" width="1" height="1" fill="#2b1a0a"/><rect x="14" y="14" width="1" height="1" fill="#2b1a0a"/></g>
+  <g class="lid"><rect x="1" y="2" width="1" height="1" fill="#2b1a0a"/><rect x="2" y="2" width="1" height="1" fill="#2b1a0a"/><rect x="3" y="2" width="1" height="1" fill="#2b1a0a"/><rect x="4" y="2" width="1" height="1" fill="#2b1a0a"/><rect x="5" y="2" width="1" height="1" fill="#2b1a0a"/><rect x="6" y="2" width="1" height="1" fill="#2b1a0a"/><rect x="7" y="2" width="1" height="1" fill="#2b1a0a"/><rect x="8" y="2" width="1" height="1" fill="#2b1a0a"/><rect x="9" y="2" width="1" height="1" fill="#2b1a0a"/><rect x="10" y="2" width="1" height="1" fill="#2b1a0a"/><rect x="11" y="2" width="1" height="1" fill="#2b1a0a"/><rect x="12" y="2" width="1" height="1" fill="#2b1a0a"/><rect x="13" y="2" width="1" height="1" fill="#2b1a0a"/><rect x="14" y="2" width="1" height="1" fill="#2b1a0a"/><rect x="1" y="3" width="1" height="1" fill="#2b1a0a"/><rect x="2" y="3" width="1" height="1" fill="#c08040"/><rect x="3" y="3" width="1" height="1" fill="#c08040"/><rect x="4" y="3" width="1" height="1" fill="#c08040"/><rect x="5" y="3" width="1" height="1" fill="#c08040"/><rect x="6" y="3" width="1" height="1" fill="#c08040"/><rect x="7" y="3" width="1" height="1" fill="#c08040"/><rect x="8" y="3" width="1" height="1" fill="#c08040"/><rect x="9" y="3" width="1" height="1" fill="#c08040"/><rect x="10" y="3" width="1" height="1" fill="#c08040"/><rect x="11" y="3" width="1" height="1" fill="#c08040"/><rect x="12" y="3" width="1" height="1" fill="#c08040"/><rect x="13" y="3" width="1" height="1" fill="#c08040"/><rect x="14" y="3" width="1" height="1" fill="#2b1a0a"/><rect x="1" y="4" width="1" height="1" fill="#2b1a0a"/><rect x="2" y="4" width="1" height="1" fill="#a0692e"/><rect x="3" y="4" width="1" height="1" fill="#a0692e"/><rect x="4" y="4" width="1" height="1" fill="#a0692e"/><rect x="5" y="4" width="1" height="1" fill="#a0692e"/><rect x="6" y="4" width="1" height="1" fill="#a0692e"/><rect x="7" y="4" width="1" height="1" fill="#a0692e"/><rect x="8" y="4" width="1" height="1" fill="#a0692e"/><rect x="9" y="4" width="1" height="1" fill="#a0692e"/><rect x="10" y="4" width="1" height="1" fill="#a0692e"/><rect x="11" y="4" width="1" height="1" fill="#a0692e"/><rect x="12" y="4" width="1" height="1" fill="#a0692e"/><rect x="13" y="4" width="1" height="1" fill="#a0692e"/><rect x="14" y="4" width="1" height="1" fill="#2b1a0a"/><rect x="1" y="5" width="1" height="1" fill="#2b1a0a"/><rect x="2" y="5" width="1" height="1" fill="#a0692e"/><rect x="3" y="5" width="1" height="1" fill="#a0692e"/><rect x="4" y="5" width="1" height="1" fill="#a0692e"/><rect x="5" y="5" width="1" height="1" fill="#a0692e"/><rect x="6" y="5" width="1" height="1" fill="#2b1a0a"/><rect x="7" y="5" width="1" height="1" fill="#d0d0d0"/><rect x="8" y="5" width="1" height="1" fill="#d0d0d0"/><rect x="9" y="5" width="1" height="1" fill="#2b1a0a"/><rect x="10" y="5" width="1" height="1" fill="#a0692e"/><rect x="11" y="5" width="1" height="1" fill="#a0692e"/><rect x="12" y="5" width="1" height="1" fill="#a0692e"/><rect x="13" y="5" width="1" height="1" fill="#a0692e"/><rect x="14" y="5" width="1" height="1" fill="#2b1a0a"/><rect x="1" y="6" width="1" height="1" fill="#2b1a0a"/><rect x="2" y="6" width="1" height="1" fill="#6b4320"/><rect x="3" y="6" width="1" height="1" fill="#6b4320"/><rect x="4" y="6" width="1" height="1" fill="#6b4320"/><rect x="5" y="6" width="1" height="1" fill="#6b4320"/><rect x="6" y="6" width="1" height="1" fill="#2b1a0a"/><rect x="7" y="6" width="1" height="1" fill="#7a7a7a"/><rect x="8" y="6" width="1" height="1" fill="#7a7a7a"/><rect x="9" y="6" width="1" height="1" fill="#2b1a0a"/><rect x="10" y="6" width="1" height="1" fill="#6b4320"/><rect x="11" y="6" width="1" height="1" fill="#6b4320"/><rect x="12" y="6" width="1" height="1" fill="#6b4320"/><rect x="13" y="6" width="1" height="1" fill="#6b4320"/><rect x="14" y="6" width="1" height="1" fill="#2b1a0a"/></g>
+</svg>
+</span>
+        </span>
+        <span class="caption">
+          <span class="hint">Klicka på kistan!</span>
+          <span class="name">Guldsvärd</span>
+        </span>
+      </button>
+  </section>
+
+  <h2>Det här blev fel</h2>
+  <ul>
+      <li class="error">
+        <div class="task">Uppgift 3</div>
+        <div class="q">Räkna i huvudet.<br>4,6 + 1,4 = ?</div>
+        <div class="answers">
+          <span>Du skrev: <s>5</s></span>
+          <span class="right">Rätt svar: <b>6</b></span>
+        </div>
+        <p class="tip"><b>Tips:</b> 6 tiondelar + 4 tiondelar = 10 tiondelar, och det är 1 hel. Så det blir 4 + 1 + 1 = 6.</p>
+      </li>
+      <li class="error">
+        <div class="task">Uppgift 4</div>
+        <div class="q">Steve har ett magiskt förtrollningsbord. Det gör tal 10, 100 eller 1 000 gånger större eller mindre.<br>2,7 · 1 000 = ?</div>
+        <div class="answers">
+          <span>Du skrev: <s>270</s></span>
+          <span class="right">Rätt svar: <b>2 700</b></span>
+        </div>
+        <p class="tip"><b>Tips:</b> Gånger 1 000 flyttar siffrorna tre steg åt vänster: 2,7 → 27 → 270 → 2 700. Du flyttade två steg. Tre nollor i 1 000 = tre steg.</p>
+      </li>
+      <li class="error">
+        <div class="task">Uppgift 5b</div>
+        <div class="q">Ställ upp och räkna. Tänk på att komma ska stå under komma.<br>b) 20,5 − 7,36</div>
+        <div class="answers">
+          <span>Du skrev: <s>13,20</s></span>
+          <span class="right">Rätt svar: <b>13,14</b></span>
+        </div>
+        <p class="tip"><b>Tips:</b> Skriv 20,5 som 20,50, så har båda talen två decimaler. Då syns det att det blir 0 − 6 på hundradelsplatsen och att du måste växla.</p>
+      </li>
+      <li class="error">
+        <div class="task">Uppgift 6a</div>
+        <div class="q">Alex har 4,5 kg järn. Hon smälter 1,75 kg till.<br>a) Hur mycket järn har hon nu?</div>
+        <div class="answers">
+          <span>Du skrev: <s>5,80 kg</s></span>
+          <span class="right">Rätt svar: <b>6,25 kg</b></span>
+        </div>
+        <p class="tip"><b>Tips:</b> 4,5 är samma sak som 4,50. Femman är 5 tiondelar, alltså 50 hundradelar, inte 5. Ställ upp med komma under komma: 4,50 + 1,75 = 6,25.</p>
+      </li>
+      <li class="error">
+        <div class="task">Uppgift 6b</div>
+        <div class="q">Alex har 4,5 kg järn. Hon smälter 1,75 kg till.<br>b) Sedan använder hon 2,8 kg till en rustning. Hur mycket järn har hon kvar?</div>
+        <div class="answers">
+          <span>Du skrev: <s>3,72 kg</s></span>
+          <span class="right">Rätt svar: <b>3,45 kg</b></span>
+        </div>
+        <p class="tip"><b>Tips:</b> Skriv 2,8 som 2,80 så att decimalerna hamnar rätt: 6,25 − 2,80 = 3,45.</p>
+      </li>
+      <li class="error">
+        <div class="task">Uppgift 7a</div>
+        <div class="q">I en leksaksaffär köper du en Minecraft-nyckelring för 24,90 kr och ett ark klistermärken för 12,50 kr. Du betalar med en 50-lapp.<br>a) Vad kostar sakerna tillsammans?</div>
+        <div class="answers">
+          <span>Du skrev: <s>34,40 kr</s></span>
+          <span class="right">Rätt svar: <b>37,40 kr</b></span>
+        </div>
+        <p class="tip"><b>Tips:</b> 24,90 + 12,50 = 37,40. Gör ett överslag som koll: ungefär 25 + 12 = 37. Bra att du räknade b rätt utifrån ditt svar i a!</p>
+      </li>
+      <li class="error">
+        <div class="task">Uppgift 9</div>
+        <div class="q">Steve bygger ett staket som ska bli 10 m långt. På måndagen bygger han 3,75 m och på tisdagen 2,8 m.<br>a) Hur mycket staket är kvar att bygga?<br>b) Steve har trä till 3,5 m staket till. Räcker det? Förklara.</div>
+        <div class="answers">
+          <span>Du svarade inte</span>
+          <span class="right">Rätt svar: <b>a) 3,45 m  b) Ja, det räcker. 5 cm blir över.</b></span>
+        </div>
+        <p class="tip"><b>Tips:</b> Dela upp i steg. 1) Hur mycket har han byggt? 3,75 + 2,80 = 6,55 m. 2) Hur mycket är kvar? 10,00 − 6,55 = 3,45 m. 3) Jämför: 3,50 är mer än 3,45, så det räcker.</p>
+      </li>
+  </ul>
+
+  <a class="facit" href="blad/2026-10-09-minecraft/facit.pdf">Hela facit (PDF)</a>
+</main>
+<script>
+  // Click opens the ball, a second click closes it. The state is remembered in this browser,
+  // so an opened ball is shown open (without the animation) next time. #oppen plays it without saving.
+  // While the ball shakes the frame keeps shining (.charging); at the bang, 1.3 s in, it shakes once (.bang).
+  const BANG_MS = 1300;
+  document.querySelectorAll(".reveal").forEach(el => {
+    const key = el.dataset.key;
+    let timer;
+    const open = () => {
+      el.classList.add("open", "charging");
+      timer = setTimeout(() => el.classList.replace("charging", "bang"), BANG_MS);
+    };
+    const close = () => el.classList.remove("open", "shown", "charging", "bang");
+
+    let stored = false;
+    try { stored = localStorage.getItem(key) === "open"; } catch {}
+    if (location.hash === "#oppen") open();
+    else if (stored) el.classList.add("open", "shown");
+
+    el.addEventListener("click", () => {
+      clearTimeout(timer);
+      const opening = !el.classList.contains("open");
+      close();
+      if (opening) open();
+      try { opening ? localStorage.setItem(key, "open") : localStorage.removeItem(key); } catch {}
+    });
+  });
+</script>
+</body>
+</html>

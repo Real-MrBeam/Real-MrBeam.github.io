@@ -39,6 +39,7 @@
   .prize.small .ballimg { width: 56px; height: 56px; }
   .prize.large .ballimg { width: 96px; height: 96px; }
   .prize .pokeimg { display: none; width: 100%; height: 100%; object-fit: contain; image-rendering: auto; }
+  .prize .pokeimg[src$=".svg"] { image-rendering: pixelated; }
   .prize .name { font-weight: 700; height: 20px; line-height: 20px; white-space: nowrap; }
   .prize.large .name { font-size: 20px; height: 26px; line-height: 26px; }
   .prize.secret .name { visibility: hidden; }
@@ -72,6 +73,21 @@
     <li class="row">
       <div class="card">
         <div>
+          <h2>Dagbok för alla mina mattefans, blad 3</h2>
+          <p>Blad 3: Fyll på med nollor</p>
+          <p class="date">16 oktober 2026</p>
+        </div>
+        <div class="links">
+          <a class="primary" href="blad/2026-10-16-dagbok/blad.html">Öppna och fyll i</a>
+          <a href="blad/2026-10-16-dagbok/blad.pdf">PDF för utskrift</a>
+          
+        </div>
+      </div>
+      <div class="prize empty">Pris efter rättning</div>
+    </li>
+    <li class="row">
+      <div class="card">
+        <div>
           <h2>Minecraft-matte, blad 2</h2>
           <p>Blad 2: Räkna med decimaltal</p>
           <p class="date">9 oktober 2026</p>
@@ -79,10 +95,17 @@
         <div class="links">
           <a class="primary" href="blad/2026-10-09-minecraft/blad.html">Öppna och fyll i</a>
           <a href="blad/2026-10-09-minecraft/blad.pdf">PDF för utskrift</a>
-          
+          <a class="result" href="blad/2026-10-09-minecraft/resultat.html">Se resultat</a>
         </div>
       </div>
-      <div class="prize empty">Pris efter rättning</div>
+      <a class="prize small secret" href="blad/2026-10-09-minecraft/resultat.html" style="--prize: #c49a1c" data-key="matteblad:pris:2026-10-09-minecraft" data-poke="mallar/minecraft/pris/guld.svg">
+        <span class="level">Guld</span>
+        <span class="art">
+          <img class="ballimg" src="mallar/minecraft/pris/kista.svg" alt="">
+          <img class="pokeimg" alt="Guldsvärd">
+        </span>
+        <span class="name">Guldsvärd</span>
+      </a>
     </li>
     <li class="row">
       <div class="card">
