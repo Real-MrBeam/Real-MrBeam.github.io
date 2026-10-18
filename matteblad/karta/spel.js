@@ -3,7 +3,7 @@
 'use strict';
 // The game reads two data files: geometry (karta.json) and names, texts and rules (berattelse.json).
 const [karta, berattelse, PORTRAITS, PETDATA] = await Promise.all(['data/karta.json', 'data/berattelse.json', 'data/portratt.json', 'data/djur.json'].map(u =>
-  fetch(u).then(r => { if (!r.ok) throw new Error(u + ' ' + r.status); return r.json(); })));
+  fetch(u, { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error(u + ' ' + r.status); return r.json(); })));
 const TS = karta.ruta, MW = karta.bredd, MH = karta.hojd;
 const $ = s => document.querySelector(s);
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
