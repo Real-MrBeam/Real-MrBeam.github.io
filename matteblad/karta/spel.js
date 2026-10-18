@@ -125,7 +125,7 @@ function drawBridgeTile(ctx, x, y){
   }
 }
 
-let TERRAIN = [];
+let TERRAIN = [], GRAY = [];
 function buildTerrain(){
   const r = rng(42);
   // dekor i gräset
@@ -168,7 +168,7 @@ function buildTerrain(){
     ctx.drawImage(base, 0, 0); ctx.drawImage(waterLayer(f), 0, 0); ctx.drawImage(over, 0, 0);
     frames.push(c);
   }
-  TERRAIN = frames;
+  TERRAIN = frames; GRAY = frames.map(grayCopy);
 }
 
 /* ---------- tillstånd ---------- */
@@ -177,6 +177,7 @@ const START = () => ({
   stars: startData.stjarnor, coins: startData.mynt, node: startData.plats,
   built: Object.fromEntries(startData.byggt.map(id => [id, true])),
   valda: {}, saker: [],
+  sett: new Uint8Array(MW*MH),
   log: startData.logg.map(r => ({ subj: r.amne, p: r.poang, max: r.max, st: r.stjarnor, bonus: r.bonus })),
   testIdx: 0,
 });
@@ -256,6 +257,59 @@ function onArrive(){
   else showNode();
 }
 let pendingPlot = null;
+
+/* ---------- fog of war ---------- */
+// Where the boy has been (and a bit around the road) the map is shown in colour, the rest in black and white.
+// S.sett holds one flag per tile. The colour layer is cut out with a mask whose edge is a pixel pattern.
+const FOG_R = 4;
+const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
+const seenAt = (x, y) => inb(x, y) && S.sett[y*MW + x] === 1;
+let maskDirty = true, MASK = null, MASKCTX = null, TMP = null, lastRevealKey = '';
+function revealAround(wx, wy){
+  const cx = Math.floor(wx / TS), cy = Math.floor(wy / TS), k = cx + ',' + cy;
+  if (k === lastRevealKey) return;
+  lastRevealKey = k;
+  for (let y = cy - FOG_R; y <= cy + FOG_R; y++) for (let x = cx - FOG_R; x <= cx + FOG_R; x++){
+    if (!inb(x, y) || S.sett[y*MW + x]) continue;
+    if (Math.hypot(x - cx, y - cy) <= FOG_R + .3){ S.sett[y*MW + x] = 1; maskDirty = true; }
+  }
+}
+function grayCopy(src){
+  const c = document.createElement('canvas'); c.width = src.width; c.height = src.height;
+  const x = c.getContext('2d'); x.drawImage(src, 0, 0);
+  const im = x.getImageData(0, 0, c.width, c.height), d = im.data;
+  for (let i = 0; i < d.length; i += 4){
+    const g = Math.round((d[i]*.3 + d[i+1]*.59 + d[i+2]*.11) * .8);
+    d[i] = g; d[i+1] = g; d[i+2] = Math.min(255, g + 4);
+  }
+  x.putImageData(im, 0, 0);
+  return c;
+}
+function buildMask(){
+  const w = MW*TS, h = MH*TS;
+  if (!MASK){
+    MASK = document.createElement('canvas'); MASK.width = w; MASK.height = h; MASKCTX = MASK.getContext('2d');
+    TMP = document.createElement('canvas'); TMP.width = w; TMP.height = h;
+  }
+  const im = MASKCTX.createImageData(w, h), D = im.data;
+  const on = (x, y) => { D[(y*w + x)*4 + 3] = 255; };
+  for (let ty = 0; ty < MH; ty++) for (let tx = 0; tx < MW; tx++){
+    if (seenAt(tx, ty)){ for (let ly = 0; ly < TS; ly++) for (let lx = 0; lx < TS; lx++) on(tx*TS + lx, ty*TS + ly); continue; }
+    const L = seenAt(tx-1, ty), R = seenAt(tx+1, ty), U = seenAt(tx, ty-1), B = seenAt(tx, ty+1);
+    const UL = seenAt(tx-1, ty-1), UR = seenAt(tx+1, ty-1), BL = seenAt(tx-1, ty+1), BR = seenAt(tx+1, ty+1);
+    if (!(L || R || U || B || UL || UR || BL || BR)) continue;
+    for (let ly = 0; ly < TS; ly++) for (let lx = 0; lx < TS; lx++){
+      let d = 99;
+      if (L) d = Math.min(d, lx + .5); if (R) d = Math.min(d, TS - .5 - lx);
+      if (U) d = Math.min(d, ly + .5); if (B) d = Math.min(d, TS - .5 - ly);
+      if (UL) d = Math.min(d, Math.hypot(lx + .5, ly + .5)); if (UR) d = Math.min(d, Math.hypot(TS - .5 - lx, ly + .5));
+      if (BL) d = Math.min(d, Math.hypot(lx + .5, TS - .5 - ly)); if (BR) d = Math.min(d, Math.hypot(TS - .5 - lx, TS - .5 - ly));
+      if (d < 8 && BAYER[(ly & 3)*4 + (lx & 3)] < (1 - d / 8) * 16) on(tx*TS + lx, ty*TS + ly);
+    }
+  }
+  MASKCTX.putImageData(im, 0, 0);
+  maskDirty = false;
+}
 
 /* ---------- effekter ---------- */
 const FX = [];
@@ -358,6 +412,7 @@ function frame(now){
       else { boy.x += dx / d * left; boy.y += dy / d * left; left = 0; }
     }
   }
+  revealAround(boy.x + 8, boy.y + 8);
   // kamera
   let tx, ty;
   if (cam.focus && now < cam.focus.until){ [tx, ty] = centerOn(cam.focus.x, cam.focus.y); }
@@ -374,11 +429,17 @@ function frame(now){
   ctx.fillStyle = '#181425'; ctx.fillRect(0, 0, cv.width, cv.height);
   ctx.setTransform(scaleDev, 0, 0, scaleDev, -ox, -oy);
   ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(TERRAIN[terrainFrame], 0, 0);
+  if (maskDirty) buildMask();
+  ctx.drawImage(GRAY[terrainFrame], 0, 0);
+  const tc = TMP.getContext('2d');
+  tc.globalCompositeOperation = 'source-over'; tc.clearRect(0, 0, TMP.width, TMP.height);
+  tc.drawImage(TERRAIN[terrainFrame], 0, 0);
+  tc.globalCompositeOperation = 'destination-in'; tc.drawImage(MASK, 0, 0);
+  ctx.drawImage(TMP, 0, 0);
 
   const reach = new Set([S.node]); { const q = [S.node]; while (q.length){ const n = q.shift(); for (const e of edgesOf(n)) if (edgeOpen(e)){ const m = otherEnd(e, n); if (!reach.has(m)){ reach.add(m); q.push(m); } } } }
-  for (const p of PLOTS) drawPlot(p, now);
-  FLAGS.forEach((f, i) => drawFlag(f, now, i));
+  for (const p of PLOTS) if (seenAt(p.x + 1, p.y + 1)) drawPlot(p, now);
+  FLAGS.forEach((f, i) => { if (seenAt(Math.floor(f.x / TS), Math.floor(f.y / TS))) drawFlag(f, now, i); });
   for (const id in NODES) drawNode(NODES[id], now, reach.has(id));
   for (const g of GATES){
     const open = S.stars >= g.req;
@@ -404,7 +465,7 @@ function frame(now){
     pill(sx(g.x*TS + 8), sy(g.y*TS - 6), [LOCK, String(g.req), STAR], { color: '#fee761' });
   }
   for (const p of PLOTS){
-    if (S.built[p.id]) continue;
+    if (S.built[p.id] || !seenAt(p.x + 1, p.y + 1)) continue;
     pill(sx(p.x*TS + 24), sy(p.y*TS - 1), [COIN, String(p.cost)], { color: '#ffffff', bg: '#3f2631', edge: '#733e39' });
   }
   for (const id in NODES){
@@ -631,6 +692,7 @@ $('#btnTest').addEventListener('click', addTest);
 $('#btnSheet').addEventListener('click', addSheet);
 $('#btnReset').addEventListener('click', () => {
   S = START(); boy.route = null; placeBoy(S.node); plotAnim.clear(); gateAnim.clear(); FX.length = 0;
+  lastRevealKey = ''; maskDirty = true; revealAround(boy.x + 8, boy.y + 8);
   cam.follow = true; cam.focus = null; centerOn(boy.x + 8, boy.y + 8, true);
   dlg = null; updateHud(); renderLog(); renderPack(); showNode(); toast('Kartan är återställd.');
 });
@@ -656,7 +718,7 @@ function tapAt(wx, wy){
   const tx = Math.floor(wx / TS), ty = Math.floor(wy / TS);
   for (const id in NODES){ const n = NODES[id]; if (Math.abs(wx - (n.x*TS + 8)) < 13 && Math.abs(wy - (n.y*TS + 6)) < 14){ walkTo(id); return; } }
   for (const g of GATES){ if (tx === g.x && (ty === g.y || ty === g.y - 1)){ showGate(g); if (S.stars < g.req) toast(`Porten öppnas vid ${g.req} stjärnor. Du har ${S.stars}.`); return; } }
-  for (const p of PLOTS){ if (tx >= p.x && tx <= p.x + 2 && ty >= p.y - 1 && ty <= p.y + 2){ goPlot(p); return; } }
+  for (const p of PLOTS){ if (seenAt(p.x + 1, p.y + 1) && tx >= p.x && tx <= p.x + 2 && ty >= p.y - 1 && ty <= p.y + 2){ goPlot(p); return; } }
 }
 cv.addEventListener('keydown', e => {
   const dirs = { ArrowUp: [0,-1], ArrowDown: [0,1], ArrowLeft: [-1,0], ArrowRight: [1,0] };
@@ -682,7 +744,7 @@ function trimTile(i){
 }
 function start(data){
   if (data && data.S) S = data.S;
-  placeBoy(S.node);
+  placeBoy(S.node); lastRevealKey = ''; revealAround(boy.x + 8, boy.y + 8);
   COIN = trimTile(93);
   STAR_URL = iconURL(STAR, 4); COIN_URL = iconURL(COIN, 4); LOCK_URL = iconURL(LOCK, 4);
   $('#logoStar').src = STAR_URL; $('#icoStar').src = STAR_URL; $('#icoCoin').src = COIN_URL;
