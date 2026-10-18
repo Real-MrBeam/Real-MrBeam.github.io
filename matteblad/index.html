@@ -58,16 +58,19 @@
   @media (prefers-reduced-motion: reduce) { .prize { animation: none !important; } }
   .prize.empty { border: 2px dashed #c9d3df; color: #8a96a3; font-size: 14px; text-align: center;
                  justify-content: center; background: transparent; box-shadow: none; }
+  .prizeslot > .prize { flex: 1; }
+  .las-slot { min-height: 146px; }
   @media (max-width: 640px) {
     .row { grid-template-columns: 1fr; }
     .prize.empty { display: none; }
+    .las-slot { min-height: 80px; }
   }
 </style>
 </head>
 <body>
 <main>
   <h1>Matteblad</h1>
-  <p class="intro">Välj ett blad. Allt du skriver sparas på datorn du använder. Tryck på "Klar! Spara som PDF" när du är färdig och skicka filen hem. När bladet är rättat får du ett pris!</p>
+  <p class="intro">Välj ett blad. Allt du skriver sparas på datorn du använder. Tryck på "Klar! Spara som PDF" när du är färdig och skicka filen hem. När bladet är rättat får du ett pris. Resultaten är låsta med ett lösenord.</p>
   <ul>
     <li class="row">
       <div class="card">
@@ -97,14 +100,7 @@
           <a class="result" href="blad/2026-10-09-minecraft/resultat.html">Se resultat</a>
         </div>
       </div>
-      <a class="prize small secret" href="blad/2026-10-09-minecraft/resultat.html" style="--prize: #c49a1c" data-key="matteblad:pris:2026-10-09-minecraft" data-poke="mallar/minecraft/pris/guld.svg">
-        <span class="level">Guld</span>
-        <span class="art">
-          <img class="ballimg" src="mallar/minecraft/pris/kista.svg" alt="">
-          <img class="pokeimg" alt="Guldsvärd">
-        </span>
-        <span class="name">Guldsvärd</span>
-      </a>
+      <div class="las prizeslot" data-enc="v1.6d2327a95a836d5c.Wl06Bak+WcAFt50Mtfu+5UxaHy/F0G9q5HkkogPwwPo6xILTDY0CPoy5fAJNBlYxx3FzH3zSbjksC7WBaZXezm8xu4HlGZqtgeFc9nKdvlYBVALXSqUkQEhXurXuokP1j7il4JrheElSL+1pluR0pz/AGx5naI90r1UAYk9NHO5Rxs6eLEeE5ElLtS+dx+/x0/I6CdIYtejMT8dpuzuzFX2jQvzB/HUcmc4Yxt00e8PiEUfDuw+jJzsmgKMuw9TRQG0QNV8lRNTUiymrh3ST5o0F2DWbcri2p0Ht4WaexEgZwqQbSOOjmJy+CimNO1OOe3ZQ0F7+5Lxndqc88PzQfrj6STU8bsnbPmco6qj1UsauzKCJz9gcFAav1VhU4umRV0+It6unq9FkC4LM1BnKTOeuZBsXhJcfvteJQkZgQ+mlg1gmx+P2SmeoXWRyok+MQQA+ecazFByKTsl1e14x4Mx7MgKO63WxTVF2bqMOgI0FroTPG9VM5X6yAyZdPWtLOfUufr0k7FJmDsXNHymh9B0hwNjemKpanXzxSdMGrNsQuF2Z+b6xqbA3k9I8AhvwCrlDQsZgPW8Zrz29VjHkFBsyyZgtEefw+ARtIIXoE6Kylr89Fc+FRTf5w9fQxjY+E2Zru8D0HxRuCm8tRpkQ+v1Xg6zFnOofTK4Qf0/LvaU=.Rev9E0Cw65Grz5FC.sZSaEnSm5JECxHDM918yPpIu950HFemYel47uQQ/0ZrrqyzSGamfUT7IYRJWMsjGRDPdfjBql0fPPuRe4xhvL6J0F6AtIANVc/2BvtyjZ4iUSHWzOfYp1PCueL9GCJS0GpPm2uWyUmXfWHmyr2EE8OP5aqWl8SI2OYCvLTzl8Zu1LU75X9dgvbfOGjiAxlMKY8q7/l9dQx0saJOouqhZ1TgYnDL4Nhg6HasPDGJZF0HZXCal7O7a7cQp/EXivhuGPc4uINNJFYON4OFBfmSZhcxoXGKMIKLvw2fSXXT3dKyk40EFboq/cCneHHysU2PeudlthPWK4s9qiMJK68v6i5qTWea0E/+KPbrtCtdC+FpVK5usx9h7S+3MzvclZqEn1qfSbNgKUQb0pcinC6d9eiz8A3a5vWRixcN/zsERXq/Ub/EyXD/NfkNuPIC7xNx074PbIVAcxYgbvXlsMsqjXGWYrZoYXjJLEqUIbJhQSHw612OEs8xTsWWeO+dUKTuZbyJqjgJW2Tg7A4T42OwGXjVZFDqE6YHbee2mzXRL5u7yySmo3eRq7KETbkNhD7XgzAu15wmcHPwt6rdiRabIP8m2Pmoov3gALnrESTJzl55H8bTcSCpJF5k="><button type="button" class="las-slot" data-las-open><svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" fill="currentColor"/><path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2"/></svg><span>Låst</span></button></div>
     </li>
     <li class="row">
       <div class="card">
@@ -119,21 +115,16 @@
           <a class="result" href="blad/2026-10-08-pokemon/resultat.html">Se resultat</a>
         </div>
       </div>
-      <a class="prize small secret" href="blad/2026-10-08-pokemon/resultat.html" style="--prize: #2a75bb" data-key="matteblad:pris:2026-10-08-pokemon" data-poke="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/6.png">
-        <span class="level">Sällsynt</span>
-        <span class="art">
-          <img class="ballimg" src="mallar/pokemon/pris/superboll.svg" alt="">
-          <img class="pokeimg" alt="Charizard">
-        </span>
-        <span class="name">Charizard</span>
-      </a>
+      <div class="las prizeslot" data-enc="v1.6d2327a95a836d5c.XsRZEVJ1zA7M5iWtOmJzGd9OJ4dts5qLQQN54BXEAR2PoPzWg1ydFk6yF9cHuKliIA6rJCTY08Zh02NN5WGhE4jwCVANBCkW2ZFHPD2JxL0mHkwSZXz8b2BpzKL+t4+HBj+H+4cxPT3UoPH5LA1gsMyvRHpA3inSGU/tMiiJlAmbDTZ78aHH9Ru3qZQPEakGFmgwUDbp19c/xme5Oi27ezGwFokxSpp3zLuMZBGPAgF53iGUxuQEnEhs5dz1GCdJPQxM2QS4vim4BKhZ9XDAi5sucxl0K2tjaAW9v7kMMVdy/QKX9knxVfu8aJeSMEEtN3bINq//Kbowd0u3Wp9BR86u6ypkqUqTrSnY7REpXz+HYGG7ZqtIFrjd826ekpaD3CN1+4R3XqwOUkGYfhsg2o5AMzQGVsu9aIRJnbW4tCv+ttTDk2BnSheFuSvj4S5s52Dn7rawp9uyhLfTK6FfAWQOcB1wddzhHqeite0PNQi9cdCwC+QGOwHQ/Ila2PYwYKDtuH1ClztlPN/nMMpWYXHUFMjcxZQNZK+Z61QLIRqvwFGASXPTQGM2SOsTNMyZWM+59KcpB8eXehM6E4tEhSETcTuUF1Bzj8VzWEmhSkkcIqcEcYrNV11S5r6F0cUpS1CCKNpPSDWecXKVC7EtXuWxK9huGszFhJC5rR72EZU=.bztPZNNDUMk6BQoC.WTd0vaUTkqYzL+VqdoMC7JGZIGJSLsEueAhHke0Tx8XZueK/4fcSHPIvLeTSRaw0sQWcLL6v2A8qZmXc32TTYYE2AQY6Cv+rKZuht7nty7FUVyyIE5LESI16EueEjZ6WT2E94KTWlj2CUMy5Lq0dfeRzb3Kmjk40riFkJcBGpVsAGCGrCL+cBIl0oAnTbczdCPNo3ZM65qsvVUo+TeOxaPSYx2QK2JDu6YMGHJpsOKklGRpXPVBHxwiS8TNltTG4Elh+fTDWYsYJKULwamDqDaJWGOAaEaLtkoUT/CoZbnHSH8BGOq1Uaj48uXIQxqmnS2OVylxOmYtRWVLM4UxnlE6vk5sqSpGPJGcW92WAHKhtTzKKcbR6cwMfM1MCbyYmdcOpj4P6U2ssCQ4vnLDJz3v0A5IFQx9VXlA8a+ExCZP+06nLUzrBHPLTjdvApVxy2XSO0DtGMPOxEzuFoTBNH/RMTHZpeuKFavtwGjQNU6qzBkbcKL/vGPAwjnJsh5fr4Kdy8uOhuv+TE9rrjq0RCKyVyrv5WkYNZ/0S9jTyubeTRiuDwBBPyY2xoJU0/fvgQOtHTqa3R4psibxdYd+b8n7P9TtP7wAcqSdM3MJU0+wHTHYPi6bVDoFq4RNBTDGKB1s1+5KrTdANf5PsrBiYM24C/g106gCVWjo32m9Hhn+grbuTmb+eXnRi+ug1jZxEA83xiRhbrpI6i/qbvZNB5Bo="><button type="button" class="las-slot" data-las-open><svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" fill="currentColor"/><path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2"/></svg><span>Låst</span></button></div>
     </li>
   </ul>
 </main>
+<script src="mallar/las.js" data-las="las/las.json" defer></script>
 <script>
-  // Show the Pokémon instead of the ball if it has been opened on the result page in this browser.
-  // Runs on pageshow so it also updates when coming back with the browser's back button.
-  addEventListener("pageshow", () => {
+  // Show the prize instead of the closed ball or chest if it has been opened on the result page in this browser.
+  // Runs on pageshow so it also updates when coming back with the browser's back button, and again once the
+  // locked prize boxes have been opened with the password.
+  function updateOpened() {
     document.querySelectorAll(".prize[data-key]").forEach(el => {
       let open = false;
       try { open = localStorage.getItem(el.dataset.key) === "open"; } catch {}
@@ -144,7 +135,9 @@
       }
       el.classList.toggle("opened", open);
     });
-  });
+  }
+  addEventListener("pageshow", updateOpened);
+  document.addEventListener("las:unlocked", updateOpened);
 </script>
 </body>
 </html>
