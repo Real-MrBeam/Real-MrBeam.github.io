@@ -63,6 +63,19 @@ const STAR = sprite([
 const DUST = sprite([
   ".....o.....", "....owo....", "....owo....", "...owCwo...", ".oowwCwwoo.", "owwCCbCCwwo", ".oowwCwwoo.", "...owCwo...", "....owo....", "....owo....", ".....o....."],
   { o:'#3f2631', w:'#ffffff', C:'#2ce8f5', b:'#0099db' });
+// Icons for the boxes under the map: a rune stone, a parchment scroll, a bag and a book
+const RUNE = sprite([
+  "...oooooo...", "..osssssso..", ".ossCsssSso.", ".osCsCssSso.", ".ossCsssSso.", "ossCCsssSsso", "osssCsssSsso",
+  "ossCsCssSsso", "osssssSSSsso", ".oSSSSSSSSo.", "..oooooooo.."], { o:'#3f2631', s:'#8b9bb4', S:'#5a6988', C:'#2ce8f5' });
+const SCROLL = sprite([
+  ".oooooooooo.", "oPPppppppPPo", "oPpkkkkkkpPo", ".oppppppppo.", ".opkkkkkkpo.", ".oppppppppo.", ".opkkkkkppo.",
+  ".oppppppppo.", "oPppppppppPo", "oPPrrppppPPo", ".oooooooooo."], { o:'#3f2631', p:'#ead4aa', P:'#c9a46c', k:'#8b6a4a', r:'#e43b44' });
+const BAG = sprite([
+  "....oooo....", "...o....o...", "..o......o..", ".oooooooooo.", "oBbbbbbbbbBo", "oBbbbyybbbBo", "oBbbbyybbbBo",
+  "oBbbbbbbbbBo", "oBbbbbbbbbBo", "oBBBBBBBBBBo", ".oooooooooo."], { o:'#3f2631', b:'#b86f50', B:'#733e39', y:'#feae34' });
+const BOOK = sprite([
+  ".ooooooooooo", "ogggggggggwo", "ogGGGGGGGgwo", "ogGyyyyyGgwo", "ogGGGGGGGgwo", "ogggggggggwo", "ogggyyyyggwo",
+  "ogggggggggwo", "ogggggggggwo", "oddddddddddo", ".ooooooooooo"], { o:'#3f2631', g:'#3e8948', G:'#63c74d', y:'#fee761', w:'#ead4aa', d:'#265c42' });
 const LOCK = sprite(["..sss..", ".s...s.", ".s...s.", "ooooooo", "oyyyyyo", "oyyoyyo", "oyyyyyo", "ooooooo"], { o:'#3f2631', y:'#feae34', s:'#c0cbdc' });
 const GATEPAL = { o:'#3f2631', S:'#c0cbdc', s:'#8b9bb4', w:'#b86f50', W:'#733e39', y:'#feae34', Y:'#fee761' };
 const GATE_TOP = ["................", "oooooooooooooooo", "oSSSSSSSSSSSSSSo", "osssssssssssssso", "oooooooooooooooo"];
@@ -226,12 +239,13 @@ function buildTerrain(){
 
 /* ---------- tillstånd ---------- */
 const startData = berattelse.exempel.start;
+let REAL = null; // { stars, stoft, handelser } once the locked events have been opened
 const START = () => ({
-  stars: startData.stjarnor, coins: startData.stjarnstoft, node: startData.plats,
+  stars: REAL ? REAL.stars : startData.stjarnor, coins: REAL ? REAL.stoft : startData.stjarnstoft, node: startData.plats,
   built: Object.fromEntries(startData.byggt.map(id => [id, true])),
   valda: {}, saker: [], steg: {}, handlat: {}, djur: [], fram: [], stopp: {}, hittat: [],
   sett: new Uint8Array(MW*MH),
-  log: startData.logg.map(r => ({ subj: r.amne, p: r.poang, max: r.max, st: r.stjarnor, bonus: r.bonus })),
+  log: REAL ? REAL.handelser.slice() : startData.logg.map(r => ({ typ: 'runa', amne: r.amne, procent: Math.round(r.poang / r.max * 100), stjarnor: r.stjarnor, bonus: r.bonus })),
   testIdx: 0,
 });
 let S = START();
@@ -252,9 +266,10 @@ function petPos(k){
   }
   return { x: cx, y: cy };
 }
-// Up to three animals follow him: the ones he has put forward in the animal book. In debug mode all of them follow.
+// Up to three animals follow him: the ones he has put forward in the animal book. In debug mode, if none is put forward,
+// the first three follow so that it is possible to see them.
 const MAX_FRAM = 3;
-const activePets = () => DEBUG.mode ? Object.keys(PETS) : S.fram;
+const activePets = () => DEBUG.mode && !S.fram.length ? Object.keys(PETS).slice(0, MAX_FRAM) : S.fram;
 
 
 /* ---------- canvas ---------- */
@@ -575,7 +590,7 @@ function frame(now){
 const panel = $('#panel');
 function esc(s){ return String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c])); }
 function iconURL(c, s){ const k = document.createElement('canvas'); k.width = c.width*s; k.height = c.height*s; const x = k.getContext('2d'); x.imageSmoothingEnabled = false; x.drawImage(c, 0, 0, k.width, k.height); return k.toDataURL(); }
-let STAR_URL = '', DUST_URL = '', LOCK_URL = '';
+let STAR_URL = '', DUST_URL = '', LOCK_URL = '', RUNE_URL = '', SCROLL_URL = '';
 function plotPreview(p){
   const c = document.createElement('canvas'); c.width = 48; c.height = 48; c.className = 'pix';
   const x = c.getContext('2d'); x.imageSmoothingEnabled = false;
@@ -671,15 +686,17 @@ const emptyTiles = p => (p.tom ? ITEMS[p.tom] : EMPTY_PLOT);
 function plotTiles(p){ if (p.prebuilt) return ITEMS[p.item]; const v = shownVal(p); return v ? ITEMS[v.byggnad] : emptyTiles(p); }
 let dlg = null, typeTimer = 0, blinkTimer = 0;
 
-// Ready-made portraits arrive encrypted in the page (#portrattLas) and open with the password. Until then, and for anyone
+// Ready-made portraits and the real events arrive encrypted in the page (#lasData) and open with the password. Until then, and for anyone
 // without a picture, the drawn pixel portraits from portratt.json are used. The ready-made ones do not blink.
 const PORTRAIT_IMG = {};
 function loadPortraitImages(){
-  const el = document.getElementById('portrattLas');
-  if (!el || !el.classList.contains('unlocked')) return;
-  let data = {};
-  try { data = JSON.parse(el.textContent); } catch (e) { return; }
-  for (const [id, url] of Object.entries(data)){
+  const el = document.getElementById('lasData');
+  if (!el || !el.classList.contains('unlocked') || el.dataset.read) return;
+  let locked = {};
+  try { locked = JSON.parse(el.textContent); } catch (e) { return; }
+  el.dataset.read = '1';
+  if (locked.handelser) applyReal(locked.handelser);
+  for (const [id, url] of Object.entries(locked.portratt ?? {})){
     if (PORTRAIT_IMG[id]) continue;
     const im = new Image();
     im.onload = () => { PORTRAIT_IMG[id] = im; const cv = panel.querySelector('.portrait'); if (cv && dlg && dlg.lines[dlg.i].p === id){ clearInterval(blinkTimer); drawPortrait(cv, id, false); } };
@@ -724,7 +741,7 @@ function startTyping(){
   typeTimer = setInterval(() => { n++; say.textContent = L.t.slice(0, n); if (n >= L.t.length) finish(); }, 24);
   say.onclick = finish;
 }
-const toNode = () => { dlg = null; showNode(); };
+const toNode = () => { dlg = null; if (newsQueue.length) showNews(); else showNode(); };
 // A price in a button: the stardust icon and the number in bold
 const price = n => `<span class="price"><img class="pix" src="${DUST_URL}" alt="">${n}<span class="sr"> stjärnstoft</span></span>`;
 function startBuild(p){
@@ -913,26 +930,64 @@ function updateHud(which){
 let toastTimer = 0;
 function toast(msg){ const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 3200); }
 function hideHint(){ $('#hint').hidden = true; }
+// One line per rune or scroll, the newest first
+const placeName = id => (id && NODES[id] ? NODES[id].name : '');
 function renderLog(fresh){
-  const ol = $('#log');
-  ol.innerHTML = S.log.slice().reverse().slice(0, 5).map((r, i) => {
-    const pct = Math.round(r.p / r.max * 100);
-    return `<li class="${fresh && i === 0 ? 'new' : ''}"><span><b>${esc(r.subj)}</b> ${r.p} av ${r.max} p, ${pct} %</span><span class="st">${'★'.repeat(r.st)}${r.bonus ? ' +1 bonus' : ''}</span></li>`;
-  }).join('');
+  $('#log').innerHTML = S.log.length ? S.log.slice().reverse().map((e, i) => {
+    const where = placeName(e.plats);
+    const left = e.typ === 'runa'
+      ? `<img class="pix" src="${RUNE_URL}" alt=""><span><b>Runa${where ? ' vid ' + esc(where) : ''}</b> ${esc(e.amne)}${e.procent != null ? ', ' + e.procent + ' %' : ''}</span>`
+      : `<img class="pix" src="${SCROLL_URL}" alt=""><span><b>Pergamentrulle${where ? ' vid ' + esc(where) : ''}</b> ${e.ratt} av ${e.av} rätt</span>`;
+    const right = e.typ === 'runa' ? `${'★'.repeat(e.stjarnor)}${e.bonus ? ' +1' : ''}` : `<img class="pix" src="${DUST_URL}" alt="">${e.stoft}`;
+    return `<li class="${fresh && i === 0 ? 'new' : ''}">${left}<span class="st">${right}</span></li>`;
+  }).join('') : '<li><span>Inga runor eller rullar ännu.</span></li>';
 }
-const starsFor = (p, max) => { const pct = p / max * 100; return berattelse.regler.stjarnor.find(r => pct >= r.minProcent).antal; };
+const starsFor = pct => berattelse.regler.stjarnor.find(r => pct >= r.minProcent).antal;
+// The real events: stars from the runes (with a bonus when a subject goes better than last time) and stardust from the scrolls
+function applyReal(events){
+  let stars = 0, stoft = 0;
+  const handelser = events.map((e, i) => {
+    if (e.typ === 'rulle'){ stoft += e.stoft; return e; }
+    const prev = events.slice(0, i).reverse().find(x => x.typ === 'runa' && x.amne === e.amne && x.procent != null);
+    const st = e.stjarnor ?? starsFor(e.procent);
+    const bonus = e.procent != null && prev && e.procent > prev.procent ? 1 : 0;
+    stars += st + bonus;
+    return { ...e, stjarnor: st, bonus };
+  });
+  REAL = { stars, stoft, handelser };
+  restart();
+  const seen = seenEvents();
+  newsQueue = handelser.filter(e => !seen.includes(e.id));
+  // restart() closes any dialog, so the letter (first time) or the news is shown again from the start
+  if (!introSeen()) showIntro(); else if (newsQueue.length) showNews();
+}
+// News: a rune or scroll he has not seen on this device is told as a short story the first time
+const NEWS_KEY = 'glimmerdal:handelser';
+let newsQueue = [];
+const seenEvents = () => { try { return JSON.parse(localStorage.getItem(NEWS_KEY) || '[]'); } catch (e) { return []; } };
+function showNews(){
+  const list = newsQueue; newsQueue = [];
+  const lines = list.flatMap(e => [{ p: null, t: e.text }, { p: null, t: e.typ === 'runa'
+    ? `Runan gav ${e.stjarnor} ${e.stjarnor === 1 ? 'stjärna' : 'stjärnor'}${e.bonus ? ', och en extra för att du tolkade bättre än förra gången' : ''}.`
+    : `Rullen gav ${e.stoft} stjärnstoft.` }]);
+  startDialog(lines, () => [{ label: 'Till kartan', run: () => {
+    try { localStorage.setItem(NEWS_KEY, JSON.stringify([...new Set([...seenEvents(), ...list.map(e => e.id)])])); } catch (e) { /* shown again next time */ }
+    updateHud('stars'); toNode();
+  } }]);
+}
+// Made-up runes and scrolls for trying things out (the buttons under Debug)
 function addTest(){
   const t = SAMPLE_TESTS[S.testIdx % SAMPLE_TESTS.length]; S.testIdx++;
-  const prev = [...S.log].reverse().find(r => r.subj === t.subj);
-  const st = starsFor(t.p, t.max);
-  const bonus = prev && t.p / t.max > prev.p / prev.max ? 1 : 0;
+  const procent = Math.round(t.p / t.max * 100);
+  const prev = [...S.log].reverse().find(r => r.typ === 'runa' && r.amne === t.subj && r.procent != null);
+  const st = starsFor(procent);
+  const bonus = prev && procent > prev.procent ? 1 : 0;
   const before = S.stars;
-  S.log.push({ subj: t.subj, p: t.p, max: t.max, st, bonus });
+  S.log.push({ typ: 'runa', amne: t.subj, procent, stjarnor: st, bonus });
   S.stars += st + bonus;
   updateHud('stars'); renderLog(true);
-  const pct = Math.round(t.p / t.max * 100);
   const opened = GATES.filter(g => before < g.req && S.stars >= g.req);
-  let msg = `${t.subj}: ${t.p} av ${t.max} p (${pct} %) ger ${st + bonus} ${st + bonus === 1 ? 'stjärna' : 'stjärnor'}${bonus ? ', med bonus för förbättring' : ''}.`;
+  let msg = `Runa i ${t.subj}: ${procent} % tolkat ger ${st + bonus} ${st + bonus === 1 ? 'stjärna' : 'stjärnor'}${bonus ? ', med bonus för förbättring' : ''}.`;
   if (opened.length){
     const now = performance.now();
     opened.forEach((g, i) => { gateAnim.set(g, now + i * 300); setTimeout(() => sparkle(g.x*TS + 8, g.y*TS + 4, 26), 600 + i * 300); });
@@ -946,8 +1001,8 @@ function addTest(){
 }
 function addSheet(){
   const mb = berattelse.exempel.mattebladRatt; const right = mb.min + Math.floor(Math.random() * (mb.max - mb.min + 1));
-  S.coins += right; updateHud('coins');
-  toast(`Matteblad rättat: ${right} rätt ger ${right} stjärnstoft.`);
+  S.coins += right; S.log.push({ typ: 'rulle', ratt: right, av: mb.max, stoft: right }); updateHud('coins'); renderLog(true);
+  toast(`Pergamentrulle: ${right} rätt ger ${right} stjärnstoft.`);
   if (current && current.type !== 'walk') renderPanel(current);
 }
 $('#btnTest').addEventListener('click', addTest);
@@ -957,17 +1012,21 @@ $('#btnDebug').addEventListener('click', () => {
   DEBUG.mode = (DEBUG.mode + 1) % DEBUG_LABEL.length;
   buildTerrain();
   $('#btnDebug').textContent = DEBUG_LABEL[DEBUG.mode];
+  $('#debugBtns').hidden = DEBUG.mode === 0;
   if (current && current.type !== 'walk' && current.type !== 'dialog') renderPanel(current);
 });
 $('#btnLetter').addEventListener('click', showIntro);
 $('#btnReset').addEventListener('click', () => {
-  S = START(); boy.route = null; placeBoy(S.node); plotAnim.clear(); gateAnim.clear(); FX.length = 0; buildTerrain();
-  lastRevealKey = ''; maskDirty = true; revealAround(boy.x + 8, boy.y + 8);
-  cam.follow = true; cam.focus = null; centerOn(boy.x + 8, boy.y + 8, true);
-  dlg = null; updateHud(); renderLog(); renderPack(); renderBook(); showNode(); toast('Kartan är återställd.');
+  restart(); toast('Kartan är återställd.');
   try { localStorage.removeItem(INTRO_KEY); } catch (e) { /* nothing to clear */ }
   showIntro();
 });
+function restart(){
+  S = START(); boy.route = null; placeBoy(S.node); plotAnim.clear(); gateAnim.clear(); FX.length = 0; buildTerrain();
+  lastRevealKey = ''; maskDirty = true; revealAround(boy.x + 8, boy.y + 8);
+  cam.follow = true; cam.focus = null; centerOn(boy.x + 8, boy.y + 8, true);
+  dlg = null; updateHud(); renderLog(); renderPack(); renderBook(); showNode();
+}
 
 /* ---------- pekare ---------- */
 let down = null;
@@ -1011,7 +1070,8 @@ cv.addEventListener('keydown', e => {
 function start(data){
   if (data && data.S) S = data.S;
   placeBoy(S.node); lastRevealKey = ''; revealAround(boy.x + 8, boy.y + 8);
-  STAR_URL = iconURL(STAR, 4); DUST_URL = iconURL(DUST, 4); LOCK_URL = iconURL(LOCK, 4);
+  STAR_URL = iconURL(STAR, 4); DUST_URL = iconURL(DUST, 4); LOCK_URL = iconURL(LOCK, 4); RUNE_URL = iconURL(RUNE, 4); SCROLL_URL = iconURL(SCROLL, 4);
+  $('#icoRunes').src = RUNE_URL; $('#icoBag').src = iconURL(BAG, 4); $('#icoBook').src = iconURL(BOOK, 4);
   $('#logoStar').src = STAR_URL; $('#icoStar').src = STAR_URL; $('#icoCoin').src = DUST_URL;
   document.querySelectorAll('img[data-ico]').forEach(im => { im.src = im.dataset.ico === 'star' ? STAR_URL : DUST_URL; });
   buildTerrain();
