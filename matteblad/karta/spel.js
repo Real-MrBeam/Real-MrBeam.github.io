@@ -611,19 +611,14 @@ function renderPanel(view){
     h = `<span class="tag">På väg</span><h2>Till ${esc(NODES[view.id].name)}</h2><p>Pojken går längs stigen.</p>`;
   } else if (view.type === 'node'){
     const n = NODES[view.id];
-    const roads = edgesOf(n.id).map(e => {
-      const o = NODES[otherEnd(e, n.id)];
-      if (edgeOpen(e)) return `<button class="btn" type="button" data-go="${o.id}">${esc(o.name)}</button>`;
-      const left = e.gate.req - S.stars;
-      return `<button class="btn locked" type="button" data-gate="${GATES.indexOf(e.gate)}"><img class="pix" src="${LOCK_URL}" alt="">${esc(o.name)} <small>${e.gate.req} stjärnor, ${left} kvar</small></button>`;
-    }).join('');
+    // No road buttons (Peter 2026-10-18): he walks by tapping the dots on the map, or with the arrow keys
     const plots = PLOTS.filter(p => p.node === n.id);
     const stop = STOPP[n.id];
     h = `<span class="tag">Du är här</span><h2>${esc(n.name)}</h2><p>${esc(n.text)}</p><div class="panel-body">`;
     for (const p of plots) h += plotBlock(p);
     if (stop) h += stopBlock(n.id);
     if (n.id === 'slott') h += `<div><button class="btn" type="button" data-slott="1">${esc(berattelse.dialog.slottKnapp)}</button></div>`;
-    h += `<div><p class="sub">Vägar härifrån</p><div class="roads">${roads}</div></div></div>`;
+    h += `</div>`;
   } else if (view.type === 'gate'){
     const g = view.gate, e = g.edge, open = S.stars >= g.req;
     const names = `${NODES[e.a].name} och ${NODES[e.b].name}`;
