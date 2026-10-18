@@ -243,7 +243,7 @@ let REAL = null; // { stars, stoft, handelser } once the locked events have been
 const START = () => ({
   stars: REAL ? REAL.stars : startData.stjarnor, coins: REAL ? REAL.stoft : startData.stjarnstoft, node: startData.plats,
   built: Object.fromEntries(startData.byggt.map(id => [id, true])),
-  valda: {}, saker: [], steg: {}, handlat: {}, djur: [], fram: [], stopp: {}, hittat: [],
+  valda: {}, saker: [], steg: {}, handlat: {}, djur: [], fram: [], stopp: {}, hittat: [], spent: 0,
   sett: new Uint8Array(MW*MH),
   log: REAL ? REAL.handelser.slice() : startData.logg.map(r => ({ typ: 'runa', amne: r.amne, procent: Math.round(r.poang / r.max * 100), stjarnor: r.stjarnor, bonus: r.bonus })),
   testIdx: 0,
@@ -306,6 +306,10 @@ const otherEnd = (e, id) => e.a === id ? e.b : e.a;
 const hiddenNode = id => !!NODES[id].hidden && !DEBUG.mode && !S.hittat.includes(id);
 const edgeShown = e => !hiddenNode(e.a) && !hiddenNode(e.b);
 function edgesOf(id){ return EDGES.filter(e => (e.a === id || e.b === id) && edgeShown(e)); }
+// In the dark, only what can be reached from where he stands is shown: the dots of the neighbouring places and the gates
+// on those roads (Peter 2026-10-18). Everything he has seen stays visible.
+const nodeShown = id => !hiddenNode(id) && (DEBUG.mode > 0 || id === S.node || seenReal(NODES[id].x, NODES[id].y) || edgesOf(S.node).some(e => otherEnd(e, S.node) === id));
+const gateShown = g => DEBUG.mode > 0 || seenReal(g.x, g.y) || edgesOf(S.node).some(e => e.gate === g);
 function findRoute(from, to, ignoreLocks){
   const prev = { [from]: null }, q = [from];
   while (q.length){
@@ -340,7 +344,7 @@ function walkTo(id){
   renderPanel({ type: 'walk', id });
 }
 function onArrive(){
-  S.node = boy.target; boy.route = null; boy.dir = 'down';
+  S.node = boy.target; boy.route = null; boy.dir = 'down'; saveSoon();
   if (pendingPlot && PLOTS.find(p => p.id === pendingPlot).node === S.node){ showPlot(PLOTS.find(p => p.id === pendingPlot)); pendingPlot = null; }
   else showNode();
 }
@@ -553,8 +557,9 @@ function frame(now){
     const p = FLAG_PLOT[i], at = p && builtShown(p) ? { x: p.x*TS + 24, y: p.y*TS + 2 } : f;
     if (seenAt(Math.floor(at.x / TS), Math.floor(at.y / TS))) drawFlag(at, now, i);
   });
-  for (const id in NODES) if (!hiddenNode(id)) drawNode(NODES[id], now, reach.has(id));
+  for (const id in NODES) if (nodeShown(id)) drawNode(NODES[id], now, reach.has(id));
   for (const g of GATES){
+    if (!gateShown(g)) continue;
     const open = S.stars >= g.req;
     const a = gateAnim.get(g);
     let img = open ? GATE_OPEN : GATE_CLOSED, shake = 0;
@@ -574,7 +579,7 @@ function frame(now){
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   const sx = wx => wx * scaleDev - ox, sy = wy => wy * scaleDev - oy;
   for (const g of GATES){
-    if (S.stars >= g.req) continue;
+    if (S.stars >= g.req || !gateShown(g)) continue;
     pill(sx(g.x*TS + 8), sy(g.y*TS - 6), [LOCK, String(g.req), STAR], { color: '#fee761' });
   }
   // What things cost is not shown on the map (Peter 2026-10-18), only in the panel. The stars a gate needs are shown above.
@@ -696,6 +701,7 @@ function loadPortraitImages(){
   try { locked = JSON.parse(el.textContent); } catch (e) { return; }
   el.dataset.read = '1';
   if (locked.handelser) applyReal(locked.handelser);
+  loadSave();
   for (const [id, url] of Object.entries(locked.portratt ?? {})){
     if (PORTRAIT_IMG[id]) continue;
     const im = new Image();
@@ -776,10 +782,11 @@ function runStep(ad, id, pre){
 function takeStep(ad, o){
   if (S.coins < o.kostnad){ toast(berattelse.dialog.ingaStoft.replace('{n}', o.kostnad - S.coins)); return; }
   if (o.kostnad){
-    S.coins -= o.kostnad; updateHud('coins');
+    spend(o.kostnad); updateHud('coins');
     sparkle(boy.x + 8, boy.y + 2, 18, '#2ce8f5'); sparkle(boy.x + 8, boy.y + 2, 12, '#ffffff');
   }
   const out = [{ p: o.p ?? null, t: o.text }];
+  saveSoon();
   if (typeof o.till === 'string'){ S.steg[ad.key] = o.till; runStep(ad, o.till, out); }
   else ad.end(o.till, out);
 }
@@ -805,7 +812,7 @@ function rewardText(till){
   return `En hemlig fiskeplats syns nu på kartan: ${NODES[till.fiskeplats].name}.`;
 }
 function finishStop(id, till, out){
-  S.stopp[id] = till; delete S.steg['stopp:' + id];
+  S.stopp[id] = till; delete S.steg['stopp:' + id]; saveSoon();
   if (till.djur) giveAnimal(till.djur);
   if (till.agn && !S.saker.includes(till.agn)){ S.saker.push(till.agn); renderPack(); toast(rewardText(till)); }
   if (till.stoft){ S.coins += till.stoft; updateHud('coins'); sparkle(boy.x + 8, boy.y + 2, 24); toast(rewardText(till)); }
@@ -822,7 +829,7 @@ function confirmBuild(p, v, pre){
   ]);
 }
 function doBuild(p, v){
-  S.coins -= v.kostnad; S.built[p.id] = true; S.valda[p.id] = v.id; delete S.steg[p.id];
+  spend(v.kostnad); saveSoon(); S.built[p.id] = true; S.valda[p.id] = v.id; delete S.steg[p.id];
   if (p.skog) buildTerrain();
   plotAnim.set(p.id, performance.now());
   dust(p.x*TS + 24, p.y*TS + 30);
@@ -859,7 +866,7 @@ function buy(p, id){
   const it = SAKER[id];
   if (S.saker.includes(id) || S.handlat[p.id]) return;
   if (S.coins < it.pris){ toast(berattelse.dialog.ingaStoft.replace('{n}', it.pris - S.coins)); return; }
-  S.coins -= it.pris; S.saker.push(id); S.handlat[p.id] = id;
+  spend(it.pris); saveSoon(); S.saker.push(id); S.handlat[p.id] = id;
   updateHud('coins');
   if (it.djur) giveAnimal(it.djur, it);
   else toast(`Du köpte ${it.namn.toLowerCase()}!`);
@@ -895,7 +902,7 @@ $('#book').addEventListener('click', ev => {
   if (i >= 0) S.fram.splice(i, 1);
   else if (S.fram.length >= MAX_FRAM){ toast(berattelse.dialog.djurbok.max); return; }
   else { S.fram.push(id); petState.delete(id); sparkle(boy.x + 8, boy.y + 2, 12); }
-  renderBook();
+  renderBook(); saveSoon();
 });
 
 /* ---------- drottningens brev och räkningen i slottet ---------- */
@@ -961,6 +968,77 @@ function applyReal(events){
   // restart() closes any dialog, so the letter (first time) or the news is shown again from the start
   if (!introSeen()) showIntro(); else if (newsQueue.length) showNews();
 }
+/* ---------- sparning ---------- */
+// His game is saved as spel.json in the private repo Real-MrBeam/stjarnkartan-data through GitHub's API. The key arrives
+// encrypted in the page (#lasNyckel) and opens with the password, like the portraits. Without the key nothing is saved.
+// Stars and stardust are never saved: they are counted from the runes and scrolls. Only what he has spent is saved.
+const SAVE = { repo: '', file: '', key: '', sha: null, timer: 0, off: false, loaded: false };
+const SAVED_FIELDS = ['node', 'built', 'valda', 'saker', 'steg', 'handlat', 'djur', 'fram', 'stopp', 'hittat', 'spent'];
+const b64 = text => { const bytes = new TextEncoder().encode(text); let s = ''; for (const b of bytes) s += String.fromCharCode(b); return btoa(s); };
+const unb64 = data => new TextDecoder().decode(Uint8Array.from(atob(data.replace(/\s/g, '')), c => c.charCodeAt(0)));
+function spend(n){ S.coins -= n; S.spent += n; }
+function gh(method, body){
+  return fetch(`https://api.github.com/repos/${SAVE.repo}/contents/${SAVE.file}`, { method, cache: 'no-store', keepalive: method === 'PUT',
+    headers: { Authorization: `Bearer ${SAVE.key}`, Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' },
+    body: body && JSON.stringify(body) });
+}
+async function loadSave(){
+  const el = document.getElementById('lasNyckel');
+  if (!el || !el.classList.contains('unlocked') || SAVE.key) return;
+  SAVE.repo = el.dataset.repo; SAVE.file = el.dataset.fil; SAVE.key = el.textContent.trim();
+  try {
+    const res = await gh('GET');
+    if (res.status === 404){ SAVE.loaded = true; return; }
+    if (!res.ok) throw new Error('GitHub ' + res.status);
+    const file = await res.json();
+    SAVE.sha = file.sha;
+    applySaved(JSON.parse(unb64(file.content)));
+    SAVE.loaded = true;
+  } catch (err){
+    console.error(err); SAVE.off = true;
+    toast('Det gick inte att hämta det sparade spelet. Inget sparas förrän sidan laddas om.');
+  }
+}
+function applySaved(data){
+  for (const k of SAVED_FIELDS) if (data[k] !== undefined) S[k] = data[k];
+  if (typeof data.sett === 'string') S.sett = Uint8Array.from(atob(data.sett), c => c.charCodeAt(0));
+  S.coins = (REAL ? REAL.stoft : startData.stjarnstoft) - S.spent;
+  boy.route = null; placeBoy(S.node); plotAnim.clear(); petState.clear();
+  lastRevealKey = ''; maskDirty = true; buildTerrain();
+  cam.follow = true; centerOn(boy.x + 8, boy.y + 8, true);
+  updateHud(); renderLog(); renderPack(); renderBook();
+  if (!dlg) showNode();
+}
+function snapshot(){
+  const data = { version: 1, sparad: new Date().toISOString() };
+  for (const k of SAVED_FIELDS) data[k] = S[k];
+  let s = ''; for (const b of S.sett) s += String.fromCharCode(b);
+  data.sett = btoa(s);
+  return data;
+}
+// Saves a moment after a change. If the file was changed elsewhere (another device), the newest version is overwritten.
+function saveSoon(){
+  if (!SAVE.key || !SAVE.loaded || SAVE.off) return;
+  clearTimeout(SAVE.timer);
+  SAVE.timer = setTimeout(saveNow, 1500);
+}
+async function saveNow(retry){
+  clearTimeout(SAVE.timer); SAVE.timer = 0;
+  if (!SAVE.key || !SAVE.loaded || SAVE.off) return;
+  try {
+    const res = await gh('PUT', { message: 'Sparat spel', content: b64(JSON.stringify(snapshot())), ...(SAVE.sha ? { sha: SAVE.sha } : {}) });
+    if ((res.status === 409 || res.status === 422) && !retry){
+      const cur = await gh('GET'); if (cur.ok) SAVE.sha = (await cur.json()).sha;
+      return saveNow(true);
+    }
+    if (!res.ok) throw new Error('GitHub ' + res.status);
+    SAVE.sha = (await res.json()).content.sha;
+  } catch (err){ console.error(err); toast('Spelet kunde inte sparas just nu. Det försöker igen vid nästa ändring.'); }
+}
+addEventListener('pagehide', () => { if (SAVE.timer) saveNow(); });
+// The example buttons under Debug change the game, so they stop the saving until the page is loaded again
+function stopSaving(){ if (SAVE.key && !SAVE.off){ SAVE.off = true; toast('Sparningen är av tills sidan laddas om, eftersom du provar med påhittade värden.'); } }
+
 // News: a rune or scroll he has not seen on this device is told as a short story the first time
 const NEWS_KEY = 'glimmerdal:handelser';
 let newsQueue = [];
@@ -977,6 +1055,7 @@ function showNews(){
 }
 // Made-up runes and scrolls for trying things out (the buttons under Debug)
 function addTest(){
+  stopSaving();
   const t = SAMPLE_TESTS[S.testIdx % SAMPLE_TESTS.length]; S.testIdx++;
   const procent = Math.round(t.p / t.max * 100);
   const prev = [...S.log].reverse().find(r => r.typ === 'runa' && r.amne === t.subj && r.procent != null);
@@ -1000,6 +1079,7 @@ function addTest(){
   renderPanel(current && (current.type === 'gate' || current.type === 'dialog') ? current : (boy.route ? current : { type: 'node', id: S.node }));
 }
 function addSheet(){
+  stopSaving();
   const mb = berattelse.exempel.mattebladRatt; const right = mb.min + Math.floor(Math.random() * (mb.max - mb.min + 1));
   S.coins += right; S.log.push({ typ: 'rulle', ratt: right, av: mb.max, stoft: right }); updateHud('coins'); renderLog(true);
   toast(`Pergamentrulle: ${right} rätt ger ${right} stjärnstoft.`);
@@ -1017,7 +1097,7 @@ $('#btnDebug').addEventListener('click', () => {
 });
 $('#btnLetter').addEventListener('click', showIntro);
 $('#btnReset').addEventListener('click', () => {
-  restart(); toast('Kartan är återställd.');
+  stopSaving(); restart(); toast('Kartan är återställd.');
   try { localStorage.removeItem(INTRO_KEY); } catch (e) { /* nothing to clear */ }
   showIntro();
 });
@@ -1047,8 +1127,8 @@ cv.addEventListener('pointerup', e => {
 cv.addEventListener('pointercancel', () => { down = null; });
 function tapAt(wx, wy){
   const tx = Math.floor(wx / TS), ty = Math.floor(wy / TS);
-  for (const id in NODES){ const n = NODES[id]; if (!hiddenNode(id) && Math.abs(wx - (n.x*TS + 8)) < 13 && Math.abs(wy - (n.y*TS + 6)) < 14){ walkTo(id); return; } }
-  for (const g of GATES){ if (tx === g.x && (ty === g.y || ty === g.y - 1)){ showGate(g); if (S.stars < g.req) toast(`Porten öppnas vid ${g.req} stjärnor. Du har ${S.stars}.`); return; } }
+  for (const id in NODES){ const n = NODES[id]; if (nodeShown(id) && Math.abs(wx - (n.x*TS + 8)) < 13 && Math.abs(wy - (n.y*TS + 6)) < 14){ walkTo(id); return; } }
+  for (const g of GATES){ if (gateShown(g) && tx === g.x && (ty === g.y || ty === g.y - 1)){ showGate(g); if (S.stars < g.req) toast(`Porten öppnas vid ${g.req} stjärnor. Du har ${S.stars}.`); return; } }
   for (const p of PLOTS){ if (seenAt(p.x + 1, p.y + 1) && tx >= p.x && tx <= p.x + 2 && ty >= p.y - 1 && ty <= p.y + 2){ goPlot(p); return; } }
 }
 cv.addEventListener('keydown', e => {
