@@ -319,7 +319,7 @@
     "honungsburk": {
       "namn": "Honungsburk",
       "pris": 6,
-      "text": "Björnen i Höstskogen vill gärna ha den, och djuren i vattnet faller för den. Räcker som agn en gång.",
+      "text": "Björnen i Höstskogen vill gärna ha den, och djuren i vattnet faller för den.",
       "typ": "agn"
     },
     "humleagg": {
@@ -370,7 +370,7 @@
     "glodsvamp": {
       "namn": "Glödsvamp",
       "pris": 6,
-      "text": "Lyser som en lykta och lockar fram djur i mörkt vatten. Räcker som agn en gång.",
+      "text": "Lyser som en lykta och lockar fram djur i mörkt vatten.",
       "typ": "agn"
     },
     "sporpase": {
@@ -409,7 +409,7 @@
     "appelpaj": {
       "namn": "Äppelpaj",
       "pris": 6,
-      "text": "Björnen Brumma vill ha den, och djuren i vattnet gillar den också. Räcker som agn en gång.",
+      "text": "Björnen Brumma vill ha den, och djuren i vattnet gillar den också.",
       "typ": "agn"
     },
     "appelkorg": {
@@ -463,7 +463,7 @@
     "flugask": {
       "namn": "Flugask",
       "pris": 6,
-      "text": "Ovanliga flugor som fisken regnbåge inte kan motstå. Räcker som agn en gång.",
+      "text": "Ovanliga flugor som fisken regnbåge inte kan motstå.",
       "typ": "agn"
     },
     "hav": {
@@ -505,32 +505,32 @@
     },
     "daggmask": {
       "namn": "Daggmaskar",
-      "text": "En burk med feta daggmaskar. Räcker som agn en gång.",
+      "text": "En burk med feta daggmaskar.",
       "typ": "agn"
     },
     "blabar": {
       "namn": "Lysande blåbär",
-      "text": "Blåbär som lyser svagt i mörkret. Sjödjur sägs älska dem. Räcker som agn en gång.",
+      "text": "Blåbär som lyser svagt i mörkret. Sjödjur sägs älska dem.",
       "typ": "agn"
     },
     "lysmask": {
       "namn": "Lysmaskar",
-      "text": "Små maskar som lyser grönt i mörkret. Räcker som agn en gång.",
+      "text": "Små maskar som lyser grönt i mörkret.",
       "typ": "agn"
     },
     "silverfluga": {
       "namn": "Silverflugor",
-      "text": "Flugor som glänser som silver. Räcker som agn en gång.",
+      "text": "Flugor som glänser som silver.",
       "typ": "agn"
     },
     "degkula": {
       "namn": "Mjölnarens degkula",
-      "text": "En fast kula av mjölnarens deg. Fiskarna sägs inte kunna motstå den. Räcker som agn en gång.",
+      "text": "En fast kula av mjölnarens deg. Fiskarna sägs inte kunna motstå den.",
       "typ": "agn"
     },
     "snackor": {
       "namn": "Blanka snäckor",
-      "text": "Mörka, blanka snäckor från bäcken. Djuren i djupet sägs älska dem. Räcker som agn en gång.",
+      "text": "Mörka, blanka snäckor från bäcken. Djuren i djupet sägs älska dem.",
       "typ": "agn"
     }
   },

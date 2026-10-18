@@ -621,7 +621,7 @@ function renderPanel(view){
   }
   panel.innerHTML = h;
   if (view.type === 'dialog') startTyping();
-  panel.querySelectorAll('.plot[data-plot]').forEach(el => { const p = PLOTS.find(q => q.id === el.dataset.plot); el.prepend(plotPreview(p)); });
+  panel.querySelectorAll('.plot[data-plot]:not([data-noicon])').forEach(el => { const p = PLOTS.find(q => q.id === el.dataset.plot); el.prepend(plotPreview(p)); });
 }
 function plotBlock(p){
   if (p.prebuilt) return `<div class="plot" data-plot="${p.id}"><div><b>${esc(p.name)}</b><span>Byggd.</span></div></div>`;
@@ -633,7 +633,9 @@ function plotBlock(p){
   const names = b.val.map(x => esc(PERS[x.person].namn)).join(' och ');
   const label = b.aventyr && S.steg[p.id] ? 'Gå vidare' : (b.knapp || 'Prata med dem');
   const btn = here ? `<button class="btn" type="button" data-talk="${p.id}">${esc(label)}</button>` : `<button class="btn alt" type="button" data-goplot="${p.id}">Gå dit</button>`;
-  return `<div class="plot" data-plot="${p.id}"><div><b>${b.rubrik ? esc(b.rubrik) : names + ' vill bygga här'}</b><span>${b.val.every(x => x.kostnad === b.val[0].kostnad) ? b.val[0].kostnad + ' stjärnstoft att bygga' : 'från ' + p.cost + ' stjärnstoft att bygga'}</span></div>${btn}</div>`;
+  // An adventure only says what is going on, no picture and no price (Peter 2026-10-18). A dispute shows both.
+  if (b.aventyr) return `<div class="plot" data-plot="${p.id}" data-noicon><div><b>${esc(b.rubrik)}</b></div>${btn}</div>`;
+  return `<div class="plot" data-plot="${p.id}"><div><b>${names} vill bygga här</b><span>${b.val.every(x => x.kostnad === b.val[0].kostnad) ? b.val[0].kostnad + ' stjärnstoft att bygga' : 'från ' + p.cost + ' stjärnstoft att bygga'}</span></div>${btn}</div>`;
 }
 let current = null;
 const showNode = () => renderPanel({ type: 'node', id: S.node });
@@ -770,7 +772,7 @@ const STOPP = berattelse.stopp;
 function stopBlock(id){
   const s = STOPP[id], done = S.stopp[id], going = S.steg['stopp:' + id], here = S.node === id && !boy.route;
   const btn = done || !here ? '' : `<button class="btn" type="button" data-stopp="${id}">${esc(going ? berattelse.dialog.stoppFortsatt : s.knapp)}</button>`;
-  return `<div class="plot"><div><b>${esc(s.rubrik)}</b><span>${done ? esc(berattelse.dialog.stoppKlar) + ' ' + esc(rewardText(done)) : 'Ett äventyr som bara går att göra en gång.'}</span></div>${btn}</div>`;
+  return `<div class="plot"><div><b>${esc(s.rubrik)}</b>${done ? `<span>${esc(berattelse.dialog.stoppKlar)} ${esc(rewardText(done))}</span>` : ''}</div>${btn}</div>`;
 }
 function startStop(id){
   if (S.stopp[id]) return;
@@ -894,11 +896,10 @@ function startCount(){
   ]);
 }
 
-const TYP = { agn: 'Agn', verktyg: 'Verktyg' };
 function renderPack(){
   const own = S.saker.filter(id => SAKER[id].typ !== 'djur');
   $('#pack').innerHTML = own.length
-    ? own.map(id => `<li><span><b>${esc(SAKER[id].namn)}</b> ${esc(SAKER[id].text)}</span><span class="st">${TYP[SAKER[id].typ]}</span></li>`).join('')
+    ? own.map(id => `<li><span><b>${esc(SAKER[id].namn)}</b> ${esc(SAKER[id].text)}</span></li>`).join('')
     : '<li><span>Inget ännu. Bygg något och handla!</span></li>';
 }
 
