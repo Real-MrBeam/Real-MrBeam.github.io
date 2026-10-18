@@ -1,4 +1,4 @@
-// Stjärnkartan: spelkoden. Data kommer från data/karta.json och data/berattelse.json, världen byggs av varld.js.
+// Djuren i Glimmerdal (kartan i karta/, hette först Stjärnkartan): spelkoden. Data kommer från data/karta.json och data/berattelse.json, världen byggs av varld.js.
 (async () => {
 'use strict';
 // The game reads two data files: geometry (karta.json) and names, texts and rules (berattelse.json).
@@ -52,8 +52,7 @@ BOY.left = BOY.right.map(mirror);
 // Names and texts are in berattelse.json (djur). Up to three animals follow the boy, the rest are in the animal book.
 const PETS = Object.fromEntries(Object.entries(PETDATA).map(([id, d]) => {
   const frames = d.bilder.map(rows => sprite(rows, d.farger));
-  const dark = sprite(d.bilder[0], Object.fromEntries(Object.keys(d.farger).map(k => [k, k === 'o' ? '#262b44' : '#3a4466'])));
-  return [id, { namn: berattelse.djur[id].namn, lyft: d.lyft, right: frames, left: frames.map(mirror), dark }];
+  return [id, { namn: berattelse.djur[id].namn, lyft: d.lyft, right: frames, left: frames.map(mirror) }];
 }));
 
 const STAR = sprite([
@@ -182,7 +181,11 @@ function buildTerrain(){
   for (let y = 0; y < MH; y++) for (let x = 0; x < MW; x++){
     const v = gr(); tile(b, v < 0.13 ? 1 : v < 0.17 ? 2 : 0, x*TS, y*TS);
   }
-  for (let y = 0; y < MH; y++) for (let x = 0; x < MW; x++) if (M[y][x] === 'p') auto(b, DIRT, isPath, x, y);
+  // The road to a hidden stop is drawn as grass until the stop has been found
+  const shownRoad = new Set(EDGES.filter(edgeShown).flatMap(e => e.tiles.map(([x, y]) => key(x, y))));
+  const hiddenRoad = new Set(EDGES.filter(e => !edgeShown(e)).flatMap(e => e.tiles.map(([x, y]) => key(x, y))).filter(k => !shownRoad.has(k)));
+  const isShownPath = (x, y) => isPath(x, y) && !hiddenRoad.has(key(x, y));
+  for (let y = 0; y < MH; y++) for (let x = 0; x < MW; x++) if (M[y][x] === 'p' && !hiddenRoad.has(key(x, y))) auto(b, DIRT, isShownPath, x, y);
   const over = document.createElement('canvas'); over.width = base.width; over.height = base.height;
   const o = over.getContext('2d');
   for (let y = 0; y < MH; y++) for (let x = 0; x < MW; x++) if (M[y][x] === 'b') drawBridgeTile(o, x, y);
@@ -226,7 +229,7 @@ const startData = berattelse.exempel.start;
 const START = () => ({
   stars: startData.stjarnor, coins: startData.stjarnstoft, node: startData.plats,
   built: Object.fromEntries(startData.byggt.map(id => [id, true])),
-  valda: {}, saker: [], steg: {}, handlat: {}, djur: [], fram: [],
+  valda: {}, saker: [], steg: {}, handlat: {}, djur: [], fram: [], stopp: {}, hittat: [],
   sett: new Uint8Array(MW*MH),
   log: startData.logg.map(r => ({ subj: r.amne, p: r.poang, max: r.max, st: r.stjarnor, bonus: r.bonus })),
   testIdx: 0,
@@ -284,7 +287,10 @@ function centerOn(wx, wy, snap){
 /* ---------- logik ---------- */
 const edgeOpen = e => !e.gate || S.stars >= e.gate.req;
 const otherEnd = (e, id) => e.a === id ? e.b : e.a;
-function edgesOf(id){ return EDGES.filter(e => e.a === id || e.b === id); }
+// A hidden stop (a secret fishing place) cannot be seen or walked to until an adventure has found it. In debug mode it shows.
+const hiddenNode = id => !!NODES[id].hidden && !DEBUG.mode && !S.hittat.includes(id);
+const edgeShown = e => !hiddenNode(e.a) && !hiddenNode(e.b);
+function edgesOf(id){ return EDGES.filter(e => (e.a === id || e.b === id) && edgeShown(e)); }
 function findRoute(from, to, ignoreLocks){
   const prev = { [from]: null }, q = [from];
   while (q.length){
@@ -402,6 +408,7 @@ function drawNode(n, now, reachable){
   ellipse(cx, cy, 3.5, 2, reachable ? (n.id === 'slott' ? '#e43b44' : '#feae34') : '#5a6988');
   ctx.fillStyle = reachable ? '#ffffff' : '#c0cbdc'; ctx.fillRect(cx - 4, cy - 2, 2, 1);
 }
+const FLAG_PLOT = FLAGS.map(f => PLOTS.find(p => f.x >= p.x*TS && f.x < (p.x + 3)*TS && f.y >= p.y*TS && f.y < (p.y + 3)*TS));
 function drawFlag(f, now, i){
   const x = f.x, y = f.y;
   ctx.fillStyle = '#3f2631'; ctx.fillRect(x, y - 10, 1, 11);
@@ -525,8 +532,12 @@ function frame(now){
 
   const reach = new Set([S.node]); { const q = [S.node]; while (q.length){ const n = q.shift(); for (const e of edgesOf(n)) if (edgeOpen(e)){ const m = otherEnd(e, n); if (!reach.has(m)){ reach.add(m); q.push(m); } } } }
   for (const p of PLOTS) if (seenAt(p.x + 1, p.y + 1)) drawPlot(p, now);
-  FLAGS.forEach((f, i) => { if (seenAt(Math.floor(f.x / TS), Math.floor(f.y / TS))) drawFlag(f, now, i); });
-  for (const id in NODES) drawNode(NODES[id], now, reach.has(id));
+  FLAGS.forEach((f, i) => {
+    // A flag that stands on a plot moves up onto the roof when something is built there, so it does not cover the door
+    const p = FLAG_PLOT[i], at = p && builtShown(p) ? { x: p.x*TS + 24, y: p.y*TS + 2 } : f;
+    if (seenAt(Math.floor(at.x / TS), Math.floor(at.y / TS))) drawFlag(at, now, i);
+  });
+  for (const id in NODES) if (!hiddenNode(id)) drawNode(NODES[id], now, reach.has(id));
   for (const g of GATES){
     const open = S.stars >= g.req;
     const a = gateAnim.get(g);
@@ -556,7 +567,7 @@ function frame(now){
   }
   for (const id in NODES){
     const n = NODES[id], here = id === S.node && !boy.route;
-    if (!seenAt(n.x, n.y)) continue;
+    if (!seenAt(n.x, n.y) || hiddenNode(id)) continue;
     pill(sx(n.x*TS + 8), sy(n.y*TS + (n.labelAbove ? -1 : 31)), [n.name], { color: here ? '#fee761' : '#ffffff', edge: here ? '#feae34' : '#3a4466' });
   }
   requestAnimationFrame(frame);
@@ -589,8 +600,10 @@ function renderPanel(view){
       return `<button class="btn locked" type="button" data-gate="${GATES.indexOf(e.gate)}"><img class="pix" src="${LOCK_URL}" alt="">${esc(o.name)} <small>${e.gate.req} stjärnor, ${left} kvar</small></button>`;
     }).join('');
     const plots = PLOTS.filter(p => p.node === n.id);
+    const stop = STOPP[n.id];
     h = `<span class="tag">Du är här</span><h2>${esc(n.name)}</h2><p>${esc(n.text)}</p><div class="panel-body">`;
     for (const p of plots) h += plotBlock(p);
+    if (stop) h += stopBlock(n.id);
     if (n.id === 'slott') h += `<div><button class="btn" type="button" data-slott="1">${esc(berattelse.dialog.slottKnapp)}</button></div>`;
     h += `<div><p class="sub">Vägar härifrån</p><div class="roads">${roads}</div></div></div>`;
   } else if (view.type === 'gate'){
@@ -610,7 +623,7 @@ function renderPanel(view){
   }
   panel.innerHTML = h;
   if (view.type === 'dialog') startTyping();
-  panel.querySelectorAll('.plot').forEach(el => { const p = PLOTS.find(q => q.id === el.dataset.plot); el.prepend(plotPreview(p)); });
+  panel.querySelectorAll('.plot[data-plot]').forEach(el => { const p = PLOTS.find(q => q.id === el.dataset.plot); el.prepend(plotPreview(p)); });
 }
 function plotBlock(p){
   if (p.prebuilt) return `<div class="plot" data-plot="${p.id}"><div><b>${esc(p.name)}</b><span>Byggd.</span></div></div>`;
@@ -638,6 +651,7 @@ panel.addEventListener('click', ev => {
   else if (b.dataset.talk) startBuild(PLOTS.find(q => q.id === b.dataset.talk));
   else if (b.dataset.shop) startShop(PLOTS.find(q => q.id === b.dataset.shop));
   else if (b.dataset.slott) startCount();
+  else if (b.dataset.stopp) startStop(b.dataset.stopp);
   else if (b.dataset.dlgnext !== undefined){ dlg.i++; renderPanel({ type: 'dialog' }); }
   else if (b.dataset.dlgchoice !== undefined){ dlg.choices[+b.dataset.dlgchoice].run(); }
 });
@@ -700,27 +714,61 @@ function startBuild(p){
 // or a light appears), some are free (he just decides what to do). The last choice leads to one of the two buildings and the
 // other one is never found. Where he has got to is kept in S.steg, so nothing is paid twice. 'bygg:<id>' means that the choice
 // is made and only the building is left.
+// An adventure is one of: { def: the aventyr data, key: where the progress is kept in S.steg, end(till, lines): what an ending does }
+function plotAdventure(p){
+  const b = BYGG[p.bygg];
+  return { def: b.aventyr, key: p.id, end: (till, out) => { S.steg[p.id] = 'bygg:' + till.bygg; confirmBuild(p, b.val.find(v => v.id === till.bygg), out); } };
+}
 function startAdventure(p){
   const b = BYGG[p.bygg], at = S.steg[p.id] || b.aventyr.start;
   if (at.startsWith('bygg:')) confirmBuild(p, b.val.find(v => v.id === at.slice(5)), []);
-  else runStep(p, at, []);
+  else runStep(plotAdventure(p), at, []);
 }
-function runStep(p, id, pre){
-  const st = BYGG[p.bygg].aventyr.steg[id];
+function runStep(ad, id, pre){
+  const st = ad.def.steg[id];
   startDialog([...pre, { p: st.p ?? null, t: st.t }], () => [
-    ...st.val.map(o => ({ label: o.kostnad ? `${esc(o.label)} <small>${o.kostnad} stjärnstoft</small>` : esc(o.label), poor: S.coins < o.kostnad, run: () => takeStep(p, o) })),
+    ...st.val.map(o => ({ label: o.kostnad ? `${esc(o.label)} <small>${o.kostnad} stjärnstoft</small>` : esc(o.label), poor: S.coins < o.kostnad, run: () => takeStep(ad, o) })),
     { label: berattelse.dialog.tankLiteTill, alt: true, run: toNode },
   ]);
 }
-function takeStep(p, o){
+function takeStep(ad, o){
   if (S.coins < o.kostnad){ toast(berattelse.dialog.ingaStoft.replace('{n}', o.kostnad - S.coins)); return; }
   if (o.kostnad){
     S.coins -= o.kostnad; updateHud('coins');
     sparkle(boy.x + 8, boy.y + 2, 18, '#2ce8f5'); sparkle(boy.x + 8, boy.y + 2, 12, '#ffffff');
   }
   const out = [{ p: o.p ?? null, t: o.text }];
-  if (typeof o.till === 'string'){ S.steg[p.id] = o.till; runStep(p, o.till, out); }
-  else { S.steg[p.id] = 'bygg:' + o.till.bygg; confirmBuild(p, BYGG[p.bygg].val.find(v => v.id === o.till.bygg), out); }
+  if (typeof o.till === 'string'){ S.steg[ad.key] = o.till; runStep(ad, o.till, out); }
+  else ad.end(o.till, out);
+}
+
+/* ---------- stoppen med äventyr ---------- */
+// The new stops are only adventures, no people and no building. Each can be played once: the ending he reaches is what he
+// gets (an animal, a bait, stardust or a secret fishing place), the other endings are lost.
+const STOPP = berattelse.stopp;
+function stopBlock(id){
+  const s = STOPP[id], done = S.stopp[id], going = S.steg['stopp:' + id], here = S.node === id && !boy.route;
+  const btn = done || !here ? '' : `<button class="btn" type="button" data-stopp="${id}">${esc(going ? berattelse.dialog.stoppFortsatt : s.knapp)}</button>`;
+  return `<div class="plot"><div><b>${esc(s.rubrik)}</b><span>${done ? esc(berattelse.dialog.stoppKlar) + ' ' + esc(rewardText(done)) : 'Ett äventyr som bara går att göra en gång.'}</span></div>${btn}</div>`;
+}
+function startStop(id){
+  if (S.stopp[id]) return;
+  const s = STOPP[id], key = 'stopp:' + id;
+  runStep({ def: s.aventyr, key, end: (till, out) => finishStop(id, till, out) }, S.steg[key] || s.aventyr.start, []);
+}
+function rewardText(till){
+  if (till.djur){ const d = berattelse.djur[till.djur]; return `${d.namn}, ${d.art.toLowerCase()}, skrevs in i djurboken.`; }
+  if (till.agn) return `Du fick ${SAKER[till.agn].namn.toLowerCase()}.`;
+  if (till.stoft) return `Du fick ${till.stoft} stjärnstoft.`;
+  return `En hemlig fiskeplats syns nu på kartan: ${NODES[till.fiskeplats].name}.`;
+}
+function finishStop(id, till, out){
+  S.stopp[id] = till; delete S.steg['stopp:' + id];
+  if (till.djur) giveAnimal(till.djur);
+  if (till.agn && !S.saker.includes(till.agn)){ S.saker.push(till.agn); renderPack(); toast(rewardText(till)); }
+  if (till.stoft){ S.coins += till.stoft; updateHud('coins'); sparkle(boy.x + 8, boy.y + 2, 24); toast(rewardText(till)); }
+  if (till.fiskeplats){ S.hittat.push(till.fiskeplats); buildTerrain(); sparkle(NODES[till.fiskeplats].x*TS + 8, NODES[till.fiskeplats].y*TS + 8, 26); toast(rewardText(till)); }
+  startDialog([...out, { p: null, t: rewardText(till) }], () => [{ label: 'Tillbaka till kartan', alt: true, run: toNode }]);
 }
 function confirmBuild(p, v, pre){
   const adventure = !!BYGG[p.bygg].aventyr, short = () => toast(berattelse.dialog.ingaStoft.replace('{n}', v.kostnad - S.coins));
@@ -789,15 +837,14 @@ function giveAnimal(id, it){
   renderBook();
 }
 const bookIcons = {};
-const bookIcon = (id, found) => { const k = id + found; return bookIcons[k] || (bookIcons[k] = iconURL(found ? PETS[id].right[0] : PETS[id].dark, 3)); };
+const bookIcon = id => bookIcons[id] || (bookIcons[id] = iconURL(PETS[id].right[0], 3));
 function renderBook(){
-  const ids = Object.keys(berattelse.djur), D = berattelse.dialog.djurbok;
-  $('#bookCount').textContent = `${S.djur.length} av ${ids.length} djur hittade. ${S.fram.length} av ${MAX_FRAM} är framme.`;
-  $('#book').innerHTML = ids.map(id => {
-    const d = berattelse.djur[id], found = S.djur.includes(id), out = S.fram.includes(id);
-    if (!found) return `<li class="unknown"><img class="pix" src="${bookIcon(id, false)}" alt=""><div><b>${esc(D.okant)}</b><small>${esc(d.ledtrad)}</small></div></li>`;
+  const D = berattelse.dialog.djurbok;
+  $('#bookCount').textContent = S.djur.length ? `Du har hittat ${S.djur.length} djur. ${S.fram.length} av ${MAX_FRAM} är framme.` : D.tom;
+  $('#book').innerHTML = S.djur.map(id => {
+    const d = berattelse.djur[id], out = S.fram.includes(id);
     const btn = `<button class="btn${out ? '' : ' alt'}" type="button" data-fram="${id}">${out ? esc(D.laggUndan) : esc(D.haFramme)}</button>`;
-    return `<li class="${out ? 'fram' : ''}"><img class="pix" src="${bookIcon(id, true)}" alt=""><div><b>${esc(d.namn)}</b> <span class="st">${esc(d.art)}</span><small>${esc(d.text)} ${esc(d.hur)}</small>${btn}</div></li>`;
+    return `<li class="${out ? 'fram' : ''}"><img class="pix" src="${bookIcon(id)}" alt=""><div><b>${esc(d.namn)}</b> <span class="st">${esc(d.art)}</span><small>${esc(d.text)} ${esc(d.hur)}</small>${btn}</div></li>`;
   }).join('');
 }
 $('#book').addEventListener('click', ev => {
@@ -819,9 +866,9 @@ function showIntro(){
 }
 // At the castle the queen counts the animals in the book and says something that fits
 function startCount(){
-  const D = berattelse.dialog, n = S.djur.length, m = Object.keys(berattelse.djur).length;
-  const row = n === 0 ? D.slott[0] : [...D.slott].reverse().find(r => r.andel <= n / m && r.andel > 0);
-  startDialog([{ p: 'drottningen', t: D.slottHej }, { p: 'drottningen', t: row.t.replace('{n}', n).replace('{m}', m) }], () => [
+  const D = berattelse.dialog, n = S.djur.length;
+  const row = [...D.slott].reverse().find(r => n >= r.antal);
+  startDialog([{ p: 'drottningen', t: D.slottHej }, { p: 'drottningen', t: row.t.replace('{n}', n) }], () => [
     { label: 'Tillbaka till kartan', alt: true, run: toNode },
   ]);
 }
@@ -917,7 +964,7 @@ cv.addEventListener('pointerup', e => {
 cv.addEventListener('pointercancel', () => { down = null; });
 function tapAt(wx, wy){
   const tx = Math.floor(wx / TS), ty = Math.floor(wy / TS);
-  for (const id in NODES){ const n = NODES[id]; if (Math.abs(wx - (n.x*TS + 8)) < 13 && Math.abs(wy - (n.y*TS + 6)) < 14){ walkTo(id); return; } }
+  for (const id in NODES){ const n = NODES[id]; if (!hiddenNode(id) && Math.abs(wx - (n.x*TS + 8)) < 13 && Math.abs(wy - (n.y*TS + 6)) < 14){ walkTo(id); return; } }
   for (const g of GATES){ if (tx === g.x && (ty === g.y || ty === g.y - 1)){ showGate(g); if (S.stars < g.req) toast(`Porten öppnas vid ${g.req} stjärnor. Du har ${S.stars}.`); return; } }
   for (const p of PLOTS){ if (seenAt(p.x + 1, p.y + 1) && tx >= p.x && tx <= p.x + 2 && ty >= p.y - 1 && ty <= p.y + 2){ goPlot(p); return; } }
 }

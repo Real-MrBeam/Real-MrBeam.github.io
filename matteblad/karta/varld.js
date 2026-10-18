@@ -51,7 +51,7 @@
     for (const p of karta.platser) {
       const story = berattelse.platser[p.id];
       if (!story) throw new Error(`Platsen ${p.id} saknas i berattelse.json`);
-      NODES[p.id] = { x: p.x, y: p.y, name: story.namn, text: story.text, ...(p.etikettOver ? { labelAbove: true } : {}), id: p.id };
+      NODES[p.id] = { x: p.x, y: p.y, name: story.namn, text: story.text, ...(p.etikettOver ? { labelAbove: true } : {}), ...(p.dold ? { hidden: true } : {}), id: p.id };
     }
 
     // Roads between places, with an optional star gate. Bridges where a road crosses water.
@@ -74,7 +74,8 @@
         while (x !== x2 || y !== y2) { x += dx; y += dy; tiles.push([x, y]); }
       }
       e.tiles = tiles;
-      for (const [x, y] of tiles) M[y][x] = M[y][x] === "w" ? "b" : "p";
+      // A tile can belong to two roads (a stop on a bridge), so a bridge stays a bridge
+      for (const [x, y] of tiles) M[y][x] = M[y][x] === "w" || M[y][x] === "b" ? "b" : "p";
       if (e.gate) e.gate.edge = e;
     }
     const GATES = EDGES.filter(e => e.gate).map(e => e.gate);
