@@ -1,0 +1,837 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Stjärnkartan</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: ett spelfönster. HUD överst, världskartan som huvudnummer, en dialogruta under som i ett gammalt rollspel. Ett enda mörkt utseende med flit. */
+:root{
+  --night:#181425; --navy:#262b44; --slate:#3a4466; --ink:#3f2631;
+  --mist:#c0cbdc; --steel:#8b9bb4; --paper:#ead4aa; --wood:#b86f50;
+  --gold:#feae34; --gold-lite:#fee761; --leaf:#63c74d; --leaf-dark:#3e8948; --sky:#0099db;
+  --text:#ffffff; --text-dim:#c0cbdc;
+  --font-pixel:"Pixelify Sans", ui-rounded, "Trebuchet MS", system-ui, sans-serif;
+  color-scheme: dark;
+}
+html,body{background:var(--night);color:var(--text)}
+body{font-family:var(--font-pixel);font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1040px;margin:0 auto;padding-block:14px 28px;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));display:grid;gap:14px}
+.pix{image-rendering:pixelated;image-rendering:crisp-edges}
+
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.top h1{margin:0;display:flex;align-items:center;gap:10px;font-size:28px;font-weight:700;letter-spacing:.5px;color:var(--gold-lite);text-shadow:0 3px 0 var(--ink)}
+.top h1 img{width:26px;height:26px}
+.hud{display:flex;gap:8px}
+.chip{display:flex;align-items:center;gap:8px;background:var(--navy);border:2px solid var(--ink);box-shadow:inset 0 0 0 2px var(--slate);padding:6px 12px 6px 9px;font-size:20px;font-weight:600;font-variant-numeric:tabular-nums;min-width:74px}
+.chip img{width:26px;height:26px;object-fit:contain}
+.chip.pop{animation:pop .5s steps(4)}
+@keyframes pop{0%{transform:translateY(0)}30%{transform:translateY(-5px)}60%{transform:translateY(1px)}100%{transform:translateY(0)}}
+
+.stage{position:relative;height:clamp(340px, 62vh, 600px);border:3px solid var(--ink);box-shadow:0 0 0 3px var(--slate), 0 6px 0 3px var(--ink);background:#84c669;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none}
+.stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:pointer}
+.stage canvas:focus-visible{outline:3px solid var(--gold);outline-offset:-3px}
+.toast{position:absolute;left:50%;top:12px;transform:translateX(-50%);max-width:calc(100% - 24px);width:max-content;background:var(--navy);border:2px solid var(--ink);box-shadow:inset 0 0 0 2px var(--gold);padding:8px 14px;font-size:15px;text-align:center;pointer-events:none;text-wrap:balance}
+.hint{position:absolute;left:10px;bottom:10px;right:10px;width:max-content;max-width:calc(100% - 20px);background:rgba(24,20,37,.82);border:2px solid var(--ink);padding:5px 10px;font-size:13px;color:var(--text-dim);pointer-events:none}
+
+.lower{display:grid;gap:14px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:780px){.lower{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr)}}
+.box{background:var(--navy);border:3px solid var(--ink);box-shadow:inset 0 0 0 3px var(--slate);padding:16px 18px;min-width:0}
+.box h2{margin:0 0 4px;font-size:22px;font-weight:700;color:var(--gold-lite);text-wrap:balance}
+.box p{margin:0;color:var(--text-dim);max-width:60ch}
+.tag{display:inline-block;font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--leaf);margin-bottom:2px}
+.panel-body{display:grid;gap:12px;margin-top:10px}
+.sub{font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--steel);margin:0 0 6px}
+.roads{display:flex;flex-wrap:wrap;gap:8px}
+.btn{font:inherit;font-size:15px;font-weight:600;color:var(--ink);background:var(--gold);border:2px solid var(--ink);box-shadow:inset -2px -3px 0 rgba(63,38,49,.25), 0 3px 0 var(--ink);padding:7px 12px 6px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;line-height:1.2}
+.btn:hover{background:var(--gold-lite)}
+.btn:active{transform:translateY(2px);box-shadow:inset -2px -3px 0 rgba(63,38,49,.25), 0 1px 0 var(--ink)}
+.btn:focus-visible{outline:3px solid var(--text);outline-offset:2px}
+.btn.alt{background:var(--mist)}
+.btn.alt:hover{background:var(--text)}
+.btn.locked{background:var(--slate);color:var(--text-dim);box-shadow:inset -2px -3px 0 rgba(0,0,0,.2), 0 3px 0 var(--ink)}
+.btn.locked:hover{background:#4a5577}
+.btn img{width:16px;height:16px;object-fit:contain}
+.btn small{font-weight:400;opacity:.85}
+.meter{display:grid;gap:6px}
+.bar{height:16px;background:var(--night);border:2px solid var(--ink);box-shadow:inset 0 0 0 2px var(--slate);position:relative}
+.bar i{position:absolute;left:2px;top:2px;bottom:2px;background:var(--gold);box-shadow:inset 0 -3px 0 #f77622}
+.meter span{font-size:14px;color:var(--text-dim);font-variant-numeric:tabular-nums}
+.plot{display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:rgba(24,20,37,.45);border:2px solid var(--ink);padding:10px 12px}
+.plot canvas{width:48px;height:48px;flex:none}
+.plot div{flex:1;min-width:140px}
+.plot b{display:block;font-size:17px}
+.plot span{font-size:14px;color:var(--text-dim)}
+
+.demo h2{font-size:19px}
+.demo-btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.log{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:4px;font-size:14px;font-variant-numeric:tabular-nums}
+.log li{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed var(--slate);padding:4px 0;color:var(--text-dim)}
+.log li b{color:var(--text);font-weight:500}
+.log li .st{color:var(--gold);white-space:nowrap}
+.log li.new{animation:flash 1.2s steps(6)}
+@keyframes flash{0%,40%{background:rgba(254,174,52,.25)}100%{background:transparent}}
+
+footer{font-size:13px;color:var(--steel);display:grid;gap:4px}
+footer a{color:var(--mist)}
+
+@media (max-width:480px){
+  .top h1{font-size:23px}
+  .chip{font-size:18px;min-width:64px;padding:5px 10px 5px 7px}
+  .chip img{width:22px;height:22px}
+  .box{padding:14px}
+}
+@media (prefers-reduced-motion: reduce){.chip.pop,.log li.new{animation:none}}
+</style>
+
+<main class="wrap">
+  <header class="top">
+    <a href="../" style="order:-1;font:600 15px var(--font-pixel);color:var(--text-dim);text-decoration:none;border:2px solid var(--slate);background:var(--navy);padding:4px 12px;border-radius:6px">← Till matteblad</a>
+    <h1><img id="logoStar" class="pix" alt="">Stjärnkartan</h1>
+    <div class="hud" aria-label="Dina samlade stjärnor och mynt">
+      <span class="chip" id="chipStars" title="Stjärnor från prov"><img id="icoStar" class="pix" alt="Stjärnor"><span id="starCount">6</span></span>
+      <span class="chip" id="chipCoins" title="Mynt från matteblad"><img id="icoCoin" class="pix" alt="Mynt"><span id="coinCount">34</span></span>
+    </div>
+  </header>
+
+  <div class="stage" id="stage">
+    <canvas id="map" tabindex="0" aria-label="Världskarta med platser, stjärnportar och byggtomter. Använd piltangenterna för att gå mellan platser."></canvas>
+    <div class="toast" id="toast" hidden></div>
+    <div class="hint" id="hint">Tryck på en plats för att gå dit. Dra för att titta runt.</div>
+  </div>
+
+  <div class="lower">
+    <section class="box" id="panel" aria-live="polite"></section>
+    <section class="box demo">
+      <span class="tag">Exempel</span>
+      <h2>Prova hur det känns</h2>
+      <p>Resultaten här är påhittade. I den riktiga kartan kommer stjärnorna från rättade prov och mynten från rättade matteblad.</p>
+      <div class="demo-btns">
+        <button class="btn" id="btnTest" type="button"><img class="pix" data-ico="star" alt="">Nytt prov</button>
+        <button class="btn" id="btnSheet" type="button"><img class="pix" data-ico="coin" alt="">Rättat matteblad</button>
+        <button class="btn alt" id="btnReset" type="button">Börja om</button>
+      </div>
+      <ol class="log" id="log" aria-label="Provlogg"></ol>
+    </section>
+  </div>
+
+  <footer>
+    <span>Kartgrafik: Tiny Town av Kenney (CC0, kenney.nl). Pojken, vattnet, broarna, portarna och stjärnorna är egen pixelgrafik.</span>
+    <span>Stjärnor: under 50 % ger 1, 50 till 79 % ger 2, minst 80 % ger 3. Bättre än förra provet i samma ämne ger en bonusstjärna.</span>
+  </footer>
+</main>
+
+<script>
+(() => {
+'use strict';
+const TS = 16, MW = 44, MH = 30;
+const $ = s => document.querySelector(s);
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- liten deterministisk slump ---------- */
+function rng(seed){ let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+
+/* ---------- sprites ritade som text ---------- */
+function sprite(rows, pal){
+  const h = rows.length, w = rows[0].length;
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  const x = c.getContext('2d');
+  for (let y = 0; y < h; y++) for (let i = 0; i < w; i++){
+    const ch = rows[y][i];
+    if (ch !== '.' && pal[ch]){ x.fillStyle = pal[ch]; x.fillRect(i, y, 1, 1); }
+  }
+  return c;
+}
+function mirror(src){ const c = document.createElement('canvas'); c.width = src.width; c.height = src.height; const x = c.getContext('2d'); x.translate(src.width, 0); x.scale(-1, 1); x.drawImage(src, 0, 0); return c; }
+
+const BOYPAL = { o:'#3f2631', c:'#e43b44', C:'#a22633', w:'#f6757a', s:'#fcbc8f', S:'#eaa56c', h:'#733e39', e:'#262b44', b:'#0099db', B:'#124e89', g:'#63c74d', G:'#3e8948', d:'#265c42', p:'#3a4466', k:'#262b44', y:'#feae34' };
+const head = ["................", ".....oooooo.....", "....occcccco....", "...occwccccco..."];
+const FRONT = [...head,
+  "...oCCCCCCCCo...", "...ohssssssho...", "...osesssseso...", "...osssSSssso...", "....osssssso....",
+  "...obgbbbbgbo...", "..osbgbbbbgbso..", "..osBbbbbbbBso..", "...oppppppppo..."];
+const BACK = [...head,
+  "...oCccccccCo...", "...ohhhhhhhho...", "...ohhhhhhhho...", "....ohssssho....", "...odggggggdo...",
+  "..osdgGGGGgdso..", "..osdggggggdso..", "..osdgggyggdso..", "...oddddddddo..."];
+const LEGS_A = ["...opppoopppo...", "...okkkookkko...", "....ooo..ooo...."];
+const LEGS_B = ["...opppoopppo...", "...okkkoopppo...", "....ooo.okkko..."];
+const LEGS_C = ["...opppoopppo...", "...opppookkko...", "...okkko.ooo...."];
+const SIDE = ["................", ".....ooooo......", "....occwcco.....", "...occccccco....",
+  "...oCCCCCCCCCo..", "...ohhhssssoo...", "...ohhsssesso...", "...ohsssssssso..", "....oosssSso....",
+  "..oddgbbbbo.....", "..odggbbsbo.....", "..odggbBsBo.....", "...oddppppo....."];
+const SIDE_A = ["....oppppo......", "....okkkkko.....", ".....oooooo....."];
+const SIDE_B = ["...oppoppo......", "..okkko.okkko...", "...ooo...ooo...."];
+
+const BOY = {
+  down: [FRONT.concat(LEGS_A), FRONT.concat(LEGS_B), FRONT.concat(LEGS_A), FRONT.concat(LEGS_C)].map(r => sprite(r, BOYPAL)),
+  up:   [BACK.concat(LEGS_A), BACK.concat(LEGS_B), BACK.concat(LEGS_A), BACK.concat(LEGS_C)].map(r => sprite(r, BOYPAL)),
+  right:[SIDE.concat(SIDE_A), SIDE.concat(SIDE_B)].map(r => sprite(r, BOYPAL)),
+};
+BOY.left = BOY.right.map(mirror);
+
+const STAR = sprite([
+  "......o......", ".....oyo.....", ".....oyo.....", "....oyyyo....", "ooooywyyyoooo", "oyyyywyyyyyyo",
+  ".oyyyyyyyyyo.", "..oyyyyyyyo..", "...oyyyyyo...", "...oyyoyyo...", "..oyyo.oyyo..", "..oyo...oyo..", "..oo.....oo.."],
+  { o:'#3f2631', y:'#feae34', w:'#fee761' });
+const LOCK = sprite(["..sss..", ".s...s.", ".s...s.", "ooooooo", "oyyyyyo", "oyyoyyo", "oyyyyyo", "ooooooo"], { o:'#3f2631', y:'#feae34', s:'#c0cbdc' });
+const GATEPAL = { o:'#3f2631', S:'#c0cbdc', s:'#8b9bb4', w:'#b86f50', W:'#733e39', y:'#feae34', Y:'#fee761' };
+const GATE_TOP = ["................", "oooooooooooooooo", "oSSSSSSSSSSSSSSo", "osssssssssssssso", "oooooooooooooooo"];
+const GATE_CLOSED = sprite([...GATE_TOP,
+  ".oSsowWwwWwoSso.", ".oSsowWwwWwoSso.", ".oSsowwyywwoSso.", ".oSsowyYYywoSso.", ".oSsowwyywwoSso.",
+  ".oSsowWwwWwoSso.", ".oSsowWwwWwoSso.", ".oSsowWwwWwoSso.", ".oSsowWwwWwoSso.", ".ossowwwwwwosso.", ".oooooooooooooo."], GATEPAL);
+const GATE_OPEN = sprite([...GATE_TOP,
+  ".oSso......oSso.", ".oSso......oSso.", ".oSso......oSso.", ".oSso......oSso.", ".oSso......oSso.",
+  ".oSso......oSso.", ".oSso......oSso.", ".oSso......oSso.", ".oSso......oSso.", ".osso......osso.", ".oooo......oooo."], GATEPAL);
+
+/* ---------- världen ---------- */
+const M = Array.from({ length: MH }, () => new Array(MW).fill('g'));
+const inb = (x, y) => x >= 0 && y >= 0 && x < MW && y < MH;
+const at = (x, y) => inb(x, y) ? M[y][x] : null;
+function fillR(x0, y0, x1, y1, v){ for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) if (inb(x, y)) M[y][x] = v; }
+function ell(cx, cy, rx, ry, v){ for (let y = 0; y < MH; y++) for (let x = 0; x < MW; x++){ const dx = (x + .5 - cx) / rx, dy = (y + .5 - cy) / ry; if (dx*dx + dy*dy <= 1) M[y][x] = v; } }
+
+fillR(0, 0, 19, 19, 'F'); fillR(20, 0, 30, 14, 'A');
+fillR(42, 0, 43, 6, 'F'); fillR(33, 13, 35, 19, 'F'); fillR(39, 14, 43, 19, 'F');
+fillR(0, 27, 5, 29, 'F'); fillR(39, 26, 43, 29, 'A'); fillR(29, 27, 30, 29, 'F');
+ell(4.5, 5.5, 4.3, 3.7, 'g'); ell(15, 14.5, 5.7, 3.6, 'g'); ell(25, 7, 4.7, 4.3, 'g');
+const LAKE = { cx: 24.2*TS, cy: 18.6*TS, rx: 4.9*TS, ry: 3.1*TS };
+function waterD(X, Y){
+  const ex = (X - LAKE.cx) / LAKE.rx, ey = (Y - LAKE.cy) / LAKE.ry;
+  const wob = Math.sin(Math.atan2(ey, ex) * 5 + 1) * 0.05 + Math.sin(Math.atan2(ey, ex) * 3) * 0.03;
+  let d = (1 + wob - Math.hypot(ex, ey)) * LAKE.ry;
+  const rc = 32*TS + Math.sin(Y / 41) * 4 + Math.sin(Y / 17 + 1) * 1.5;
+  d = Math.max(d, 15 + Math.sin(Y / 29 + 2) * 2 - Math.abs(X - rc));
+  if (X > 26*TS && X < 33*TS){ const sc = 19*TS + Math.sin(X / 11) * 1.5; d = Math.max(d, 8 - Math.abs(Y - sc)); }
+  return d;
+}
+for (let y = 0; y < MH; y++) for (let x = 0; x < MW; x++) if (waterD(x*TS + 8, y*TS + 8) > 0) M[y][x] = 'w';
+
+const NODES = {
+  hem:    { x: 5,  y: 24, name: 'Hemmet',          text: 'Här började resan. Stugan bredvid byggdes för mynt från matteblad.' },
+  skola:  { x: 14, y: 24, name: 'Skolan',          text: 'Varje prov ger 1 till 3 stjärnor. Stjärnorna öppnar portarna ut i världen.' },
+  glanta: { x: 14, y: 14, name: 'Skogsgläntan',    text: 'En solig glänta mitt i granskogen. Här skulle bin trivas.' },
+  hemlig: { x: 5,  y: 6,  name: 'Hemliga gläntan', text: 'Få hittar hit. Det växer konstiga svampar mellan träden.' },
+  host:   { x: 25, y: 8,  name: 'Höstskogen',      text: 'Löven är orange här året runt. Perfekt för en fruktlund.' },
+  sjo:    { x: 24, y: 24, name: 'Sjöviken',        text: 'Vid stranden går det att bygga en fiskebod.' },
+  fiske:  { x: 37, y: 24, name: 'Fiskeläget',      text: 'Ett litet läge vid älven. Härifrån går en väg norrut mot tornet.' },
+  torn:   { x: 37, y: 10, name: 'Tornet',          text: 'Från tornet syns slottet. Det är inte långt kvar.' },
+  slott:  { x: 37, y: 5,  name: 'Slottet',         text: 'Terminens mål. Hit kommer den som samlat 20 stjärnor.', labelAbove: true },
+};
+for (const k in NODES) NODES[k].id = k;
+
+const EDGES = [
+  { a: 'hem',    b: 'skola',  pts: [[5,24],[14,24]] },
+  { a: 'skola',  b: 'glanta', pts: [[14,24],[14,14]], gate: { x: 14, y: 20, req: 3 } },
+  { a: 'glanta', b: 'host',   pts: [[14,14],[14,8],[25,8]], gate: { x: 14, y: 11, req: 5 } },
+  { a: 'glanta', b: 'hemlig', pts: [[14,14],[9,14],[9,6],[5,6]], gate: { x: 9, y: 10, req: 10 } },
+  { a: 'skola',  b: 'sjo',    pts: [[14,24],[24,24]], gate: { x: 19, y: 24, req: 8 } },
+  { a: 'sjo',    b: 'fiske',  pts: [[24,24],[37,24]], gate: { x: 28, y: 24, req: 12 } },
+  { a: 'host',   b: 'torn',   pts: [[25,8],[34,8],[34,10],[37,10]], gate: { x: 29, y: 8, req: 14 } },
+  { a: 'fiske',  b: 'torn',   pts: [[37,24],[37,10]] },
+  { a: 'torn',   b: 'slott',  pts: [[37,10],[37,5]], gate: { x: 37, y: 7, req: 20 } },
+];
+for (const e of EDGES){
+  const tiles = [];
+  for (let i = 0; i < e.pts.length - 1; i++){
+    let [x, y] = e.pts[i]; const [x2, y2] = e.pts[i + 1];
+    const dx = Math.sign(x2 - x), dy = Math.sign(y2 - y);
+    if (i === 0) tiles.push([x, y]);
+    while (x !== x2 || y !== y2){ x += dx; y += dy; tiles.push([x, y]); }
+  }
+  e.tiles = tiles;
+  for (const [x, y] of tiles) M[y][x] = M[y][x] === 'w' ? 'b' : 'p';
+  if (e.gate) e.gate.edge = e;
+}
+const GATES = EDGES.filter(e => e.gate).map(e => e.gate);
+
+const PLOTS = [
+  { id: 'stuga',   node: 'hem',    x: 1,  y: 20, name: 'Stuga',          cost: 15, item: 'stuga',   prebuilt: true },
+  { id: 'brunn',   node: 'hem',    x: 6,  y: 20, name: 'Brunn',          cost: 8,  item: 'brunn' },
+  { id: 'bikupor', node: 'glanta', x: 16, y: 15, name: 'Bikupor',        cost: 12, item: 'bikupor' },
+  { id: 'koja',    node: 'hemlig', x: 2,  y: 2,  name: 'Hemlig stuga',   cost: 25, item: 'koja' },
+  { id: 'frukt',   node: 'host',   x: 22, y: 4,  name: 'Fruktlund',      cost: 15, item: 'frukt' },
+  { id: 'bod',     node: 'sjo',    x: 25, y: 26, name: 'Fiskebod',       cost: 20, item: 'bod' },
+];
+for (const p of PLOTS) fillR(p.x, p.y, p.x + 2, p.y + 2, 'g');
+
+/* byggnader på tomterna, 3x3 tile-index (-1 = tomt) */
+const ITEMS = {
+  stuga:   [[52,53,54],[64,65,66],[84,86,87]],
+  brunn:   [[-1,92,-1],[2,104,130],[1,2,-1]],
+  bikupor: [[94,2,94],[2,94,2],[-1,1,-1]],
+  koja:    [[-1,55,-1],[29,67,-1],[-1,87,29]],
+  frukt:   [[27,-1,27],[-1,27,107],[1,-1,2]],
+  bod:     [[-1,51,-1],[131,63,-1],[-1,91,130]],
+};
+const EMPTY_PLOT = [[44,45,46],[56,83,58],[68,69,70]];
+
+/* fasta saker på kartan */
+const OBJ = [];
+const occ = new Set();
+const key = (x, y) => x + ',' + y;
+function put(i, x, y){ OBJ.push({ i, x, y }); occ.add(key(x, y)); }
+function block(rows, x, y){ rows.forEach((r, dy) => r.forEach((i, dx) => { if (i >= 0) put(i, x + dx, y + dy); else occ.add(key(x + dx, y + dy)); })); }
+block([[48,49,50],[60,61,62],[88,90,91]], 10, 20); put(83, 13, 23);
+block([[52,53,54],[64,65,66],[84,86,87]], 39, 20); block([[51],[63],[91]], 42, 20); put(130, 38, 22); put(107, 43, 22);
+block([[96,97,98],[108,109,110],[120,121,122],[126,125,126]], 39, 8);
+put(107, 4, 22); put(29, 2, 8); put(29, 7, 3); put(29, 11, 16); put(29, 19, 13); put(27, 28, 4); put(27, 22, 9);
+put(83, 23, 22); put(28, 34, 26); put(28, 22, 28); put(5, 12, 26); put(5, 35, 21); put(29, 41, 25);
+for (let y = 1; y <= 4; y++) for (let x = 33; x <= 41; x++) occ.add(key(x, y));
+for (const p of PLOTS) for (let dy = 0; dy < 3; dy++) for (let dx = 0; dx < 3; dx++) occ.add(key(p.x + dx, p.y + dy));
+for (const k in NODES) occ.add(key(NODES[k].x, NODES[k].y));
+
+const CASTLE = [[96,97,98,-1,-1,96,97,98],[108,109,110,100,100,108,109,110],[120,121,122,111,112,120,121,122],[126,125,126,123,124,126,125,126]];
+const CASTLE_X = 33 * TS + 8, CASTLE_Y = 1 * TS;
+const FLAGS = [ { x: CASTLE_X + 24, y: CASTLE_Y - 2 }, { x: CASTLE_X + 5*16 + 24, y: CASTLE_Y - 2 }, { x: 40*TS + 8, y: 8*TS - 2 } ];
+
+/* ---------- tileset ---------- */
+const tiles = new Image();
+tiles.src = 'data:image/png;base64,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';
+const tileXY = i => [(i % 12) * TS, Math.floor(i / 12) * TS];
+function tile(ctx, i, x, y){ const [sx, sy] = tileXY(i); ctx.drawImage(tiles, sx, sy, TS, TS, x, y, TS, TS); }
+function quad(ctx, i, qx, qy, x, y){ const [sx, sy] = tileXY(i); ctx.drawImage(tiles, sx + qx*8, sy + qy*8, 8, 8, x + qx*8, y + qy*8, 8, 8); }
+function auto(ctx, set, same, x, y){
+  const up = same(x, y - 1), dn = same(x, y + 1), lf = same(x - 1, y), rt = same(x + 1, y);
+  for (let qy = 0; qy < 2; qy++) for (let qx = 0; qx < 2; qx++){
+    const v = qy ? dn : up, h = qx ? rt : lf;
+    const col = h ? 1 : (qx ? 2 : 0), row = v ? 1 : (qy ? 2 : 0);
+    quad(ctx, set[row*3 + col], qx, qy, x*TS, y*TS);
+  }
+}
+const DIRT = [12,13,14,24,25,26,36,37,38];
+const FOREST = { F: [6,7,8,18,19,20,30,31,32], A: [9,10,11,21,22,23,33,34,35] };
+const isWater = (x, y) => { const v = at(x, y); return v === null || v === 'w' || v === 'b'; };
+const isPath = (x, y) => { const v = at(x, y); return v === 'p' || v === 'b'; };
+
+let WFIELD = null;
+function hex(c){ return [parseInt(c.slice(1,3),16), parseInt(c.slice(3,5),16), parseInt(c.slice(5,7),16)]; }
+const WC = { lip: hex('#3e8948'), foam: hex('#2ce8f5'), mid: hex('#0099db'), deep: hex('#0e86c8'), glint: hex('#ffffff') };
+function waterLayer(frame){
+  const w = MW*TS, h = MH*TS;
+  if (!WFIELD){ WFIELD = new Float32Array(w*h); for (let Y = 0; Y < h; Y++) for (let X = 0; X < w; X++) WFIELD[Y*w + X] = waterD(X + .5, Y + .5); }
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  const x = c.getContext('2d'), im = x.createImageData(w, h), D = im.data;
+  for (let Y = 0; Y < h; Y++) for (let X = 0; X < w; X++){
+    const d = WFIELD[Y*w + X]; if (d < -1.2) continue;
+    if (M[Y >> 4][X >> 4] === 'p') continue;
+    let col;
+    if (d < 0) col = WC.lip;
+    else if (d < 1.3) col = WC.foam;
+    else {
+      col = d > 9 ? WC.deep : WC.mid;
+      const band = Math.floor(Y / 6);
+      if (d > 3 && Y % 6 === 2 && ((X + frame*2 + band*7) % 15) < 3) col = WC.foam;
+      if (d > 4 && ((X*7 + Y*13 + frame*29) % 211) === 0) col = WC.glint;
+    }
+    const o = (Y*w + X) * 4; D[o] = col[0]; D[o+1] = col[1]; D[o+2] = col[2]; D[o+3] = 255;
+  }
+  x.putImageData(im, 0, 0);
+  return c;
+}
+function drawBridgeTile(ctx, x, y){
+  const ox = x*TS, oy = y*TS;
+  const left = at(x-1, y) !== 'b', right = at(x+1, y) !== 'b';
+  ctx.fillStyle = '#3f2631'; ctx.fillRect(ox, oy + 13, TS, 2);
+  ctx.fillStyle = '#b86f50'; ctx.fillRect(ox, oy + 2, TS, 11);
+  ctx.fillStyle = '#c28569'; ctx.fillRect(ox, oy + 3, TS, 2);
+  ctx.fillStyle = '#733e39';
+  for (let i = 3; i < TS; i += 4) ctx.fillRect(ox + i, oy + 2, 1, 11);
+  ctx.fillStyle = '#3f2631'; ctx.fillRect(ox, oy + 1, TS, 1); ctx.fillRect(ox, oy + 12, TS, 1);
+  for (const [cond, px] of [[left, 0], [right, TS - 3]]){
+    if (!cond) continue;
+    ctx.fillStyle = '#3f2631'; ctx.fillRect(ox + px, oy - 1, 3, 16);
+    ctx.fillStyle = '#b86f50'; ctx.fillRect(ox + px + 1, oy, 1, 14);
+  }
+}
+
+let TERRAIN = [];
+function buildTerrain(){
+  const r = rng(42);
+  // dekor i gräset
+  const near = (x, y) => [[1,0],[-1,0],[0,1],[0,-1]].some(([dx, dy]) => { const v = at(x+dx, y+dy); return v === 'p' || v === 'b' || v === 'w'; });
+  for (let y = 0; y < MH; y++) for (let x = 0; x < MW; x++){
+    if (M[y][x] !== 'g' || occ.has(key(x, y)) || near(x, y)) continue;
+    const v = r();
+    if (v < 0.03) put(28, x, y);
+    else if (v < 0.045 && at(x, y-1) === 'g' && !occ.has(key(x, y-1)) && !near(x, y-1)){ put(4, x, y-1); put(16, x, y); }
+    else if (v < 0.065) put(5, x, y);
+    else if (v < 0.072) put(29, x, y);
+  }
+  const base = document.createElement('canvas'); base.width = MW*TS; base.height = MH*TS;
+  const b = base.getContext('2d');
+  const gr = rng(7);
+  for (let y = 0; y < MH; y++) for (let x = 0; x < MW; x++){
+    const v = gr(); tile(b, v < 0.13 ? 1 : v < 0.17 ? 2 : 0, x*TS, y*TS);
+  }
+  for (let y = 0; y < MH; y++) for (let x = 0; x < MW; x++) if (M[y][x] === 'p') auto(b, DIRT, isPath, x, y);
+  const over = document.createElement('canvas'); over.width = base.width; over.height = base.height;
+  const o = over.getContext('2d');
+  for (let y = 0; y < MH; y++) for (let x = 0; x < MW; x++) if (M[y][x] === 'b') drawBridgeTile(o, x, y);
+  const tr = rng(99), stamps = [];
+  const pick = t => tr() < .7 ? { i: t === 'F' ? 28 : 27 } : { i: t === 'F' ? 16 : 15, top: t === 'F' ? 4 : 3 };
+  const same = (x, y, t) => { const v = at(x, y); return v === null || v === t; };
+  for (let y = 0; y < MH; y++) for (let x = 0; x < MW; x++){
+    const t = M[y][x]; if (t !== 'F' && t !== 'A') continue;
+    stamps.push({ x: x*TS, y: y*TS - (same(x, y-1, t) ? 3 : 0), ...(same(x, y-1, t) ? pick(t) : { i: t === 'F' ? 28 : 27 }) });
+    if (same(x+1, y, t) && same(x, y+1, t) && same(x+1, y+1, t)) stamps.push({ x: x*TS + 8, y: y*TS + 5, ...pick(t) });
+  }
+  for (const ob of OBJ) stamps.push({ x: ob.x*TS, y: ob.y*TS, i: ob.i, obj: true });
+  stamps.sort((a, b) => a.y - b.y || (a.obj ? 1 : 0) - (b.obj ? 1 : 0));
+  for (const st of stamps){ if (st.top !== undefined) tile(o, st.top, st.x, st.y - TS); tile(o, st.i, st.x, st.y); }
+  o.fillStyle = '#262b44'; o.fillRect(CASTLE_X + 3*TS + 6, CASTLE_Y + 2*TS + 6, 20, 26);
+  CASTLE.forEach((row, dy) => row.forEach((i, dx) => { if (i >= 0) tile(o, i, CASTLE_X + dx*TS, CASTLE_Y + dy*TS); }));
+  const frames = [];
+  for (let f = 0; f < 3; f++){
+    const c = document.createElement('canvas'); c.width = base.width; c.height = base.height;
+    const ctx = c.getContext('2d');
+    ctx.drawImage(base, 0, 0); ctx.drawImage(waterLayer(f), 0, 0); ctx.drawImage(over, 0, 0);
+    frames.push(c);
+  }
+  TERRAIN = frames;
+}
+
+/* ---------- tillstånd ---------- */
+const START = () => ({
+  stars: 6, coins: 34, node: 'skola',
+  built: { stuga: true },
+  log: [ { subj: 'Matte', p: 14, max: 20, st: 2, bonus: 0 }, { subj: 'Engelska', p: 15, max: 18, st: 3, bonus: 0 }, { subj: 'SO', p: 5, max: 12, st: 1, bonus: 0 } ],
+  testIdx: 0,
+});
+let S = START();
+const SAMPLE_TESTS = [
+  { subj: 'NO', p: 9, max: 15 }, { subj: 'Matte', p: 17, max: 20 }, { subj: 'Svenska', p: 11, max: 20 },
+  { subj: 'Engelska', p: 17, max: 18 }, { subj: 'SO', p: 9, max: 12 }, { subj: 'Matte', p: 19, max: 20 },
+  { subj: 'NO', p: 13, max: 15 }, { subj: 'Svenska', p: 16, max: 20 },
+];
+
+const boy = { x: 0, y: 0, dir: 'down', route: null, step: 0, t: 0, target: null };
+function placeBoy(id){ const n = NODES[id]; boy.x = n.x*TS; boy.y = n.y*TS; }
+
+/* ---------- canvas ---------- */
+const stage = $('#stage'), cv = $('#map'), ctx = cv.getContext('2d');
+let dpr = 1, scaleCss = 2, scaleDev = 2, viewW = 0, viewH = 0;
+const cam = { x: 0, y: 0, follow: true, focus: null };
+function resize(){
+  const r = stage.getBoundingClientRect();
+  dpr = window.devicePixelRatio || 1;
+  scaleCss = Math.max(2, Math.min(4, Math.floor(r.width / (18*TS))));
+  scaleDev = Math.max(1, Math.round(scaleCss * dpr));
+  cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr);
+  viewW = cv.width / scaleDev; viewH = cv.height / scaleDev;
+  ctx.imageSmoothingEnabled = false;
+}
+new ResizeObserver(resize).observe(stage);
+
+function clampCam(x, y){
+  const mw = MW*TS, mh = MH*TS;
+  x = viewW >= mw ? (mw - viewW) / 2 : Math.max(0, Math.min(mw - viewW, x));
+  y = viewH >= mh ? (mh - viewH) / 2 : Math.max(0, Math.min(mh - viewH, y));
+  return [x, y];
+}
+function centerOn(wx, wy, snap){
+  const [x, y] = clampCam(wx - viewW/2, wy - viewH/2);
+  if (snap){ cam.x = x; cam.y = y; }
+  return [x, y];
+}
+
+/* ---------- logik ---------- */
+const edgeOpen = e => !e.gate || S.stars >= e.gate.req;
+const otherEnd = (e, id) => e.a === id ? e.b : e.a;
+function edgesOf(id){ return EDGES.filter(e => e.a === id || e.b === id); }
+function findRoute(from, to, ignoreLocks){
+  const prev = { [from]: null }, q = [from];
+  while (q.length){
+    const n = q.shift(); if (n === to) break;
+    for (const e of edgesOf(n)){
+      if (!ignoreLocks && !edgeOpen(e)) continue;
+      const m = otherEnd(e, n); if (m in prev) continue;
+      prev[m] = { n, e }; q.push(m);
+    }
+  }
+  if (!(to in prev)) return null;
+  const hops = []; let c = to;
+  while (prev[c]){ hops.unshift({ e: prev[c].e, from: prev[c].n, to: c }); c = prev[c].n; }
+  return hops;
+}
+function walkTo(id){
+  if (boy.route || id === S.node) { if (id === S.node) showNode(); return; }
+  const hops = findRoute(S.node, id, false);
+  if (!hops){
+    const any = findRoute(S.node, id, true);
+    const g = any && any.map(h => h.e).find(e => !edgeOpen(e));
+    if (g){ showGate(g.gate); focusGate(g.gate); toast(`Porten mot ${NODES[g.b === S.node ? g.a : g.b].name} kräver ${g.gate.req} stjärnor.`); }
+    return;
+  }
+  const pts = [];
+  for (const h of hops){
+    const t = h.e.a === h.from ? h.e.tiles : [...h.e.tiles].reverse();
+    for (let i = (pts.length ? 1 : 1); i < t.length; i++) pts.push(t[i]);
+  }
+  boy.route = pts; boy.step = 0; boy.target = id; cam.follow = true; cam.focus = null;
+  hideHint();
+  renderPanel({ type: 'walk', id });
+}
+function onArrive(){
+  S.node = boy.target; boy.route = null; boy.dir = 'down';
+  if (pendingPlot && PLOTS.find(p => p.id === pendingPlot).node === S.node){ showPlot(PLOTS.find(p => p.id === pendingPlot)); pendingPlot = null; }
+  else showNode();
+}
+let pendingPlot = null;
+
+/* ---------- effekter ---------- */
+const FX = [];
+function sparkle(wx, wy, n, col){
+  for (let i = 0; i < n; i++){ const a = Math.random() * Math.PI * 2, s = 18 + Math.random() * 30; FX.push({ k: 'spark', x: wx, y: wy, vx: Math.cos(a)*s, vy: Math.sin(a)*s - 20, t: 0, life: .7 + Math.random()*.5, col: col || (Math.random() < .5 ? '#fee761' : '#ffffff') }); }
+}
+function dust(wx, wy){
+  for (let i = 0; i < 14; i++){ const a = Math.random() * Math.PI * 2, s = 10 + Math.random() * 22; FX.push({ k: 'dust', x: wx + Math.cos(a)*10, y: wy + Math.sin(a)*8, vx: Math.cos(a)*s, vy: Math.sin(a)*s*.6 - 6, t: 0, life: .55 + Math.random()*.35, r: 2 + Math.random()*3 }); }
+}
+const gateAnim = new Map(), plotAnim = new Map();
+function showMap(){ const r = stage.getBoundingClientRect(); if (r.top < 0 || r.bottom > innerHeight) stage.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' }); }
+function focusGate(g){ cam.follow = false; cam.focus = { x: g.x*TS + 8, y: g.y*TS + 8, until: performance.now() + 2200 }; }
+
+/* ---------- ritning ---------- */
+function ellipse(cx, cy, rx, ry, col){
+  ctx.fillStyle = col;
+  const kx = Math.ceil(rx), ky = Math.ceil(ry);
+  for (let py = -ky; py < ky; py++) for (let px = -kx; px < kx; px++){
+    const dx = (px + .5) / rx, dy = (py + .5) / ry;
+    if (dx*dx + dy*dy <= 1) ctx.fillRect(cx + px, cy + py, 1, 1);
+  }
+}
+function drawNode(n, now, reachable){
+  const cx = n.x*TS + 8, cy = n.y*TS + 10;
+  ellipse(cx, cy + 1, 7, 4.5, 'rgba(63,38,49,.35)');
+  ellipse(cx, cy, 7, 4.5, '#3f2631');
+  ellipse(cx, cy, 6, 3.5, reachable ? '#ead4aa' : '#8b9bb4');
+  ellipse(cx, cy, 3.5, 2, reachable ? (n.id === 'slott' ? '#e43b44' : '#feae34') : '#5a6988');
+  ctx.fillStyle = reachable ? '#ffffff' : '#c0cbdc'; ctx.fillRect(cx - 4, cy - 2, 2, 1);
+}
+function drawFlag(f, now, i){
+  const x = f.x, y = f.y;
+  ctx.fillStyle = '#3f2631'; ctx.fillRect(x, y - 10, 1, 11);
+  const w = Math.floor(now / 260 + i) % 2;
+  ctx.fillStyle = '#3f2631'; ctx.fillRect(x + 1, y - 11, 7, 6);
+  ctx.fillStyle = i === 2 ? '#0099db' : '#e43b44'; ctx.fillRect(x + 1, y - 10, 6, 4);
+  ctx.fillStyle = i === 2 ? '#2ce8f5' : '#f6757a'; ctx.fillRect(x + 1, y - 10, 6, 1);
+  if (w){ ctx.fillStyle = '#3f2631'; ctx.fillRect(x + 4, y - 11, 1, 1); ctx.fillRect(x + 7, y - 7, 1, 2); }
+  else { ctx.fillStyle = '#3f2631'; ctx.fillRect(x + 6, y - 6, 2, 1); }
+}
+function drawPlot(p, now){
+  const ox = p.x*TS, oy = p.y*TS;
+  const built = S.built[p.id];
+  const a = plotAnim.get(p.id);
+  if (built){
+    let lift = 0;
+    if (a){ const t = (now - a) / 1000; if (t < .35) return; if (t < .7) lift = Math.round(Math.sin((t - .35) / .35 * Math.PI) * 4); }
+    ITEMS[p.item].forEach((row, dy) => row.forEach((i, dx) => { if (i >= 0) tile(ctx, i, ox + dx*TS, oy + dy*TS - lift); }));
+  } else {
+    EMPTY_PLOT.forEach((row, dy) => row.forEach((i, dx) => tile(ctx, i, ox + dx*TS, oy + dy*TS)));
+  }
+}
+function drawBoy(now){
+  let frames = BOY[boy.dir];
+  let f = 0, bob = 0;
+  if (boy.route){ f = Math.floor(now / 130) % frames.length; }
+  else { bob = (Math.floor(now / 480) % 2) ? 1 : 0; }
+  const x = Math.round(boy.x), y = Math.round(boy.y) - 6 + bob;
+  ctx.fillStyle = 'rgba(63,38,49,.35)'; ctx.fillRect(x + 4, Math.round(boy.y) + 9, 8, 2); ctx.fillRect(x + 3, Math.round(boy.y) + 10, 10, 1);
+  ctx.drawImage(frames[f], x, y);
+}
+function pill(x, y, parts, opts){
+  opts = opts || {};
+  const fs = Math.round(11.5 * dpr), gap = Math.round(4*dpr);
+  ctx.font = `600 ${fs}px "Pixelify Sans", system-ui, sans-serif`;
+  const items = parts.map(p => {
+    if (typeof p === 'string') return { t: p, w: Math.ceil(ctx.measureText(p).width) };
+    const s = Math.max(1, Math.round(dpr * 13 / p.height));
+    return { c: p, s, w: p.width * s, h: p.height * s };
+  });
+  const padX = Math.round(6*dpr), h = Math.round(19*dpr);
+  const w = padX*2 + items.reduce((a, it) => a + it.w, 0) + gap * (items.length - 1);
+  const left = Math.round(x - w/2), top = Math.round(y - h);
+  ctx.fillStyle = '#3f2631'; ctx.fillRect(left - Math.round(dpr), top - Math.round(dpr), w + 2*Math.round(dpr), h + 2*Math.round(dpr));
+  ctx.fillStyle = opts.bg || '#262b44'; ctx.fillRect(left, top, w, h);
+  ctx.fillStyle = opts.edge || '#3a4466'; ctx.fillRect(left, top + h - Math.round(2*dpr), w, Math.round(2*dpr));
+  let cx = left + padX;
+  ctx.textBaseline = 'middle';
+  for (const it of items){
+    if (it.c) ctx.drawImage(it.c, cx, Math.round(top + (h - it.h) / 2 - dpr), it.w, it.h);
+    else { ctx.fillStyle = opts.color || '#ffffff'; ctx.fillText(it.t, cx, top + h/2); }
+    cx += it.w + gap;
+  }
+}
+let COIN = null;
+let terrainFrame = 0, lastWater = 0, lastT = performance.now();
+
+function frame(now){
+  const dt = Math.min(.05, (now - lastT) / 1000); lastT = now;
+  if (!TERRAIN.length || !viewW){ requestAnimationFrame(frame); return; }
+  // gång
+  if (boy.route){
+    const speed = 72 * dt;
+    let left = speed;
+    while (left > 0 && boy.route){
+      const [tx, ty] = boy.route[boy.step];
+      const gx = tx*TS, gy = ty*TS, dx = gx - boy.x, dy = gy - boy.y, d = Math.hypot(dx, dy);
+      if (Math.abs(dx) > Math.abs(dy)) boy.dir = dx > 0 ? 'right' : 'left'; else if (d > 0) boy.dir = dy > 0 ? 'down' : 'up';
+      if (d <= left){ boy.x = gx; boy.y = gy; left -= d; boy.step++; if (boy.step >= boy.route.length){ onArrive(); } }
+      else { boy.x += dx / d * left; boy.y += dy / d * left; left = 0; }
+    }
+  }
+  // kamera
+  let tx, ty;
+  if (cam.focus && now < cam.focus.until){ [tx, ty] = centerOn(cam.focus.x, cam.focus.y); }
+  else if (cam.focus){ cam.focus = null; cam.follow = true; [tx, ty] = centerOn(boy.x + 8, boy.y + 8); }
+  else if (cam.follow){ [tx, ty] = centerOn(boy.x + 8, boy.y + 8); }
+  else { [tx, ty] = clampCam(cam.x, cam.y); }
+  const k = reduceMotion ? 1 : 1 - Math.exp(-dt * 7);
+  cam.x += (tx - cam.x) * k; cam.y += (ty - cam.y) * k;
+  if (Math.abs(tx - cam.x) < .05) cam.x = tx; if (Math.abs(ty - cam.y) < .05) cam.y = ty;
+
+  if (now - lastWater > 380){ terrainFrame = (terrainFrame + 1) % 3; lastWater = now; }
+  const ox = Math.round(cam.x * scaleDev), oy = Math.round(cam.y * scaleDev);
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.fillStyle = '#181425'; ctx.fillRect(0, 0, cv.width, cv.height);
+  ctx.setTransform(scaleDev, 0, 0, scaleDev, -ox, -oy);
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(TERRAIN[terrainFrame], 0, 0);
+
+  const reach = new Set([S.node]); { const q = [S.node]; while (q.length){ const n = q.shift(); for (const e of edgesOf(n)) if (edgeOpen(e)){ const m = otherEnd(e, n); if (!reach.has(m)){ reach.add(m); q.push(m); } } } }
+  for (const p of PLOTS) drawPlot(p, now);
+  FLAGS.forEach((f, i) => drawFlag(f, now, i));
+  for (const id in NODES) drawNode(NODES[id], now, reach.has(id));
+  for (const g of GATES){
+    const open = S.stars >= g.req;
+    const a = gateAnim.get(g);
+    let img = open ? GATE_OPEN : GATE_CLOSED, shake = 0;
+    if (a){ const t = (now - a) / 1000; if (t < .6){ img = GATE_CLOSED; shake = (Math.floor(t * 30) % 2) ? 1 : -1; } else if (t > 2) gateAnim.delete(g); }
+    ctx.drawImage(img, g.x*TS + shake, g.y*TS - 4);
+  }
+  drawBoy(now);
+  // partiklar
+  for (let i = FX.length - 1; i >= 0; i--){
+    const p = FX[i]; p.t += dt; if (p.t > p.life){ FX.splice(i, 1); continue; }
+    p.x += p.vx * dt; p.y += p.vy * dt;
+    if (p.k === 'spark'){ p.vy += 60 * dt; ctx.fillStyle = p.col; const s = p.t < p.life * .6 ? 2 : 1; ctx.fillRect(Math.round(p.x), Math.round(p.y), s, s); }
+    else { p.vx *= .92; p.vy *= .92; const r = Math.max(1, Math.round(p.r * (1 - p.t / p.life))); ctx.fillStyle = p.t < p.life*.5 ? '#ffffff' : '#c0cbdc'; ctx.fillRect(Math.round(p.x) - r, Math.round(p.y) - r, r*2, r*2); }
+  }
+
+  // etiketter i skärmskala
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  const sx = wx => wx * scaleDev - ox, sy = wy => wy * scaleDev - oy;
+  for (const g of GATES){
+    if (S.stars >= g.req) continue;
+    pill(sx(g.x*TS + 8), sy(g.y*TS - 6), [LOCK, String(g.req), STAR], { color: '#fee761' });
+  }
+  for (const p of PLOTS){
+    if (S.built[p.id]) continue;
+    pill(sx(p.x*TS + 24), sy(p.y*TS - 1), [COIN, String(p.cost)], { color: '#ffffff', bg: '#3f2631', edge: '#733e39' });
+  }
+  for (const id in NODES){
+    const n = NODES[id], here = id === S.node && !boy.route;
+    pill(sx(n.x*TS + 8), sy(n.y*TS + (n.labelAbove ? -1 : 31)), [n.name], { color: here ? '#fee761' : '#ffffff', edge: here ? '#feae34' : '#3a4466' });
+  }
+  requestAnimationFrame(frame);
+}
+
+/* ---------- panel ---------- */
+const panel = $('#panel');
+function esc(s){ return String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c])); }
+function iconURL(c, s){ const k = document.createElement('canvas'); k.width = c.width*s; k.height = c.height*s; const x = k.getContext('2d'); x.imageSmoothingEnabled = false; x.drawImage(c, 0, 0, k.width, k.height); return k.toDataURL(); }
+let STAR_URL = '', COIN_URL = '', LOCK_URL = '';
+function plotPreview(p){
+  const c = document.createElement('canvas'); c.width = 48; c.height = 48; c.className = 'pix';
+  const x = c.getContext('2d'); x.imageSmoothingEnabled = false;
+  for (let dy = 0; dy < 3; dy++) for (let dx = 0; dx < 3; dx++) tile(x, 0, dx*16, dy*16);
+  ITEMS[p.item].forEach((row, dy) => row.forEach((i, dx) => { if (i >= 0) tile(x, i, dx*16, dy*16); }));
+  return c;
+}
+function renderPanel(view){
+  current = view;
+  let h = '';
+  if (view.type === 'walk'){
+    h = `<span class="tag">På väg</span><h2>Till ${esc(NODES[view.id].name)}</h2><p>Pojken går längs stigen.</p>`;
+  } else if (view.type === 'node'){
+    const n = NODES[view.id];
+    const roads = edgesOf(n.id).map(e => {
+      const o = NODES[otherEnd(e, n.id)];
+      if (edgeOpen(e)) return `<button class="btn" type="button" data-go="${o.id}">${esc(o.name)}</button>`;
+      const left = e.gate.req - S.stars;
+      return `<button class="btn locked" type="button" data-gate="${GATES.indexOf(e.gate)}"><img class="pix" src="${LOCK_URL}" alt="">${esc(o.name)} <small>${e.gate.req} stjärnor, ${left} kvar</small></button>`;
+    }).join('');
+    const plots = PLOTS.filter(p => p.node === n.id);
+    h = `<span class="tag">Du är här</span><h2>${esc(n.name)}</h2><p>${esc(n.text)}</p><div class="panel-body">`;
+    for (const p of plots) h += plotBlock(p);
+    h += `<div><p class="sub">Vägar härifrån</p><div class="roads">${roads}</div></div></div>`;
+  } else if (view.type === 'gate'){
+    const g = view.gate, e = g.edge, open = S.stars >= g.req;
+    const names = `${NODES[e.a].name} och ${NODES[e.b].name}`;
+    const pct = Math.min(100, Math.round(S.stars / g.req * 100));
+    const left = g.req - S.stars;
+    h = `<span class="tag">${open ? 'Öppen port' : 'Stängd port'}</span><h2>Stjärnporten</h2><p>Porten mellan ${esc(names)} öppnas vid ${g.req} stjärnor.</p>
+      <div class="panel-body"><div class="meter"><div class="bar"><i style="width:calc(${pct}% - 4px)"></i></div><span>${Math.min(S.stars, g.req)} av ${g.req} stjärnor${open ? '. Porten är öppen.' : `. ${left === 1 ? 'En stjärna' : left + ' stjärnor'} kvar.`}</span></div>
+      <div class="roads"><button class="btn alt" type="button" data-back="1">Tillbaka till ${esc(NODES[S.node].name)}</button></div></div>`;
+  } else if (view.type === 'plot'){
+    const p = view.plot, n = NODES[p.node];
+    h = `<span class="tag">Tomt i ${esc(n.name)}</span><h2>${esc(p.name)}</h2><p>${S.built[p.id] ? 'Det här har du byggt. Det står kvar på kartan för alltid.' : `Kostar ${p.cost} mynt. Mynt får du för rätta svar på matteblad.`}</p><div class="panel-body">${plotBlock(p)}<div class="roads"><button class="btn alt" type="button" data-back="1">Tillbaka</button></div></div>`;
+  }
+  panel.innerHTML = h;
+  panel.querySelectorAll('.plot').forEach(el => { const p = PLOTS.find(q => q.id === el.dataset.plot); el.prepend(plotPreview(p)); });
+}
+function plotBlock(p){
+  if (S.built[p.id]) return `<div class="plot" data-plot="${p.id}"><div><b>${esc(p.name)}</b><span>Byggd.</span></div></div>`;
+  const can = S.coins >= p.cost;
+  const btn = S.node === p.node && !boy.route
+    ? `<button class="btn${can ? '' : ' locked'}" type="button" data-build="${p.id}"><img class="pix" src="${COIN_URL}" alt="">Bygg för ${p.cost}</button>`
+    : `<button class="btn alt" type="button" data-goplot="${p.id}">Gå dit</button>`;
+  return `<div class="plot" data-plot="${p.id}"><div><b>${esc(p.name)}</b><span>${can ? `${p.cost} mynt` : `${p.cost} mynt, ${p.cost - S.coins} till behövs`}</span></div>${btn}</div>`;
+}
+let current = null;
+const showNode = () => renderPanel({ type: 'node', id: S.node });
+const showGate = g => renderPanel({ type: 'gate', gate: g });
+const showPlot = p => renderPanel({ type: 'plot', plot: p });
+panel.addEventListener('click', ev => {
+  const b = ev.target.closest('button'); if (!b) return;
+  if (b.dataset.go || b.dataset.gate || b.dataset.goplot || b.dataset.build) showMap();
+  if (b.dataset.go) walkTo(b.dataset.go);
+  else if (b.dataset.gate){ const g = GATES[+b.dataset.gate]; showGate(g); focusGate(g); }
+  else if (b.dataset.back){ cam.focus = null; cam.follow = true; showNode(); }
+  else if (b.dataset.goplot){ const p = PLOTS.find(q => q.id === b.dataset.goplot); goPlot(p); }
+  else if (b.dataset.build) build(PLOTS.find(q => q.id === b.dataset.build));
+});
+function goPlot(p){
+  if (S.node === p.node && !boy.route){ showPlot(p); return; }
+  const hops = findRoute(S.node, p.node, false);
+  if (!hops){ walkTo(p.node); return; }
+  pendingPlot = p.id; walkTo(p.node);
+}
+function build(p){
+  if (S.built[p.id]) return;
+  if (S.coins < p.cost){ toast(`Du behöver ${p.cost - S.coins} mynt till. Gör ett matteblad!`); return; }
+  S.coins -= p.cost; S.built[p.id] = true;
+  plotAnim.set(p.id, performance.now());
+  dust(p.x*TS + 24, p.y*TS + 30);
+  setTimeout(() => sparkle(p.x*TS + 24, p.y*TS + 18, 18), 420);
+  updateHud('coins'); toast(`Du byggde ${p.name.toLowerCase()} för ${p.cost} mynt!`);
+  renderPanel(current && current.type === 'plot' ? current : { type: 'node', id: S.node });
+}
+
+/* ---------- HUD, toast, logg ---------- */
+function updateHud(which){
+  $('#starCount').textContent = S.stars; $('#coinCount').textContent = S.coins;
+  if (which){ const el = which === 'stars' ? $('#chipStars') : $('#coinCount').parentElement; el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); }
+}
+let toastTimer = 0;
+function toast(msg){ const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 3200); }
+function hideHint(){ $('#hint').hidden = true; }
+function renderLog(fresh){
+  const ol = $('#log');
+  ol.innerHTML = S.log.slice().reverse().slice(0, 5).map((r, i) => {
+    const pct = Math.round(r.p / r.max * 100);
+    return `<li class="${fresh && i === 0 ? 'new' : ''}"><span><b>${esc(r.subj)}</b> ${r.p} av ${r.max} p, ${pct} %</span><span class="st">${'★'.repeat(r.st)}${r.bonus ? ' +1 bonus' : ''}</span></li>`;
+  }).join('');
+}
+const starsFor = (p, max) => { const pct = p / max * 100; return pct >= 80 ? 3 : pct >= 50 ? 2 : 1; };
+function addTest(){
+  const t = SAMPLE_TESTS[S.testIdx % SAMPLE_TESTS.length]; S.testIdx++;
+  const prev = [...S.log].reverse().find(r => r.subj === t.subj);
+  const st = starsFor(t.p, t.max);
+  const bonus = prev && t.p / t.max > prev.p / prev.max ? 1 : 0;
+  const before = S.stars;
+  S.log.push({ subj: t.subj, p: t.p, max: t.max, st, bonus });
+  S.stars += st + bonus;
+  updateHud('stars'); renderLog(true);
+  const pct = Math.round(t.p / t.max * 100);
+  const opened = GATES.filter(g => before < g.req && S.stars >= g.req);
+  let msg = `${t.subj}: ${t.p} av ${t.max} p (${pct} %) ger ${st + bonus} ${st + bonus === 1 ? 'stjärna' : 'stjärnor'}${bonus ? ', med bonus för förbättring' : ''}.`;
+  if (opened.length){
+    const now = performance.now();
+    opened.forEach((g, i) => { gateAnim.set(g, now + i * 300); setTimeout(() => sparkle(g.x*TS + 8, g.y*TS + 4, 26), 600 + i * 300); });
+    focusGate(opened[0]); cam.focus.until = performance.now() + 2600;
+    msg += ` En port öppnades!`;
+    showMap();
+    hideHint();
+  }
+  toast(msg);
+  renderPanel(current && current.type === 'gate' ? current : (boy.route ? current : { type: 'node', id: S.node }));
+}
+function addSheet(){
+  const right = 8 + Math.floor(Math.random() * 7);
+  S.coins += right; updateHud('coins');
+  toast(`Matteblad rättat: ${right} rätt ger ${right} mynt.`);
+  if (current && current.type !== 'walk') renderPanel(current);
+}
+$('#btnTest').addEventListener('click', addTest);
+$('#btnSheet').addEventListener('click', addSheet);
+$('#btnReset').addEventListener('click', () => {
+  S = START(); boy.route = null; placeBoy(S.node); plotAnim.clear(); gateAnim.clear(); FX.length = 0;
+  cam.follow = true; cam.focus = null; centerOn(boy.x + 8, boy.y + 8, true);
+  updateHud(); renderLog(); showNode(); toast('Kartan är återställd.');
+});
+
+/* ---------- pekare ---------- */
+let down = null;
+cv.addEventListener('pointerdown', e => { down = { x: e.clientX, y: e.clientY, cx: cam.x, cy: cam.y, drag: false, id: e.pointerId }; cv.setPointerCapture(e.pointerId); });
+cv.addEventListener('pointermove', e => {
+  if (!down) return;
+  const dx = e.clientX - down.x, dy = e.clientY - down.y;
+  if (!down.drag && Math.hypot(dx, dy) > 7){ down.drag = true; cam.follow = false; cam.focus = null; hideHint(); }
+  if (down.drag){ const [x, y] = clampCam(down.cx - dx / scaleCss, down.cy - dy / scaleCss); cam.x = x; cam.y = y; }
+});
+cv.addEventListener('pointerup', e => {
+  if (!down) return; const d = down; down = null;
+  if (d.drag) return;
+  const r = cv.getBoundingClientRect();
+  const wx = (e.clientX - r.left) / scaleCss + cam.x, wy = (e.clientY - r.top) / scaleCss + cam.y;
+  tapAt(wx, wy);
+});
+cv.addEventListener('pointercancel', () => { down = null; });
+function tapAt(wx, wy){
+  const tx = Math.floor(wx / TS), ty = Math.floor(wy / TS);
+  for (const id in NODES){ const n = NODES[id]; if (Math.abs(wx - (n.x*TS + 8)) < 13 && Math.abs(wy - (n.y*TS + 6)) < 14){ walkTo(id); return; } }
+  for (const g of GATES){ if (tx === g.x && (ty === g.y || ty === g.y - 1)){ showGate(g); if (S.stars < g.req) toast(`Porten öppnas vid ${g.req} stjärnor. Du har ${S.stars}.`); return; } }
+  for (const p of PLOTS){ if (tx >= p.x && tx <= p.x + 2 && ty >= p.y - 1 && ty <= p.y + 2){ goPlot(p); return; } }
+}
+cv.addEventListener('keydown', e => {
+  const dirs = { ArrowUp: [0,-1], ArrowDown: [0,1], ArrowLeft: [-1,0], ArrowRight: [1,0] };
+  const d = dirs[e.key]; if (!d || boy.route) return;
+  e.preventDefault();
+  for (const ed of edgesOf(S.node)){
+    const t = ed.a === S.node ? ed.tiles : [...ed.tiles].reverse();
+    const [x0, y0] = t[0], [x1, y1] = t[1];
+    if (Math.sign(x1 - x0) === d[0] && Math.sign(y1 - y0) === d[1]){
+      const o = otherEnd(ed, S.node);
+      if (edgeOpen(ed)) walkTo(o); else { showGate(ed.gate); focusGate(ed.gate); toast(`Porten öppnas vid ${ed.gate.req} stjärnor.`); }
+      return;
+    }
+  }
+});
+
+/* ---------- start ---------- */
+function trimTile(i){
+  const t = document.createElement('canvas'); t.width = TS; t.height = TS; const tx = t.getContext('2d'); tile(tx, i, 0, 0);
+  const d = tx.getImageData(0, 0, TS, TS).data; let x0 = TS, y0 = TS, x1 = -1, y1 = -1;
+  for (let y = 0; y < TS; y++) for (let x = 0; x < TS; x++) if (d[(y*TS + x)*4 + 3] > 0){ x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y); }
+  const c = document.createElement('canvas'); c.width = x1 - x0 + 1; c.height = y1 - y0 + 1; c.getContext('2d').drawImage(t, x0, y0, c.width, c.height, 0, 0, c.width, c.height); return c;
+}
+function start(data){
+  if (data && data.S) S = data.S;
+  placeBoy(S.node);
+  COIN = trimTile(93);
+  STAR_URL = iconURL(STAR, 4); COIN_URL = iconURL(COIN, 4); LOCK_URL = iconURL(LOCK, 4);
+  $('#logoStar').src = STAR_URL; $('#icoStar').src = STAR_URL; $('#icoCoin').src = COIN_URL;
+  document.querySelectorAll('img[data-ico]').forEach(im => { im.src = im.dataset.ico === 'star' ? STAR_URL : COIN_URL; });
+  buildTerrain();
+  resize(); centerOn(boy.x + 8, boy.y + 8, true);
+  updateHud(); renderLog(); showNode();
+  requestAnimationFrame(t => { lastT = t; frame(t); });
+}
+window.claude?.hot?.snapshot?.(() => ({ S }));
+tiles.decode().catch(() => {}).then(() => {
+  const boot = window.claude?.hot?.ready ? window.claude.hot.ready.bind(window.claude.hot) : (fn => fn(window.claude?.hot?.data ?? {}));
+  boot(start);
+});
+})();
+</script>
