@@ -725,11 +725,13 @@ function startTyping(){
   say.onclick = finish;
 }
 const toNode = () => { dlg = null; showNode(); };
+// A price in a button: the stardust icon and the number in bold
+const price = n => `<span class="price"><img class="pix" src="${DUST_URL}" alt="">${n}<span class="sr"> stjärnstoft</span></span>`;
 function startBuild(p){
   const b = BYGG[p.bygg];
   if (b.aventyr) return startAdventure(p);
   startDialog(b.val.map(v => ({ p: v.talar === null ? null : v.person, t: v.onskan })), () => [
-    ...b.val.map(v => ({ label: `Låt ${esc(PERS[v.person].namn)} bygga <small>${esc(v.namn)}, ${v.kostnad} stjärnstoft</small>`, poor: S.coins < v.kostnad, run: () => confirmBuild(p, v) })),
+    ...b.val.map(v => ({ label: `Låt ${esc(PERS[v.person].namn)} bygga ${price(v.kostnad)}<small>${esc(v.namn)}</small>`, poor: S.coins < v.kostnad, run: () => confirmBuild(p, v) })),
     { label: berattelse.dialog.tankLiteTill, alt: true, run: toNode },
   ]);
 }
@@ -750,7 +752,7 @@ function startAdventure(p){
 function runStep(ad, id, pre){
   const st = ad.def.steg[id];
   startDialog([...pre, { p: st.p ?? null, t: st.t }], () => [
-    ...st.val.map(o => ({ label: o.kostnad ? `${esc(o.label)} <small>${o.kostnad} stjärnstoft</small>` : esc(o.label), poor: S.coins < o.kostnad, run: () => takeStep(ad, o) })),
+    ...st.val.map(o => ({ label: o.kostnad ? `${esc(o.label)} ${price(o.kostnad)}` : esc(o.label), poor: S.coins < o.kostnad, run: () => takeStep(ad, o) })),
     { label: berattelse.dialog.tankLiteTill, alt: true, run: toNode },
   ]);
 }
@@ -798,7 +800,7 @@ function confirmBuild(p, v, pre){
   if (!adventure && S.coins < v.kostnad){ short(); return; }
   const text = v.bekrafta ? v.bekrafta.replace('{n}', v.kostnad) : `${PERS[v.person].namn} bygger ${v.namn.toLowerCase()} för ${v.kostnad} stjärnstoft.`;
   startDialog([...(pre || []), { p: null, t: `${text} ${berattelse.dialog.val}` }], () => [
-    { label: `Ja, bygg för ${v.kostnad} stjärnstoft`, poor: S.coins < v.kostnad, run: () => S.coins < v.kostnad ? short() : doBuild(p, v) },
+    { label: `Ja, bygg ${price(v.kostnad)}`, poor: S.coins < v.kostnad, run: () => S.coins < v.kostnad ? short() : doBuild(p, v) },
     { label: adventure ? 'Vänta lite' : 'Nej, vänta', alt: true, run: adventure ? toNode : () => startBuild(p) },
   ]);
 }
@@ -821,8 +823,8 @@ function startShop(p, seen){
   startDialog([{ p: v.person, t: had ? D.redanHandlat : `${v.butikHej} ${D.enGang}` }], () => [
     ...v.saljer.map(id => {
       const it = SAKER[id], own = had === id;
-      const tail = own ? 'Köpt' : had ? 'Du har redan handlat här' : it.pris + ' stjärnstoft';
-      return { label: `${esc(it.namn)} <small>${tail}. ${esc(it.text)}</small>`, disabled: !!had, poor: !had && S.coins < it.pris, run: () => confirmBuy(p, id) };
+      const tail = own ? 'Köpt. ' : had ? 'Du har redan handlat här. ' : '';
+      return { label: `${esc(it.namn)} ${had ? '' : price(it.pris)}<small>${tail}${esc(it.text)}</small>`, disabled: !!had, poor: !had && S.coins < it.pris, run: () => confirmBuy(p, id) };
     }),
     { label: 'Tillbaka till kartan', alt: true, run: toNode },
   ], seen);
@@ -832,7 +834,7 @@ function confirmBuy(p, id){
   if (S.coins < it.pris){ toast(berattelse.dialog.ingaStoft.replace('{n}', it.pris - S.coins)); return; }
   const text = berattelse.dialog.kop.replace('{namn}', it.namn.toLowerCase()).replace('{pris}', it.pris).replace('{person}', PERS[v.person].namn);
   startDialog([{ p: null, t: text }], () => [
-    { label: `Ja, köp för ${it.pris} stjärnstoft`, run: () => buy(p, id) },
+    { label: `Ja, köp ${price(it.pris)}`, run: () => buy(p, id) },
     { label: 'Nej, vänta', alt: true, run: () => startShop(p, true) },
   ]);
 }
