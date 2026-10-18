@@ -2,7 +2,7 @@
 (async () => {
 'use strict';
 // The game reads two data files: geometry (karta.json) and names, texts and rules (berattelse.json).
-const [karta, berattelse] = await Promise.all(['data/karta.json', 'data/berattelse.json'].map(u =>
+const [karta, berattelse, PORTRAITS] = await Promise.all(['data/karta.json', 'data/berattelse.json', 'data/portratt.json'].map(u =>
   fetch(u).then(r => { if (!r.ok) throw new Error(u + ' ' + r.status); return r.json(); })));
 const TS = karta.ruta, MW = karta.bredd, MH = karta.hojd;
 const $ = s => document.querySelector(s);
@@ -176,6 +176,7 @@ const startData = berattelse.exempel.start;
 const START = () => ({
   stars: startData.stjarnor, coins: startData.mynt, node: startData.plats,
   built: Object.fromEntries(startData.byggt.map(id => [id, true])),
+  valda: {}, saker: [],
   log: startData.logg.map(r => ({ subj: r.amne, p: r.poang, max: r.max, st: r.stjarnor, bonus: r.bonus })),
   testIdx: 0,
 });
@@ -302,7 +303,7 @@ function drawPlot(p, now){
   if (built){
     let lift = 0;
     if (a){ const t = (now - a) / 1000; if (t < .35) return; if (t < .7) lift = Math.round(Math.sin((t - .35) / .35 * Math.PI) * 4); }
-    ITEMS[p.item].forEach((row, dy) => row.forEach((i, dx) => { if (i >= 0) tile(ctx, i, ox + dx*TS, oy + dy*TS - lift); }));
+    plotTiles(p).forEach((row, dy) => row.forEach((i, dx) => { if (i >= 0) tile(ctx, i, ox + dx*TS, oy + dy*TS - lift); }));
   } else {
     EMPTY_PLOT.forEach((row, dy) => row.forEach((i, dx) => tile(ctx, i, ox + dx*TS, oy + dy*TS)));
   }
@@ -422,11 +423,12 @@ function plotPreview(p){
   const c = document.createElement('canvas'); c.width = 48; c.height = 48; c.className = 'pix';
   const x = c.getContext('2d'); x.imageSmoothingEnabled = false;
   for (let dy = 0; dy < 3; dy++) for (let dx = 0; dx < 3; dx++) tile(x, 0, dx*16, dy*16);
-  ITEMS[p.item].forEach((row, dy) => row.forEach((i, dx) => { if (i >= 0) tile(x, i, dx*16, dy*16); }));
+  plotTiles(p).forEach((row, dy) => row.forEach((i, dx) => { if (i >= 0) tile(x, i, dx*16, dy*16); }));
   return c;
 }
 function renderPanel(view){
   current = view;
+  clearInterval(typeTimer); clearInterval(blinkTimer);
   let h = '';
   if (view.type === 'walk'){
     h = `<span class="tag">På väg</span><h2>Till ${esc(NODES[view.id].name)}</h2><p>Pojken går längs stigen.</p>`;
@@ -453,17 +455,24 @@ function renderPanel(view){
   } else if (view.type === 'plot'){
     const p = view.plot, n = NODES[p.node];
     h = `<span class="tag">Tomt i ${esc(n.name)}</span><h2>${esc(p.name)}</h2><p>${S.built[p.id] ? 'Det här har du byggt. Det står kvar på kartan för alltid.' : `Kostar ${p.cost} mynt. Mynt får du för rätta svar på matteblad.`}</p><div class="panel-body">${plotBlock(p)}<div class="roads"><button class="btn alt" type="button" data-back="1">Tillbaka</button></div></div>`;
+  } else if (view.type === 'dialog'){
+    const L = dlg.lines[dlg.i], who = L.p ? PERS[L.p] : null;
+    h = `<div class="dlg">${who ? '<canvas class="portrait pix" width="32" height="32" aria-hidden="true"></canvas>' : ''}<div class="dlg-body"><div class="who">${who ? `<b>${esc(who.namn)}</b> <span>${esc(who.yrke)}</span>` : '<span class="tag">Berättare</span>'}</div><p class="say" aria-live="polite"></p><div class="dlg-btns" hidden></div></div></div>`;
   }
   panel.innerHTML = h;
+  if (view.type === 'dialog') startTyping();
   panel.querySelectorAll('.plot').forEach(el => { const p = PLOTS.find(q => q.id === el.dataset.plot); el.prepend(plotPreview(p)); });
 }
 function plotBlock(p){
-  if (S.built[p.id]) return `<div class="plot" data-plot="${p.id}"><div><b>${esc(p.name)}</b><span>Byggd.</span></div></div>`;
-  const can = S.coins >= p.cost;
-  const btn = S.node === p.node && !boy.route
-    ? `<button class="btn${can ? '' : ' locked'}" type="button" data-build="${p.id}"><img class="pix" src="${COIN_URL}" alt="">Bygg för ${p.cost}</button>`
-    : `<button class="btn alt" type="button" data-goplot="${p.id}">Gå dit</button>`;
-  return `<div class="plot" data-plot="${p.id}"><div><b>${esc(p.name)}</b><span>${can ? `${p.cost} mynt` : `${p.cost} mynt, ${p.cost - S.coins} till behövs`}</span></div>${btn}</div>`;
+  if (p.prebuilt) return `<div class="plot" data-plot="${p.id}"><div><b>${esc(p.name)}</b><span>Byggd.</span></div></div>`;
+  const b = BYGG[p.bygg], v = valOf(p), here = S.node === p.node && !boy.route;
+  if (v){
+    const shop = here ? `<button class="btn" type="button" data-shop="${p.id}">Handla hos ${esc(PERS[v.person].namn)}</button>` : '';
+    return `<div class="plot" data-plot="${p.id}"><div><b>${esc(v.namn)}</b><span>Byggd av ${esc(PERS[v.person].namn)}.</span></div>${shop}</div>`;
+  }
+  const names = b.val.map(x => esc(PERS[x.person].namn)).join(' och ');
+  const btn = here ? `<button class="btn" type="button" data-talk="${p.id}">Prata med dem</button>` : `<button class="btn alt" type="button" data-goplot="${p.id}">Gå dit</button>`;
+  return `<div class="plot" data-plot="${p.id}"><div><b>${names} vill bygga här</b><span>${b.val.every(x => x.kostnad === b.val[0].kostnad) ? b.val[0].kostnad + ' mynt' : 'från ' + p.cost + ' mynt'}</span></div>${btn}</div>`;
 }
 let current = null;
 const showNode = () => renderPanel({ type: 'node', id: S.node });
@@ -471,12 +480,15 @@ const showGate = g => renderPanel({ type: 'gate', gate: g });
 const showPlot = p => renderPanel({ type: 'plot', plot: p });
 panel.addEventListener('click', ev => {
   const b = ev.target.closest('button'); if (!b) return;
-  if (b.dataset.go || b.dataset.gate || b.dataset.goplot || b.dataset.build) showMap();
+  if (b.dataset.go || b.dataset.gate || b.dataset.goplot) showMap();
   if (b.dataset.go) walkTo(b.dataset.go);
   else if (b.dataset.gate){ const g = GATES[+b.dataset.gate]; showGate(g); focusGate(g); }
   else if (b.dataset.back){ cam.focus = null; cam.follow = true; showNode(); }
   else if (b.dataset.goplot){ const p = PLOTS.find(q => q.id === b.dataset.goplot); goPlot(p); }
-  else if (b.dataset.build) build(PLOTS.find(q => q.id === b.dataset.build));
+  else if (b.dataset.talk) startBuild(PLOTS.find(q => q.id === b.dataset.talk));
+  else if (b.dataset.shop) startShop(PLOTS.find(q => q.id === b.dataset.shop));
+  else if (b.dataset.dlgnext !== undefined){ dlg.i++; renderPanel({ type: 'dialog' }); }
+  else if (b.dataset.dlgchoice !== undefined){ dlg.choices[+b.dataset.dlgchoice].run(); }
 });
 function goPlot(p){
   if (S.node === p.node && !boy.route){ showPlot(p); return; }
@@ -484,15 +496,90 @@ function goPlot(p){
   if (!hops){ walkTo(p.node); return; }
   pendingPlot = p.id; walkTo(p.node);
 }
-function build(p){
-  if (S.built[p.id]) return;
-  if (S.coins < p.cost){ toast(`Du behöver ${p.cost - S.coins} mynt till. Gör ett matteblad!`); return; }
-  S.coins -= p.cost; S.built[p.id] = true;
+/* ---------- samtal, byggval och butiker ---------- */
+const PERS = berattelse.personer, BYGG = berattelse.bygg, SAKER = berattelse.saker;
+const valOf = p => { const id = S.valda[p.id]; return id ? BYGG[p.bygg].val.find(v => v.id === id) : null; };
+function plotTiles(p){ if (p.prebuilt) return ITEMS[p.item]; const v = valOf(p); return v ? ITEMS[v.byggnad] : EMPTY_PLOT; }
+let dlg = null, typeTimer = 0, blinkTimer = 0;
+
+function drawPortrait(cv, id, blink){
+  const d = PORTRAITS[id], x = cv.getContext('2d');
+  const rows = blink ? d.rader.map(r => [...r].map(c => d.ogon.includes(c) ? 's' : c).join('')) : d.rader;
+  x.clearRect(0, 0, 32, 32); x.drawImage(sprite(rows, d.farger), 0, 0);
+}
+// A dialog is a list of lines, one per person (p = null is the narrator). When the last line has been read,
+// end() gives the choices to show. seen = true shows the lines at once (used when the screen is redrawn).
+function startDialog(lines, end, seen){
+  dlg = { lines, end, i: 0, choices: [], seen: new Set(seen ? lines.map((_, k) => k) : []) };
+  renderPanel({ type: 'dialog' });
+}
+function dialogButtons(){
+  if (dlg.i < dlg.lines.length - 1) return '<button class="btn" type="button" data-dlgnext="1">Fortsätt</button>';
+  dlg.choices = dlg.end();
+  return dlg.choices.map((c, i) => `<button class="btn${c.alt ? ' alt' : ''}${c.poor ? ' locked' : ''}" type="button" data-dlgchoice="${i}"${c.disabled ? ' disabled' : ''}>${c.label}</button>`).join('');
+}
+function startTyping(){
+  const L = dlg.lines[dlg.i];
+  const say = panel.querySelector('.say'), btns = panel.querySelector('.dlg-btns'), cv = panel.querySelector('.portrait');
+  const finish = () => { clearInterval(typeTimer); say.textContent = L.t; if (btns.hidden){ btns.innerHTML = dialogButtons(); btns.hidden = false; } };
+  if (cv){
+    drawPortrait(cv, L.p, false);
+    blinkTimer = setInterval(() => { if (Math.random() < .4){ drawPortrait(cv, L.p, true); setTimeout(() => drawPortrait(cv, L.p, false), 140); } }, 1500);
+  }
+  const instant = reduceMotion || dlg.seen.has(dlg.i); dlg.seen.add(dlg.i);
+  if (instant){ finish(); return; }
+  let n = 0;
+  typeTimer = setInterval(() => { n++; say.textContent = L.t.slice(0, n); if (n >= L.t.length) finish(); }, 24);
+  say.onclick = finish;
+}
+const toNode = () => { dlg = null; showNode(); };
+function startBuild(p){
+  const b = BYGG[p.bygg];
+  startDialog(b.val.map(v => ({ p: v.talar === null ? null : v.person, t: v.onskan })), () => [
+    ...b.val.map(v => ({ label: `Låt ${esc(PERS[v.person].namn)} bygga <small>${esc(v.namn)}, ${v.kostnad} mynt</small>`, poor: S.coins < v.kostnad, run: () => confirmBuild(p, v) })),
+    { label: berattelse.dialog.tankLiteTill, alt: true, run: toNode },
+  ]);
+}
+function confirmBuild(p, v){
+  if (S.coins < v.kostnad){ toast(berattelse.dialog.ingaMynt.replace('{n}', v.kostnad - S.coins)); return; }
+  startDialog([{ p: null, t: `${PERS[v.person].namn} bygger ${v.namn.toLowerCase()} för ${v.kostnad} mynt. ${berattelse.dialog.val}` }], () => [
+    { label: `Ja, bygg för ${v.kostnad} mynt`, run: () => doBuild(p, v) },
+    { label: 'Nej, vänta', alt: true, run: () => startBuild(p) },
+  ]);
+}
+function doBuild(p, v){
+  S.coins -= v.kostnad; S.built[p.id] = true; S.valda[p.id] = v.id;
   plotAnim.set(p.id, performance.now());
   dust(p.x*TS + 24, p.y*TS + 30);
   setTimeout(() => sparkle(p.x*TS + 24, p.y*TS + 18, 18), 420);
-  updateHud('coins'); toast(`Du byggde ${p.name.toLowerCase()} för ${p.cost} mynt!`);
-  renderPanel(current && current.type === 'plot' ? current : { type: 'node', id: S.node });
+  updateHud('coins'); toast(`Du byggde ${v.namn.toLowerCase()} för ${v.kostnad} mynt!`);
+  startDialog([{ p: v.forlorarePerson, t: v.forlorare }, { p: v.person, t: v.tack }], () => [
+    { label: `Handla hos ${esc(PERS[v.person].namn)}`, run: () => startShop(p) },
+    { label: 'Tillbaka till kartan', alt: true, run: toNode },
+  ]);
+}
+function startShop(p, seen){
+  const v = valOf(p);
+  startDialog([{ p: v.person, t: v.butikHej }], () => [
+    ...v.saljer.map(id => {
+      const it = SAKER[id], own = S.saker.includes(id);
+      return { label: `${esc(it.namn)} <small>${own ? 'Köpt' : it.pris + ' mynt'}. ${esc(it.text)}</small>`, disabled: own, poor: !own && S.coins < it.pris, run: () => buy(p, id) };
+    }),
+    { label: 'Tillbaka till kartan', alt: true, run: toNode },
+  ], seen);
+}
+function buy(p, id){
+  const it = SAKER[id];
+  if (S.saker.includes(id)) return;
+  if (S.coins < it.pris){ toast(berattelse.dialog.ingaMynt.replace('{n}', it.pris - S.coins)); return; }
+  S.coins -= it.pris; S.saker.push(id);
+  updateHud('coins'); renderPack(); toast(`Du köpte ${it.namn.toLowerCase()}!`);
+  startShop(p, true);
+}
+function renderPack(){
+  $('#pack').innerHTML = S.saker.length
+    ? S.saker.map(id => `<li><span><b>${esc(SAKER[id].namn)}</b> ${esc(SAKER[id].text)}</span>${SAKER[id].typ === 'husdjur' ? '<span class="st">Husdjur</span>' : ''}</li>`).join('')
+    : '<li><span>Inget ännu. Bygg något och handla!</span></li>';
 }
 
 /* ---------- HUD, toast, logg ---------- */
@@ -532,7 +619,7 @@ function addTest(){
     hideHint();
   }
   toast(msg);
-  renderPanel(current && current.type === 'gate' ? current : (boy.route ? current : { type: 'node', id: S.node }));
+  renderPanel(current && (current.type === 'gate' || current.type === 'dialog') ? current : (boy.route ? current : { type: 'node', id: S.node }));
 }
 function addSheet(){
   const mb = berattelse.exempel.mattebladRatt; const right = mb.min + Math.floor(Math.random() * (mb.max - mb.min + 1));
@@ -545,7 +632,7 @@ $('#btnSheet').addEventListener('click', addSheet);
 $('#btnReset').addEventListener('click', () => {
   S = START(); boy.route = null; placeBoy(S.node); plotAnim.clear(); gateAnim.clear(); FX.length = 0;
   cam.follow = true; cam.focus = null; centerOn(boy.x + 8, boy.y + 8, true);
-  updateHud(); renderLog(); showNode(); toast('Kartan är återställd.');
+  dlg = null; updateHud(); renderLog(); renderPack(); showNode(); toast('Kartan är återställd.');
 });
 
 /* ---------- pekare ---------- */
@@ -602,7 +689,7 @@ function start(data){
   document.querySelectorAll('img[data-ico]').forEach(im => { im.src = im.dataset.ico === 'star' ? STAR_URL : COIN_URL; });
   buildTerrain();
   resize(); centerOn(boy.x + 8, boy.y + 8, true);
-  updateHud(); renderLog(); showNode();
+  updateHud(); renderLog(); renderPack(); showNode();
   requestAnimationFrame(t => { lastT = t; frame(t); });
 }
 tiles.decode().catch(() => {}).then(() => start());

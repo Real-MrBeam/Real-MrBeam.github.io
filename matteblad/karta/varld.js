@@ -79,7 +79,12 @@
     const PLOTS = karta.tomter.map(t => {
       const story = berattelse.tomter[t.id];
       if (!story) throw new Error(`Tomten ${t.id} saknas i berattelse.json`);
-      return { id: t.id, node: t.plats, x: t.x, y: t.y, name: story.namn, cost: story.kostnad, item: t.byggnad, ...(story.byggd ? { prebuilt: true } : {}) };
+      // A plot that is already built (the cottage) has a fixed building. Every other plot is a build with two
+      // alternatives in berattelse.bygg, and the player chooses one.
+      if (story.byggd) return { id: t.id, node: t.plats, x: t.x, y: t.y, name: story.namn, cost: story.kostnad, item: t.byggnad, prebuilt: true };
+      const bygg = berattelse.bygg[story.bygg];
+      if (!bygg) throw new Error(`Tomten ${t.id} pekar på bygget ${story.bygg} som saknas i berattelse.json`);
+      return { id: t.id, node: t.plats, x: t.x, y: t.y, name: story.namn, cost: Math.min(...bygg.val.map(v => v.kostnad)), bygg: story.bygg };
     });
     for (const p of PLOTS) fillR(p.x, p.y, p.x + 2, p.y + 2, "g");
     const ITEMS = karta.byggnader;

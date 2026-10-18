@@ -84,6 +84,15 @@ footer a{color:var(--mist)}
   .box{padding:14px}
 }
 @media (prefers-reduced-motion: reduce){.chip.pop,.log li.new{animation:none}}
+.dlg{display:flex;gap:14px;align-items:flex-start}
+.portrait{flex:none;width:128px;height:128px;border:3px solid var(--slate);background:var(--navy);border-radius:6px}
+.dlg-body{flex:1;min-width:0;display:grid;gap:8px}
+.who b{font-size:20px;color:var(--gold-lite)}.who span{color:var(--text-dim)}
+.say{margin:0;min-height:3.2em;font-size:17px;cursor:pointer}
+.dlg-btns{display:grid;gap:8px}.dlg-btns[hidden]{display:none}
+.dlg-btns .btn{text-align:left}.dlg-btns .btn small{display:block;font-size:13px;font-weight:400;opacity:.85}
+.btn[disabled]{opacity:.5;cursor:default}
+@media (max-width:640px){.portrait{width:88px;height:88px}}
 </style>
 
 <main class="wrap">
@@ -114,6 +123,8 @@ footer a{color:var(--mist)}
         <button class="btn alt" id="btnReset" type="button">Börja om</button>
       </div>
       <ol class="log" id="log" aria-label="Provlogg"></ol>
+      <h2 style="margin-top:14px">Mina saker</h2>
+      <ul class="log" id="pack" aria-label="Mina saker"></ul>
     </section>
   </div>
 
