@@ -1,0 +1,187 @@
+{
+  "version": 1,
+  "titel": "Stjärnkartan",
+  "platser": {
+    "hem": {
+      "namn": "Hemmet",
+      "text": "Här började resan. Stugan bredvid byggdes för mynt från matteblad."
+    },
+    "skola": {
+      "namn": "Skolan",
+      "text": "Varje prov ger 1 till 3 stjärnor. Stjärnorna öppnar portarna ut i världen."
+    },
+    "glanta": {
+      "namn": "Skogsgläntan",
+      "text": "En solig glänta mitt i granskogen. Här skulle bin trivas."
+    },
+    "hemlig": {
+      "namn": "Hemliga gläntan",
+      "text": "Få hittar hit. Det växer konstiga svampar mellan träden."
+    },
+    "host": {
+      "namn": "Höstskogen",
+      "text": "Löven är orange här året runt. Perfekt för en fruktlund."
+    },
+    "sjo": {
+      "namn": "Sjöviken",
+      "text": "Vid stranden går det att bygga en fiskebod."
+    },
+    "fiske": {
+      "namn": "Fiskeläget",
+      "text": "Ett litet läge vid älven. Härifrån går en väg norrut mot tornet."
+    },
+    "torn": {
+      "namn": "Tornet",
+      "text": "Från tornet syns slottet. Det är inte långt kvar."
+    },
+    "slott": {
+      "namn": "Slottet",
+      "text": "Terminens mål. Hit kommer den som samlat 20 stjärnor."
+    }
+  },
+  "portar": {
+    "skola|glanta": {
+      "stjarnor": 3
+    },
+    "glanta|host": {
+      "stjarnor": 5
+    },
+    "glanta|hemlig": {
+      "stjarnor": 10
+    },
+    "skola|sjo": {
+      "stjarnor": 8
+    },
+    "sjo|fiske": {
+      "stjarnor": 12
+    },
+    "host|torn": {
+      "stjarnor": 14
+    },
+    "torn|slott": {
+      "stjarnor": 20
+    }
+  },
+  "tomter": {
+    "stuga": {
+      "namn": "Stuga",
+      "kostnad": 15,
+      "byggd": true
+    },
+    "brunn": {
+      "namn": "Brunn",
+      "kostnad": 8
+    },
+    "bikupor": {
+      "namn": "Bikupor",
+      "kostnad": 12
+    },
+    "koja": {
+      "namn": "Hemlig stuga",
+      "kostnad": 25
+    },
+    "frukt": {
+      "namn": "Fruktlund",
+      "kostnad": 15
+    },
+    "bod": {
+      "namn": "Fiskebod",
+      "kostnad": 20
+    }
+  },
+  "regler": {
+    "stjarnor": [
+      {
+        "minProcent": 80,
+        "antal": 3
+      },
+      {
+        "minProcent": 50,
+        "antal": 2
+      },
+      {
+        "minProcent": 0,
+        "antal": 1
+      }
+    ]
+  },
+  "exempel": {
+    "start": {
+      "stjarnor": 6,
+      "mynt": 34,
+      "plats": "skola",
+      "byggt": [
+        "stuga"
+      ],
+      "logg": [
+        {
+          "amne": "Matte",
+          "poang": 14,
+          "max": 20,
+          "stjarnor": 2,
+          "bonus": 0
+        },
+        {
+          "amne": "Engelska",
+          "poang": 15,
+          "max": 18,
+          "stjarnor": 3,
+          "bonus": 0
+        },
+        {
+          "amne": "SO",
+          "poang": 5,
+          "max": 12,
+          "stjarnor": 1,
+          "bonus": 0
+        }
+      ]
+    },
+    "prov": [
+      {
+        "amne": "NO",
+        "poang": 9,
+        "max": 15
+      },
+      {
+        "amne": "Matte",
+        "poang": 17,
+        "max": 20
+      },
+      {
+        "amne": "Svenska",
+        "poang": 11,
+        "max": 20
+      },
+      {
+        "amne": "Engelska",
+        "poang": 17,
+        "max": 18
+      },
+      {
+        "amne": "SO",
+        "poang": 9,
+        "max": 12
+      },
+      {
+        "amne": "Matte",
+        "poang": 19,
+        "max": 20
+      },
+      {
+        "amne": "NO",
+        "poang": 13,
+        "max": 15
+      },
+      {
+        "amne": "Svenska",
+        "poang": 16,
+        "max": 20
+      }
+    ],
+    "mattebladRatt": {
+      "min": 8,
+      "max": 14
+    }
+  }
+}
