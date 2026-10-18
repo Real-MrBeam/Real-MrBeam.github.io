@@ -4,7 +4,7 @@
   "platser": {
     "hem": {
       "namn": "Hemmet",
-      "text": "Här började resan. Stugan bredvid byggdes för mynt från matteblad."
+      "text": "Här började resan. Stugan bredvid byggdes av stjärnstoft från matteblad."
     },
     "skola": {
       "namn": "Skolan",
@@ -120,7 +120,6 @@
   "exempel": {
     "start": {
       "stjarnor": 6,
-      "mynt": 34,
       "plats": "skola",
       "byggt": [
         "stuga"
@@ -147,7 +146,8 @@
           "stjarnor": 1,
           "bonus": 0
         }
-      ]
+      ],
+      "stjarnstoft": 34
     },
     "prov": [
       {
@@ -260,6 +260,10 @@
     "dag": {
       "namn": "Dag",
       "yrke": "Duvskötare"
+    },
+    "drottningen": {
+      "namn": "Drottningen",
+      "yrke": "Rikets drottning"
     }
   },
   "saker": {
@@ -267,193 +271,201 @@
       "namn": "Kristallykta",
       "pris": 8,
       "text": "Lyser upp mörka platser.",
-      "typ": "sak"
+      "typ": "verktyg"
     },
     "geleagg": {
       "namn": "Gelé-ägg",
       "pris": 12,
-      "text": "Kläcks till husdjuret Gelé, en grön geleklump som studsar efter dig.",
-      "typ": "husdjur"
+      "text": "Kläcks till Gelé, en grön geleklump som studsar efter dig.",
+      "typ": "djur",
+      "djur": "gele"
     },
     "honungsburk": {
       "namn": "Honungsburk",
       "pris": 6,
-      "text": "Björnen i Höstskogen vill ha den.",
-      "typ": "sak"
+      "text": "Björnen i Höstskogen vill ha den, och djuren i vattnet faller för den. Agn som kan användas en gång.",
+      "typ": "agn"
     },
     "humleagg": {
       "namn": "Humleägg",
       "pris": 12,
-      "text": "Kläcks till husdjuret Bumbus, en tjock humla.",
-      "typ": "husdjur"
+      "text": "Kläcks till Bumbus, en tjock humla.",
+      "typ": "djur",
+      "djur": "bumbus"
     },
     "springskor": {
       "namn": "Springskor",
       "pris": 10,
       "text": "Du går dubbelt så fort på kartan.",
-      "typ": "sak"
+      "typ": "verktyg"
     },
     "hopprep": {
       "namn": "Hopprep",
       "pris": 5,
       "text": "Gremlinen i Tornet vill leka med det.",
-      "typ": "sak"
+      "typ": "verktyg"
     },
     "jattemorot": {
       "namn": "Jättemorot",
       "pris": 6,
-      "text": "Haren i Skogsgläntan följer med och blir ditt husdjur.",
-      "typ": "husdjur"
+      "text": "Haren Hopp följer med dig för en morot.",
+      "typ": "djur",
+      "djur": "hare"
     },
     "fropase": {
       "namn": "Fröpåse",
       "pris": 4,
       "text": "Planteras på en tom plats och blir en blomma på kartan.",
-      "typ": "sak"
+      "typ": "verktyg"
     },
     "kikare": {
       "namn": "Kikare",
       "pris": 8,
       "text": "Visar var gömda kistor finns på kartan.",
-      "typ": "sak"
+      "typ": "verktyg"
     },
     "fagelfro": {
       "namn": "Fågelfrö",
       "pris": 5,
-      "text": "Kråkan Kaxig blir ditt husdjur.",
-      "typ": "husdjur"
+      "text": "Kråkan Kaxig kommer fram och vill följa med.",
+      "typ": "djur",
+      "djur": "kraka"
     },
     "glodsvamp": {
       "namn": "Glödsvamp",
       "pris": 6,
-      "text": "Lyser som en lykta.",
-      "typ": "sak"
+      "text": "Lyser som en lykta och lockar djur i mörkt vatten. Agn som kan användas en gång.",
+      "typ": "agn"
     },
     "sporpase": {
       "namn": "Sporpåse",
       "pris": 10,
-      "text": "Blir husdjuret Gnissel, en liten gremlin som samlar glitter.",
-      "typ": "husdjur"
+      "text": "Ur påsen växer Gnissel, en liten gremlin som samlar glitter.",
+      "typ": "djur",
+      "djur": "gnissel"
     },
     "flygdryck": {
       "namn": "Flygdryck",
       "pris": 12,
       "text": "Du flyger över älven till Fågelön, en hemlig plats.",
-      "typ": "sak"
+      "typ": "verktyg"
     },
     "katten": {
       "namn": "Katten Sot",
       "pris": 15,
-      "text": "En svart katt som blir ditt husdjur.",
-      "typ": "husdjur"
+      "text": "Den svarta katten Sot hoppar upp på din axel.",
+      "typ": "djur",
+      "djur": "sot"
     },
     "stenhacka": {
       "namn": "Stenhacka",
       "pris": 10,
       "text": "Bryter upp stenblocket som stänger genvägen mellan Höstskogen och Tornet.",
-      "typ": "sak"
+      "typ": "verktyg"
     },
     "klippan": {
       "namn": "Klippan",
       "pris": 15,
-      "text": "Ett litet stenväsen som blir ditt husdjur.",
-      "typ": "husdjur"
+      "text": "Det lilla stenväsendet Klippan rullar efter dig.",
+      "typ": "djur",
+      "djur": "klippan"
     },
     "appelpaj": {
       "namn": "Äppelpaj",
       "pris": 6,
-      "text": "Björnen Brumma vill ha den.",
-      "typ": "sak"
+      "text": "Björnen Brumma vill ha den, och djuren i vattnet gillar den också. Agn som kan användas en gång.",
+      "typ": "agn"
     },
     "appelkorg": {
       "namn": "Äppelkorg",
       "pris": 4,
       "text": "Ge den till vem som helst som tack.",
-      "typ": "sak"
+      "typ": "verktyg"
     },
     "flotte": {
       "namn": "Flotte",
       "pris": 12,
       "text": "Åker nedför älven till ett fiskeställe.",
-      "typ": "sak"
+      "typ": "verktyg"
     },
     "fagelholk": {
       "namn": "Fågelholk",
       "pris": 5,
       "text": "Hängs upp och lockar en ovanlig fågel till kartan.",
-      "typ": "sak"
+      "typ": "verktyg"
     },
     "snorkel": {
       "namn": "Snorkel",
       "pris": 8,
       "text": "Du dyker efter skatter i sjön.",
-      "typ": "sak"
+      "typ": "verktyg"
     },
     "badring": {
       "namn": "Badring",
       "pris": 5,
       "text": "Kul på bilden, inget mer.",
-      "typ": "sak"
+      "typ": "verktyg"
     },
     "roddbat": {
       "namn": "Roddbåt",
       "pris": 14,
       "text": "Du fiskar mitt i sjön, där de ovanliga fiskarna finns.",
-      "typ": "sak"
+      "typ": "verktyg"
     },
     "kompass": {
       "namn": "Kompass",
       "pris": 6,
       "text": "Visar vägen till närmaste stängda port.",
-      "typ": "sak"
+      "typ": "verktyg"
     },
     "flugspo": {
       "namn": "Flugspö",
       "pris": 10,
       "text": "Fångar öring och harr i strömmen under broarna.",
-      "typ": "sak"
+      "typ": "verktyg"
     },
     "flugask": {
       "namn": "Flugask",
       "pris": 6,
-      "text": "Ovanliga flugor som fångar regnbåge.",
-      "typ": "sak"
+      "text": "Ovanliga flugor som fångar regnbåge. Agn som kan användas en gång.",
+      "typ": "agn"
     },
     "hav": {
       "namn": "Håv",
       "pris": 6,
       "text": "Fångar grodor och småfisk vid stranden.",
-      "typ": "sak"
+      "typ": "verktyg"
     },
     "kraftbur": {
       "namn": "Kräftbur",
       "pris": 10,
       "text": "Fångar kräftor över natten.",
-      "typ": "sak"
+      "typ": "verktyg"
     },
     "stjarnkikare": {
       "namn": "Stjärnkikare",
       "pris": 10,
       "text": "Visar stjärnfall på kartan som lämnar glitter.",
-      "typ": "sak"
+      "typ": "verktyg"
     },
     "stjarnkarta": {
       "namn": "Stjärnkarta",
       "pris": 8,
       "text": "En tavla till prisskåpet.",
-      "typ": "sak"
+      "typ": "verktyg"
     },
     "brevduva": {
       "namn": "Brevduva",
       "pris": 10,
       "text": "Skickar brev till slottet, och vakten berättar en hemlighet.",
-      "typ": "sak"
+      "typ": "verktyg"
     },
     "duvanpip": {
       "namn": "Duvan Pip",
       "pris": 15,
-      "text": "En duva som blir ditt husdjur.",
-      "typ": "husdjur"
+      "text": "Duvan Pip sätter sig på din hatt och följer med.",
+      "typ": "djur",
+      "djur": "pip"
     }
   },
   "bygg": {
@@ -496,6 +508,34 @@
       ]
     },
     "skola": {
+      "rubrik": "Något skimrar på skolgården",
+      "knapp": "Gå och titta",
+      "aventyr": {
+        "start": "a",
+        "steg": {
+          "a": {
+            "t": "På skolgården ligger ett litet frö som skimrar som en fallen stjärna. Ingen vet vad som händer om man lägger det någonstans.",
+            "val": [
+              {
+                "label": "Plantera fröet i jorden",
+                "kostnad": 0,
+                "text": "Du gräver ner fröet och klappar till jorden. Den börjar glimra, och glasväggar växer upp som is som blir till glas. Sven, vaktmästaren, kommer springande med en spade.",
+                "till": {
+                  "bygg": "vaxthus"
+                }
+              },
+              {
+                "label": "Lägg fröet i sanden vid klätterställningen",
+                "kostnad": 0,
+                "text": "Du lägger fröet i sanden. En stark ranka skjuter upp och slingrar sig runt stolparna. Lisa, gympaläraren, kommer joggande: ”En hinderbana! Vem vågar först?”",
+                "till": {
+                  "bygg": "hinderbana"
+                }
+              }
+            ]
+          }
+        }
+      },
       "val": [
         {
           "id": "hinderbana",
@@ -504,9 +544,6 @@
           "byggs": "Klätterställning, däck och lina",
           "kostnad": 12,
           "byggnad": "hinderbana",
-          "onskan": "Jag är gympalärare och vill bygga en hinderbana bakom skolan. Men vaktmästaren har redan grävt upp marken.",
-          "forlorare": "Jaha. Då får tomaterna vänta. Gympa är ju också bra för barnen.",
-          "forlorarePerson": "sven",
           "tack": "Fantastiskt! Nu blir det rörelse på rasten!",
           "butikHej": "Spring, hoppa, kasta! Vill du ha något till ditt äventyr?",
           "saljer": [
@@ -521,9 +558,6 @@
           "byggs": "Glashus med tomater",
           "kostnad": 12,
           "byggnad": "vaxthus",
-          "onskan": "Jag gräver för ett växthus. Barnen ska få odla egna grönsaker.",
-          "forlorare": "Okej, då gör vi hinderbana någon annan gång.",
-          "forlorarePerson": "lisa",
           "tack": "Tack! Det här blir det finaste växthuset i hela riket.",
           "butikHej": "Frön och grönt, det är det som gäller. Se dig omkring!",
           "saljer": [
@@ -534,6 +568,34 @@
       ]
     },
     "glanta": {
+      "rubrik": "Det börjar skymma i gläntan",
+      "knapp": "Vänta på natten",
+      "aventyr": {
+        "start": "a",
+        "steg": {
+          "a": {
+            "t": "Du väntar tills det blir skymning. Till vänster dansar små ljus bland svamparna. Till höger hörs ett knackande högt uppe i ett träd.",
+            "val": [
+              {
+                "label": "Kasta stjärnstoft mot ljusen",
+                "kostnad": 2,
+                "text": "Ljusen virvlar runt i en ring och sätter sig i gräset som lysande svampar. Murkel, svampväsendet, hoppar fram: ”Min dansring! Hur visste du?”",
+                "till": {
+                  "bygg": "svampring"
+                }
+              },
+              {
+                "label": "Kasta stjärnstoft mot trädet",
+                "kostnad": 2,
+                "text": "Stjärnstoftet bygger en stege av ljus upp längs stammen. Där uppe sitter Greta, skogvaktaren, och vinkar: ”Äntligen någon som kan hjälpa mig räkna fåglar!”",
+                "till": {
+                  "bygg": "utkikstorn"
+                }
+              }
+            ]
+          }
+        }
+      },
       "val": [
         {
           "id": "utkikstorn",
@@ -542,9 +604,6 @@
           "byggs": "Trätorn i gläntans mitt",
           "kostnad": 12,
           "byggnad": "utkikstorn",
-          "onskan": "Jag är skogvaktare och vill bygga ett utkikstorn för att räkna fåglar. Men en liten gubbe har ritat en ring av svamp just där.",
-          "forlorare": "Svampringen var min... men okej. Vi dansar någon annanstans på fullmånen.",
-          "forlorarePerson": "murkel",
           "tack": "Tack! Härifrån ser man hela skogen.",
           "butikHej": "Titta, titta! Kikare och fågelfrö. Vad behöver du?",
           "saljer": [
@@ -559,9 +618,6 @@
           "byggs": "Ring av lysande svampar",
           "kostnad": 12,
           "byggnad": "svampring",
-          "onskan": "Svampringen är min! Där dansar vi på fullmånen. Ingen får bygga där.",
-          "forlorare": "Då bygger jag inget torn. Men jag räknar fåglarna ändå.",
-          "forlorarePerson": "greta",
           "tack": "Hihi! Tack, nu lyser svamparna riktigt fint.",
           "butikHej": "Glöd och spor! Små saker för stora äventyr.",
           "saljer": [
@@ -572,46 +628,100 @@
       ]
     },
     "hemlig": {
+      "rubrik": "Hemliga gläntan ligger bakom en stängd väg",
+      "knapp": "Se hur du kommer fram",
+      "aventyr": {
+        "start": "a",
+        "steg": {
+          "a": {
+            "t": "Hemliga gläntan ligger långt in i skogen, men vägen dit är stängd. Till höger forsar en bred bäck och till vänster reser sig en brant klippa.",
+            "val": [
+              {
+                "label": "Kasta stjärnstoft på bäcken",
+                "kostnad": 2,
+                "text": "Stjärnstoftet glittrar på vattnet, och en bro av ljus växer fram över bäcken. På andra sidan dansar irrbloss vid en smal stig som leder till en liten stuga med bubblande grytor. Hulda, häxan, brygger drycker där.",
+                "till": {
+                  "bygg": "stigen"
+                }
+              },
+              {
+                "label": "Kasta stjärnstoft på klippan",
+                "kostnad": 2,
+                "text": "Stjärnstoftet fastnar i berget, och en stege av ljus växer upp längs klippan. Där uppe gapar ett mörkt hål in i berget. Där bor trollet Torvald. Han är snällare än han ser ut.",
+                "till": {
+                  "bygg": "grottan"
+                }
+              }
+            ]
+          }
+        }
+      },
       "val": [
         {
           "id": "stigen",
           "person": "hulda",
-          "talar": null,
           "namn": "Mystiska stigen",
           "byggs": "Häxans stuga med grytor",
           "kostnad": 25,
           "byggnad": "hexstuga",
-          "onskan": "Irrbloss dansar vid en smal stig. Där bakom skymtar en liten stuga med bubblande grytor. Hulda, häxan, brygger drycker där.",
-          "forlorare": "Grottan ligger kvar där den ligger. Jag kanske hälsar på dig ändå.",
-          "forlorarePerson": "torvald",
+          "bekrafta": "Hulda bygger häxstugan för {n} stjärnstoft. Grottan i berget hittar du aldrig.",
           "tack": "Hihi! Välkommen in. Jag brygger gott, men fråga inte vad som är i.",
           "butikHej": "Drycker och katter. Vad önskar du? Åh, och har du en groda?",
           "saljer": [
             "flygdryck",
             "katten"
-          ]
+          ],
+          "forlorare": "Du hittade stugan med de bubblande grytorna. Grottan i berget ligger kvar där den ligger, och ingen vet att den finns.",
+          "forlorarePerson": null
         },
         {
           "id": "grottan",
           "person": "torvald",
-          "talar": null,
           "namn": "Grottan",
           "byggs": "Trollets stenhåla",
           "kostnad": 25,
           "byggnad": "grotta",
-          "onskan": "Ett mörkt hål i berget. Där inne bor trollet Torvald. Han är snällare än han ser ut.",
-          "forlorare": "Nej, nej! Då flyttar jag in någon annanstans och grytorna får vänta.",
-          "forlorarePerson": "hulda",
+          "bekrafta": "Torvald bygger stenhålan för {n} stjärnstoft. Häxans stuga hittar du aldrig.",
           "tack": "Gruff! Välkommen, vän. Jag är inte farlig. Mest.",
           "butikHej": "Stenar och hackor, det är mitt. Vad söker du? Jag vill gärna ha en kräfta.",
           "saljer": [
             "stenhacka",
             "klippan"
-          ]
+          ],
+          "forlorare": "Du hittade grottan och trollet. Stigen med irrbloss försvinner bland träden, och häxans stuga får du aldrig se.",
+          "forlorarePerson": null
         }
       ]
     },
     "host": {
+      "rubrik": "Ett träd har ramlat över stigen",
+      "knapp": "Gå och titta",
+      "aventyr": {
+        "start": "a",
+        "steg": {
+          "a": {
+            "t": "Ett stort träd har ramlat över stigen. Det hänger fullt av äpplen i grenarna, och stammen är grov och rak.",
+            "val": [
+              {
+                "label": "Plocka äpplena",
+                "kostnad": 0,
+                "text": "Du plockar ett äpple efter det andra och ställer dem i rad. Astrid, äppelodlaren, kommer med en kärra: ”Här ska det bli en fruktlund!”",
+                "till": {
+                  "bygg": "fruktlund"
+                }
+              },
+              {
+                "label": "Såga upp stammen",
+                "kostnad": 0,
+                "text": "Du tar en gammal såg som ligger i gräset, och det hörs över halva skogen. Kalle, snickaren, kommer fram med sina verktyg: ”Ett sågverk! Äntligen!”",
+                "till": {
+                  "bygg": "sagverk"
+                }
+              }
+            ]
+          }
+        }
+      },
       "val": [
         {
           "id": "fruktlund",
@@ -620,9 +730,6 @@
           "byggs": "Äppelträd och en kärra",
           "kostnad": 15,
           "byggnad": "fruktlund",
-          "onskan": "Jag är äppelodlare och vill plantera en fruktlund. Men snickaren har redan märkt ut träden han ska fälla.",
-          "forlorare": "Okej. Då får byn ta plank någon annanstans ifrån.",
-          "forlorarePerson": "kalle",
           "tack": "Tack! Om några år blir det äppelpaj till alla.",
           "butikHej": "Äpplen! Röda, gröna och bakade.",
           "saljer": [
@@ -637,9 +744,6 @@
           "byggs": "Vattenhjul och plankstaplar",
           "kostnad": 15,
           "byggnad": "sagverk",
-          "onskan": "Byn behöver plank till nya hus. Jag vill bygga ett sågverk här vid älven.",
-          "forlorare": "Då planterar jag mina äppelträd längre bort.",
-          "forlorarePerson": "astrid",
           "tack": "Bra! Nu ska det sågas!",
           "butikHej": "Flottar och holkar. Allt av trä.",
           "saljer": [
@@ -650,6 +754,34 @@
       ]
     },
     "sjo": {
+      "rubrik": "Någon ropar från sjön",
+      "knapp": "Gå ner till stranden",
+      "aventyr": {
+        "start": "a",
+        "steg": {
+          "a": {
+            "t": "Någon ropar från andra sidan sjön. Det är för djupt för att vada och för långt för att kasta.",
+            "val": [
+              {
+                "label": "Kasta stjärnstoft på vattnet",
+                "kostnad": 3,
+                "text": "Planka efter planka stiger upp ur vattnet och bildar en brygga ut i sjön. Bertil, badvakten, kommer springande: ”En badbrygga! Äntligen!”",
+                "till": {
+                  "bygg": "badbrygga"
+                }
+              },
+              {
+                "label": "Kasta stjärnstoft på stranden",
+                "kostnad": 3,
+                "text": "Stjärnstoftet samlas till en liten båt som guppar vid stranden. Siri, seglaren, hoppar ur den: ”Tack! Nu behöver den bara ett tak.”",
+                "till": {
+                  "bygg": "bathus"
+                }
+              }
+            ]
+          }
+        }
+      },
       "val": [
         {
           "id": "badbrygga",
@@ -658,9 +790,6 @@
           "byggs": "Brygga med stege",
           "kostnad": 20,
           "byggnad": "brygga",
-          "onskan": "Jag är badvakt och vill bygga en badbrygga. Men seglaren har lagt sin båt mitt på stranden.",
-          "forlorare": "Okej, då seglar jag vidare. Men bryggan är fin den med.",
-          "forlorarePerson": "siri",
           "tack": "Plask! Nu blir det badsommar.",
           "butikHej": "Snorkel och badring. Njut av vattnet!",
           "saljer": [
@@ -675,9 +804,6 @@
           "byggs": "Rött båthus",
           "kostnad": 20,
           "byggnad": "bathus",
-          "onskan": "Jag vill bygga ett båthus. Båten behöver tak över sig på vintern.",
-          "forlorare": "Hm. Då får vi bada från stranden som vanligt.",
-          "forlorarePerson": "bertil",
           "tack": "Tack! Nu kan båten sova gott.",
           "butikHej": "Roddbåtar och kompasser. Kom ombord!",
           "saljer": [
@@ -726,6 +852,34 @@
       ]
     },
     "torn": {
+      "rubrik": "Duvorna vill inte landa",
+      "knapp": "Gå upp i tornet",
+      "aventyr": {
+        "start": "a",
+        "steg": {
+          "a": {
+            "t": "En stor duvflock cirklar runt tornets topp och vill inte landa. Ovanför dem skymtar de första stjärnorna.",
+            "val": [
+              {
+                "label": "Strö ut en handfull frön",
+                "kostnad": 0,
+                "text": "Du strör ut frön på tornets tak, och duvorna landar en efter en. Dag, duvskötaren, kommer upp med en korg: ”Ett duvslag! Så snällt!”",
+                "till": {
+                  "bygg": "duvslag"
+                }
+              },
+              {
+                "label": "Sätt dig och titta på stjärnorna",
+                "kostnad": 0,
+                "text": "Du sätter dig ner och tittar upp. Duvorna kurar ihop sig vid dina fötter. Stella, astronomen, kommer upp med ett teleskop: ”Perfekt kväll för ett observatorium!”",
+                "till": {
+                  "bygg": "observatorium"
+                }
+              }
+            ]
+          }
+        }
+      },
       "val": [
         {
           "id": "observatorium",
@@ -734,9 +888,6 @@
           "byggs": "Kupol med teleskop",
           "kostnad": 20,
           "byggnad": "observatorium",
-          "onskan": "Jag är astronom och vill bygga ett observatorium på toppen. Men det sitter duvor överallt.",
-          "forlorare": "Okej, mina duvor flyttar till slottet. Pip pip.",
-          "forlorarePerson": "dag",
           "tack": "Tack! Nu kan jag följa stjärnorna.",
           "butikHej": "Stjärnor och kikare. Titta uppåt!",
           "saljer": [
@@ -751,9 +902,6 @@
           "byggs": "Duvslag på taket",
           "kostnad": 20,
           "byggnad": "duvslag",
-          "onskan": "Jag är duvskötare och vill bygga ett duvslag. Mina duvor bär brev åt hela riket.",
-          "forlorare": "Då får jag kika på stjärnorna från marken.",
-          "forlorarePerson": "stella",
           "tack": "Tack! Nu får duvorna ett riktigt hem.",
           "butikHej": "Brevduvor och duvor. Vad passar dig?",
           "saljer": [
@@ -767,6 +915,120 @@
   "dialog": {
     "val": "Valet är för alltid. Du kan inte ångra det. Ska du bygga?",
     "tankLiteTill": "Tänk lite till",
-    "ingaMynt": "Du behöver {n} mynt till. Gör ett matteblad!"
+    "ingaStoft": "Du behöver {n} stjärnstoft till. Gör ett matteblad!",
+    "intro": [
+      {
+        "p": null,
+        "t": "En natt föll alla stjärnor från himlen. De blev till stjärnstoft över hela riket, och de gamla stjärnportarna slog igen."
+      },
+      {
+        "p": "drottningen",
+        "t": "Käre kartritare. Sedan stjärnorna föll har rikets mytiska djur börjat visa sig. Gelékluttar studsar i skogen, näcken spelar i älven och gremlins gömmer sig i tornen."
+      },
+      {
+        "p": "drottningen",
+        "t": "Ingen har någonsin skrivit ner dem. Jag söker någon som kan kartlägga alla rikets djur. Vill du ta uppdraget?"
+      },
+      {
+        "p": null,
+        "t": "Du tar drottningens uppdrag. Följ stigarna, hjälp folket du möter och samla stjärnstoft. Varje djur du hittar skrivs in i din djurbok."
+      },
+      {
+        "p": "drottningen",
+        "t": "Bra! När du kommer till slottet räknar vi djuren tillsammans. Lycka till!"
+      }
+    ],
+    "introKnapp": "Börja resan",
+    "slottKnapp": "Visa djuren för drottningen",
+    "slottHej": "Låt mig se din djurbok.",
+    "slott": [
+      {
+        "andel": 0,
+        "t": "Din djurbok är tom. Gå ut och leta, så ses vi igen."
+      },
+      {
+        "andel": 0.01,
+        "t": "Så spännande! Du har hittat {n} av {m} djur. Det finns många fler därute."
+      },
+      {
+        "andel": 0.5,
+        "t": "Imponerande! {n} av {m} djur. Bara några få saknas nu."
+      },
+      {
+        "andel": 1,
+        "t": "Alla {m} djuren! Du är rikets bästa kartritare. Tack för allt du har gjort."
+      }
+    ],
+    "enGang": "Jag kan bara sälja en sak till dig, så välj med omsorg.",
+    "redanHandlat": "Du har redan handlat hos mig. Tack för sist!",
+    "kop": "Köpa {namn} för {pris} stjärnstoft? Du kan bara handla en sak hos {person}.",
+    "djurbok": {
+      "rubrik": "Djurboken",
+      "tom": "Inga djur än. Bygg något, handla och utforska!",
+      "max": "Du kan bara ha tre djur framme. Lägg undan ett först.",
+      "okant": "Okänt djur",
+      "framme": "Framme",
+      "haFramme": "Ha framme",
+      "laggUndan": "Lägg undan",
+      "brev": "Läs drottningens brev"
+    }
+  },
+  "djur": {
+    "gele": {
+      "namn": "Gelé",
+      "art": "Geleväsen",
+      "text": "En grön geleklump som studsar efter dig och blir blankare när den är glad.",
+      "hur": "Kläcktes ur Gelé-ägget.",
+      "ledtrad": "Något som kan kläckas ur ett ägg, och som studsar."
+    },
+    "bumbus": {
+      "namn": "Bumbus",
+      "art": "Stjärnhumla",
+      "text": "En tjock humla vars vingar glittrar som stjärnstoft.",
+      "hur": "Kläcktes ur Humleägget.",
+      "ledtrad": "Något som surrar och bor nära bikupor."
+    },
+    "hare": {
+      "namn": "Hopp",
+      "art": "Månehare",
+      "text": "En hare som bara syns när månen är framme. Den älskar morötter.",
+      "hur": "Följde med för en jättemorot.",
+      "ledtrad": "Någon som gillar morötter."
+    },
+    "kraka": {
+      "namn": "Kaxig",
+      "art": "Sagokråka",
+      "text": "En kråka som samlar glitter och pratar kråkspråk.",
+      "hur": "Lockades fram med fågelfrö.",
+      "ledtrad": "Någon som sitter högt uppe och gillar frön."
+    },
+    "gnissel": {
+      "namn": "Gnissel",
+      "art": "Glittergremlin",
+      "text": "En liten gremlin som samlar glitter och gnisslar när den är glad.",
+      "hur": "Växte fram ur en sporpåse.",
+      "ledtrad": "Något som växer ur en påse med sporer."
+    },
+    "sot": {
+      "namn": "Sot",
+      "art": "Skuggkatt",
+      "text": "En svart katt som försvinner i skuggorna och dyker upp där du minst anar.",
+      "hur": "Följde med från häxans stuga.",
+      "ledtrad": "Något som bor hos en häxa."
+    },
+    "klippan": {
+      "namn": "Klippan",
+      "art": "Stenväsen",
+      "text": "Ett litet stenväsen som ser ut som en sten med ögon.",
+      "hur": "Hittades i trollets grotta.",
+      "ledtrad": "Något som liknar en sten och bor i en grotta."
+    },
+    "pip": {
+      "namn": "Pip",
+      "art": "Stjärnduva",
+      "text": "En duva vars fjädrar glimmar när det blir kväll.",
+      "hur": "Kom flygande från duvslaget.",
+      "ledtrad": "Något som flyger runt ett torn."
+    }
   }
 }

@@ -2,7 +2,7 @@
 (async () => {
 'use strict';
 // The game reads two data files: geometry (karta.json) and names, texts and rules (berattelse.json).
-const [karta, berattelse, PORTRAITS] = await Promise.all(['data/karta.json', 'data/berattelse.json', 'data/portratt.json'].map(u =>
+const [karta, berattelse, PORTRAITS, PETDATA] = await Promise.all(['data/karta.json', 'data/berattelse.json', 'data/portratt.json', 'data/djur.json'].map(u =>
   fetch(u).then(r => { if (!r.ok) throw new Error(u + ' ' + r.status); return r.json(); })));
 const TS = karta.ruta, MW = karta.bredd, MH = karta.hojd;
 const $ = s => document.querySelector(s);
@@ -48,10 +48,22 @@ const BOY = {
 };
 BOY.left = BOY.right.map(mirror);
 
+// The animals: two frames each, drawn facing right and mirrored for walking left (data/djur.json, made by verktyg/gor-djur.mjs).
+// Names and texts are in berattelse.json (djur). Up to three animals follow the boy, the rest are in the animal book.
+const PETS = Object.fromEntries(Object.entries(PETDATA).map(([id, d]) => {
+  const frames = d.bilder.map(rows => sprite(rows, d.farger));
+  const dark = sprite(d.bilder[0], Object.fromEntries(Object.keys(d.farger).map(k => [k, k === 'o' ? '#262b44' : '#3a4466'])));
+  return [id, { namn: berattelse.djur[id].namn, lyft: d.lyft, right: frames, left: frames.map(mirror), dark }];
+}));
+
 const STAR = sprite([
   "......o......", ".....oyo.....", ".....oyo.....", "....oyyyo....", "ooooywyyyoooo", "oyyyywyyyyyyo",
   ".oyyyyyyyyyo.", "..oyyyyyyyo..", "...oyyyyyo...", "...oyyoyyo...", "..oyyo.oyyo..", "..oyo...oyo..", "..oo.....oo.."],
   { o:'#3f2631', y:'#feae34', w:'#fee761' });
+// Stardust: a four-pointed sparkle. It is what the matteblad give, and what building and some choices on the map cost.
+const DUST = sprite([
+  ".....o.....", "....owo....", "....owo....", "...owCwo...", ".oowwCwwoo.", "owwCCbCCwwo", ".oowwCwwoo.", "...owCwo...", "....owo....", "....owo....", ".....o....."],
+  { o:'#3f2631', w:'#ffffff', C:'#2ce8f5', b:'#0099db' });
 const LOCK = sprite(["..sss..", ".s...s.", ".s...s.", "ooooooo", "oyyyyyo", "oyyoyyo", "oyyyyyo", "ooooooo"], { o:'#3f2631', y:'#feae34', s:'#c0cbdc' });
 const GATEPAL = { o:'#3f2631', S:'#c0cbdc', s:'#8b9bb4', w:'#b86f50', W:'#733e39', y:'#feae34', Y:'#fee761' };
 const GATE_TOP = ["................", "oooooooooooooooo", "oSSSSSSSSSSSSSSo", "osssssssssssssso", "oooooooooooooooo"];
@@ -69,7 +81,27 @@ const { M, inb, at, key, occ, OBJ, put, NODES, EDGES, GATES, PLOTS, ITEMS, EMPTY
 const tiles = new Image();
 tiles.src = karta.bild;
 const tileXY = i => [(i % 12) * TS, Math.floor(i / 12) * TS];
-function tile(ctx, i, x, y){ const [sx, sy] = tileXY(i); ctx.drawImage(tiles, sx, sy, TS, TS, x, y, TS, TS); }
+// More tilesets can be added in karta.json (tilesets). A cell is a number (the main tileset), a text "o:14,10"
+// (column and row in the tileset o) or a list of those that are drawn on top of each other.
+const SETS = {};
+for (const [id, t] of Object.entries(karta.tilesets || {})){ const img = new Image(); img.src = t.bild; SETS[id] = img; }
+const refCache = new Map();
+function parseRef(s){
+  let r = refCache.get(s);
+  if (!r){
+    const m = /^(\w+):(\d+),(\d+)$/.exec(s);
+    if (!m || !SETS[m[1]]) throw new Error('Okänd ruta ' + s);
+    r = { img: SETS[m[1]], sx: +m[2] * TS, sy: +m[3] * TS };
+    refCache.set(s, r);
+  }
+  return r;
+}
+const filled = Varld.filled;
+function tile(ctx, i, x, y){
+  if (Array.isArray(i)){ for (const j of i) tile(ctx, j, x, y); return; }
+  if (typeof i === 'string'){ const r = parseRef(i); ctx.drawImage(r.img, r.sx, r.sy, TS, TS, x, y, TS, TS); return; }
+  const [sx, sy] = tileXY(i); ctx.drawImage(tiles, sx, sy, TS, TS, x, y, TS, TS);
+}
 function quad(ctx, i, qx, qy, x, y){ const [sx, sy] = tileXY(i); ctx.drawImage(tiles, sx + qx*8, sy + qy*8, 8, 8, x + qx*8, y + qy*8, 8, 8); }
 function auto(ctx, set, same, x, y){
   const up = same(x, y - 1), dn = same(x, y + 1), lf = same(x - 1, y), rt = same(x + 1, y);
@@ -125,8 +157,11 @@ function drawBridgeTile(ctx, x, y){
   }
 }
 
-let TERRAIN = [], GRAY = [];
-function buildTerrain(){
+let TERRAIN = [];
+// The small decoration in the grass is placed once. The terrain image is redrawn when a forest plot is built, or in debug mode.
+let decorDone = false;
+function placeDecor(){
+  if (decorDone) return; decorDone = true;
   const r = rng(42);
   // dekor i gräset
   const near = (x, y) => [[1,0],[-1,0],[0,1],[0,-1]].some(([dx, dy]) => { const v = at(x+dx, y+dy); return v === 'p' || v === 'b' || v === 'w'; });
@@ -138,6 +173,9 @@ function buildTerrain(){
     else if (v < 0.065) put(5, x, y);
     else if (v < 0.072) put(29, x, y);
   }
+}
+function buildTerrain(){
+  placeDecor();
   const base = document.createElement('canvas'); base.width = MW*TS; base.height = MH*TS;
   const b = base.getContext('2d');
   const gr = rng(7);
@@ -156,11 +194,23 @@ function buildTerrain(){
     stamps.push({ x: x*TS, y: y*TS - (same(x, y-1, t) ? 3 : 0), ...(same(x, y-1, t) ? pick(t) : { i: t === 'F' ? 28 : 27 }) });
     if (same(x+1, y, t) && same(x, y+1, t) && same(x+1, y+1, t)) stamps.push({ x: x*TS + 8, y: y*TS + 5, ...pick(t) });
   }
+  // A plot that is forest until something is built there (the hidden glade) gets the same kind of trees, with its own random numbers
+  for (const p of PLOTS){
+    if (!p.skog || builtShown(p)) continue;
+    const pr = rng(500 + p.x * 31 + p.y);
+    const inPlot = (x, y) => x >= p.x && x < p.x + 3 && y >= p.y && y < p.y + 3;
+    const pk = () => pr() < .7 ? { i: 28 } : { i: 16, top: 4 };
+    for (let y = p.y; y < p.y + 3; y++) for (let x = p.x; x < p.x + 3; x++){
+      const up = inPlot(x, y - 1) || same(x, y - 1, 'F');
+      stamps.push({ x: x*TS, y: y*TS - (up ? 3 : 0), ...(up ? pk() : { i: 28 }) });
+      if (inPlot(x + 1, y) && inPlot(x, y + 1)) stamps.push({ x: x*TS + 8, y: y*TS + 5, ...pk() });
+    }
+  }
   for (const ob of OBJ) stamps.push({ x: ob.x*TS, y: ob.y*TS, i: ob.i, obj: true });
   stamps.sort((a, b) => a.y - b.y || (a.obj ? 1 : 0) - (b.obj ? 1 : 0));
   for (const st of stamps){ if (st.top !== undefined) tile(o, st.top, st.x, st.y - TS); tile(o, st.i, st.x, st.y); }
   o.fillStyle = '#262b44'; o.fillRect(CASTLE_X + 3*TS + 6, CASTLE_Y + 2*TS + 6, 20, 26);
-  CASTLE.forEach((row, dy) => row.forEach((i, dx) => { if (i >= 0) tile(o, i, CASTLE_X + dx*TS, CASTLE_Y + dy*TS); }));
+  CASTLE.forEach((row, dy) => row.forEach((i, dx) => { if (filled(i)) tile(o, i, CASTLE_X + dx*TS, CASTLE_Y + dy*TS); }));
   const frames = [];
   for (let f = 0; f < 3; f++){
     const c = document.createElement('canvas'); c.width = base.width; c.height = base.height;
@@ -168,15 +218,15 @@ function buildTerrain(){
     ctx.drawImage(base, 0, 0); ctx.drawImage(waterLayer(f), 0, 0); ctx.drawImage(over, 0, 0);
     frames.push(c);
   }
-  TERRAIN = frames; GRAY = frames.map(grayCopy);
+  TERRAIN = frames;
 }
 
 /* ---------- tillstånd ---------- */
 const startData = berattelse.exempel.start;
 const START = () => ({
-  stars: startData.stjarnor, coins: startData.mynt, node: startData.plats,
+  stars: startData.stjarnor, coins: startData.stjarnstoft, node: startData.plats,
   built: Object.fromEntries(startData.byggt.map(id => [id, true])),
-  valda: {}, saker: [],
+  valda: {}, saker: [], steg: {}, handlat: {}, djur: [], fram: [],
   sett: new Uint8Array(MW*MH),
   log: startData.logg.map(r => ({ subj: r.amne, p: r.poang, max: r.max, st: r.stjarnor, bonus: r.bonus })),
   testIdx: 0,
@@ -185,7 +235,24 @@ let S = START();
 const SAMPLE_TESTS = berattelse.exempel.prov.map(t => ({ subj: t.amne, p: t.poang, max: t.max }));
 
 const boy = { x: 0, y: 0, dir: 'down', route: null, step: 0, t: 0, target: null };
-function placeBoy(id){ const n = NODES[id]; boy.x = n.x*TS; boy.y = n.y*TS; }
+// The pets follow the path the boy has walked. trail holds the points he has passed, pet number k stands a few pixels
+// further back along it. At the start the trail runs straight to the left of him, so the pets stand beside him.
+const trail = [], petState = new Map();
+function resetTrail(){ trail.length = 0; for (let i = 100; i >= 0; i--) trail.push({ x: boy.x - i, y: boy.y }); petState.clear(); }
+function placeBoy(id){ const n = NODES[id]; boy.x = n.x*TS; boy.y = n.y*TS; resetTrail(); }
+function petPos(k){
+  let need = 13 + k * 11, cx = boy.x, cy = boy.y;
+  for (let i = trail.length - 1; i > 0 && need > 0; i--){
+    const a = trail[i - 1], d = Math.hypot(cx - a.x, cy - a.y);
+    if (d >= need){ const t = need / d; return { x: cx + (a.x - cx) * t, y: cy + (a.y - cy) * t }; }
+    need -= d; cx = a.x; cy = a.y;
+  }
+  return { x: cx, y: cy };
+}
+// Up to three animals follow him: the ones he has put forward in the animal book. In debug mode all of them follow.
+const MAX_FRAM = 3;
+const activePets = () => DEBUG.mode ? Object.keys(PETS) : S.fram;
+
 
 /* ---------- canvas ---------- */
 const stage = $('#stage'), cv = $('#map'), ctx = cv.getContext('2d');
@@ -259,11 +326,17 @@ function onArrive(){
 let pendingPlot = null;
 
 /* ---------- fog of war ---------- */
-// Where the boy has been (and a bit around the road) the map is shown in colour, the rest in black and white.
+// Where the boy has been (and a bit around the road) the map is shown in colour, the rest is black. Only the dots he can
+// land on (without names) and the gates show through the dark.
 // S.sett holds one flag per tile. The colour layer is cut out with a mask whose edge is a pixel pattern.
 const FOG_R = 4;
 const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
-const seenAt = (x, y) => inb(x, y) && S.sett[y*MW + x] === 1;
+const FOG_COLOR = '#000000';
+// Debug (button on the page): 0 = off. 1 and 2 = every plot built with the first or the second alternative, 3 = every plot empty.
+// In all three there is no fog and every name is shown.
+const DEBUG = { mode: 0 };
+const seenReal = (x, y) => inb(x, y) && S.sett[y*MW + x] === 1;
+const seenAt = (x, y) => DEBUG.mode > 0 || seenReal(x, y);
 let maskDirty = true, MASK = null, MASKCTX = null, TMP = null, lastRevealKey = '';
 function revealAround(wx, wy){
   const cx = Math.floor(wx / TS), cy = Math.floor(wy / TS), k = cx + ',' + cy;
@@ -274,17 +347,6 @@ function revealAround(wx, wy){
     if (Math.hypot(x - cx, y - cy) <= FOG_R + .3){ S.sett[y*MW + x] = 1; maskDirty = true; }
   }
 }
-function grayCopy(src){
-  const c = document.createElement('canvas'); c.width = src.width; c.height = src.height;
-  const x = c.getContext('2d'); x.drawImage(src, 0, 0);
-  const im = x.getImageData(0, 0, c.width, c.height), d = im.data;
-  for (let i = 0; i < d.length; i += 4){
-    const g = Math.round((d[i]*.3 + d[i+1]*.59 + d[i+2]*.11) * .8);
-    d[i] = g; d[i+1] = g; d[i+2] = Math.min(255, g + 4);
-  }
-  x.putImageData(im, 0, 0);
-  return c;
-}
 function buildMask(){
   const w = MW*TS, h = MH*TS;
   if (!MASK){
@@ -294,9 +356,9 @@ function buildMask(){
   const im = MASKCTX.createImageData(w, h), D = im.data;
   const on = (x, y) => { D[(y*w + x)*4 + 3] = 255; };
   for (let ty = 0; ty < MH; ty++) for (let tx = 0; tx < MW; tx++){
-    if (seenAt(tx, ty)){ for (let ly = 0; ly < TS; ly++) for (let lx = 0; lx < TS; lx++) on(tx*TS + lx, ty*TS + ly); continue; }
-    const L = seenAt(tx-1, ty), R = seenAt(tx+1, ty), U = seenAt(tx, ty-1), B = seenAt(tx, ty+1);
-    const UL = seenAt(tx-1, ty-1), UR = seenAt(tx+1, ty-1), BL = seenAt(tx-1, ty+1), BR = seenAt(tx+1, ty+1);
+    if (seenReal(tx, ty)){ for (let ly = 0; ly < TS; ly++) for (let lx = 0; lx < TS; lx++) on(tx*TS + lx, ty*TS + ly); continue; }
+    const L = seenReal(tx-1, ty), R = seenReal(tx+1, ty), U = seenReal(tx, ty-1), B = seenReal(tx, ty+1);
+    const UL = seenReal(tx-1, ty-1), UR = seenReal(tx+1, ty-1), BL = seenReal(tx-1, ty+1), BR = seenReal(tx+1, ty+1);
     if (!(L || R || U || B || UL || UR || BL || BR)) continue;
     for (let ly = 0; ly < TS; ly++) for (let lx = 0; lx < TS; lx++){
       let d = 99;
@@ -352,14 +414,15 @@ function drawFlag(f, now, i){
 }
 function drawPlot(p, now){
   const ox = p.x*TS, oy = p.y*TS;
-  const built = S.built[p.id];
+  const built = builtShown(p);
   const a = plotAnim.get(p.id);
   if (built){
     let lift = 0;
     if (a){ const t = (now - a) / 1000; if (t < .35) return; if (t < .7) lift = Math.round(Math.sin((t - .35) / .35 * Math.PI) * 4); }
-    plotTiles(p).forEach((row, dy) => row.forEach((i, dx) => { if (i >= 0) tile(ctx, i, ox + dx*TS, oy + dy*TS - lift); }));
+    plotTiles(p).forEach((row, dy) => row.forEach((i, dx) => { if (filled(i)) tile(ctx, i, ox + dx*TS, oy + dy*TS - lift); }));
   } else {
-    EMPTY_PLOT.forEach((row, dy) => row.forEach((i, dx) => tile(ctx, i, ox + dx*TS, oy + dy*TS)));
+    if (p.skog) return;
+    emptyTiles(p).forEach((row, dy) => row.forEach((i, dx) => { if (filled(i)) tile(ctx, i, ox + dx*TS, oy + dy*TS); }));
   }
 }
 function drawBoy(now){
@@ -370,6 +433,26 @@ function drawBoy(now){
   const x = Math.round(boy.x), y = Math.round(boy.y) - 6 + bob;
   ctx.fillStyle = 'rgba(63,38,49,.35)'; ctx.fillRect(x + 4, Math.round(boy.y) + 9, 8, 2); ctx.fillRect(x + 3, Math.round(boy.y) + 10, 10, 1);
   ctx.drawImage(frames[f], x, y);
+}
+function drawPet(id, st, now, k){
+  const P = PETS[id], f = (st.moved ? Math.floor(now / 140 + k) : Math.floor(now / 650 + k)) % 2;
+  const bob = P.lyft ? Math.round(Math.sin(now / 210 + k * 2)) : 0;
+  const x = Math.round(st.x), y = Math.round(st.y) - 6 - P.lyft + bob;
+  ctx.fillStyle = 'rgba(63,38,49,.35)'; ctx.fillRect(x + 5, Math.round(st.y) + 9, 6, 2); ctx.fillRect(x + 4, Math.round(st.y) + 10, 8, 1);
+  ctx.drawImage((st.left ? P.left : P.right)[f], x, y);
+}
+// The boy and the pets are drawn from the back to the front
+function drawActors(now){
+  const list = [{ y: boy.y, draw: () => drawBoy(now) }];
+  activePets().forEach((id, k) => {
+    const p = petPos(k), st = petState.get(id) || { x: p.x, y: p.y, left: false, moved: false };
+    const dx = p.x - st.x;
+    st.moved = Math.hypot(dx, p.y - st.y) > .05;
+    if (dx < -.15) st.left = true; else if (dx > .15) st.left = false;
+    st.x = p.x; st.y = p.y; petState.set(id, st);
+    list.push({ y: p.y, draw: () => drawPet(id, st, now, k) });
+  });
+  list.sort((a, b) => a.y - b.y).forEach(a => a.draw());
 }
 function pill(x, y, parts, opts){
   opts = opts || {};
@@ -394,7 +477,6 @@ function pill(x, y, parts, opts){
     cx += it.w + gap;
   }
 }
-let COIN = null;
 let terrainFrame = 0, lastWater = 0, lastT = performance.now();
 
 function frame(now){
@@ -412,6 +494,7 @@ function frame(now){
       else { boy.x += dx / d * left; boy.y += dy / d * left; left = 0; }
     }
   }
+  { const lp = trail[trail.length - 1]; if (Math.hypot(boy.x - lp.x, boy.y - lp.y) >= 1){ trail.push({ x: boy.x, y: boy.y }); if (trail.length > 700) trail.splice(0, 100); } }
   revealAround(boy.x + 8, boy.y + 8);
   // kamera
   let tx, ty;
@@ -426,16 +509,19 @@ function frame(now){
   if (now - lastWater > 380){ terrainFrame = (terrainFrame + 1) % 3; lastWater = now; }
   const ox = Math.round(cam.x * scaleDev), oy = Math.round(cam.y * scaleDev);
   ctx.setTransform(1, 0, 0, 1, 0, 0);
-  ctx.fillStyle = '#181425'; ctx.fillRect(0, 0, cv.width, cv.height);
+  ctx.fillStyle = FOG_COLOR; ctx.fillRect(0, 0, cv.width, cv.height);
   ctx.setTransform(scaleDev, 0, 0, scaleDev, -ox, -oy);
   ctx.imageSmoothingEnabled = false;
-  if (maskDirty) buildMask();
-  ctx.drawImage(GRAY[terrainFrame], 0, 0);
-  const tc = TMP.getContext('2d');
-  tc.globalCompositeOperation = 'source-over'; tc.clearRect(0, 0, TMP.width, TMP.height);
-  tc.drawImage(TERRAIN[terrainFrame], 0, 0);
-  tc.globalCompositeOperation = 'destination-in'; tc.drawImage(MASK, 0, 0);
-  ctx.drawImage(TMP, 0, 0);
+  if (DEBUG.mode){ ctx.drawImage(TERRAIN[terrainFrame], 0, 0); }
+  else {
+    if (maskDirty) buildMask();
+    ctx.fillStyle = FOG_COLOR; ctx.fillRect(0, 0, MW*TS, MH*TS);
+    const tc = TMP.getContext('2d');
+    tc.globalCompositeOperation = 'source-over'; tc.clearRect(0, 0, TMP.width, TMP.height);
+    tc.drawImage(TERRAIN[terrainFrame], 0, 0);
+    tc.globalCompositeOperation = 'destination-in'; tc.drawImage(MASK, 0, 0);
+    ctx.drawImage(TMP, 0, 0);
+  }
 
   const reach = new Set([S.node]); { const q = [S.node]; while (q.length){ const n = q.shift(); for (const e of edgesOf(n)) if (edgeOpen(e)){ const m = otherEnd(e, n); if (!reach.has(m)){ reach.add(m); q.push(m); } } } }
   for (const p of PLOTS) if (seenAt(p.x + 1, p.y + 1)) drawPlot(p, now);
@@ -448,7 +534,7 @@ function frame(now){
     if (a){ const t = (now - a) / 1000; if (t < .6){ img = GATE_CLOSED; shake = (Math.floor(t * 30) % 2) ? 1 : -1; } else if (t > 2) gateAnim.delete(g); }
     ctx.drawImage(img, g.x*TS + shake, g.y*TS - 4);
   }
-  drawBoy(now);
+  drawActors(now);
   // partiklar
   for (let i = FX.length - 1; i >= 0; i--){
     const p = FX[i]; p.t += dt; if (p.t > p.life){ FX.splice(i, 1); continue; }
@@ -465,11 +551,12 @@ function frame(now){
     pill(sx(g.x*TS + 8), sy(g.y*TS - 6), [LOCK, String(g.req), STAR], { color: '#fee761' });
   }
   for (const p of PLOTS){
-    if (S.built[p.id] || !seenAt(p.x + 1, p.y + 1)) continue;
-    pill(sx(p.x*TS + 24), sy(p.y*TS - 1), [COIN, String(p.cost)], { color: '#ffffff', bg: '#3f2631', edge: '#733e39' });
+    if (builtShown(p) || !seenAt(p.x + 1, p.y + 1)) continue;
+    pill(sx(p.x*TS + 24), sy(p.y*TS - 1), [DUST, String(p.cost)], { color: '#ffffff', bg: '#3f2631', edge: '#733e39' });
   }
   for (const id in NODES){
     const n = NODES[id], here = id === S.node && !boy.route;
+    if (!seenAt(n.x, n.y)) continue;
     pill(sx(n.x*TS + 8), sy(n.y*TS + (n.labelAbove ? -1 : 31)), [n.name], { color: here ? '#fee761' : '#ffffff', edge: here ? '#feae34' : '#3a4466' });
   }
   requestAnimationFrame(frame);
@@ -479,12 +566,12 @@ function frame(now){
 const panel = $('#panel');
 function esc(s){ return String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c])); }
 function iconURL(c, s){ const k = document.createElement('canvas'); k.width = c.width*s; k.height = c.height*s; const x = k.getContext('2d'); x.imageSmoothingEnabled = false; x.drawImage(c, 0, 0, k.width, k.height); return k.toDataURL(); }
-let STAR_URL = '', COIN_URL = '', LOCK_URL = '';
+let STAR_URL = '', DUST_URL = '', LOCK_URL = '';
 function plotPreview(p){
   const c = document.createElement('canvas'); c.width = 48; c.height = 48; c.className = 'pix';
   const x = c.getContext('2d'); x.imageSmoothingEnabled = false;
   for (let dy = 0; dy < 3; dy++) for (let dx = 0; dx < 3; dx++) tile(x, 0, dx*16, dy*16);
-  plotTiles(p).forEach((row, dy) => row.forEach((i, dx) => { if (i >= 0) tile(x, i, dx*16, dy*16); }));
+  plotTiles(p).forEach((row, dy) => row.forEach((i, dx) => { if (filled(i)) tile(x, i, dx*16, dy*16); }));
   return c;
 }
 function renderPanel(view){
@@ -504,6 +591,7 @@ function renderPanel(view){
     const plots = PLOTS.filter(p => p.node === n.id);
     h = `<span class="tag">Du är här</span><h2>${esc(n.name)}</h2><p>${esc(n.text)}</p><div class="panel-body">`;
     for (const p of plots) h += plotBlock(p);
+    if (n.id === 'slott') h += `<div><button class="btn" type="button" data-slott="1">${esc(berattelse.dialog.slottKnapp)}</button></div>`;
     h += `<div><p class="sub">Vägar härifrån</p><div class="roads">${roads}</div></div></div>`;
   } else if (view.type === 'gate'){
     const g = view.gate, e = g.edge, open = S.stars >= g.req;
@@ -515,7 +603,7 @@ function renderPanel(view){
       <div class="roads"><button class="btn alt" type="button" data-back="1">Tillbaka till ${esc(NODES[S.node].name)}</button></div></div>`;
   } else if (view.type === 'plot'){
     const p = view.plot, n = NODES[p.node];
-    h = `<span class="tag">Tomt i ${esc(n.name)}</span><h2>${esc(p.name)}</h2><p>${S.built[p.id] ? 'Det här har du byggt. Det står kvar på kartan för alltid.' : `Kostar ${p.cost} mynt. Mynt får du för rätta svar på matteblad.`}</p><div class="panel-body">${plotBlock(p)}<div class="roads"><button class="btn alt" type="button" data-back="1">Tillbaka</button></div></div>`;
+    h = `<span class="tag">Tomt i ${esc(n.name)}</span><h2>${esc(p.name)}</h2><p>${S.built[p.id] ? 'Det här har du byggt. Det står kvar på kartan för alltid.' : `Kostar ${p.cost} stjärnstoft. Stjärnstoft får du för rätta svar på matteblad.`}</p><div class="panel-body">${plotBlock(p)}<div class="roads"><button class="btn alt" type="button" data-back="1">Tillbaka</button></div></div>`;
   } else if (view.type === 'dialog'){
     const L = dlg.lines[dlg.i], who = L.p ? PERS[L.p] : null;
     h = `<div class="dlg">${who ? '<canvas class="portrait pix" width="32" height="32" aria-hidden="true"></canvas>' : ''}<div class="dlg-body"><div class="who">${who ? `<b>${esc(who.namn)}</b> <span>${esc(who.yrke)}</span>` : '<span class="tag">Berättare</span>'}</div><p class="say" aria-live="polite"></p><div class="dlg-btns" hidden></div></div></div>`;
@@ -532,8 +620,9 @@ function plotBlock(p){
     return `<div class="plot" data-plot="${p.id}"><div><b>${esc(v.namn)}</b><span>Byggd av ${esc(PERS[v.person].namn)}.</span></div>${shop}</div>`;
   }
   const names = b.val.map(x => esc(PERS[x.person].namn)).join(' och ');
-  const btn = here ? `<button class="btn" type="button" data-talk="${p.id}">Prata med dem</button>` : `<button class="btn alt" type="button" data-goplot="${p.id}">Gå dit</button>`;
-  return `<div class="plot" data-plot="${p.id}"><div><b>${names} vill bygga här</b><span>${b.val.every(x => x.kostnad === b.val[0].kostnad) ? b.val[0].kostnad + ' mynt' : 'från ' + p.cost + ' mynt'}</span></div>${btn}</div>`;
+  const label = b.aventyr && S.steg[p.id] ? 'Gå vidare' : (b.knapp || 'Prata med dem');
+  const btn = here ? `<button class="btn" type="button" data-talk="${p.id}">${esc(label)}</button>` : `<button class="btn alt" type="button" data-goplot="${p.id}">Gå dit</button>`;
+  return `<div class="plot" data-plot="${p.id}"><div><b>${b.rubrik ? esc(b.rubrik) : names + ' vill bygga här'}</b><span>${b.val.every(x => x.kostnad === b.val[0].kostnad) ? b.val[0].kostnad + ' stjärnstoft att bygga' : 'från ' + p.cost + ' stjärnstoft att bygga'}</span></div>${btn}</div>`;
 }
 let current = null;
 const showNode = () => renderPanel({ type: 'node', id: S.node });
@@ -548,6 +637,7 @@ panel.addEventListener('click', ev => {
   else if (b.dataset.goplot){ const p = PLOTS.find(q => q.id === b.dataset.goplot); goPlot(p); }
   else if (b.dataset.talk) startBuild(PLOTS.find(q => q.id === b.dataset.talk));
   else if (b.dataset.shop) startShop(PLOTS.find(q => q.id === b.dataset.shop));
+  else if (b.dataset.slott) startCount();
   else if (b.dataset.dlgnext !== undefined){ dlg.i++; renderPanel({ type: 'dialog' }); }
   else if (b.dataset.dlgchoice !== undefined){ dlg.choices[+b.dataset.dlgchoice].run(); }
 });
@@ -560,7 +650,11 @@ function goPlot(p){
 /* ---------- samtal, byggval och butiker ---------- */
 const PERS = berattelse.personer, BYGG = berattelse.bygg, SAKER = berattelse.saker;
 const valOf = p => { const id = S.valda[p.id]; return id ? BYGG[p.bygg].val.find(v => v.id === id) : null; };
-function plotTiles(p){ if (p.prebuilt) return ITEMS[p.item]; const v = valOf(p); return v ? ITEMS[v.byggnad] : EMPTY_PLOT; }
+// What is drawn on the map. In debug mode every plot is built with the first or the second alternative.
+const shownVal = p => DEBUG.mode === 3 ? null : DEBUG.mode ? BYGG[p.bygg].val[DEBUG.mode - 1] : valOf(p);
+const builtShown = p => !!p.prebuilt || (DEBUG.mode ? DEBUG.mode < 3 : !!S.built[p.id]);
+const emptyTiles = p => (p.tom ? ITEMS[p.tom] : EMPTY_PLOT);
+function plotTiles(p){ if (p.prebuilt) return ITEMS[p.item]; const v = shownVal(p); return v ? ITEMS[v.byggnad] : emptyTiles(p); }
 let dlg = null, typeTimer = 0, blinkTimer = 0;
 
 function drawPortrait(cv, id, blink){
@@ -596,50 +690,147 @@ function startTyping(){
 const toNode = () => { dlg = null; showNode(); };
 function startBuild(p){
   const b = BYGG[p.bygg];
+  if (b.aventyr) return startAdventure(p);
   startDialog(b.val.map(v => ({ p: v.talar === null ? null : v.person, t: v.onskan })), () => [
-    ...b.val.map(v => ({ label: `Låt ${esc(PERS[v.person].namn)} bygga <small>${esc(v.namn)}, ${v.kostnad} mynt</small>`, poor: S.coins < v.kostnad, run: () => confirmBuild(p, v) })),
+    ...b.val.map(v => ({ label: `Låt ${esc(PERS[v.person].namn)} bygga <small>${esc(v.namn)}, ${v.kostnad} stjärnstoft</small>`, poor: S.coins < v.kostnad, run: () => confirmBuild(p, v) })),
     { label: berattelse.dialog.tankLiteTill, alt: true, run: toNode },
   ]);
 }
-function confirmBuild(p, v){
-  if (S.coins < v.kostnad){ toast(berattelse.dialog.ingaMynt.replace('{n}', v.kostnad - S.coins)); return; }
-  startDialog([{ p: null, t: `${PERS[v.person].namn} bygger ${v.namn.toLowerCase()} för ${v.kostnad} mynt. ${berattelse.dialog.val}` }], () => [
-    { label: `Ja, bygg för ${v.kostnad} mynt`, run: () => doBuild(p, v) },
-    { label: 'Nej, vänta', alt: true, run: () => startBuild(p) },
+// An adventure is a few steps with two choices each. Some choices cost stardust (he throws it on the spot and a bridge, a ladder
+// or a light appears), some are free (he just decides what to do). The last choice leads to one of the two buildings and the
+// other one is never found. Where he has got to is kept in S.steg, so nothing is paid twice. 'bygg:<id>' means that the choice
+// is made and only the building is left.
+function startAdventure(p){
+  const b = BYGG[p.bygg], at = S.steg[p.id] || b.aventyr.start;
+  if (at.startsWith('bygg:')) confirmBuild(p, b.val.find(v => v.id === at.slice(5)), []);
+  else runStep(p, at, []);
+}
+function runStep(p, id, pre){
+  const st = BYGG[p.bygg].aventyr.steg[id];
+  startDialog([...pre, { p: st.p ?? null, t: st.t }], () => [
+    ...st.val.map(o => ({ label: o.kostnad ? `${esc(o.label)} <small>${o.kostnad} stjärnstoft</small>` : esc(o.label), poor: S.coins < o.kostnad, run: () => takeStep(p, o) })),
+    { label: berattelse.dialog.tankLiteTill, alt: true, run: toNode },
+  ]);
+}
+function takeStep(p, o){
+  if (S.coins < o.kostnad){ toast(berattelse.dialog.ingaStoft.replace('{n}', o.kostnad - S.coins)); return; }
+  if (o.kostnad){
+    S.coins -= o.kostnad; updateHud('coins');
+    sparkle(boy.x + 8, boy.y + 2, 18, '#2ce8f5'); sparkle(boy.x + 8, boy.y + 2, 12, '#ffffff');
+  }
+  const out = [{ p: o.p ?? null, t: o.text }];
+  if (typeof o.till === 'string'){ S.steg[p.id] = o.till; runStep(p, o.till, out); }
+  else { S.steg[p.id] = 'bygg:' + o.till.bygg; confirmBuild(p, BYGG[p.bygg].val.find(v => v.id === o.till.bygg), out); }
+}
+function confirmBuild(p, v, pre){
+  const adventure = !!BYGG[p.bygg].aventyr, short = () => toast(berattelse.dialog.ingaStoft.replace('{n}', v.kostnad - S.coins));
+  if (!adventure && S.coins < v.kostnad){ short(); return; }
+  const text = v.bekrafta ? v.bekrafta.replace('{n}', v.kostnad) : `${PERS[v.person].namn} bygger ${v.namn.toLowerCase()} för ${v.kostnad} stjärnstoft.`;
+  startDialog([...(pre || []), { p: null, t: `${text} ${berattelse.dialog.val}` }], () => [
+    { label: `Ja, bygg för ${v.kostnad} stjärnstoft`, poor: S.coins < v.kostnad, run: () => S.coins < v.kostnad ? short() : doBuild(p, v) },
+    { label: adventure ? 'Vänta lite' : 'Nej, vänta', alt: true, run: adventure ? toNode : () => startBuild(p) },
   ]);
 }
 function doBuild(p, v){
-  S.coins -= v.kostnad; S.built[p.id] = true; S.valda[p.id] = v.id;
+  S.coins -= v.kostnad; S.built[p.id] = true; S.valda[p.id] = v.id; delete S.steg[p.id];
+  if (p.skog) buildTerrain();
   plotAnim.set(p.id, performance.now());
   dust(p.x*TS + 24, p.y*TS + 30);
   setTimeout(() => sparkle(p.x*TS + 24, p.y*TS + 18, 18), 420);
-  updateHud('coins'); toast(`Du byggde ${v.namn.toLowerCase()} för ${v.kostnad} mynt!`);
-  startDialog([{ p: v.forlorarePerson, t: v.forlorare }, { p: v.person, t: v.tack }], () => [
+  updateHud('coins'); toast(`Du byggde ${v.namn.toLowerCase()} för ${v.kostnad} stjärnstoft!`);
+  const lines = v.forlorare ? [{ p: v.forlorarePerson ?? null, t: v.forlorare }] : [];
+  startDialog([...lines, { p: v.person, t: v.tack }], () => [
     { label: `Handla hos ${esc(PERS[v.person].namn)}`, run: () => startShop(p) },
     { label: 'Tillbaka till kartan', alt: true, run: toNode },
   ]);
 }
+// A person only sells one thing to him, once: he picks one of the two and cannot come back for the other.
 function startShop(p, seen){
-  const v = valOf(p);
-  startDialog([{ p: v.person, t: v.butikHej }], () => [
+  const v = valOf(p), had = S.handlat[p.id], D = berattelse.dialog;
+  startDialog([{ p: v.person, t: had ? D.redanHandlat : `${v.butikHej} ${D.enGang}` }], () => [
     ...v.saljer.map(id => {
-      const it = SAKER[id], own = S.saker.includes(id);
-      return { label: `${esc(it.namn)} <small>${own ? 'Köpt' : it.pris + ' mynt'}. ${esc(it.text)}</small>`, disabled: own, poor: !own && S.coins < it.pris, run: () => buy(p, id) };
+      const it = SAKER[id], own = had === id;
+      const tail = own ? 'Köpt' : had ? 'Du har redan handlat här' : it.pris + ' stjärnstoft';
+      return { label: `${esc(it.namn)} <small>${tail}. ${esc(it.text)}</small>`, disabled: !!had, poor: !had && S.coins < it.pris, run: () => confirmBuy(p, id) };
     }),
     { label: 'Tillbaka till kartan', alt: true, run: toNode },
   ], seen);
 }
+function confirmBuy(p, id){
+  const v = valOf(p), it = SAKER[id];
+  if (S.coins < it.pris){ toast(berattelse.dialog.ingaStoft.replace('{n}', it.pris - S.coins)); return; }
+  const text = berattelse.dialog.kop.replace('{namn}', it.namn.toLowerCase()).replace('{pris}', it.pris).replace('{person}', PERS[v.person].namn);
+  startDialog([{ p: null, t: text }], () => [
+    { label: `Ja, köp för ${it.pris} stjärnstoft`, run: () => buy(p, id) },
+    { label: 'Nej, vänta', alt: true, run: () => startShop(p, true) },
+  ]);
+}
 function buy(p, id){
   const it = SAKER[id];
-  if (S.saker.includes(id)) return;
-  if (S.coins < it.pris){ toast(berattelse.dialog.ingaMynt.replace('{n}', it.pris - S.coins)); return; }
-  S.coins -= it.pris; S.saker.push(id);
-  updateHud('coins'); renderPack(); toast(`Du köpte ${it.namn.toLowerCase()}!`);
+  if (S.saker.includes(id) || S.handlat[p.id]) return;
+  if (S.coins < it.pris){ toast(berattelse.dialog.ingaStoft.replace('{n}', it.pris - S.coins)); return; }
+  S.coins -= it.pris; S.saker.push(id); S.handlat[p.id] = id;
+  updateHud('coins');
+  if (it.djur) giveAnimal(it.djur, it);
+  else toast(`Du köpte ${it.namn.toLowerCase()}!`);
+  renderPack();
   startShop(p, true);
 }
+
+/* ---------- djurboken ---------- */
+// An animal that has been found goes into the book. Up to three are put forward and follow him on the map.
+function giveAnimal(id, it){
+  if (S.djur.includes(id)) return;
+  S.djur.push(id);
+  const D = berattelse.djur[id], fram = S.fram.length < MAX_FRAM;
+  if (fram){ S.fram.push(id); petState.delete(id); }
+  sparkle(boy.x + 8, boy.y + 2, 22);
+  toast(`${D.namn}, ${D.art.toLowerCase()}, skrevs in i djurboken${fram ? ' och följer nu med dig' : ''}.`);
+  renderBook();
+}
+const bookIcons = {};
+const bookIcon = (id, found) => { const k = id + found; return bookIcons[k] || (bookIcons[k] = iconURL(found ? PETS[id].right[0] : PETS[id].dark, 3)); };
+function renderBook(){
+  const ids = Object.keys(berattelse.djur), D = berattelse.dialog.djurbok;
+  $('#bookCount').textContent = `${S.djur.length} av ${ids.length} djur hittade. ${S.fram.length} av ${MAX_FRAM} är framme.`;
+  $('#book').innerHTML = ids.map(id => {
+    const d = berattelse.djur[id], found = S.djur.includes(id), out = S.fram.includes(id);
+    if (!found) return `<li class="unknown"><img class="pix" src="${bookIcon(id, false)}" alt=""><div><b>${esc(D.okant)}</b><small>${esc(d.ledtrad)}</small></div></li>`;
+    const btn = `<button class="btn${out ? '' : ' alt'}" type="button" data-fram="${id}">${out ? esc(D.laggUndan) : esc(D.haFramme)}</button>`;
+    return `<li class="${out ? 'fram' : ''}"><img class="pix" src="${bookIcon(id, true)}" alt=""><div><b>${esc(d.namn)}</b> <span class="st">${esc(d.art)}</span><small>${esc(d.text)} ${esc(d.hur)}</small>${btn}</div></li>`;
+  }).join('');
+}
+$('#book').addEventListener('click', ev => {
+  const b = ev.target.closest('button[data-fram]'); if (!b) return;
+  const id = b.dataset.fram, i = S.fram.indexOf(id);
+  if (i >= 0) S.fram.splice(i, 1);
+  else if (S.fram.length >= MAX_FRAM){ toast(berattelse.dialog.djurbok.max); return; }
+  else { S.fram.push(id); petState.delete(id); sparkle(boy.x + 8, boy.y + 2, 12); }
+  renderBook();
+});
+
+/* ---------- drottningens brev och räkningen i slottet ---------- */
+const INTRO_KEY = 'stjarnkartan:intro';
+const introSeen = () => { try { return localStorage.getItem(INTRO_KEY) === '1'; } catch (e) { return false; } };
+const markIntro = () => { try { localStorage.setItem(INTRO_KEY, '1'); } catch (e) { /* the letter is then shown again next time */ } };
+function showIntro(){
+  const D = berattelse.dialog;
+  startDialog(D.intro.map(l => ({ p: l.p, t: l.t })), () => [{ label: D.introKnapp, run: () => { markIntro(); toNode(); } }]);
+}
+// At the castle the queen counts the animals in the book and says something that fits
+function startCount(){
+  const D = berattelse.dialog, n = S.djur.length, m = Object.keys(berattelse.djur).length;
+  const row = n === 0 ? D.slott[0] : [...D.slott].reverse().find(r => r.andel <= n / m && r.andel > 0);
+  startDialog([{ p: 'drottningen', t: D.slottHej }, { p: 'drottningen', t: row.t.replace('{n}', n).replace('{m}', m) }], () => [
+    { label: 'Tillbaka till kartan', alt: true, run: toNode },
+  ]);
+}
+
+const TYP = { agn: 'Agn', verktyg: 'Verktyg' };
 function renderPack(){
-  $('#pack').innerHTML = S.saker.length
-    ? S.saker.map(id => `<li><span><b>${esc(SAKER[id].namn)}</b> ${esc(SAKER[id].text)}</span>${SAKER[id].typ === 'husdjur' ? '<span class="st">Husdjur</span>' : ''}</li>`).join('')
+  const own = S.saker.filter(id => SAKER[id].typ !== 'djur');
+  $('#pack').innerHTML = own.length
+    ? own.map(id => `<li><span><b>${esc(SAKER[id].namn)}</b> ${esc(SAKER[id].text)}</span><span class="st">${TYP[SAKER[id].typ]}</span></li>`).join('')
     : '<li><span>Inget ännu. Bygg något och handla!</span></li>';
 }
 
@@ -685,16 +876,26 @@ function addTest(){
 function addSheet(){
   const mb = berattelse.exempel.mattebladRatt; const right = mb.min + Math.floor(Math.random() * (mb.max - mb.min + 1));
   S.coins += right; updateHud('coins');
-  toast(`Matteblad rättat: ${right} rätt ger ${right} mynt.`);
+  toast(`Matteblad rättat: ${right} rätt ger ${right} stjärnstoft.`);
   if (current && current.type !== 'walk') renderPanel(current);
 }
 $('#btnTest').addEventListener('click', addTest);
 $('#btnSheet').addEventListener('click', addSheet);
+const DEBUG_LABEL = ['Debug: av', 'Debug: bygg A, ingen dimma', 'Debug: bygg B, ingen dimma', 'Debug: tomma tomter, ingen dimma'];
+$('#btnDebug').addEventListener('click', () => {
+  DEBUG.mode = (DEBUG.mode + 1) % DEBUG_LABEL.length;
+  buildTerrain();
+  $('#btnDebug').textContent = DEBUG_LABEL[DEBUG.mode];
+  if (current && current.type !== 'walk' && current.type !== 'dialog') renderPanel(current);
+});
+$('#btnLetter').addEventListener('click', showIntro);
 $('#btnReset').addEventListener('click', () => {
-  S = START(); boy.route = null; placeBoy(S.node); plotAnim.clear(); gateAnim.clear(); FX.length = 0;
+  S = START(); boy.route = null; placeBoy(S.node); plotAnim.clear(); gateAnim.clear(); FX.length = 0; buildTerrain();
   lastRevealKey = ''; maskDirty = true; revealAround(boy.x + 8, boy.y + 8);
   cam.follow = true; cam.focus = null; centerOn(boy.x + 8, boy.y + 8, true);
-  dlg = null; updateHud(); renderLog(); renderPack(); showNode(); toast('Kartan är återställd.');
+  dlg = null; updateHud(); renderLog(); renderPack(); renderBook(); showNode(); toast('Kartan är återställd.');
+  try { localStorage.removeItem(INTRO_KEY); } catch (e) { /* nothing to clear */ }
+  showIntro();
 });
 
 /* ---------- pekare ---------- */
@@ -736,25 +937,19 @@ cv.addEventListener('keydown', e => {
 });
 
 /* ---------- start ---------- */
-function trimTile(i){
-  const t = document.createElement('canvas'); t.width = TS; t.height = TS; const tx = t.getContext('2d'); tile(tx, i, 0, 0);
-  const d = tx.getImageData(0, 0, TS, TS).data; let x0 = TS, y0 = TS, x1 = -1, y1 = -1;
-  for (let y = 0; y < TS; y++) for (let x = 0; x < TS; x++) if (d[(y*TS + x)*4 + 3] > 0){ x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y); }
-  const c = document.createElement('canvas'); c.width = x1 - x0 + 1; c.height = y1 - y0 + 1; c.getContext('2d').drawImage(t, x0, y0, c.width, c.height, 0, 0, c.width, c.height); return c;
-}
 function start(data){
   if (data && data.S) S = data.S;
   placeBoy(S.node); lastRevealKey = ''; revealAround(boy.x + 8, boy.y + 8);
-  COIN = trimTile(93);
-  STAR_URL = iconURL(STAR, 4); COIN_URL = iconURL(COIN, 4); LOCK_URL = iconURL(LOCK, 4);
-  $('#logoStar').src = STAR_URL; $('#icoStar').src = STAR_URL; $('#icoCoin').src = COIN_URL;
-  document.querySelectorAll('img[data-ico]').forEach(im => { im.src = im.dataset.ico === 'star' ? STAR_URL : COIN_URL; });
+  STAR_URL = iconURL(STAR, 4); DUST_URL = iconURL(DUST, 4); LOCK_URL = iconURL(LOCK, 4);
+  $('#logoStar').src = STAR_URL; $('#icoStar').src = STAR_URL; $('#icoCoin').src = DUST_URL;
+  document.querySelectorAll('img[data-ico]').forEach(im => { im.src = im.dataset.ico === 'star' ? STAR_URL : DUST_URL; });
   buildTerrain();
   resize(); centerOn(boy.x + 8, boy.y + 8, true);
-  updateHud(); renderLog(); renderPack(); showNode();
+  updateHud(); renderLog(); renderPack(); renderBook(); showNode();
+  if (!introSeen()) showIntro();
   requestAnimationFrame(t => { lastT = t; frame(t); });
 }
-tiles.decode().catch(() => {}).then(() => start());
+Promise.all([tiles, ...Object.values(SETS)].map(im => im.decode().catch(() => {}))).then(() => start());
 })().catch(err => {
   console.error(err);
   const h = document.getElementById('hint');

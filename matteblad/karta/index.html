@@ -72,6 +72,16 @@ body{font-family:var(--font-pixel);font-size:16px;line-height:1.45;-webkit-font-
 .log li b{color:var(--text);font-weight:500}
 .log li .st{color:var(--gold);white-space:nowrap}
 .log li.new{animation:flash 1.2s steps(6)}
+.book-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap}
+.book-list{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.book-list li{display:flex;gap:10px;align-items:flex-start;border:2px solid var(--slate);background:rgba(0,0,0,.18);padding:8px;min-width:0}
+.book-list li.fram{border-color:var(--gold)}
+.book-list li.unknown{opacity:.7}
+.book-list img{width:48px;height:48px;flex:none}
+.book-list b{color:var(--text);font-weight:600}
+.book-list .st{color:var(--gold);font-size:13px}
+.book-list small{display:block;color:var(--text-dim);font-size:13px;line-height:1.35;margin-top:2px}
+.book-list .btn{margin-top:6px;font-size:13px;padding:4px 9px 3px}
 @keyframes flash{0%,40%{background:rgba(254,174,52,.25)}100%{background:transparent}}
 
 footer{font-size:13px;color:var(--steel);display:grid;gap:4px}
@@ -99,9 +109,9 @@ footer a{color:var(--mist)}
   <header class="top">
     <a href="../" style="order:-1;font:600 15px var(--font-pixel);color:var(--text-dim);text-decoration:none;border:2px solid var(--slate);background:var(--navy);padding:4px 12px;border-radius:6px">← Till matteblad</a>
     <h1><img id="logoStar" class="pix" alt="">Stjärnkartan</h1>
-    <div class="hud" aria-label="Dina samlade stjärnor och mynt">
+    <div class="hud" aria-label="Dina samlade stjärnor och ditt stjärnstoft">
       <span class="chip" id="chipStars" title="Stjärnor från prov"><img id="icoStar" class="pix" alt="Stjärnor"><span id="starCount">6</span></span>
-      <span class="chip" id="chipCoins" title="Mynt från matteblad"><img id="icoCoin" class="pix" alt="Mynt"><span id="coinCount">34</span></span>
+      <span class="chip" id="chipCoins" title="Stjärnstoft från matteblad"><img id="icoCoin" class="pix" alt="Stjärnstoft"><span id="coinCount">34</span></span>
     </div>
   </header>
 
@@ -116,20 +126,28 @@ footer a{color:var(--mist)}
     <section class="box demo">
       <span class="tag">Exempel</span>
       <h2>Prova hur det känns</h2>
-      <p>Resultaten här är påhittade. I den riktiga kartan kommer stjärnorna från rättade prov och mynten från rättade matteblad.</p>
+      <p>Resultaten här är påhittade. I den riktiga kartan kommer stjärnorna från rättade prov och stjärnstoftet från rättade matteblad.</p>
       <div class="demo-btns">
         <button class="btn" id="btnTest" type="button"><img class="pix" data-ico="star" alt="">Nytt prov</button>
         <button class="btn" id="btnSheet" type="button"><img class="pix" data-ico="coin" alt="">Rättat matteblad</button>
         <button class="btn alt" id="btnReset" type="button">Börja om</button>
+        <button class="btn alt" id="btnDebug" type="button">Debug: av</button>
       </div>
       <ol class="log" id="log" aria-label="Provlogg"></ol>
       <h2 style="margin-top:14px">Mina saker</h2>
       <ul class="log" id="pack" aria-label="Mina saker"></ul>
     </section>
+    <section class="box" id="bookBox" style="grid-column:1/-1">
+      <div class="book-head">
+        <div><span class="tag">Samling</span><h2>Djurboken</h2><p id="bookCount"></p></div>
+        <button class="btn alt" id="btnLetter" type="button">Läs drottningens brev</button>
+      </div>
+      <ul class="book-list" id="book" aria-label="Djurboken"></ul>
+    </section>
   </div>
 
   <footer>
-    <span>Kartgrafik: Tiny Town av Kenney (CC0, kenney.nl). Pojken, vattnet, broarna, portarna och stjärnorna är egen pixelgrafik.</span>
+    <span>Kartgrafik: Tiny Town av Kenney och Open RPG Fantasy Tilesets av finalbossblues (båda CC0). Pojken, djuren, vattnet, broarna, portarna och stjärnorna är egen pixelgrafik.</span>
     <span>Stjärnor: under 50 % ger 1, 50 till 79 % ger 2, minst 80 % ger 3. Bättre än förra provet i samma ämne ger en bonusstjärna.</span>
   </footer>
 </main>

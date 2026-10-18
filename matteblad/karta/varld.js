@@ -4,6 +4,10 @@
   if (typeof module === "object" && module.exports) module.exports = factory();
   else root.Varld = factory();
 })(typeof self !== "undefined" ? self : globalThis, function () {
+  // A cell in a building or object is a tile number (the main tileset), a text "o:14,10" (column and row in the tileset
+  // called o), or a list of those drawn on top of each other (a window on a wall). -1 means empty.
+  const filled = i => typeof i === "string" || Array.isArray(i) || i >= 0;
+
   function byggVarld(karta, berattelse) {
     const TS = karta.ruta, MW = karta.bredd, MH = karta.hojd;
     const M = Array.from({ length: MH }, () => new Array(MW).fill(karta.grundmark));
@@ -84,7 +88,7 @@
       if (story.byggd) return { id: t.id, node: t.plats, x: t.x, y: t.y, name: story.namn, cost: story.kostnad, item: t.byggnad, prebuilt: true };
       const bygg = berattelse.bygg[story.bygg];
       if (!bygg) throw new Error(`Tomten ${t.id} pekar på bygget ${story.bygg} som saknas i berattelse.json`);
-      return { id: t.id, node: t.plats, x: t.x, y: t.y, name: story.namn, cost: Math.min(...bygg.val.map(v => v.kostnad)), bygg: story.bygg };
+      return { id: t.id, node: t.plats, x: t.x, y: t.y, name: story.namn, cost: Math.min(...bygg.val.map(v => v.kostnad)), bygg: story.bygg, ...(t.tom ? { tom: t.tom } : {}), ...(t.skog ? { skog: true } : {}) };
     });
     for (const p of PLOTS) fillR(p.x, p.y, p.x + 2, p.y + 2, "g");
     const ITEMS = karta.byggnader;
@@ -95,9 +99,9 @@
     const occ = new Set();
     function put(i, x, y) { OBJ.push({ i, x, y }); occ.add(key(x, y)); }
     function block(rows, x, y) {
-      rows.forEach((r, dy) => r.forEach((i, dx) => { if (i >= 0) put(i, x + dx, y + dy); else occ.add(key(x + dx, y + dy)); }));
+      rows.forEach((r, dy) => r.forEach((i, dx) => { if (filled(i)) put(i, x + dx, y + dy); else occ.add(key(x + dx, y + dy)); }));
     }
-    for (const f of karta.fasta) {
+    for (const f of [...karta.fasta, ...(karta.dekor || [])]) {
       if (f.block) block(f.block, f.x, f.y);
       else if (f.put) put(...f.put);
       else throw new Error("Okänt objekt i karta.json fasta");
@@ -112,5 +116,5 @@
     return { M, inb, at, key, occ, OBJ, put, NODES, EDGES, GATES, PLOTS, ITEMS, EMPTY_PLOT, CASTLE, CASTLE_X, CASTLE_Y, FLAGS, waterD, LAKE };
   }
 
-  return { byggVarld };
+  return { byggVarld, filled };
 });

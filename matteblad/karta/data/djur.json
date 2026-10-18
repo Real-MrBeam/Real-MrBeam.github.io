@@ -1,0 +1,338 @@
+{
+  "gele": {
+    "lyft": 0,
+    "farger": {"o":"#3f2631","g":"#63c74d","G":"#3e8948","h":"#c0f09a","k":"#262b44","w":"#ffffff"},
+    "bilder": [
+      [
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        ".....oooooo.....",
+        "....oghggggo....",
+        "...oghggggggo...",
+        "..ogghgggggggo..",
+        "..ogggkgggkggo..",
+        ".oggggkgggkgggo.",
+        "..oggggggggggo..",
+        "..oGGGGGGGGGGo..",
+        "...oGGGGGGGGo...",
+        "....oGGGGGGo....",
+        ".....oooooo....."
+      ],
+      [
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        ".....oooooo.....",
+        "...ooggggggoo...",
+        "..oghhgggggggo..",
+        ".oggggggggggggo.",
+        "oggggkggggkggggo",
+        ".oGGGkGGGGkGGGo.",
+        "..oGGGGGGGGGGo..",
+        "...ooGGGGGGoo...",
+        ".....oooooo....."
+      ]
+    ]
+  },
+  "bumbus": {
+    "lyft": 3,
+    "farger": {"o":"#3f2631","y":"#feae34","Y":"#fee761","k":"#3f2631","w":"#dff6f5","W":"#92e8f5","e":"#262b44"},
+    "bilder": [
+      [
+        ".........o......",
+        ".....oooowoo....",
+        "....owwwwwwwo...",
+        "...owwwwwwwwo...",
+        "...owwwwwwwwo...",
+        "...owkyykwwwo...",
+        "...oykyykyyoyoo.",
+        "..oyykyykyyyyyyo",
+        "ooyyykyykyyyyeeo",
+        "kkkyykyykyyyyyyo",
+        "oooyykyykyyyyyyo",
+        "...oykyykyyoyoY.",
+        "....ooyykoo.o...",
+        "......ooo.......",
+        "................",
+        "................"
+      ],
+      [
+        "................",
+        "................",
+        "................",
+        ".....oo.ooo.....",
+        "....owwowwwo....",
+        "...owkyykwwwo...",
+        "...oykyykyywyoo.",
+        "..oyykyykyyyyyyo",
+        "ooyyykyykyyyyeeo",
+        "kkkyykyykyyyyyyo",
+        "oooyykyykyyyyyyo",
+        "...oykyykyyoyoY.",
+        "....ooyykoo.o...",
+        "......ooo.......",
+        "................",
+        "................"
+      ]
+    ]
+  },
+  "hare": {
+    "lyft": 0,
+    "farger": {"o":"#3f2631","b":"#b86f50","B":"#8b5a3c","p":"#f6757a","w":"#ffffff","k":"#262b44"},
+    "bilder": [
+      [
+        "................",
+        "...........o....",
+        "..........oboo..",
+        ".........obbobo.",
+        ".........obpobbo",
+        ".........obpopbo",
+        ".........obbbpbo",
+        "....oooooobbbbo.",
+        "...obbbbbbbbbkbo",
+        ".oobbbbbbbbbbbbo",
+        "owwwbbbbbbbbbbk.",
+        "owwwbbbbbbbbbo..",
+        ".oobbbbbbbboo...",
+        "...oBBBBBBo.....",
+        "....oooooo......",
+        "................"
+      ],
+      [
+        "..........oboo..",
+        ".........obbobo.",
+        ".........obpobbo",
+        ".........obpopbo",
+        ".........obbbpbo",
+        "....oooooobbbbo.",
+        "...obbbbbbbbbkbo",
+        ".oobbbbbbbbbbbbo",
+        "owwwbbbbbbbbbbk.",
+        "owwwbbbbbbbbbo..",
+        ".oobbbbbbbboo...",
+        "...oBBBBBBo.....",
+        "....oooooo......",
+        "................",
+        "................",
+        "................"
+      ]
+    ]
+  },
+  "kraka": {
+    "lyft": 0,
+    "farger": {"o":"#3f2631","d":"#3a4466","D":"#262b44","h":"#5a6988","a":"#feae34","w":"#ffffff","k":"#181425"},
+    "bilder": [
+      [
+        "................",
+        "................",
+        "................",
+        "...........o....",
+        ".........oodoo..",
+        ".....oooodddddoo",
+        "...oodddddddwkaa",
+        "..odddddddddddaa",
+        "ooodddhhhddddooo",
+        "ddddddddddddo...",
+        "dddddddddddo....",
+        "oooddddddddo....",
+        "...ooDDDDoo.....",
+        ".....ooooo......",
+        ".....oaooao.....",
+        "......o..o......"
+      ],
+      [
+        "................",
+        "................",
+        "...........o....",
+        ".........oodoo..",
+        ".....oooodddddoo",
+        "...oodddddddwkaa",
+        "..odddhhddddddaa",
+        "oooddhdddddddooo",
+        "ddddddddddddo...",
+        "dddddddddddo....",
+        "oooddddddddo....",
+        "...ooDDDDoo.....",
+        ".....ooooo......",
+        ".....oaooao.....",
+        "......o..o......",
+        "................"
+      ]
+    ]
+  },
+  "gnissel": {
+    "lyft": 0,
+    "farger": {"o":"#3f2631","g":"#8aa03c","G":"#5e7a2c","p":"#f6757a","y":"#fee761","k":"#262b44"},
+    "bilder": [
+      [
+        "................",
+        "................",
+        "................",
+        "................",
+        ".oooo.oooo.oooo.",
+        "oggggoggggoggggo",
+        "oggpgggggggggpgo",
+        ".oooggygggygooo.",
+        "...oggkgggkgo...",
+        "....oggggggo....",
+        "...ogggkkkggo...",
+        "...oggggggggo.y.",
+        "....oggggggo.y..",
+        "....oGGGGGGo....",
+        ".....oooooo.....",
+        "................"
+      ],
+      [
+        "................",
+        "................",
+        "................",
+        "................",
+        "......oooo......",
+        ".oooooggggooooo.",
+        "oggggggggggggggo",
+        "oggpggygggyggpgo",
+        ".oooggkgggkgooo.",
+        "....oggggggo....",
+        "...ogggkkkggo...",
+        "...oggggggggo.y.",
+        "....oggggggo.y..",
+        "....oGGGGGGo....",
+        ".....oooooo.....",
+        "................"
+      ]
+    ]
+  },
+  "sot": {
+    "lyft": 0,
+    "farger": {"o":"#3f2631","c":"#4a4a5e","C":"#2f2f40","h":"#6b6b80","g":"#a2e07a","p":"#f6757a","k":"#181425"},
+    "bilder": [
+      [
+        "................",
+        "................",
+        "................",
+        "..........oo.oo.",
+        "..o......occocco",
+        ".oco.....opcopco",
+        "occo.....occcco.",
+        "occoooooocccccco",
+        "occccccccccgcgco",
+        "occccchhccccccco",
+        "occcccccccccpco.",
+        ".occccccccccoo..",
+        "..occcccccco....",
+        "...ooCCCCoo.....",
+        ".....oooo.......",
+        "................"
+      ],
+      [
+        "................",
+        "................",
+        "................",
+        "..o.......oo.oo.",
+        ".oco.....occocco",
+        "occo.....opcopco",
+        "occo.....occcco.",
+        "occcooooocccccco",
+        "occocccccccgcgco",
+        "occccchhccccccco",
+        ".occccccccccpco.",
+        ".occccccccccoo..",
+        "..occcccccco....",
+        "...ooCCCCoo.....",
+        ".....oooo.......",
+        "................"
+      ]
+    ]
+  },
+  "klippan": {
+    "lyft": 0,
+    "farger": {"o":"#3f2631","s":"#8b9bb4","S":"#5a6988","h":"#c0cbdc","m":"#3e8948","k":"#262b44","w":"#ffffff"},
+    "bilder": [
+      [
+        "................",
+        "................",
+        "................",
+        "................",
+        "......oooo......",
+        "....oossssoo....",
+        "...ommmssssso...",
+        "..osmmhsssssso..",
+        "..osshssssssso..",
+        ".osssswssswssso.",
+        ".osssskssskssso.",
+        "..osssssssssso..",
+        "..oSSSSSSSSSSo..",
+        "...oSSSSSSSSo...",
+        "....ooSSSSoo....",
+        "......oooo......"
+      ],
+      [
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        ".....oooooo.....",
+        "...oommssssoo...",
+        "..osmmhsssssso..",
+        ".ossshsssssssso.",
+        ".ossswsssswssso.",
+        ".osssksssskssso.",
+        "..oSSSSSSSSSSo..",
+        "...oSSSSSSSSo...",
+        "....ooSSSSoo....",
+        "......oooo......"
+      ]
+    ]
+  },
+  "pip": {
+    "lyft": 0,
+    "farger": {"o":"#3f2631","w":"#eef0f6","s":"#c0cbdc","S":"#8b9bb4","a":"#feae34","k":"#262b44"},
+    "bilder": [
+      [
+        "................",
+        "................",
+        "................",
+        "................",
+        "..........oooo..",
+        ".....ooooowwwwo.",
+        "...oowwwwwwwkwoo",
+        "..owwwwwwwwwwwaa",
+        ".oowsssswwwwwooo",
+        "owwwssssswwwo...",
+        "owwwSSSSSwwo....",
+        ".oowSSSSSwwo....",
+        "...oossssoo.....",
+        ".....ooooo......",
+        ".....oaooao.....",
+        "......o..o......"
+      ],
+      [
+        "................",
+        "................",
+        "................",
+        "..........oooo..",
+        ".....ooooowwwwo.",
+        "...oowwwwwwwkwoo",
+        "..owwwwwwwwwwwaa",
+        ".oowsssswwwwwooo",
+        "owwwssssswwwo...",
+        "owwwSSSSSwwo....",
+        ".oowSSSSSwwo....",
+        "...oossssoo.....",
+        ".....ooooo......",
+        ".....oaooao.....",
+        "......o..o......",
+        "................"
+      ]
+    ]
+  }
+}
