@@ -335,7 +335,8 @@ let pendingPlot = null;
 // Where the boy has been (and a bit around the road) the map is shown in colour, the rest is black. Only the dots he can
 // land on (without names) and the gates show through the dark.
 // S.sett holds one flag per tile. The colour layer is cut out with a mask whose edge is a pixel pattern.
-const FOG_R = 4;
+// How far he sees: less while he walks on a road, more when he stands on a place (Peter 2026-10-18)
+const FOG_WALK = 3, FOG_STOP = 5;
 const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
 const FOG_COLOR = '#000000';
 // Debug (button on the page): 0 = off. 1 and 2 = every plot built with the first or the second alternative, 3 = every plot empty.
@@ -344,13 +345,13 @@ const DEBUG = { mode: 0 };
 const seenReal = (x, y) => inb(x, y) && S.sett[y*MW + x] === 1;
 const seenAt = (x, y) => DEBUG.mode > 0 || seenReal(x, y);
 let maskDirty = true, MASK = null, MASKCTX = null, TMP = null, lastRevealKey = '';
-function revealAround(wx, wy){
-  const cx = Math.floor(wx / TS), cy = Math.floor(wy / TS), k = cx + ',' + cy;
+function revealAround(wx, wy, r = FOG_STOP){
+  const cx = Math.floor(wx / TS), cy = Math.floor(wy / TS), k = cx + ',' + cy + ',' + r;
   if (k === lastRevealKey) return;
   lastRevealKey = k;
-  for (let y = cy - FOG_R; y <= cy + FOG_R; y++) for (let x = cx - FOG_R; x <= cx + FOG_R; x++){
+  for (let y = cy - r; y <= cy + r; y++) for (let x = cx - r; x <= cx + r; x++){
     if (!inb(x, y) || S.sett[y*MW + x]) continue;
-    if (Math.hypot(x - cx, y - cy) <= FOG_R + .3){ S.sett[y*MW + x] = 1; maskDirty = true; }
+    if (Math.hypot(x - cx, y - cy) <= r + .3){ S.sett[y*MW + x] = 1; maskDirty = true; }
   }
 }
 function buildMask(){
@@ -502,7 +503,7 @@ function frame(now){
     }
   }
   { const lp = trail[trail.length - 1]; if (Math.hypot(boy.x - lp.x, boy.y - lp.y) >= 1){ trail.push({ x: boy.x, y: boy.y }); if (trail.length > 700) trail.splice(0, 100); } }
-  revealAround(boy.x + 8, boy.y + 8);
+  revealAround(boy.x + 8, boy.y + 8, boy.route ? FOG_WALK : FOG_STOP);
   // kamera
   let tx, ty;
   if (cam.focus && now < cam.focus.until){ [tx, ty] = centerOn(cam.focus.x, cam.focus.y); }
@@ -561,10 +562,7 @@ function frame(now){
     if (S.stars >= g.req) continue;
     pill(sx(g.x*TS + 8), sy(g.y*TS - 6), [LOCK, String(g.req), STAR], { color: '#fee761' });
   }
-  for (const p of PLOTS){
-    if (builtShown(p) || !seenAt(p.x + 1, p.y + 1)) continue;
-    pill(sx(p.x*TS + 24), sy(p.y*TS - 1), [DUST, String(p.cost)], { color: '#ffffff', bg: '#3f2631', edge: '#733e39' });
-  }
+  // What things cost is not shown on the map (Peter 2026-10-18), only in the panel. The stars a gate needs are shown above.
   for (const id in NODES){
     const n = NODES[id], here = id === S.node && !boy.route;
     if (!seenAt(n.x, n.y) || hiddenNode(id)) continue;
@@ -671,7 +669,30 @@ const emptyTiles = p => (p.tom ? ITEMS[p.tom] : EMPTY_PLOT);
 function plotTiles(p){ if (p.prebuilt) return ITEMS[p.item]; const v = shownVal(p); return v ? ITEMS[v.byggnad] : emptyTiles(p); }
 let dlg = null, typeTimer = 0, blinkTimer = 0;
 
+// Ready-made portraits arrive encrypted in the page (#portrattLas) and open with the password. Until then, and for anyone
+// without a picture, the drawn pixel portraits from portratt.json are used. The ready-made ones do not blink.
+const PORTRAIT_IMG = {};
+function loadPortraitImages(){
+  const el = document.getElementById('portrattLas');
+  if (!el || !el.classList.contains('unlocked')) return;
+  let data = {};
+  try { data = JSON.parse(el.textContent); } catch (e) { return; }
+  for (const [id, url] of Object.entries(data)){
+    if (PORTRAIT_IMG[id]) continue;
+    const im = new Image();
+    im.onload = () => { PORTRAIT_IMG[id] = im; const cv = panel.querySelector('.portrait'); if (cv && dlg && dlg.lines[dlg.i].p === id){ clearInterval(blinkTimer); drawPortrait(cv, id, false); } };
+    im.src = url;
+  }
+}
+document.addEventListener('las:unlocked', loadPortraitImages);
 function drawPortrait(cv, id, blink){
+  const img = PORTRAIT_IMG[id];
+  if (img){
+    if (cv.width !== img.naturalWidth){ cv.width = img.naturalWidth; cv.height = img.naturalHeight; }
+    const x = cv.getContext('2d'); x.imageSmoothingEnabled = false; x.clearRect(0, 0, cv.width, cv.height); x.drawImage(img, 0, 0);
+    return;
+  }
+  if (cv.width !== 32){ cv.width = 32; cv.height = 32; }
   const d = PORTRAITS[id], x = cv.getContext('2d');
   const rows = blink ? d.rader.map(r => [...r].map(c => d.ogon.includes(c) ? 's' : c).join('')) : d.rader;
   x.clearRect(0, 0, 32, 32); x.drawImage(sprite(rows, d.farger), 0, 0);
@@ -693,7 +714,7 @@ function startTyping(){
   const finish = () => { clearInterval(typeTimer); say.textContent = L.t; if (btns.hidden){ btns.innerHTML = dialogButtons(); btns.hidden = false; } };
   if (cv){
     drawPortrait(cv, L.p, false);
-    blinkTimer = setInterval(() => { if (Math.random() < .4){ drawPortrait(cv, L.p, true); setTimeout(() => drawPortrait(cv, L.p, false), 140); } }, 1500);
+    if (!PORTRAIT_IMG[L.p]) blinkTimer = setInterval(() => { if (Math.random() < .4){ drawPortrait(cv, L.p, true); setTimeout(() => drawPortrait(cv, L.p, false), 140); } }, 1500);
   }
   const instant = reduceMotion || dlg.seen.has(dlg.i); dlg.seen.add(dlg.i);
   if (instant){ finish(); return; }
@@ -993,6 +1014,7 @@ function start(data){
   buildTerrain();
   resize(); centerOn(boy.x + 8, boy.y + 8, true);
   updateHud(); renderLog(); renderPack(); renderBook(); showNode();
+  loadPortraitImages();
   if (!introSeen()) showIntro();
   requestAnimationFrame(t => { lastT = t; frame(t); });
 }
