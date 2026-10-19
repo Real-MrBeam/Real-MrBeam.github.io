@@ -421,7 +421,7 @@
     "flotte": {
       "namn": "Flotte",
       "pris": 12,
-      "text": "Tar dig nedför älven till ett fiskeställe.",
+      "text": "Tar dig nedför älven till ett fiskeställe. Från flotten når du forsen vid Norra bron, där något spelar fiol om nätterna.",
       "typ": "verktyg"
     },
     "fagelholk": {
@@ -433,7 +433,7 @@
     "snorkel": {
       "namn": "Snorkel",
       "pris": 8,
-      "text": "Med den kan du dyka efter skatter i sjön.",
+      "text": "Med den kan du dyka efter skatter i sjön. Under Södra bron är vattnet djupt, och där nere lyser något när man har ljus med sig.",
       "typ": "verktyg"
     },
     "badring": {
@@ -445,7 +445,7 @@
     "roddbat": {
       "namn": "Roddbåt",
       "pris": 14,
-      "text": "Tar dig mitt ut i sjön, där de ovanliga fiskarna finns.",
+      "text": "Tar dig mitt ut i sjön, där de ovanliga fiskarna finns. Ute i vassen vid sjön ringlar något stort som inte kan låta blanka saker vara.",
       "typ": "verktyg"
     },
     "kompass": {
@@ -457,7 +457,7 @@
     "flugspo": {
       "namn": "Flugspö",
       "pris": 10,
-      "text": "Fångar öring och harr i strömmen under broarna.",
+      "text": "Fångar öring och harr i strömmen under broarna. I forsen vid Norra bron sägs något spela fiol när silverflugor glimmar på vattnet.",
       "typ": "verktyg"
     },
     "flugask": {
@@ -469,13 +469,13 @@
     "hav": {
       "namn": "Håv",
       "pris": 6,
-      "text": "Fångar grodor och småfisk vid stranden.",
+      "text": "Fångar grodor och småfisk vid stranden. Under Södra bron är vattnet djupt, och där nere lyser något när man har ljus med sig.",
       "typ": "verktyg"
     },
     "kraftbur": {
       "namn": "Kräftbur",
       "pris": 10,
-      "text": "Läggs ut på kvällen och fångar kräftor medan du sover.",
+      "text": "Läggs ut på kvällen och fångar kräftor medan du sover. Ute i vassen vid sjön ringlar något stort som inte kan låta blanka saker vara.",
       "typ": "verktyg"
     },
     "stjarnkikare": {
@@ -1880,6 +1880,126 @@
           }
         }
       }
+    }
+  },
+  "fiske": {
+    "platser": {
+      "sodrabron": {
+        "fiskar": [
+          "abborre",
+          "gadda",
+          "krafta"
+        ]
+      },
+      "norrabron": {
+        "fiskar": [
+          "oring",
+          "harr",
+          "regnbage"
+        ]
+      },
+      "vassen": {
+        "fiskar": [
+          "abborre",
+          "gadda",
+          "groda",
+          "krafta"
+        ]
+      }
+    },
+    "redskap": [
+      "flugspo",
+      "flotte",
+      "kraftbur",
+      "roddbat",
+      "hav",
+      "snorkel"
+    ],
+    "metspo": "Metspö",
+    "djur": [
+      {
+        "djur": "nacken",
+        "plats": "norrabron",
+        "redskap": [
+          "flugspo",
+          "flotte"
+        ],
+        "agn": [
+          "silverfluga",
+          "flugask"
+        ],
+        "text": "Vattnet i forsen blir alldeles stilla. Någon spelar fiol under ytan, och upp ur skummet stiger en gestalt med långt mörkt hår och en fiol under armen."
+      },
+      {
+        "djur": "sigge",
+        "plats": "vassen",
+        "redskap": [
+          "kraftbur",
+          "roddbat"
+        ],
+        "agn": [
+          "snackor",
+          "blabar"
+        ],
+        "text": "Vassen böjer sig. En puckel, och sedan en till, glider fram genom vattnet. Ett vänligt huvud på en lång hals tittar upp och nosar på agnet."
+      },
+      {
+        "djur": "linnea",
+        "plats": "sodrabron",
+        "redskap": [
+          "hav",
+          "snorkel"
+        ],
+        "agn": [
+          "glodsvamp",
+          "lysmask"
+        ],
+        "text": "Ljuset sjunker ner i det mörka vattnet under bron. Där nere glittrar fjäll, och en smal ormdrake ringlar upp mot ljuset och lägger sig i din hand."
+      }
+    ],
+    "fiskar": {
+      "abborre": {
+        "namn": "Abborre",
+        "text": "Randig och kaxig. Biter på nästan vad som helst."
+      },
+      "gadda": {
+        "namn": "Gädda",
+        "text": "Lång och snabb, med fler tänder än man vill räkna."
+      },
+      "krafta": {
+        "namn": "Kräfta",
+        "text": "Går baklänges och nyper gärna. Torvald i grottan vill ha en."
+      },
+      "oring": {
+        "namn": "Öring",
+        "text": "Prickig och stark. Trivs där vattnet forsar."
+      },
+      "harr": {
+        "namn": "Harr",
+        "text": "Har en ryggfena som ett segel och glänser i lila."
+      },
+      "regnbage": {
+        "namn": "Regnbåge",
+        "text": "Skimrar i alla färger när solen träffar den."
+      },
+      "groda": {
+        "namn": "Groda",
+        "text": "Ingen fisk, men den hoppade upp på kroken ändå. Hulda vill gärna ha en."
+      }
+    },
+    "texter": {
+      "rubrik": "Här går det att fiska",
+      "knapp": "Fiska",
+      "valj": "Välj redskap och agn och kasta ut.",
+      "utanAgn": "Inget agn",
+      "kasta": "Kasta ut",
+      "vanta": "Du väntar och tittar på flötet.",
+      "nu": "Det nappar.",
+      "dra": "Dra upp",
+      "tidigt": "Du drog för tidigt, och fisken simmade iväg. Agnet sitter kvar.",
+      "sent": "Flötet hann komma upp igen innan du drog. Fisken slapp, men agnet sitter kvar.",
+      "igen": "Försök igen",
+      "tillbaka": "Tillbaka"
     }
   }
 }

@@ -89,6 +89,9 @@ const CHEST_OPEN = sprite([
 const TICKET = sprite([
   "oooooooooooooo", "oYYYYYYYYYYYYo", "oYyyyyyyyyyyYo", "oYyyyyYYyyyyYo", ".oyyyYYYYyyyo.", ".oyyyyYYyyyyo.", "oYyyyYyyYyyyYo",
   "oYyyyyyyyyyyYo", "oYYYYYYYYYYYYo", "oooooooooooooo"], CHESTPAL);
+const FISH = sprite([
+  "............", "..oooo....o.", ".obbbbo..obo", "obwbbbbooBbo", "obkbbbbbbBo.", "obbbbbbbbBo.", "obbbbbbooBbo",
+  ".oBBBBo..oBo", "..oooo....o."], { o:'#3f2631', b:'#8b9bb4', B:'#5a6988', w:'#ffffff', k:'#262b44' });
 const LOCK = sprite(["..sss..", ".s...s.", ".s...s.", "ooooooo", "oyyyyyo", "oyyoyyo", "oyyyyyo", "ooooooo"], { o:'#3f2631', y:'#feae34', s:'#c0cbdc' });
 const GATEPAL = { o:'#3f2631', S:'#c0cbdc', s:'#8b9bb4', w:'#b86f50', W:'#733e39', y:'#feae34', Y:'#fee761' };
 const GATE_TOP = ["................", "oooooooooooooooo", "oSSSSSSSSSSSSSSo", "osssssssssssssso", "oooooooooooooooo"];
@@ -256,7 +259,7 @@ let REAL = null; // { stars, stoft, handelser } once the locked events have been
 const START = () => ({
   stars: REAL ? REAL.stars : startData.stjarnor, coins: REAL ? REAL.stoft : startData.stjarnstoft, node: startData.plats,
   built: Object.fromEntries(startData.byggt.map(id => [id, true])),
-  valda: {}, saker: [], steg: {}, handlat: {}, djur: [], fram: [], stopp: {}, hittat: [], spent: 0, kistor: [],
+  valda: {}, saker: [], steg: {}, handlat: {}, djur: [], fram: [], stopp: {}, hittat: [], spent: 0, kistor: [], agnAnvant: [], fiskbok: {},
   sett: new Uint8Array(MW*MH),
   log: REAL ? REAL.handelser.slice() : startData.logg.map(r => ({ typ: 'runa', amne: r.amne, procent: Math.round(r.poang / r.max * 100), stjarnor: r.stjarnor, bonus: r.bonus })),
   testIdx: 0,
@@ -352,6 +355,7 @@ function walkTo(id){
     const t = h.e.a === h.from ? h.e.tiles : [...h.e.tiles].reverse();
     for (let i = (pts.length ? 1 : 1); i < t.length; i++) pts.push(t[i]);
   }
+  stopFishing();
   boy.route = pts; boy.step = 0; boy.target = id; cam.follow = true; cam.focus = null;
   hideHint();
   renderPanel({ type: 'walk', id });
@@ -614,7 +618,7 @@ function frame(now){
 const panel = $('#panel');
 function esc(s){ return String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c])); }
 function iconURL(c, s){ const k = document.createElement('canvas'); k.width = c.width*s; k.height = c.height*s; const x = k.getContext('2d'); x.imageSmoothingEnabled = false; x.drawImage(c, 0, 0, k.width, k.height); return k.toDataURL(); }
-let STAR_URL = '', DUST_URL = '', LOCK_URL = '', RUNE_URL = '', SCROLL_URL = '', TICKET_URL = '', RUNE_BIG = '', SCROLL_BIG = '', TICKET_BIG = '';
+let FISH_BIG = '', STAR_URL = '', DUST_URL = '', LOCK_URL = '', RUNE_URL = '', SCROLL_URL = '', TICKET_URL = '', RUNE_BIG = '', SCROLL_BIG = '', TICKET_BIG = '';
 function plotPreview(p){
   const c = document.createElement('canvas'); c.width = 48; c.height = 48; c.className = 'pix';
   const x = c.getContext('2d'); x.imageSmoothingEnabled = false;
@@ -636,6 +640,7 @@ function renderPanel(view){
     h = `<span class="tag">Du är här</span><h2>${esc(n.name)}</h2><p>${esc(n.text)}</p><div class="panel-body">`;
     for (const p of plots) h += plotBlock(p);
     if (stop) h += stopBlock(n.id);
+    if (FISKE.platser[n.id]) h += fishBlock(n.id);
     if (n.id === CHEST_AT.node && pendingTickets().length) h += `<div class="plot"><div><b>En guldkista står vid skolan</b></div><button class="btn" type="button" data-kista="1">Öppna kistan</button></div>`;
     if (n.id === 'slott') h += `<div><button class="btn" type="button" data-slott="1">${esc(berattelse.dialog.slottKnapp)}</button></div>`;
     h += `</div>`;
@@ -681,12 +686,18 @@ panel.addEventListener('click', ev => {
   if (b.dataset.go || b.dataset.gate || b.dataset.goplot) showMap();
   if (b.dataset.go) walkTo(b.dataset.go);
   else if (b.dataset.gate){ const g = GATES[+b.dataset.gate]; showGate(g); focusGate(g); }
-  else if (b.dataset.back){ cam.focus = null; cam.follow = true; showNode(); }
+  else if (b.dataset.back){ stopFishing(); cam.focus = null; cam.follow = true; showNode(); }
   else if (b.dataset.goplot){ const p = PLOTS.find(q => q.id === b.dataset.goplot); goPlot(p); }
   else if (b.dataset.talk) startBuild(PLOTS.find(q => q.id === b.dataset.talk));
   else if (b.dataset.shop) startShop(PLOTS.find(q => q.id === b.dataset.shop));
   else if (b.dataset.slott) startCount();
   else if (b.dataset.kista) openChest();
+  else if (b.dataset.fiska) startFishing(b.dataset.fiska);
+  else if (b.dataset.redskap !== undefined){ fishing.redskap = b.dataset.redskap; renderFishing(); }
+  else if (b.dataset.agn !== undefined){ fishing.agn = b.dataset.agn; renderFishing(); }
+  else if (b.dataset.kasta) cast();
+  else if (b.dataset.dra) pull();
+  else if (b.dataset.igen){ fishing.phase = 'val'; renderFishing(); }
   else if (b.dataset.stopp) startStop(b.dataset.stopp);
   else if (b.dataset.dlgnext !== undefined){ dlg.i++; renderPanel({ type: 'dialog' }); }
   else if (b.dataset.dlgchoice !== undefined){ dlg.choices[+b.dataset.dlgchoice].run(); }
@@ -939,7 +950,7 @@ function startCount(){
 }
 
 function renderPack(){
-  const own = S.saker.filter(id => SAKER[id].typ !== 'djur');
+  const own = S.saker.filter(id => SAKER[id].typ !== 'djur' && !S.agnAnvant.includes(id)); // used baits are gone
   $('#pack').innerHTML = own.length
     ? own.map(id => `<li><span><b>${esc(SAKER[id].namn)}</b> ${esc(SAKER[id].text)}</span></li>`).join('')
     : '<li><span>Inget ännu. Bygg något och handla!</span></li>';
@@ -989,7 +1000,7 @@ function applyReal(events){
 // encrypted in the page (#lasNyckel) and opens with the password, like the portraits. Without the key nothing is saved.
 // Stars and stardust are never saved: they are counted from the runes and scrolls. Only what he has spent is saved.
 const SAVE = { repo: '', file: '', key: '', sha: null, timer: 0, off: false, loaded: false };
-const SAVED_FIELDS = ['node', 'built', 'valda', 'saker', 'steg', 'handlat', 'djur', 'fram', 'stopp', 'hittat', 'spent', 'kistor'];
+const SAVED_FIELDS = ['node', 'built', 'valda', 'saker', 'steg', 'handlat', 'djur', 'fram', 'stopp', 'hittat', 'spent', 'kistor', 'agnAnvant', 'fiskbok'];
 const b64 = text => { const bytes = new TextEncoder().encode(text); let s = ''; for (const b of bytes) s += String.fromCharCode(b); return btoa(s); };
 const unb64 = data => new TextDecoder().decode(Uint8Array.from(atob(data.replace(/\s/g, '')), c => c.charCodeAt(0)));
 function spend(n){ S.coins -= n; S.spent += n; }
@@ -1022,7 +1033,7 @@ function applySaved(data){
   boy.route = null; placeBoy(S.node); plotAnim.clear(); petState.clear();
   lastRevealKey = ''; maskDirty = true; buildTerrain();
   cam.follow = true; centerOn(boy.x + 8, boy.y + 8, true);
-  updateHud(); renderLog(); renderPack(); renderBook(); renderTickets();
+  updateHud(); renderLog(); renderPack(); renderBook(); renderTickets(); renderFishBook();
   if (!dlg) showNode();
 }
 function snapshot(){
@@ -1088,6 +1099,82 @@ function openModal(steps, done){
   };
   $('#modalBtn').onclick = () => { i++; if (i < steps.length) show(); else { $('#modal').hidden = true; done && done(); } };
   show();
+}
+
+/* ---------- fiske ---------- */
+// At a fishing place he picks a tool (the rod he always has, or a tool he has bought) and a bait he has not used yet,
+// casts, and pulls when the float dips. Too early or too late: the fish gets away but the bait stays. A catch uses up the
+// bait (each kind of bait only once). A water animal bites at its own place with one of its tools and one of its baits,
+// otherwise it is an ordinary fish for the fish book.
+const FISKE = berattelse.fiske;
+let fishing = null; // { plats, redskap, agn, phase: 'val' | 'vanta' | 'nu', timers }
+const myTools = () => FISKE.redskap.filter(id => S.saker.includes(id));
+const myBaits = () => S.saker.filter(id => SAKER[id].typ === 'agn' && !S.agnAnvant.includes(id));
+function fishBlock(id){
+  const T = FISKE.texter, here = S.node === id && !boy.route;
+  return `<div class="plot"><div><b>${esc(T.rubrik)}</b></div>${here ? `<button class="btn" type="button" data-fiska="${id}">${esc(T.knapp)}</button>` : ''}</div>`;
+}
+function startFishing(id){
+  fishing = { plats: id, redskap: 'metspo', agn: '', phase: 'val', timers: [] };
+  renderFishing();
+}
+function stopFishing(){ if (fishing) fishing.timers.forEach(clearTimeout); fishing = null; }
+function renderFishing(){
+  const T = FISKE.texter, fz = fishing, n = NODES[fz.plats];
+  current = { type: 'fish' };
+  clearInterval(typeTimer); clearInterval(blinkTimer);
+  let h = `<span class="tag">Fiske</span><h2>${esc(n.name)}</h2>`;
+  if (fz.phase === 'val'){
+    const tool = (id, name) => `<button class="btn${fz.redskap === id ? '' : ' alt'}" type="button" data-redskap="${id}">${esc(name)}</button>`;
+    const bait = (id, name) => `<button class="btn${fz.agn === id ? '' : ' alt'}" type="button" data-agn="${id}">${esc(name)}</button>`;
+    h += `<p>${esc(T.valj)}</p><div class="panel-body">
+      <div><p class="sub">Redskap</p><div class="roads">${tool('metspo', FISKE.metspo)}${myTools().map(id => tool(id, SAKER[id].namn)).join('')}</div></div>
+      <div><p class="sub">Agn</p><div class="roads">${bait('', T.utanAgn)}${myBaits().map(id => bait(id, SAKER[id].namn)).join('')}</div></div>
+      <div class="roads"><button class="btn" type="button" data-kasta="1">${esc(T.kasta)}</button><button class="btn alt" type="button" data-back="1">${esc(T.tillbaka)}</button></div></div>`;
+  } else if (fz.phase === 'vanta' || fz.phase === 'nu'){
+    h += `<p aria-live="polite">${esc(fz.phase === 'nu' ? T.nu : T.vanta)}</p><div class="panel-body">
+      <div class="pond${fz.phase === 'nu' ? ' dip' : ''}"><span class="float"></span></div>
+      <div class="roads"><button class="btn" type="button" data-dra="1">${esc(T.dra)}</button></div></div>`;
+  } else {
+    h += `<p>${esc(fz.miss)}</p><div class="panel-body"><div class="roads"><button class="btn" type="button" data-igen="1">${esc(T.igen)}</button><button class="btn alt" type="button" data-back="1">${esc(T.tillbaka)}</button></div></div>`;
+  }
+  panel.innerHTML = h;
+}
+function cast(){
+  const fz = fishing; fz.phase = 'vanta'; renderFishing();
+  const wait = 1500 + Math.random() * 2500;
+  fz.timers.push(setTimeout(() => { fz.phase = 'nu'; renderFishing(); }, wait));
+  fz.timers.push(setTimeout(() => { if (fz.phase === 'nu') miss(FISKE.texter.sent); }, wait + 1100));
+}
+function miss(text){ const fz = fishing; fz.timers.forEach(clearTimeout); fz.timers = []; fz.phase = 'miss'; fz.miss = text; renderFishing(); }
+function pull(){
+  const fz = fishing;
+  if (fz.phase !== 'nu') return miss(FISKE.texter.tidigt);
+  fz.timers.forEach(clearTimeout); fz.timers = [];
+  const rule = FISKE.djur.find(r => r.plats === fz.plats && r.redskap.includes(fz.redskap) && r.agn.includes(fz.agn) && !S.djur.includes(r.djur));
+  if (fz.agn){ S.agnAnvant.push(fz.agn); renderPack(); }
+  sparkle(boy.x + 8, boy.y + 2, 20, '#2ce8f5');
+  let step;
+  if (rule){
+    const d = berattelse.djur[rule.djur];
+    giveAnimal(rule.djur);
+    step = { icon: iconURL(PETS[rule.djur].right[0], 6), title: `${d.namn}, ${d.art.toLowerCase()}`, text: rule.text, reward: `${d.namn} skrevs in i djurboken.`, button: 'Till kartan' };
+  } else {
+    const list = FISKE.platser[fz.plats].fiskar, fresh = list.filter(id => !S.fiskbok[id]);
+    const pool = fresh.length && Math.random() < .6 ? fresh : list, id = pool[Math.floor(Math.random() * pool.length)];
+    const isNew = !S.fiskbok[id]; S.fiskbok[id] = (S.fiskbok[id] || 0) + 1; renderFishBook();
+    const fish = FISKE.fiskar[id];
+    step = { icon: FISH_BIG, title: fish.namn, text: fish.text, reward: isNew ? 'Ny i fiskboken.' : `Du har fått ${S.fiskbok[id]} sådana nu.`, button: 'Till kartan' };
+  }
+  saveSoon();
+  stopFishing();
+  openModal([step], () => showNode());
+}
+function renderFishBook(){
+  const ids = Object.keys(FISKE.fiskar).filter(id => S.fiskbok[id]);
+  $('#fishbook').innerHTML = ids.length
+    ? ids.map(id => `<li><span><b>${esc(FISKE.fiskar[id].namn)}</b> ${esc(FISKE.fiskar[id].text)}</span><span class="st">${S.fiskbok[id]} st</span></li>`).join('')
+    : '<li><span>Inga fiskar ännu. Fiska vid broarna.</span></li>';
 }
 
 /* ---------- guldbiljetter ---------- */
@@ -1166,7 +1253,7 @@ function restart(){
   S = START(); boy.route = null; placeBoy(S.node); plotAnim.clear(); gateAnim.clear(); FX.length = 0; buildTerrain();
   lastRevealKey = ''; maskDirty = true; revealAround(boy.x + 8, boy.y + 8);
   cam.follow = true; cam.focus = null; centerOn(boy.x + 8, boy.y + 8, true);
-  dlg = null; updateHud(); renderLog(); renderPack(); renderBook(); renderTickets(); showNode();
+  dlg = null; updateHud(); renderLog(); renderPack(); renderBook(); renderTickets(); renderFishBook(); showNode();
 }
 
 /* ---------- pekare ---------- */
@@ -1193,6 +1280,7 @@ function tapAt(wx, wy){
   for (const g of GATES){ if (gateShown(g) && tx === g.x && (ty === g.y || ty === g.y - 1)){ showGate(g); if (S.stars < g.req) toast(`Porten öppnas vid ${g.req} stjärnor. Du har ${S.stars}.`); return; } }
   for (const p of PLOTS){ if (seenAt(p.x + 1, p.y + 1) && tx >= p.x && tx <= p.x + 2 && ty >= p.y - 1 && ty <= p.y + 2){ goPlot(p); return; } }
 }
+addEventListener('keydown', e => { if (fishing && (fishing.phase === 'vanta' || fishing.phase === 'nu') && (e.key === ' ' || e.key === 'Enter')){ e.preventDefault(); pull(); } });
 cv.addEventListener('keydown', e => {
   const dirs = { ArrowUp: [0,-1], ArrowDown: [0,1], ArrowLeft: [-1,0], ArrowRight: [1,0] };
   const d = dirs[e.key]; if (!d || boy.route) return;
@@ -1213,13 +1301,14 @@ function start(data){
   if (data && data.S) S = data.S;
   placeBoy(S.node); lastRevealKey = ''; revealAround(boy.x + 8, boy.y + 8);
   STAR_URL = iconURL(STAR, 4); DUST_URL = iconURL(DUST, 4); LOCK_URL = iconURL(LOCK, 4); RUNE_URL = iconURL(RUNE, 4); SCROLL_URL = iconURL(SCROLL, 4);
+  FISH_BIG = iconURL(FISH, 8); $('#icoFish').src = iconURL(FISH, 4);
   TICKET_URL = iconURL(TICKET, 4); RUNE_BIG = iconURL(RUNE, 8); SCROLL_BIG = iconURL(SCROLL, 8); TICKET_BIG = iconURL(TICKET, 8); $('#icoTicket').src = TICKET_URL;
   $('#icoRunes').src = RUNE_URL; $('#icoBag').src = iconURL(BAG, 4); $('#icoBook').src = iconURL(BOOK, 4);
   $('#logoStar').src = STAR_URL; $('#icoStar').src = STAR_URL; $('#icoCoin').src = DUST_URL;
   document.querySelectorAll('img[data-ico]').forEach(im => { im.src = im.dataset.ico === 'star' ? STAR_URL : DUST_URL; });
   buildTerrain();
   resize(); centerOn(boy.x + 8, boy.y + 8, true);
-  updateHud(); renderLog(); renderPack(); renderBook(); renderTickets(); showNode();
+  updateHud(); renderLog(); renderPack(); renderBook(); renderTickets(); renderFishBook(); showNode();
   loadPortraitImages();
   if (!introSeen()) showIntro();
   requestAnimationFrame(t => { lastT = t; frame(t); });
