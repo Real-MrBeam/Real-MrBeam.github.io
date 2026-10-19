@@ -319,7 +319,7 @@
     "honungsburk": {
       "namn": "Honungsburk",
       "pris": 6,
-      "text": "Honung från Bosses bin, söt och tjock. Björnarna i skogen sägs inte kunna motstå den.",
+      "text": "Honung från Bosses bin, söt och tjock. Björnarna i skogen sägs inte kunna motstå den, och de är inte ensamma om det.",
       "typ": "agn"
     },
     "humleagg": {
@@ -1945,7 +1945,7 @@
         ],
         "agn": [
           "snackor",
-          "blabar"
+          "honungsburk"
         ],
         "text": "Vassen böjer sig. En puckel, och sedan en till, glider fram genom vattnet. Ett vänligt huvud på en lång hals tittar upp och nosar på agnet."
       },
@@ -2005,7 +2005,8 @@
       "tidigt": "Du drog för tidigt, och fisken simmade iväg. Agnet sitter kvar.",
       "sent": "Flötet hann komma upp igen innan du drog. Fisken slapp, men agnet sitter kvar.",
       "igen": "Försök igen",
-      "tillbaka": "Tillbaka"
+      "tillbaka": "Tillbaka",
+      "ingetNapp": "Något nosade på agnet men släppte det igen. Agnet sitter kvar, kanske passar det bättre någon annanstans."
     }
   },
   "locka": [

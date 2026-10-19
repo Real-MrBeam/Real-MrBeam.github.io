@@ -1160,6 +1160,8 @@ function pull(){
   if (fz.phase !== 'nu') return miss(FISKE.texter.tidigt);
   fz.timers.forEach(clearTimeout); fz.timers = [];
   const rule = FISKE.djur.find(r => r.plats === fz.plats && r.redskap.includes(fz.redskap) && r.agn.includes(fz.agn) && !S.djur.includes(r.djur));
+  // A bait is only used up when a water animal bites. With the wrong place or tool nothing takes it, and he keeps it.
+  if (fz.agn && !rule) return miss(FISKE.texter.ingetNapp);
   if (fz.agn){ S.agnAnvant.push(fz.agn); renderPack(); }
   sparkle(boy.x + 8, boy.y + 2, 20, '#2ce8f5');
   let step;
