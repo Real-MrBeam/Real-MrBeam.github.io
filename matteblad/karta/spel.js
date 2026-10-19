@@ -259,7 +259,7 @@ let REAL = null; // { stars, stoft, handelser } once the locked events have been
 const START = () => ({
   stars: REAL ? REAL.stars : startData.stjarnor, coins: REAL ? REAL.stoft : startData.stjarnstoft, node: startData.plats,
   built: Object.fromEntries(startData.byggt.map(id => [id, true])),
-  valda: {}, saker: [], steg: {}, handlat: {}, djur: [], fram: [], stopp: {}, hittat: [], spent: 0, kistor: [], agnAnvant: [], fiskbok: {},
+  valda: {}, saker: [], steg: {}, handlat: {}, djur: [], fram: [], stopp: {}, hittat: [], spent: 0, kistor: [], agnAnvant: [], fiskbok: {}, namn: {},
   sett: new Uint8Array(MW*MH),
   log: REAL ? REAL.handelser.slice() : startData.logg.map(r => ({ typ: 'runa', amne: r.amne, procent: Math.round(r.poang / r.max * 100), stjarnor: r.stjarnor, bonus: r.bonus })),
   testIdx: 0,
@@ -841,14 +841,14 @@ function startStop(id){
   runStep({ def: s.aventyr, key, end: (till, out) => finishStop(id, till, out) }, S.steg[key] || s.aventyr.start, []);
 }
 function rewardText(till){
-  if (till.djur){ const d = berattelse.djur[till.djur]; return `${d.namn}, ${d.art.toLowerCase()}, skrevs in i djurboken.`; }
+  if (till.djur) return `${berattelse.djur[till.djur].art} skrevs in i djurboken.`;
   if (till.agn) return `Du fick ${SAKER[till.agn].namn.toLowerCase()}.`;
   if (till.stoft) return `Du fick ${till.stoft} stjärnstoft.`;
   return `En hemlig fiskeplats syns nu på kartan: ${NODES[till.fiskeplats].name}.`;
 }
 function finishStop(id, till, out){
   S.stopp[id] = till; delete S.steg['stopp:' + id]; saveSoon();
-  if (till.djur) giveAnimal(till.djur);
+  if (till.djur) giveAnimal(till.djur, out[out.length - 1].t);
   if (till.agn && !S.saker.includes(till.agn)){ S.saker.push(till.agn); renderPack(); toast(rewardText(till)); }
   if (till.stoft){ S.coins += till.stoft; updateHud('coins'); sparkle(boy.x + 8, boy.y + 2, 24); toast(rewardText(till)); }
   if (till.fiskeplats){ S.hittat.push(till.fiskeplats); buildTerrain(); sparkle(NODES[till.fiskeplats].x*TS + 8, NODES[till.fiskeplats].y*TS + 8, 26); toast(rewardText(till)); }
@@ -903,7 +903,7 @@ function buy(p, id){
   if (S.coins < it.pris){ toast(berattelse.dialog.ingaStoft.replace('{n}', it.pris - S.coins)); return; }
   spend(it.pris); saveSoon(); S.saker.push(id); S.handlat[p.id] = id;
   updateHud('coins');
-  if (it.djur) giveAnimal(it.djur, it);
+  if (it.djur) giveAnimal(it.djur, it.text);
   else toast(`Du köpte ${it.namn.toLowerCase()}!`);
   renderPack();
   startShop(p, true);
@@ -911,14 +911,22 @@ function buy(p, id){
 
 /* ---------- djurboken ---------- */
 // An animal that has been found goes into the book. Up to three are put forward and follow him on the map.
-function giveAnimal(id, it){
+// The name he has given an animal, or its own name until then (berattelse.json djur)
+const djurNamn = id => (S.namn && S.namn[id]) || berattelse.djur[id].namn;
+function giveAnimal(id, story, done){
   if (S.djur.includes(id)) return;
   S.djur.push(id);
   const D = berattelse.djur[id], fram = S.fram.length < MAX_FRAM;
   if (fram){ S.fram.push(id); petState.delete(id); }
   sparkle(boy.x + 8, boy.y + 2, 22);
-  toast(`${D.namn}, ${D.art.toLowerCase()}, skrevs in i djurboken${fram ? ' och följer nu med dig' : ''}.`);
-  renderBook();
+  renderBook(); saveSoon();
+  nameModal(id, story || D.hur, done, `${D.art} skrevs in i djurboken${fram ? ' och följer nu med dig' : ''}.`);
+}
+// The box where he names a new animal: its picture, the story of how he found it and a field for the name
+function nameModal(id, story, done, reward){
+  const D = berattelse.djur[id];
+  openModal([{ icon: iconURL(PETS[id].right[0], 8), title: D.art, text: `${story}\n\n${D.text}`, reward, input: djurNamn(id), button: 'Klar',
+    onInput: value => { S.namn[id] = value; if (value === D.namn) delete S.namn[id]; renderBook(); saveSoon(); } }], done);
 }
 const bookIcons = {};
 const bookIcon = id => bookIcons[id] || (bookIcons[id] = iconURL(PETS[id].right[0], 3));
@@ -928,10 +936,12 @@ function renderBook(){
   $('#book').innerHTML = S.djur.map(id => {
     const d = berattelse.djur[id], out = S.fram.includes(id);
     const btn = `<button class="btn${out ? '' : ' alt'}" type="button" data-fram="${id}">${out ? esc(D.laggUndan) : esc(D.haFramme)}</button>`;
-    return `<li class="${out ? 'fram' : ''}"><img class="pix" src="${bookIcon(id)}" alt=""><div><b>${esc(d.namn)}</b> <span class="st">${esc(d.art)}</span><small>${esc(d.text)} ${esc(d.hur)}</small>${btn}</div></li>`;
+    return `<li class="${out ? 'fram' : ''}"><img class="pix" src="${bookIcon(id)}" alt=""><div><b>${esc(djurNamn(id))}</b> <span class="st">${esc(d.art)}</span><small>${esc(d.text)} ${esc(d.hur)}</small>${btn} <button class="btn alt" type="button" data-doep="${id}">Döp om</button></div></li>`;
   }).join('');
 }
 $('#book').addEventListener('click', ev => {
+  const dop = ev.target.closest('button[data-doep]');
+  if (dop){ nameModal(dop.dataset.doep, berattelse.djur[dop.dataset.doep].hur, null, ''); return; }
   const b = ev.target.closest('button[data-fram]'); if (!b) return;
   const id = b.dataset.fram, i = S.fram.indexOf(id);
   if (i >= 0) S.fram.splice(i, 1);
@@ -1008,7 +1018,7 @@ function applyReal(events){
 // encrypted in the page (#lasNyckel) and opens with the password, like the portraits. Without the key nothing is saved.
 // Stars and stardust are never saved: they are counted from the runes and scrolls. Only what he has spent is saved.
 const SAVE = { repo: '', file: '', key: '', sha: null, timer: 0, off: false, loaded: false };
-const SAVED_FIELDS = ['node', 'built', 'valda', 'saker', 'steg', 'handlat', 'djur', 'fram', 'stopp', 'hittat', 'spent', 'kistor', 'agnAnvant', 'fiskbok'];
+const SAVED_FIELDS = ['node', 'built', 'valda', 'saker', 'steg', 'handlat', 'djur', 'fram', 'stopp', 'hittat', 'spent', 'kistor', 'agnAnvant', 'fiskbok', 'namn'];
 const b64 = text => { const bytes = new TextEncoder().encode(text); let s = ''; for (const b of bytes) s += String.fromCharCode(b); return btoa(s); };
 const unb64 = data => new TextDecoder().decode(Uint8Array.from(atob(data.replace(/\s/g, '')), c => c.charCodeAt(0)));
 function spend(n){ S.coins -= n; S.spent += n; }
@@ -1097,15 +1107,20 @@ function showNews(){
   });
 }
 // A box over the map with a picture, a title, a text and one button, step by step
+// If the field is left empty the name stays as it was
+const berattelseNamn = s => s.input;
 function openModal(steps, done){
   let i = 0;
   const show = () => {
     const s = steps[i];
     $('#modalIcon').src = s.icon; $('#modalTitle').textContent = s.title; $('#modalText').textContent = s.text;
     $('#modalReward').textContent = s.reward || ''; $('#modalReward').hidden = !s.reward;
-    $('#modalBtn').textContent = s.button; $('#modal').hidden = false; $('#modalBtn').focus();
+    $('#modalBtn').textContent = s.button; $('#modal').hidden = false;
+    const field = $('#modalName'); field.hidden = s.input === undefined; field.value = s.input ?? '';
+    (s.input === undefined ? $('#modalBtn') : field).focus();
   };
-  $('#modalBtn').onclick = () => { i++; if (i < steps.length) show(); else { $('#modal').hidden = true; done && done(); } };
+  $('#modalName').onkeydown = e => { if (e.key === 'Enter') $('#modalBtn').click(); };
+  $('#modalBtn').onclick = () => { const s = steps[i]; if (s.input !== undefined && s.onInput) s.onInput($('#modalName').value.trim().slice(0, 16) || berattelseNamn(s)); i++; if (i < steps.length) show(); else { $('#modal').hidden = true; done && done(); } };
   show();
 }
 
@@ -1166,9 +1181,8 @@ function pull(){
   sparkle(boy.x + 8, boy.y + 2, 20, '#2ce8f5');
   let step;
   if (rule){
-    const d = berattelse.djur[rule.djur];
-    giveAnimal(rule.djur);
-    step = { icon: iconURL(PETS[rule.djur].right[0], 6), title: `${d.namn}, ${d.art.toLowerCase()}`, text: rule.text, reward: `${d.namn} skrevs in i djurboken.`, button: 'Till kartan' };
+    stopFishing(); giveAnimal(rule.djur, rule.text, () => showNode());
+    return saveSoon();
   } else {
     const list = FISKE.platser[fz.plats].fiskar, fresh = list.filter(id => !S.fiskbok[id]);
     const pool = fresh.length && Math.random() < .6 ? fresh : list, id = pool[Math.floor(Math.random() * pool.length)];
@@ -1199,9 +1213,7 @@ function lure(djurId){
   const r = LOCKA.find(x => x.djur === djurId), bait = r && r.agn.find(id => myBaits().includes(id));
   if (!bait || S.djur.includes(djurId)) return;
   S.agnAnvant.push(bait); renderPack();
-  giveAnimal(djurId); saveSoon();
-  const d = berattelse.djur[djurId];
-  openModal([{ icon: iconURL(PETS[djurId].right[0], 6), title: `${d.namn}, ${d.art.toLowerCase()}`, text: r.text, reward: `${d.namn} skrevs in i djurboken.`, button: 'Till kartan' }], () => showNode());
+  giveAnimal(djurId, r.text, () => showNode());
 }
 
 /* ---------- guldbiljetter ---------- */
