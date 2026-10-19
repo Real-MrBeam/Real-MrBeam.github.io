@@ -586,6 +586,12 @@ function frame(now){
   if (pendingTickets().length || chestOpening){
     const t = chestOpening ? (now - chestOpening) / 1000 : 0, shake = chestOpening && t < .6 ? (Math.floor(t * 30) % 2 ? 1 : -1) : 0;
     const glow = Math.floor(now / 400) % 2;
+    // Gold glitter that rises from the closed chest now and then, so that it is easy to see and tempting to tap
+    if (!chestOpening && !reduceMotion && now - chestGlitter > 80){
+      chestGlitter = now;
+      const gx = CHEST_AT.x*TS + 2 + Math.random() * 12, gy = CHEST_AT.y*TS + 3 + Math.random() * 8;
+      FX.push({ k: 'spark', x: gx, y: gy, vx: (Math.random() - .5) * 8, vy: -14 - Math.random() * 14, t: 0, life: .7 + Math.random() * .5, col: Math.random() < .6 ? '#fee761' : '#ffffff' });
+    }
     if (!chestOpening && glow){ ctx.fillStyle = 'rgba(254,231,97,.35)'; ctx.fillRect(CHEST_AT.x*TS - 1, CHEST_AT.y*TS + 1, 18, 13); }
     ctx.drawImage(chestOpening && t >= .6 ? CHEST_OPEN : CHEST, CHEST_AT.x*TS + shake, CHEST_AT.y*TS);
   }
@@ -1181,7 +1187,7 @@ function renderFishBook(){
 // A rune read to more than 90 % gives a golden ticket. It lies in a golden chest at the school until he opens it there.
 // The tickets are swapped for something real; Peter says when one has been used (biljettAnvand in handelser.json).
 const CHEST_AT = { x: 15, y: 23, node: 'skola' };
-let chestOpening = 0;
+let chestOpening = 0, chestGlitter = 0;
 const allTickets = () => S.log.filter(e => e.typ === 'runa' && e.biljett);
 const pendingTickets = () => allTickets().filter(e => !S.kistor.includes(e.id));
 function openChest(){
