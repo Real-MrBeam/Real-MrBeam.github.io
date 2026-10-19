@@ -319,7 +319,7 @@
     "honungsburk": {
       "namn": "Honungsburk",
       "pris": 6,
-      "text": "Björnen i Höstskogen vill gärna ha den, och djuren i vattnet faller för den.",
+      "text": "Honung från Bosses bin, söt och tjock. Djuren i vattnet faller för den.",
       "typ": "agn"
     },
     "humleagg": {
@@ -409,7 +409,7 @@
     "appelpaj": {
       "namn": "Äppelpaj",
       "pris": 6,
-      "text": "Björnen Brumma vill ha den, och djuren i vattnet gillar den också.",
+      "text": "Nybakad och fortfarande ljummen. Djuren i vattnet gillar den också.",
       "typ": "agn"
     },
     "appelkorg": {
@@ -797,7 +797,7 @@
           "kostnad": 15,
           "byggnad": "fruktlund",
           "tack": "Tack, snälla du. Om några år står här ett helt hav av äppelträd, och då bjuder jag på paj. Det gör jag förresten redan nu.",
-          "butikHej": "Björnen på stigen säger sällan nej till en paj, ska du veta. Jag har äppelpaj och en hel korg äpplen.",
+          "butikHej": "Äpplen i alla former. Jag har äppelpaj och en hel korg äpplen.",
           "saljer": [
             "appelpaj",
             "appelkorg"
