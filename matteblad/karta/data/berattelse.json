@@ -319,7 +319,7 @@
     "honungsburk": {
       "namn": "Honungsburk",
       "pris": 6,
-      "text": "Honung från Bosses bin, söt och tjock. Djuren i vattnet faller för den.",
+      "text": "Honung från Bosses bin, söt och tjock. Björnarna i skogen sägs inte kunna motstå den.",
       "typ": "agn"
     },
     "humleagg": {
@@ -409,7 +409,7 @@
     "appelpaj": {
       "namn": "Äppelpaj",
       "pris": 6,
-      "text": "Nybakad och fortfarande ljummen. Djuren i vattnet gillar den också.",
+      "text": "Nybakad och fortfarande ljummen. Björnarna i skogen följer doften långa vägar.",
       "typ": "agn"
     },
     "appelkorg": {
@@ -1143,6 +1143,12 @@
       "text": "En ormdrake med glittrande fjäll som bor långt nere i djupet.",
       "hur": "Nappade när du minst anade det.",
       "fiske": true
+    },
+    "brumma": {
+      "namn": "Brumma",
+      "art": "Höstbjörn",
+      "text": "En stor, lurvig björn med ett orange skimmer i pälsen, precis som löven i Höstskogen.",
+      "hur": "Lockades fram med något sött i Höstskogen."
     }
   },
   "stopp": {
@@ -2001,5 +2007,19 @@
       "igen": "Försök igen",
       "tillbaka": "Tillbaka"
     }
-  }
+  },
+  "locka": [
+    {
+      "plats": "host",
+      "djur": "brumma",
+      "agn": [
+        "honungsburk",
+        "appelpaj"
+      ],
+      "rubrik": "Något stort rör sig mellan de orange träden",
+      "knapp": "Bjud på något sött",
+      "saknas": "Det nosar och väntar, som om det vill ha något sött.",
+      "text": "Grenarna knakar, och en stor björn kliver fram ur löven. Den nosar försiktigt, äter upp allt du har bjudit på och lägger sig sedan bredvid dig som om ni alltid har känt varandra."
+    }
+  ]
 }

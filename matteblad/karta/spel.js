@@ -647,6 +647,7 @@ function renderPanel(view){
     for (const p of plots) h += plotBlock(p);
     if (stop) h += stopBlock(n.id);
     if (FISKE.platser[n.id]) h += fishBlock(n.id);
+    for (const r of LOCKA) if (r.plats === n.id) h += lureBlock(r);
     if (n.id === CHEST_AT.node && pendingTickets().length) h += `<div class="plot"><div><b>En guldkista står vid skolan</b></div><button class="btn" type="button" data-kista="1">Öppna kistan</button></div>`;
     if (n.id === 'slott') h += `<div><button class="btn" type="button" data-slott="1">${esc(berattelse.dialog.slottKnapp)}</button></div>`;
     h += `</div>`;
@@ -699,6 +700,7 @@ panel.addEventListener('click', ev => {
   else if (b.dataset.slott) startCount();
   else if (b.dataset.kista) openChest();
   else if (b.dataset.fiska) startFishing(b.dataset.fiska);
+  else if (b.dataset.locka) lure(b.dataset.locka);
   else if (b.dataset.redskap !== undefined){ fishing.redskap = b.dataset.redskap; renderFishing(); }
   else if (b.dataset.agn !== undefined){ fishing.agn = b.dataset.agn; renderFishing(); }
   else if (b.dataset.kasta) cast();
@@ -1181,6 +1183,23 @@ function renderFishBook(){
   $('#fishbook').innerHTML = ids.length
     ? ids.map(id => `<li><span><b>${esc(FISKE.fiskar[id].namn)}</b> ${esc(FISKE.fiskar[id].text)}</span><span class="st">${S.fiskbok[id]} st</span></li>`).join('')
     : '<li><span>Inga fiskar ännu. Fiska vid broarna.</span></li>';
+}
+
+/* ---------- locka fram djur ---------- */
+// Some animals come out at a place if he offers them something (berattelse.locka). The offer is used up like a bait.
+const LOCKA = berattelse.locka || [];
+function lureBlock(r){
+  if (S.djur.includes(r.djur)) return '';
+  const here = S.node === r.plats && !boy.route, has = r.agn.some(id => myBaits().includes(id));
+  return `<div class="plot"><div><b>${esc(r.rubrik)}</b>${has ? '' : `<span>${esc(r.saknas)}</span>`}</div>${here && has ? `<button class="btn" type="button" data-locka="${r.djur}">${esc(r.knapp)}</button>` : ''}</div>`;
+}
+function lure(djurId){
+  const r = LOCKA.find(x => x.djur === djurId), bait = r && r.agn.find(id => myBaits().includes(id));
+  if (!bait || S.djur.includes(djurId)) return;
+  S.agnAnvant.push(bait); renderPack();
+  giveAnimal(djurId); saveSoon();
+  const d = berattelse.djur[djurId];
+  openModal([{ icon: iconURL(PETS[djurId].right[0], 6), title: `${d.namn}, ${d.art.toLowerCase()}`, text: r.text, reward: `${d.namn} skrevs in i djurboken.`, button: 'Till kartan' }], () => showNode());
 }
 
 /* ---------- guldbiljetter ---------- */

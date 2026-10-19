@@ -670,5 +670,47 @@
         "................"
       ]
     ]
+  },
+  "brumma": {
+    "lyft": 0,
+    "farger": {"o":"#3f2631","b":"#8b5a3c","B":"#5d3a26","a":"#d77643","m":"#d9b38c","k":"#181425"},
+    "bilder": [
+      [
+        "................",
+        "................",
+        "................",
+        "..........o.....",
+        ".........obo.oo.",
+        "........obbbobbo",
+        "....oooooobbbbbo",
+        "..oobbbbbbbbkbbo",
+        ".obbbababbbbbbbk",
+        ".obbbbbbbabbbbmm",
+        ".obbbbbbbbbbbbo.",
+        ".obbbbbbbbbboo..",
+        ".obbbbbbbbbbo...",
+        "..oBBBBBBBBo....",
+        "..oBBooooBBo....",
+        "...oo....oo....."
+      ],
+      [
+        "................",
+        "................",
+        "..........o.....",
+        ".........obo.oo.",
+        "........obbbobbo",
+        ".........obbbbbo",
+        "....ooooobbbkbbo",
+        "..oobbbbbbbbbbbk",
+        ".obbbababbbbbbmm",
+        ".obbbbbbbabbbbo.",
+        ".obbbbbbbbbboo..",
+        ".obbbbbbbbbbo...",
+        ".obbbbbbbbbbo...",
+        "..oBBBBBBBBo....",
+        "..oBBooooBBo....",
+        "...oo....oo....."
+      ]
+    ]
   }
 }
