@@ -421,7 +421,7 @@
     "flotte": {
       "namn": "Flotte",
       "pris": 12,
-      "text": "Tar dig nedför älven till ett fiskeställe. Från flotten når du forsen vid Norra bron, där något spelar fiol om nätterna.",
+      "text": "Tar dig nedför älven till ett fiskeställe. Kalle säger att man hör fiol från älven om nätterna.",
       "typ": "verktyg"
     },
     "fagelholk": {
@@ -433,7 +433,7 @@
     "snorkel": {
       "namn": "Snorkel",
       "pris": 8,
-      "text": "Med den kan du dyka efter skatter i sjön. Under Södra bron är vattnet djupt, och där nere lyser något när man har ljus med sig.",
+      "text": "Med den kan du dyka efter skatter i sjön. Bertil vill inte dyka vid bron. Han säger att något glittrar där nere.",
       "typ": "verktyg"
     },
     "badring": {
@@ -445,7 +445,7 @@
     "roddbat": {
       "namn": "Roddbåt",
       "pris": 14,
-      "text": "Tar dig mitt ut i sjön, där de ovanliga fiskarna finns. Ute i vassen vid sjön ringlar något stort som inte kan låta blanka saker vara.",
+      "text": "Tar dig mitt ut i sjön, där de ovanliga fiskarna finns. Siri säger att något stort simmar runt i sjön.",
       "typ": "verktyg"
     },
     "kompass": {
@@ -457,7 +457,7 @@
     "flugspo": {
       "namn": "Flugspö",
       "pris": 10,
-      "text": "Fångar öring och harr i strömmen under broarna. I forsen vid Norra bron sägs något spela fiol när silverflugor glimmar på vattnet.",
+      "text": "Fångar öring och harr i strömmen under broarna. Fia säger att forsen ibland låter som musik.",
       "typ": "verktyg"
     },
     "flugask": {
@@ -469,13 +469,13 @@
     "hav": {
       "namn": "Håv",
       "pris": 6,
-      "text": "Fångar grodor och småfisk vid stranden. Under Södra bron är vattnet djupt, och där nere lyser något när man har ljus med sig.",
+      "text": "Fångar grodor och småfisk vid stranden. Det sägs att det lyser i djupet om natten.",
       "typ": "verktyg"
     },
     "kraftbur": {
       "namn": "Kräftbur",
       "pris": 10,
-      "text": "Läggs ut på kvällen och fångar kräftor medan du sover. Ute i vassen vid sjön ringlar något stort som inte kan låta blanka saker vara.",
+      "text": "Läggs ut på kvällen och fångar kräftor medan du sover. Nisse har sett vassen röra sig fast det var vindstilla.",
       "typ": "verktyg"
     },
     "stjarnkikare": {
