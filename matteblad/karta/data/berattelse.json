@@ -421,7 +421,7 @@
     "flotte": {
       "namn": "Flotte",
       "pris": 12,
-      "text": "Tar dig nedför älven till ett fiskeställe. Kalle säger att man hör fiol från älven om nätterna.",
+      "text": "Tar dig nedför älven till ett fiskeställe. Om nätterna hörs något som liknar fiol från älven.",
       "typ": "verktyg"
     },
     "fagelholk": {
@@ -433,7 +433,7 @@
     "snorkel": {
       "namn": "Snorkel",
       "pris": 8,
-      "text": "Med den kan du dyka efter skatter i sjön. Bertil vill inte dyka vid bron. Han säger att något glittrar där nere.",
+      "text": "Med den kan du dyka efter skatter i sjön. Under bron glittrar något i djupet, men ingen vill dyka dit.",
       "typ": "verktyg"
     },
     "badring": {
@@ -445,7 +445,7 @@
     "roddbat": {
       "namn": "Roddbåt",
       "pris": 14,
-      "text": "Tar dig mitt ut i sjön, där de ovanliga fiskarna finns. Siri säger att något stort simmar runt i sjön.",
+      "text": "Tar dig mitt ut i sjön, där de ovanliga fiskarna finns. Folk säger att något stort simmar runt i sjön.",
       "typ": "verktyg"
     },
     "kompass": {
@@ -457,7 +457,7 @@
     "flugspo": {
       "namn": "Flugspö",
       "pris": 10,
-      "text": "Fångar öring och harr i strömmen under broarna. Fia säger att forsen ibland låter som musik.",
+      "text": "Fångar öring och harr i strömmen under broarna. Ibland låter forsen nästan som musik.",
       "typ": "verktyg"
     },
     "flugask": {
@@ -475,7 +475,7 @@
     "kraftbur": {
       "namn": "Kräftbur",
       "pris": 10,
-      "text": "Läggs ut på kvällen och fångar kräftor medan du sover. Nisse har sett vassen röra sig fast det var vindstilla.",
+      "text": "Läggs ut på kvällen och fångar kräftor medan du sover. Vassen vid sjön rör sig ibland fast det är vindstilla.",
       "typ": "verktyg"
     },
     "stjarnkikare": {
