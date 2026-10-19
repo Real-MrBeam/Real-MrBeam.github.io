@@ -76,6 +76,19 @@ const BAG = sprite([
 const BOOK = sprite([
   ".ooooooooooo", "ogggggggggwo", "ogGGGGGGGgwo", "ogGyyyyyGgwo", "ogGGGGGGGgwo", "ogggggggggwo", "ogggyyyyggwo",
   "ogggggggggwo", "ogggggggggwo", "oddddddddddo", ".ooooooooooo"], { o:'#3f2631', g:'#3e8948', G:'#63c74d', y:'#fee761', w:'#ead4aa', d:'#265c42' });
+// The golden chest at the school and the golden ticket that is in it
+const CHESTPAL = { o:'#3f2631', y:'#feae34', Y:'#fee761', b:'#b86f50', B:'#733e39', w:'#ffffff' };
+const CHEST = sprite([
+  "................", "................", "..oooooooooooo..", ".oYYYYYYYYYYYYo.", ".oyyyyyyyyyyyyo.", ".oyyyyyyyyyyyyo.",
+  ".oooooooooooooo.", ".obbbbbooobbbbo.", ".obbbbboYobbbbo.", ".obbbbbooobbbbo.", ".obbbbbbbbbbbbo.", ".oBBBBBBBBBBBBo.",
+  ".oooooooooooooo.", "................", "................", "................"], CHESTPAL);
+const CHEST_OPEN = sprite([
+  "..oooooooooooo..", ".oYYYYYYYYYYYYo.", ".oyyyyyyyyyyyyo.", ".oooooooooooooo.", ".oYwYYwYYYwYYYo.", ".oYYYwYYwYYYwYo.",
+  ".oooooooooooooo.", ".obbbbbooobbbbo.", ".obbbbboYobbbbo.", ".obbbbbooobbbbo.", ".obbbbbbbbbbbbo.", ".oBBBBBBBBBBBBo.",
+  ".oooooooooooooo.", "................", "................", "................"], CHESTPAL);
+const TICKET = sprite([
+  "oooooooooooooo", "oYYYYYYYYYYYYo", "oYyyyyyyyyyyYo", "oYyyyyYYyyyyYo", ".oyyyYYYYyyyo.", ".oyyyyYYyyyyo.", "oYyyyYyyYyyyYo",
+  "oYyyyyyyyyyyYo", "oYYYYYYYYYYYYo", "oooooooooooooo"], CHESTPAL);
 const LOCK = sprite(["..sss..", ".s...s.", ".s...s.", "ooooooo", "oyyyyyo", "oyyoyyo", "oyyyyyo", "ooooooo"], { o:'#3f2631', y:'#feae34', s:'#c0cbdc' });
 const GATEPAL = { o:'#3f2631', S:'#c0cbdc', s:'#8b9bb4', w:'#b86f50', W:'#733e39', y:'#feae34', Y:'#fee761' };
 const GATE_TOP = ["................", "oooooooooooooooo", "oSSSSSSSSSSSSSSo", "osssssssssssssso", "oooooooooooooooo"];
@@ -243,7 +256,7 @@ let REAL = null; // { stars, stoft, handelser } once the locked events have been
 const START = () => ({
   stars: REAL ? REAL.stars : startData.stjarnor, coins: REAL ? REAL.stoft : startData.stjarnstoft, node: startData.plats,
   built: Object.fromEntries(startData.byggt.map(id => [id, true])),
-  valda: {}, saker: [], steg: {}, handlat: {}, djur: [], fram: [], stopp: {}, hittat: [], spent: 0,
+  valda: {}, saker: [], steg: {}, handlat: {}, djur: [], fram: [], stopp: {}, hittat: [], spent: 0, kistor: [],
   sett: new Uint8Array(MW*MH),
   log: REAL ? REAL.handelser.slice() : startData.logg.map(r => ({ typ: 'runa', amne: r.amne, procent: Math.round(r.poang / r.max * 100), stjarnor: r.stjarnor, bonus: r.bonus })),
   testIdx: 0,
@@ -566,6 +579,12 @@ function frame(now){
     if (a){ const t = (now - a) / 1000; if (t < .6){ img = GATE_CLOSED; shake = (Math.floor(t * 30) % 2) ? 1 : -1; } else if (t > 2) gateAnim.delete(g); }
     ctx.drawImage(img, g.x*TS + shake, g.y*TS - 4);
   }
+  if (pendingTickets().length || chestOpening){
+    const t = chestOpening ? (now - chestOpening) / 1000 : 0, shake = chestOpening && t < .6 ? (Math.floor(t * 30) % 2 ? 1 : -1) : 0;
+    const glow = Math.floor(now / 400) % 2;
+    if (!chestOpening && glow){ ctx.fillStyle = 'rgba(254,231,97,.35)'; ctx.fillRect(CHEST_AT.x*TS - 1, CHEST_AT.y*TS + 1, 18, 13); }
+    ctx.drawImage(chestOpening && t >= .6 ? CHEST_OPEN : CHEST, CHEST_AT.x*TS + shake, CHEST_AT.y*TS);
+  }
   drawActors(now);
   // partiklar
   for (let i = FX.length - 1; i >= 0; i--){
@@ -595,7 +614,7 @@ function frame(now){
 const panel = $('#panel');
 function esc(s){ return String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c])); }
 function iconURL(c, s){ const k = document.createElement('canvas'); k.width = c.width*s; k.height = c.height*s; const x = k.getContext('2d'); x.imageSmoothingEnabled = false; x.drawImage(c, 0, 0, k.width, k.height); return k.toDataURL(); }
-let STAR_URL = '', DUST_URL = '', LOCK_URL = '', RUNE_URL = '', SCROLL_URL = '';
+let STAR_URL = '', DUST_URL = '', LOCK_URL = '', RUNE_URL = '', SCROLL_URL = '', TICKET_URL = '', RUNE_BIG = '', SCROLL_BIG = '', TICKET_BIG = '';
 function plotPreview(p){
   const c = document.createElement('canvas'); c.width = 48; c.height = 48; c.className = 'pix';
   const x = c.getContext('2d'); x.imageSmoothingEnabled = false;
@@ -617,6 +636,7 @@ function renderPanel(view){
     h = `<span class="tag">Du är här</span><h2>${esc(n.name)}</h2><p>${esc(n.text)}</p><div class="panel-body">`;
     for (const p of plots) h += plotBlock(p);
     if (stop) h += stopBlock(n.id);
+    if (n.id === CHEST_AT.node && pendingTickets().length) h += `<div class="plot"><div><b>En guldkista står vid skolan</b></div><button class="btn" type="button" data-kista="1">Öppna kistan</button></div>`;
     if (n.id === 'slott') h += `<div><button class="btn" type="button" data-slott="1">${esc(berattelse.dialog.slottKnapp)}</button></div>`;
     h += `</div>`;
   } else if (view.type === 'gate'){
@@ -666,6 +686,7 @@ panel.addEventListener('click', ev => {
   else if (b.dataset.talk) startBuild(PLOTS.find(q => q.id === b.dataset.talk));
   else if (b.dataset.shop) startShop(PLOTS.find(q => q.id === b.dataset.shop));
   else if (b.dataset.slott) startCount();
+  else if (b.dataset.kista) openChest();
   else if (b.dataset.stopp) startStop(b.dataset.stopp);
   else if (b.dataset.dlgnext !== undefined){ dlg.i++; renderPanel({ type: 'dialog' }); }
   else if (b.dataset.dlgchoice !== undefined){ dlg.choices[+b.dataset.dlgchoice].run(); }
@@ -742,7 +763,7 @@ function startTyping(){
   typeTimer = setInterval(() => { n++; say.textContent = L.t.slice(0, n); if (n >= L.t.length) finish(); }, 24);
   say.onclick = finish;
 }
-const toNode = () => { dlg = null; if (newsQueue.length) showNews(); else showNode(); };
+const toNode = () => { dlg = null; showNode(); if (newsQueue.length) showNews(); };
 // A price in a button: the stardust icon and the number in bold
 const price = n => `<span class="price"><img class="pix" src="${DUST_URL}" alt="">${n}<span class="sr"> stjärnstoft</span></span>`;
 function startBuild(p){
@@ -954,7 +975,7 @@ function applyReal(events){
     const st = e.stjarnor ?? starsFor(e.procent);
     const bonus = e.procent != null && prev && e.procent > prev.procent ? 1 : 0;
     stars += st + bonus;
-    return { ...e, stjarnor: st, bonus };
+    return { ...e, stjarnor: st, bonus, biljett: e.guldbiljett === true || (e.procent != null && e.procent > 90) };
   });
   REAL = { stars, stoft, handelser };
   restart();
@@ -968,7 +989,7 @@ function applyReal(events){
 // encrypted in the page (#lasNyckel) and opens with the password, like the portraits. Without the key nothing is saved.
 // Stars and stardust are never saved: they are counted from the runes and scrolls. Only what he has spent is saved.
 const SAVE = { repo: '', file: '', key: '', sha: null, timer: 0, off: false, loaded: false };
-const SAVED_FIELDS = ['node', 'built', 'valda', 'saker', 'steg', 'handlat', 'djur', 'fram', 'stopp', 'hittat', 'spent'];
+const SAVED_FIELDS = ['node', 'built', 'valda', 'saker', 'steg', 'handlat', 'djur', 'fram', 'stopp', 'hittat', 'spent', 'kistor'];
 const b64 = text => { const bytes = new TextEncoder().encode(text); let s = ''; for (const b of bytes) s += String.fromCharCode(b); return btoa(s); };
 const unb64 = data => new TextDecoder().decode(Uint8Array.from(atob(data.replace(/\s/g, '')), c => c.charCodeAt(0)));
 function spend(n){ S.coins -= n; S.spent += n; }
@@ -1001,7 +1022,7 @@ function applySaved(data){
   boy.route = null; placeBoy(S.node); plotAnim.clear(); petState.clear();
   lastRevealKey = ''; maskDirty = true; buildTerrain();
   cam.follow = true; centerOn(boy.x + 8, boy.y + 8, true);
-  updateHud(); renderLog(); renderPack(); renderBook();
+  updateHud(); renderLog(); renderPack(); renderBook(); renderTickets();
   if (!dlg) showNode();
 }
 function snapshot(){
@@ -1040,14 +1061,59 @@ let newsQueue = [];
 const seenEvents = () => { try { return JSON.parse(localStorage.getItem(NEWS_KEY) || '[]'); } catch (e) { return []; } };
 function showNews(){
   const list = newsQueue; newsQueue = [];
-  const lines = list.flatMap(e => [{ p: null, t: e.text }, { p: null, t: e.typ === 'runa'
-    ? `Runan gav ${e.stjarnor} ${e.stjarnor === 1 ? 'stjärna' : 'stjärnor'}${e.bonus ? ', och en extra för att du tolkade bättre än förra gången' : ''}.`
-    : `Rullen gav ${e.stoft} stjärnstoft.` }]);
-  startDialog(lines, () => [{ label: 'Till kartan', run: () => {
+  const steps = list.flatMap((e, i) => {
+    const rune = e.typ === 'runa', where = placeName(e.plats), last = i === list.length - 1;
+    const title = rune ? 'Du hittade en runa' : 'Du hittade en pergamentrulle';
+    const reward = rune
+      ? `Runan gav ${e.stjarnor} ${e.stjarnor === 1 ? 'stjärna' : 'stjärnor'}${e.bonus ? ', och en extra för att du tolkade bättre än förra gången' : ''}.`
+      : `Rullen gav ${e.stoft} stjärnstoft.`;
+    return [
+      { icon: rune ? RUNE_BIG : SCROLL_BIG, title, text: where ? (rune ? `Den låg vid ${where}.` : `Den låg vid ${where}.`) : '', button: rune ? 'Tolka runan' : 'Öppna rullen' },
+      { icon: rune ? RUNE_BIG : SCROLL_BIG, title, text: e.text, reward, button: last ? 'Till kartan' : 'Nästa' },
+    ];
+  });
+  openModal(steps, () => {
     try { localStorage.setItem(NEWS_KEY, JSON.stringify([...new Set([...seenEvents(), ...list.map(e => e.id)])])); } catch (e) { /* shown again next time */ }
-    updateHud('stars'); toNode();
-  } }]);
+    updateHud('stars'); renderTickets();
+  });
 }
+// A box over the map with a picture, a title, a text and one button, step by step
+function openModal(steps, done){
+  let i = 0;
+  const show = () => {
+    const s = steps[i];
+    $('#modalIcon').src = s.icon; $('#modalTitle').textContent = s.title; $('#modalText').textContent = s.text;
+    $('#modalReward').textContent = s.reward || ''; $('#modalReward').hidden = !s.reward;
+    $('#modalBtn').textContent = s.button; $('#modal').hidden = false; $('#modalBtn').focus();
+  };
+  $('#modalBtn').onclick = () => { i++; if (i < steps.length) show(); else { $('#modal').hidden = true; done && done(); } };
+  show();
+}
+
+/* ---------- guldbiljetter ---------- */
+// A rune read to more than 90 % gives a golden ticket. It lies in a golden chest at the school until he opens it there.
+// The tickets are swapped for something real; Peter says when one has been used (biljettAnvand in handelser.json).
+const CHEST_AT = { x: 15, y: 23, node: 'skola' };
+let chestOpening = 0;
+const allTickets = () => S.log.filter(e => e.typ === 'runa' && e.biljett);
+const pendingTickets = () => allTickets().filter(e => !S.kistor.includes(e.id));
+function openChest(){
+  const t = pendingTickets()[0]; if (!t || chestOpening) return;
+  chestOpening = performance.now();
+  setTimeout(() => sparkle(CHEST_AT.x*TS + 8, CHEST_AT.y*TS + 4, 34), 650);
+  setTimeout(() => {
+    S.kistor.push(t.id); chestOpening = 0; saveSoon(); renderTickets();
+    openModal([{ icon: TICKET_BIG, title: 'En guldbiljett', text: `Kistan var full av guldglitter, och överst låg en guldbiljett från runan i ${t.amne}. Den kan växlas mot något riktigt hos mamma eller pappa.`, button: 'Ta biljetten' }],
+      () => { if (current && current.type === 'node') showNode(); });
+  }, 1100);
+}
+function renderTickets(){
+  const mine = allTickets().filter(e => S.kistor.includes(e.id)), waiting = pendingTickets().length;
+  $('#tickets').innerHTML = (waiting ? `<li><span><b>En guldkista väntar vid Skolan.</b></span></li>` : '')
+    + mine.map(e => `<li><img class="pix" src="${TICKET_URL}" alt=""><span><b>Guldbiljett</b> runan i ${esc(e.amne)}</span><span class="st">${e.biljettAnvand ? 'Använd' : 'Oanvänd'}</span></li>`).join('')
+    + (!waiting && !mine.length ? '<li><span>Inga guldbiljetter än. En runa som tolkas till över 90 % ger en.</span></li>' : '');
+}
+
 // Made-up runes and scrolls for trying things out (the buttons under Debug)
 function addTest(){
   stopSaving();
@@ -1057,9 +1123,9 @@ function addTest(){
   const st = starsFor(procent);
   const bonus = prev && procent > prev.procent ? 1 : 0;
   const before = S.stars;
-  S.log.push({ typ: 'runa', amne: t.subj, procent, stjarnor: st, bonus });
+  S.log.push({ typ: 'runa', id: 'prov-' + S.testIdx, amne: t.subj, procent, stjarnor: st, bonus, biljett: procent > 90 });
   S.stars += st + bonus;
-  updateHud('stars'); renderLog(true);
+  updateHud('stars'); renderLog(true); renderTickets();
   const opened = GATES.filter(g => before < g.req && S.stars >= g.req);
   let msg = `Runa i ${t.subj}: ${procent} % tolkat ger ${st + bonus} ${st + bonus === 1 ? 'stjärna' : 'stjärnor'}${bonus ? ', med bonus för förbättring' : ''}.`;
   if (opened.length){
@@ -1100,7 +1166,7 @@ function restart(){
   S = START(); boy.route = null; placeBoy(S.node); plotAnim.clear(); gateAnim.clear(); FX.length = 0; buildTerrain();
   lastRevealKey = ''; maskDirty = true; revealAround(boy.x + 8, boy.y + 8);
   cam.follow = true; cam.focus = null; centerOn(boy.x + 8, boy.y + 8, true);
-  dlg = null; updateHud(); renderLog(); renderPack(); renderBook(); showNode();
+  dlg = null; updateHud(); renderLog(); renderPack(); renderBook(); renderTickets(); showNode();
 }
 
 /* ---------- pekare ---------- */
@@ -1122,6 +1188,7 @@ cv.addEventListener('pointerup', e => {
 cv.addEventListener('pointercancel', () => { down = null; });
 function tapAt(wx, wy){
   const tx = Math.floor(wx / TS), ty = Math.floor(wy / TS);
+  if (pendingTickets().length && tx === CHEST_AT.x && ty === CHEST_AT.y){ if (S.node === CHEST_AT.node && !boy.route) openChest(); else { walkTo(CHEST_AT.node); toast('Kistan står vid Skolan.'); } return; }
   for (const id in NODES){ const n = NODES[id]; if (nodeShown(id) && Math.abs(wx - (n.x*TS + 8)) < 13 && Math.abs(wy - (n.y*TS + 6)) < 14){ walkTo(id); return; } }
   for (const g of GATES){ if (gateShown(g) && tx === g.x && (ty === g.y || ty === g.y - 1)){ showGate(g); if (S.stars < g.req) toast(`Porten öppnas vid ${g.req} stjärnor. Du har ${S.stars}.`); return; } }
   for (const p of PLOTS){ if (seenAt(p.x + 1, p.y + 1) && tx >= p.x && tx <= p.x + 2 && ty >= p.y - 1 && ty <= p.y + 2){ goPlot(p); return; } }
@@ -1146,12 +1213,13 @@ function start(data){
   if (data && data.S) S = data.S;
   placeBoy(S.node); lastRevealKey = ''; revealAround(boy.x + 8, boy.y + 8);
   STAR_URL = iconURL(STAR, 4); DUST_URL = iconURL(DUST, 4); LOCK_URL = iconURL(LOCK, 4); RUNE_URL = iconURL(RUNE, 4); SCROLL_URL = iconURL(SCROLL, 4);
+  TICKET_URL = iconURL(TICKET, 4); RUNE_BIG = iconURL(RUNE, 8); SCROLL_BIG = iconURL(SCROLL, 8); TICKET_BIG = iconURL(TICKET, 8); $('#icoTicket').src = TICKET_URL;
   $('#icoRunes').src = RUNE_URL; $('#icoBag').src = iconURL(BAG, 4); $('#icoBook').src = iconURL(BOOK, 4);
   $('#logoStar').src = STAR_URL; $('#icoStar').src = STAR_URL; $('#icoCoin').src = DUST_URL;
   document.querySelectorAll('img[data-ico]').forEach(im => { im.src = im.dataset.ico === 'star' ? STAR_URL : DUST_URL; });
   buildTerrain();
   resize(); centerOn(boy.x + 8, boy.y + 8, true);
-  updateHud(); renderLog(); renderPack(); renderBook(); showNode();
+  updateHud(); renderLog(); renderPack(); renderBook(); renderTickets(); showNode();
   loadPortraitImages();
   if (!introSeen()) showIntro();
   requestAnimationFrame(t => { lastT = t; frame(t); });
