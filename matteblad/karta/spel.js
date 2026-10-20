@@ -258,7 +258,8 @@ function buildTerrain(){
       if (inPlot(x + 1, y) && inPlot(x, y + 1)) stamps.push({ x: x*TS + 8, y: y*TS + 5, ...pk() });
     }
   }
-  for (const ob of OBJ) stamps.push({ x: ob.x*TS, y: ob.y*TS, i: ob.i, obj: true });
+  // The fires are out in the terrain (by day). At night drawNight puts the burning ones on top.
+  for (const ob of OBJ) stamps.push({ x: ob.x*TS, y: ob.y*TS, i: FIRE_OUT[ob.i] || ob.i, obj: true });
   stamps.sort((a, b) => a.y - b.y || (a.obj ? 1 : 0) - (b.obj ? 1 : 0));
   for (const st of stamps){ if (st.top !== undefined) tile(o, st.top, st.x, st.y - TS); tile(o, st.i, st.x, st.y); }
   o.fillStyle = '#262b44'; o.fillRect(CASTLE_X + 3*TS + 6, CASTLE_Y + 2*TS + 6, 20, 26);
@@ -648,12 +649,14 @@ function frame(now){
 // At night the map turns blue (multiply), windows glow yellow, the torches flicker and stars twinkle in the water.
 // The lights are the tiles in LIGHT_TILES: where on the tile the light sits, and what kind of light it is.
 let nightLevel = 0, STATIC_LIGHTS = null, WATER_STARS = null;
-const LIGHT_TILES = { 84: [8, 8, 'win'], 88: [8, 8, 'win'], 'o:27,2': [8, 8, 'win'], 125: [8, 8, 'slit'], 51: [8, 10, 'small'], 55: [8, 10, 'small'], 'o:18,10': [8, 4, 'fire'] };
+// The burning torch and campfire, and the same put out (own tiles in openrpg.png, verktyg/gor-egna-rutor.py)
+const FIRE_OUT = { 'o:18,10': 'o:8,16', 'o:21,12': 'o:9,16' };
+const LIGHT_TILES = { 84: [8, 8, 'win'], 88: [8, 8, 'win'], 'o:27,2': [8, 8, 'win'], 125: [8, 8, 'slit'], 51: [8, 10, 'small'], 55: [8, 10, 'small'], 'o:18,10': [8, 4, 'fire'], 'o:21,12': [8, 9, 'fire'] };
 const lightIn = i => { for (const j of Array.isArray(i) ? i : [i]) if (LIGHT_TILES[j]) return LIGHT_TILES[j]; return null; };
 function nightLights(){
   if (!STATIC_LIGHTS){
     STATIC_LIGHTS = [];
-    const add = (i, px, py) => { const L = lightIn(i); if (L) STATIC_LIGHTS.push({ x: px + L[0], y: py + L[1], k: L[2] }); };
+    const add = (i, px, py) => { const L = lightIn(i); if (L) STATIC_LIGHTS.push({ x: px + L[0], y: py + L[1], k: L[2], i, px, py }); };
     for (const o of OBJ) add(o.i, o.x*TS, o.y*TS);
     CASTLE.forEach((row, dy) => row.forEach((i, dx) => add(i, CASTLE_X + dx*TS, CASTLE_Y + dy*TS)));
   }
@@ -680,6 +683,10 @@ function drawNight(now, lv){
     ctx.fillStyle = g; ctx.fillRect(L.x - rad, L.y - rad, rad * 2, rad * 2);
   }
   ctx.globalCompositeOperation = 'source-over';
+  // the burning fires on top of the put-out ones, fading in with the night
+  ctx.globalAlpha = lv;
+  for (const L of lights) if (L.k === 'fire' && L.i) tile(ctx, L.i, L.px, L.py);
+  ctx.globalAlpha = 1;
   for (const L of lights){
     if (L.k === 'fire') continue;
     const [w, h] = L.k === 'win' ? [6, 6] : [2, 4];
@@ -697,7 +704,7 @@ function drawNight(now, lv){
 // Sleeping in Hemmet turns day into night and night into day. The choice is saved.
 function sleepBlock(){
   const here = S.node === 'hem' && !boy.route;
-  return `<div class="plot"><div><b>${S.natt ? 'Det är natt i Glimmerdal' : 'Stugan'}</b><span>${S.natt ? 'Stjärnorna lyser och fönstren glöder.' : 'Här kan du sova tills det blir natt.'}</span></div>${here ? `<button class="btn" type="button" data-sov="1">${S.natt ? 'Vakna' : 'Sov'}</button>` : ''}</div>`;
+  return `<div class="plot"><div><b>${S.natt ? 'Det är natt i Glimmerdal' : 'Stugan'}</b><span>${S.natt ? 'Sov tills det blir morgon.' : 'Sov tills det blir natt.'}</span></div>${here ? '<button class="btn" type="button" data-sov="1">Sov</button>' : ''}</div>`;
 }
 function sleep(){
   S.natt = !S.natt; saveSoon();
