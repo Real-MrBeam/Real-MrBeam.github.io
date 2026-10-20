@@ -1522,7 +1522,7 @@ function renderFishBook(){
   const ids = Object.keys(FISKE.fiskar).filter(id => S.fiskbok[id] !== undefined);
   $('#fishbook').innerHTML = ids.length
     ? ids.map(id => `<li><span><b>${esc(FISKE.fiskar[id].namn)}</b> ${esc(FISKE.fiskar[id].text)}</span><span class="st">${S.fiskbok[id] ? S.fiskbok[id] + ' st' : 'inga kvar'}</span></li>`).join('')
-    : '<li><span>Inga fiskar ännu. Fiska vid broarna.</span></li>';
+    : '<li><span>Inga fiskar ännu.</span></li>';
 }
 
 /* ---------- locka fram djur ---------- */

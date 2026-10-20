@@ -1097,7 +1097,7 @@
     ],
     "djurbok": {
       "rubrik": "Djurboken",
-      "tom": "Inga djur än. De gömmer sig längs vägarna, så ge dig ut och leta.",
+      "tom": "Inga djur än.",
       "max": "Bara tre djur kan vara framme samtidigt. Lägg undan ett först.",
       "framme": "Framme",
       "haFramme": "Ha framme",
