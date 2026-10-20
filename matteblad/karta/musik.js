@@ -231,17 +231,17 @@ function flojt(index) {
   const AC = root.AudioContext || root.webkitAudioContext; if (!AC) return 0;
   if (!P.ctx) { P.ctx = new AC(); P.master = P.ctx.createGain(); P.master.gain.value = 0; P.master.connect(P.ctx.destination); }
   P.ctx.resume();
-  const ctx = P.ctx, out = ctx.createGain(); out.gain.value = .22; out.connect(ctx.destination);
-  const toks = FLOJT[((index % FLOJT.length) + FLOJT.length) % FLOJT.length].split(' '), step = .17, t0 = ctx.currentTime + .05;
+  const ctx = P.ctx, out = ctx.createGain(); out.gain.value = .26; out.connect(ctx.destination);
+  const toks = FLOJT[((index % FLOJT.length) + FLOJT.length) % FLOJT.length].split(' '), step = .27, t0 = ctx.currentTime + .05;
   toks.forEach((tok, i) => {
     if (tok === '-' || tok === '.') return;
     let n = 1; while (i + n < toks.length && toks[i + n] === '-') n++;
     const t = t0 + i * step, len = n * step * .95;
     const o = ctx.createOscillator(), g = ctx.createGain(), lfo = ctx.createOscillator(), depth = ctx.createGain();
-    const f = freq(tok) * .75;   // a fourth lower than written, a softer, deeper flute
+    const f = freq(tok) * .5;   // an octave lower than written: a calm, deep flute
     o.type = 'sine'; o.frequency.value = f;
-    lfo.frequency.value = 5.5; depth.gain.value = f * .006; lfo.connect(depth).connect(o.frequency);
-    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(1, t + .04); g.gain.setValueAtTime(.85, t + len - .05); g.gain.linearRampToValueAtTime(0, t + len);
+    lfo.frequency.value = 4.5; depth.gain.value = f * .004; lfo.connect(depth).connect(o.frequency);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(1, t + .09); g.gain.setValueAtTime(.8, t + len - .1); g.gain.linearRampToValueAtTime(0, t + len);
     o.connect(g).connect(out); o.start(t); lfo.start(t); o.stop(t + len + .02); lfo.stop(t + len + .02);
   });
   const dur = toks.length * step + .1;
