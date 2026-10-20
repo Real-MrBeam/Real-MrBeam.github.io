@@ -4,4 +4,12 @@
   <path d="M50 4 L62 36 L96 37 L69 58 L79 92 L50 72 L21 92 L31 58 L4 37 L38 36 Z" fill="#fff" stroke="#fff" stroke-width="10" stroke-linejoin="round"/>
   <path d="M50 4 L62 36 L96 37 L69 58 L79 92 L50 72 L21 92 L31 58 L4 37 L38 36 Z" fill="url(#g)" stroke="#b8860b" stroke-width="2.5" stroke-linejoin="round"/>
   <path d="M40 30 L46 18" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".7"/>
+  <!-- doodled face, drawn with a marker like the pictures in the diary -->
+  <g fill="none" stroke="#2b2b2b" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M44 22 q1 -6 3 -2 q2 -6 3 -1 q2 -5 3 0"/>
+    <circle cx="41" cy="46" r="5.2" fill="#fff"/><circle cx="60" cy="46" r="5.2" fill="#fff"/>
+    <circle cx="42.4" cy="47" r="1.7" fill="#2b2b2b" stroke="none"/><circle cx="61.4" cy="47" r="1.7" fill="#2b2b2b" stroke="none"/>
+    <path d="M36 37 q5 -4 10 -1 M55 36 q5 -3 10 1"/>
+    <path d="M37 59 Q50 76 64 58 Z" fill="#fff"/><path d="M42 63 q8 6 16 0" stroke-width="1.6"/>
+  </g>
 </svg>
