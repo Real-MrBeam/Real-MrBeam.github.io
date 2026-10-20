@@ -855,8 +855,8 @@ function letterBlock(){
 }
 function readLetter2(){
   if (!S.brev2){ S.brev2 = true; saveSoon(); renderLetters(); }
-  const icon = iconURL(SIGIL, 6);
-  openModal(V.stycken.map((t, i) => ({ icon, title: V.titel, text: t, button: i === V.stycken.length - 1 ? 'Till kartan' : 'Läs vidare' })), () => showNode());
+  // shown like the queen's letter: line by line in the dialog box under the map
+  startDialog(V.stycken.map(t => ({ p: null, t })), () => [{ label: 'Tillbaka till kartan', alt: true, run: toNode }]);
 }
 
 /* ---------- tältet och nattfiskaren ---------- */
