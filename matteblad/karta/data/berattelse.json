@@ -2217,26 +2217,8 @@
     "knapp": "Prata med nattfiskaren",
     "rubrikDag": "Tältet är stängt",
     "rubrikNatt": "Det lyser i tältet",
-    "hej": "God natt, eller god kväll, beroende på hur man ser det. Jag köper fisk, en av varje sort, och jag har lite att sälja.",
-    "inget": "Jag har inget mer att sälja, och du har ingen fisk jag behöver. Kom tillbaka när du har fiskat något nytt.",
-    "tack": {
-      "abborre": "En abborre! Den blir god till frukost.",
-      "gadda": "Oj, vilka tänder. Den här ska jag akta fingrarna för.",
-      "krafta": "En kräfta. Den nyper, men den smakar gott.",
-      "oring": "En fin öring. Den har simmat långt.",
-      "groda": "En groda? Nåja, jag tar den. Den får bo i hinken.",
-      "harr": "En harr! Se så den glänser i lila. Den är inte lätt att få.",
-      "regnbage": "En regnbåge! Sådana ser man inte varje natt."
-    },
-    "fisk": {
-      "abborre": 1,
-      "gadda": 1,
-      "krafta": 1,
-      "oring": 1,
-      "groda": 1,
-      "harr": 3,
-      "regnbage": 3
-    },
+    "hej": "God natt, eller god kväll, beroende på hur man ser det. Jag har lite att sälja, om du vill titta.",
+    "inget": "Jag har inget mer att sälja. Lycka till med fisket.",
     "saljer": {
       "metspo": 5,
       "lykta": 6,
@@ -2247,8 +2229,7 @@
       "lykta": "Den lyser inte av sig själv, du måste tända den. Men det vet du nog.",
       "flojt": "Jag har aldrig fått en riktig ton ur den. Kanske har du bättre tur. Eller så är det platsen som är fel."
     },
-    "baraSaljer": "Ingen fisk med dig i natt? Titta gärna på det jag har.",
-    "baraKoper": "Du har redan allt jag säljer. Men fisk köper jag gärna."
+    "baraSaljer": "God natt, eller god kväll, beroende på hur man ser det. Jag har lite att sälja, om du vill titta."
   },
   "stjarnvaktarna": {
     "rubrik": "Ett brev ligger på trappan",

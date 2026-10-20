@@ -874,7 +874,16 @@ const SIGIL = sprite([".....o.....", "....owo....", "....owo....", "...owwwo..."
   { o: '#3a4466', w: '#c0cbdc', e: '#ffffff', k: '#262b44' });
 const V = berattelse.stjarnvaktarna;
 // The letter is spoken by the sign itself: the silver star with an eye is its portrait, like the queen's in her letter
-const OTHER_WHO = { stjarnvaktarna: { namn: 'Stjärnväktarna', yrke: 'Hemligt sällskap' } };
+const OTHER_WHO = { stjarnvaktarna: { namn: 'Stjärnväktarna', yrke: 'Hemligt sällskap' }, fiskesallskapet: { namn: 'Fiskesällskapet', yrke: 'Sällskapet vid älven' } };
+// The fishing society's emblem: a fish over the waves (own drawing)
+const FISH_EMBLEM = sprite(["............", "....oooo..o.", "...obbbbooBo", "..obwkbbbbBo", "..obbbbbbbBo", "...obbbbooBo", "....oooo..o.", "............", "ww..ww..ww..", ".ww..ww..ww.", "..ww..ww..ww"],
+  { o:'#3a4466', b:'#c0cbdc', B:'#8b9bb4', w:'#2ce8f5', k:'#262b44' });
+function emblemPortrait(id, spr){
+  if (PORTRAIT_IMG[id]) return;
+  const c = document.createElement('canvas'); c.width = 32; c.height = 32; const x = c.getContext('2d'); x.imageSmoothingEnabled = false;
+  x.fillStyle = '#181425'; x.fillRect(0, 0, 32, 32); x.drawImage(spr, 0, 0, spr.width, spr.height, 4, 5, spr.width * 2, spr.height * 2);
+  PORTRAIT_IMG[id] = c;
+}
 function sigilPortrait(){
   if (PORTRAIT_IMG.stjarnvaktarna) return;
   const c = document.createElement('canvas'); c.width = 32; c.height = 32; const x = c.getContext('2d'); x.imageSmoothingEnabled = false;
@@ -903,7 +912,8 @@ function fishLetterBlock(){
 }
 function readFishLetter(){
   if (!S.brevFiske){ S.brevFiske = true; saveSoon(); renderLetters(); renderFishBook(); }
-  startDialog(FS.stycken.map(t => ({ p: berattelse.handel.person, t })), () => [{ label: 'Tillbaka till kartan', alt: true, run: toNode }]);
+  emblemPortrait('fiskesallskapet', FISH_EMBLEM);
+  startDialog(FS.stycken.map(t => ({ p: 'fiskesallskapet', t })), () => [{ label: 'Tillbaka till kartan', alt: true, run: toNode }]);
 }
 function tentBlock(){
   const H = berattelse.handel, here = S.node === H.plats && !boy.route;
@@ -912,14 +922,14 @@ function tentBlock(){
 }
 function tradeOffers(){
   const H = berattelse.handel, out = [];
-  for (const [id, n] of Object.entries(H.fisk)) if (S.fiskbok[id] > 0 && !S.salt['fisk:' + id]) out.push({ key: 'fisk:' + id, namn: FISKE.fiskar[id].namn, text: FISKE.fiskar[id].text, n, tack: H.tack && H.tack[id], sell: () => { S.fiskbok[id]--; renderFishBook(); } });
+  for (const [id, n] of Object.entries(H.fisk || {})) if (S.fiskbok[id] > 0 && !S.salt['fisk:' + id]) out.push({ key: 'fisk:' + id, namn: FISKE.fiskar[id].namn, text: FISKE.fiskar[id].text, n, tack: H.tack && H.tack[id], sell: () => { S.fiskbok[id]--; renderFishBook(); } });
   return out;
 }
 function startTrade(seen){
   const H = berattelse.handel, offers = tradeOffers();
   const wares = Object.entries(H.saljer || {}).filter(([id]) => !S.saker.includes(id));
   // what he says depends on whether he has something to sell and whether there is fish to buy
-  const hello = offers.length && wares.length ? H.hej : wares.length ? H.baraSaljer : offers.length ? H.baraKoper : H.inget;
+  const hello = wares.length ? H.hej : H.inget;   // he only sells now, he buys no fish (Peter 2026-10-20)
   startDialog([{ p: H.person, t: hello }], () => [
     ...wares.map(([id, n]) => ({ label: `Köp ${esc(SAKER[id].namn.toLowerCase())} ${price(n)}<small>${esc(SAKER[id].text)}</small>`, poor: S.coins < n, run: () => buyFrom(id, n) })),
     ...offers.map(o => ({ label: `Sälj ${esc(o.namn.toLowerCase())} ${price(o.n)}<small>${esc(o.text)}</small>`, run: () => sellTo(o) })),
