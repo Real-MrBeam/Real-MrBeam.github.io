@@ -418,13 +418,6 @@
       "typ": "djur",
       "djur": "pip"
     },
-    "daggmask": {
-      "namn": "Daggmaskar",
-      "text": "En burk med feta daggmaskar.",
-      "typ": "agn",
-      "rykte": "Med daggmask nappar det fortare.",
-      "effekt": "snabb"
-    },
     "blabar": {
       "namn": "Lysande blåbär",
       "text": "Blåbär som lyser svagt i mörkret.",
@@ -440,13 +433,6 @@
       "namn": "Silverflugor",
       "text": "Flugor som glänser som silver.",
       "typ": "agn"
-    },
-    "degkula": {
-      "namn": "Mjölnarens degkula",
-      "text": "En fast kula av mjölnarens deg.",
-      "typ": "agn",
-      "rykte": "Med mjölnarens deg nappar en fisk man aldrig har fått förut.",
-      "effekt": "ny"
     },
     "snackor": {
       "namn": "Blanka snäckor",
@@ -617,6 +603,18 @@
       "text": "En blå mössa med vitt band, som Siri har seglat med i många år.",
       "typ": "klader",
       "plats": "huvud",
+      "varde": 3
+    },
+    "glaskula": {
+      "namn": "Blå glaskula",
+      "text": "En blå glaskula med en liten stjärna inuti.",
+      "typ": "fynd",
+      "varde": 2
+    },
+    "bjallra": {
+      "namn": "Kvarnbjällra",
+      "text": "En liten mässingsbjällra som plingar när man skakar den.",
+      "typ": "fynd",
       "varde": 3
     }
   },
@@ -1334,9 +1332,9 @@
               {
                 "label": "Öppna burken",
                 "kostnad": 0,
-                "text": "Burken är full av fuktig jord och feta daggmaskar. Någon har sparat dem till fiske, och nu är de dina.",
+                "text": "Burken är tom på jord, men i botten ligger en blå glaskula som någon har gömt.",
                 "till": {
-                  "agn": "daggmask"
+                  "fynd": "glaskula"
                 }
               },
               {
@@ -1777,14 +1775,14 @@
             ]
           },
           "b": {
-            "t": "På golvet står en säck mjöl och ett tråg med deg. Uppe på vinden knarrar något.",
+            "t": "På golvet står en säck mjöl och ett tråg. Bakom säcken skymtar något som blänker. Uppe på vinden knarrar något.",
             "val": [
               {
-                "label": "Knåda en degkula",
+                "label": "Titta bakom säcken",
                 "kostnad": 0,
-                "text": "Du knådar en fast liten kula. Det sägs att fiskar inte kan motstå mjölnarens deg.",
+                "text": "Bakom säcken hänger en liten mässingsbjällra. Den plingar när du tar ner den.",
                 "till": {
-                  "agn": "degkula"
+                  "fynd": "bjallra"
                 }
               },
               {
@@ -2042,8 +2040,6 @@
       },
       "vassen": {
         "fiskar": [
-          "krafta",
-          "krafta",
           "groda",
           "groda",
           "gadda"
@@ -2051,6 +2047,15 @@
         "vanta": [
           3500,
           7500
+        ]
+      },
+      "stenblocket": {
+        "fiskar": [
+          "krafta"
+        ],
+        "vanta": [
+          3000,
+          6000
         ]
       }
     },
@@ -2156,7 +2161,9 @@
       "platsFelAgn": "Något rör sig nere i vattnet här, men det vill ha något annat än det du erbjuder.",
       "fynd": "Något tungt hänger på kroken. Det är ingen fisk.",
       "ingetSpo": "Du har inget att fiska med. Någon i skogen sägs sälja spön, men bara på natten.",
-      "ingetHar": "Det här redskapet fångar inget i det här vattnet."
+      "ingetHar": "Det här redskapet fångar inget i det här vattnet.",
+      "tillbaka3": "Du har redan tre sådana, så du släpper tillbaka den i vattnet.",
+      "slut": "Det är slut på fisk här för det här redskapet. Du har redan tre av varje sort som går att få."
     },
     "fynd": [
       "stovel",
@@ -2186,7 +2193,8 @@
       ],
       "flotte": [],
       "snorkel": []
-    }
+    },
+    "max": 3
   },
   "locka": [
     {
@@ -2253,6 +2261,17 @@
       "Den natten stjärnorna föll såg vi något grått röra sig mellan byarna. Vi tror att Gråskuggan låste in himlens stjärnor i runorna och pergamentrullarna, och att bara den som räknar rätt kan släppa ut dem.",
       "Tolka varenda runa. Öppna varje rulle. Varje gång lyser himlen lite starkare.",
       "Berätta inte för någon om det här brevet. Vi vet inte vem som lyssnar. En silverstjärna med ett öga är vårt tecken. Du kommer att se det igen.\n\nStjärnväktarna"
+    ]
+  },
+  "fiskesallskapet": {
+    "plats": "talt",
+    "rubrik": "Ett brev sitter fäst på tältduken",
+    "knapp": "Läs brevet",
+    "titel": "Brev från Fiskesällskapet",
+    "stycken": [
+      "Till dig som fiskar i Glimmerdal. Fiskesällskapet vid älven vill veta vad som simmar i våra vatten.",
+      "Fånga tre av varje sort som finns och skriv in dem i din fiskbok. Fler än tre av samma behöver du inte, släpp tillbaka resten.",
+      "Vi räknar med dig.\n\nNattfiskaren, för Fiskesällskapet"
     ]
   }
 }

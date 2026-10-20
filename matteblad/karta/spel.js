@@ -845,6 +845,7 @@ document.addEventListener('visibilitychange', () => { if (window.Musik) Musik.pa
 
 // Is there still something to do at a place? Used at night to keep the plate light.
 function nodeActive(id){
+  if (FS && id === FS.plats && !S.brevFiske) return true;
   if (S.natt){   // at night the tent is open, and the fishing places if he has something to fish with, and the letter
     if (berattelse.handel && id === berattelse.handel.plats) return true;
     if (FISKE.platser[id] && myTools().length) return true;
@@ -895,6 +896,15 @@ function readLetter2(){
 /* ---------- tältet och nattfiskaren ---------- */
 // The tent behind the campfire in Skogsgläntan is closed by day. At night the night fisherman buys fish from the fish book and
 // finds from the pack, one of each kind (S.salt), so it is a collection to sell and no way to make endless stardust.
+const FS = berattelse.fiskesallskapet;
+function fishLetterBlock(){
+  const here = S.node === FS.plats && !boy.route;
+  return `<div class="plot"><div><b>${esc(FS.rubrik)}</b></div>${here ? `<button class="btn" type="button" data-fbrev="1">${esc(FS.knapp)}</button>` : ''}</div>`;
+}
+function readFishLetter(){
+  if (!S.brevFiske){ S.brevFiske = true; saveSoon(); renderLetters(); renderFishBook(); }
+  startDialog(FS.stycken.map(t => ({ p: berattelse.handel.person, t })), () => [{ label: 'Tillbaka till kartan', alt: true, run: toNode }]);
+}
 function tentBlock(){
   const H = berattelse.handel, here = S.node === H.plats && !boy.route;
   if (!S.natt) return `<div class="plot"><div><b>${esc(H.rubrikDag)}</b><span>${esc(H.stangt)}</span></div></div>`;
@@ -972,6 +982,7 @@ function renderPanel(view){
     if (day && stop) h += stopBlock(n.id);
     if (n.id === 'hem') h += sleepBlock();
     if (n.id === 'hem' && letterWaiting()) h += letterBlock();
+    if (FS && n.id === FS.plats && !S.brevFiske) h += fishLetterBlock();
     if (berattelse.handel && n.id === berattelse.handel.plats) h += tentBlock();
     if (FISKE.platser[n.id]) h += fishBlock(n.id);
     if (day && FISKE.platser[n.id] && FISKE.platser[n.id].lan) h += lanBlock(n.id);
@@ -1032,6 +1043,7 @@ panel.addEventListener('click', ev => {
   else if (b.dataset.fiska) startFishing(b.dataset.fiska);
   else if (b.dataset.sov) sleep();
   else if (b.dataset.brev) readLetter2();
+  else if (b.dataset.fbrev) readFishLetter();
   else if (b.dataset.handel) startTrade();
   else if (b.dataset.lan) talkFisher(b.dataset.lan);
   else if (b.dataset.locka) lure(b.dataset.locka);
@@ -1413,7 +1425,7 @@ function applyReal(events){
 // encrypted in the page (#lasNyckel) and opens with the password, like the portraits. Without the key nothing is saved.
 // Stars and stardust are never saved: they are counted from the runes and scrolls. Only what he has spent is saved.
 const SAVE = { repo: '', file: '', key: '', sha: null, timer: 0, off: false, loaded: false };
-const SAVED_FIELDS = ['node', 'built', 'valda', 'saker', 'steg', 'handlat', 'djur', 'fram', 'stopp', 'hittat', 'spent', 'kistor', 'agnAnvant', 'fiskbok', 'namn', 'bytt', 'intro', 'natt', 'salt', 'lasta', 'pa', 'tant', 'brev2', 'rykten'];
+const SAVED_FIELDS = ['node', 'built', 'valda', 'saker', 'steg', 'handlat', 'djur', 'fram', 'stopp', 'hittat', 'spent', 'kistor', 'agnAnvant', 'fiskbok', 'namn', 'bytt', 'intro', 'natt', 'salt', 'lasta', 'pa', 'tant', 'brev2', 'rykten', 'brevFiske'];
 const b64 = text => { const bytes = new TextEncoder().encode(text); let s = ''; for (const b of bytes) s += String.fromCharCode(b); return btoa(s); };
 const unb64 = data => new TextDecoder().decode(Uint8Array.from(atob(data.replace(/\s/g, '')), c => c.charCodeAt(0)));
 function spend(n){ S.coins -= n; S.spent += n; }
@@ -1594,8 +1606,15 @@ function renderFishing(){
   }
   panel.innerHTML = h;
 }
+// The ordinary fish this tool can take at this place (fiske.fangar), and whether all of them are already full (fiske.max of each)
+const MAXFISK = FISKE.max || 99;
+const catchable = fz => { const can = FISKE.fangar && FISKE.fangar[fz.redskap]; return FISKE.platser[fz.plats].fiskar.filter(id => !can || can.includes(id)); };
+const fishedOut = fz => { const l = catchable(fz); return l.length > 0 && l.every(id => (S.fiskbok[id] || 0) >= MAXFISK); };
 function cast(){
-  const fz = fishing; fz.phase = 'vanta'; renderFishing();
+  const fz = fishing;
+  // without bait for an animal, a place where he already has three of every kind is fished out
+  if (!fz.agn && fishedOut(fz)) return miss(FISKE.texter.slut);
+  fz.phase = 'vanta'; renderFishing();
   // each place has its own wait (fiske.platser vanta: shortest and longest, ms): quick in the rapids, slow in the reeds
   const [lo, hi] = FISKE.platser[fz.plats].vanta || [1500, 4000];
   const wait = (lo + Math.random() * (hi - lo)) * (fz.agn && SAKER[fz.agn].effekt === 'snabb' ? .5 : 1);   // with worms it bites sooner
@@ -1632,7 +1651,7 @@ function pull(){
     stopFishing(); giveAnimal(rule.djur, rule.text, () => showNode());
     return saveSoon();
   } else {
-    const finds = (FISKE.fynd || []).filter(id => !S.saker.includes(id) && !S.salt['fynd:' + id]);
+    const finds = fishedOut(fz) ? [] : (FISKE.fynd || []).filter(id => !S.saker.includes(id) && !S.salt['fynd:' + id]);
     if (effekt !== 'ny' && finds.length && Math.random() < .2){
       const id = finds[Math.floor(Math.random() * finds.length)]; S.saker.push(id); renderPack(); saveSoon(); stopFishing();
       return openModal([{ icon: FISH_BIG, title: SAKER[id].namn, text: `${FISKE.texter.fynd} ${SAKER[id].text}`, reward: SAKER[id].typ === 'klader' ? 'Lades i väskan. Du kan ta på den där.' : 'Lades i väskan.', button: 'Till kartan' }], () => showNode());
@@ -1640,8 +1659,10 @@ function pull(){
     // the list of a place repeats a fish as many times as it is common there; a kind he has not caught is a little more likely
     const fresh = list.filter(id => S.fiskbok[id] === undefined);
     const pool = fresh.length && (effekt === 'ny' || Math.random() < .35) ? fresh : list, id = pool[Math.floor(Math.random() * pool.length)];
-    const isNew = S.fiskbok[id] === undefined; S.fiskbok[id] = (S.fiskbok[id] || 0) + 1; renderFishBook();
     const fish = FISKE.fiskar[id];
+    // three of a kind is enough: a fourth goes back into the water
+    if ((S.fiskbok[id] || 0) >= MAXFISK){ stopFishing(); return openModal([{ icon: catchIcon(id), title: fish.namn, text: FISKE.texter.tillbaka3, button: 'Till kartan' }], () => showNode()); }
+    const isNew = S.fiskbok[id] === undefined; S.fiskbok[id] = (S.fiskbok[id] || 0) + 1; renderFishBook();
     step = { icon: catchIcon(id), title: fish.namn, text: fish.text, reward: isNew ? 'Ny i fiskboken.' : `Du har fått ${S.fiskbok[id]} sådana nu.`, button: 'Till kartan' };
   }
   saveSoon();
@@ -1653,9 +1674,11 @@ const FISH_ICON = {};
 const fishIcon = id => FISH_ICON[id] || (FISH_ICON[id] = iconURL(CATCH[id] || FISH, 3));
 function renderFishBook(){
   const ids = Object.keys(FISKE.fiskar).filter(id => S.fiskbok[id] !== undefined);
-  $('#fishbook').innerHTML = ids.length
-    ? ids.map(id => `<li><span class="fishico"><img class="pix" src="${fishIcon(id)}" alt=""></span><span><b>${esc(FISKE.fiskar[id].namn)}</b> ${esc(FISKE.fiskar[id].text)}</span><span class="st">${S.fiskbok[id] ? S.fiskbok[id] + ' st' : 'inga kvar'}</span></li>`).join('')
-    : '<li><span>Inga fiskar ännu.</span></li>';
+  const all = Object.keys(FISKE.fiskar), done = all.filter(id => (S.fiskbok[id] || 0) >= MAXFISK).length;
+  const head = S.brevFiske ? `<li><span><b>Fiskesällskapet</b> vill ha tre av varje sort.</span><span class="st">${done} av ${all.length} sorter</span></li>` : '';
+  $('#fishbook').innerHTML = head + (ids.length
+    ? ids.map(id => `<li><span class="fishico"><img class="pix" src="${fishIcon(id)}" alt=""></span><span><b>${esc(FISKE.fiskar[id].namn)}</b> ${esc(FISKE.fiskar[id].text)}</span><span class="st">${S.fiskbok[id] || 0} / ${MAXFISK}</span></li>`).join('')
+    : '<li><span>Inga fiskar ännu.</span></li>');
 }
 
 /* ---------- locka fram djur ---------- */
@@ -1778,9 +1801,10 @@ const ENVELOPE = sprite(["oooooooooooo", "owwwwwwwwwwo", "oowwwwwwwwoo", "owowww
 function renderLetters(){
   const list = [{ id: 'drottningen', namn: 'Drottningens brev', text: 'Om djuren som gömmer sig i Glimmerdal.' }];
   if (S.brev2 && V) list.push({ id: 'stjarnvaktarna', namn: V.titel, text: 'Förseglat med en silverstjärna med ett öga.' });
+  if (S.brevFiske && FS) list.push({ id: 'fiskesallskapet', namn: FS.titel, text: 'Fäst på tältduken bakom lägerelden.' });
   $('#letters').innerHTML = list.map(l => `<li class="readable" data-brev="${l.id}" role="button" tabindex="0" title="Läs brevet"><span><b>${esc(l.namn)}</b> ${esc(l.text)}</span></li>`).join('');
 }
-const openLetter = li => { if (!li) return; if (li.dataset.brev === 'drottningen') showIntro(); else readLetter2(); };
+const openLetter = li => { if (!li) return; const id = li.dataset.brev; if (id === 'drottningen') showIntro(); else if (id === 'fiskesallskapet') readFishLetter(); else readLetter2(); };
 $('#letters').addEventListener('click', ev => openLetter(ev.target.closest('li[data-brev]')));
 $('#letters').addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key === ' '){ const li = ev.target.closest('li[data-brev]'); if (li){ ev.preventDefault(); openLetter(li); } } });
 $('#btnReset').addEventListener('click', () => {
