@@ -707,11 +707,18 @@ function drawNight(now, lv){
   // lies over the flames and not under them.
   ctx.globalCompositeOperation = 'source-over';
   for (const L of lights) if (L.k === 'fire' && L.i) tile(ctx, L.i, L.px, L.py);
+  // places where something is still left to do keep their plate light at night, with a soft glow
+  for (const id in NODES){
+    const n = NODES[id];
+    if (!nodeShown(id) || !seen(n.x*TS + 8, n.y*TS + 8) || !nodeActive(id)) continue;
+    drawNode(n, now, true);
+    lights.push({ x: n.x*TS + 8, y: n.y*TS + 10, k: 'plate' });
+  }
   ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'lighter';
   for (const L of lights){
     const fire = L.k === 'fire', flick = fire && !reduceMotion ? .85 + .15 * Math.sin(now / 90 + L.x) * Math.sin(now / 53 + L.y) : 1;
     // the ship on the lake glows a mysterious blue, everything else warm
-    const rad = (fire ? 30 : L.k === 'lamp' ? 26 : L.k === 'win' || L.k === 'tent' ? 20 : 12) * flick, c = fire ? '255,140,50' : L.k === 'lamp' ? '90,170,255' : '255,200,100';
+    const rad = (fire ? 30 : L.k === 'lamp' ? 26 : L.k === 'win' || L.k === 'tent' ? 20 : L.k === 'plate' ? 13 : 12) * flick, c = fire ? '255,140,50' : L.k === 'lamp' ? '90,170,255' : L.k === 'plate' ? '255,235,180' : '255,200,100';
     const g = ctx.createRadialGradient(L.x, L.y, 0, L.x, L.y, rad);
     g.addColorStop(0, `rgba(${c},${.5 * lv})`); g.addColorStop(1, `rgba(${c},0)`);
     ctx.fillStyle = g; ctx.fillRect(L.x - rad, L.y - rad, rad * 2, rad * 2);
@@ -724,7 +731,7 @@ function drawNight(now, lv){
   }
   ctx.globalCompositeOperation = 'source-over';
   for (const L of lights){
-    if (L.k === 'fire' || L.k === 'tent' || L.k === 'lamp') continue;
+    if (L.k === 'fire' || L.k === 'tent' || L.k === 'lamp' || L.k === 'plate') continue;
     const [w, h] = L.k === 'win' ? [6, 6] : [2, 4];
     ctx.fillStyle = `rgba(254,231,97,${.85 * lv})`; ctx.fillRect(Math.round(L.x - w / 2), Math.round(L.y - h / 2), w, h);
   }
@@ -801,6 +808,24 @@ $('#btnMusik').addEventListener('click', () => {
   musicButton();
 });
 document.addEventListener('visibilitychange', () => { if (window.Musik) Musik.paus(document.hidden); });
+
+// Is there still something to do at a place? Used at night to keep the plate light.
+function nodeActive(id){
+  for (const p of PLOTS) if (p.node === id && !p.prebuilt){
+    if (!S.built[p.id]) return true;
+    const v = valOf(p);
+    if (v && (!S.handlat[p.id] || (v.byte && !S.bytt[p.id]))) return true;
+  }
+  if (STOPP[id] && !S.stopp[id]) return true;
+  const fp = FISKE.platser[id];
+  if (fp && FISKE.djur.some(r => r.plats === id && !S.djur.includes(r.djur))) return true;
+  if (fp && fp.lan && !S.saker.includes(fp.lan.ger)) return true;
+  if (LOCKA.some(r => r.plats === id && !S.djur.includes(r.djur))) return true;
+  if (berattelse.handel && id === berattelse.handel.plats && S.natt && (Object.keys(berattelse.handel.saljer || {}).some(x => !S.saker.includes(x)) || tradeOffers().length)) return true;
+  if (id === 'hem' && letterWaiting()) return true;
+  if (id === CHEST_AT.node && pendingTickets().length) return true;
+  return false;
+}
 
 /* ---------- Stjärnväktarnas brev ---------- */
 // A secret society, Stjärnväktarna, leaves a letter on the step of Hemmet at night, once he has opened his first rune or scroll.
