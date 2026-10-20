@@ -997,7 +997,7 @@ function renderLog(fresh){
   $('#log').innerHTML = S.log.length ? S.log.slice().reverse().map((e, i) => {
     const where = placeName(e.plats);
     const left = e.typ === 'runa'
-      ? `<img class="pix" src="${RUNE_URL}" alt=""><span><b>Runa${where ? ' vid ' + esc(where) : ''}</b> ${esc(e.amne)}${e.procent != null ? ', ' + e.procent + ' %' : ''}</span>`
+      ? `<img class="pix" src="${RUNE_URL}" alt=""><span><b>${esc(e.amne || 'Runa')}</b> ${[where ? 'vid ' + esc(where) : '', e.procent != null ? e.procent + ' %' : ''].filter(Boolean).join(', ')}</span>`
       : `<img class="pix" src="${SCROLL_URL}" alt=""><span><b>${esc(e.amne || 'Pergamentrulle')}</b> ${where ? 'vid ' + esc(where) + ', ' : ''}${e.ratt} av ${e.av} rätt</span>`;
     const right = e.typ === 'runa' ? `${'★'.repeat(e.stjarnor)}${e.bonus ? ' +1' : ''}` : `<img class="pix" src="${DUST_URL}" alt="">${e.stoft}`;
     return `<li class="${fresh && i === 0 ? 'new' : ''}">${left}<span class="st">${right}</span></li>`;
@@ -1101,7 +1101,7 @@ function showNews(){
   const list = newsQueue; newsQueue = [];
   const steps = list.flatMap((e, i) => {
     const rune = e.typ === 'runa', where = placeName(e.plats), last = i === list.length - 1;
-    const title = rune ? 'Du hittade en runa' : e.amne ? `Pergamentrulle: ${e.amne}` : 'Du hittade en pergamentrulle';
+    const title = rune ? (e.amne ? `Runa: ${e.amne}` : 'Du hittade en runa') : e.amne ? `Pergamentrulle: ${e.amne}` : 'Du hittade en pergamentrulle';
     const reward = rune
       ? `Runan gav ${e.stjarnor} ${e.stjarnor === 1 ? 'stjärna' : 'stjärnor'}${e.bonus ? ', och en extra för att du tolkade bättre än förra gången' : ''}.`
       : `Rullen gav ${e.stoft} stjärnstoft.`;
