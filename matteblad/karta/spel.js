@@ -192,7 +192,7 @@ function placeDecor(){
   if (decorDone) return; decorDone = true;
   const r = rng(42);
   // dekor i gräset
-  const near = (x, y) => [[1,0],[-1,0],[0,1],[0,-1]].some(([dx, dy]) => { const v = at(x+dx, y+dy); return v === 'p' || v === 'b' || v === 'w'; });
+  const near = (x, y) => [[1,0],[-1,0],[0,1],[0,-1]].some(([dx, dy]) => { const v = at(x+dx, y+dy); return v === 'p' || v === 's' || v === 'b' || v === 'w'; });
   for (let y = 0; y < MH; y++) for (let x = 0; x < MW; x++){
     if (M[y][x] !== 'g' || occ.has(key(x, y)) || near(x, y)) continue;
     const v = r();
@@ -215,6 +215,26 @@ function buildTerrain(){
   const hiddenRoad = new Set(EDGES.filter(e => !edgeShown(e)).flatMap(e => e.tiles.map(([x, y]) => key(x, y))).filter(k => !shownRoad.has(k)));
   const isShownPath = (x, y) => isPath(x, y) && !hiddenRoad.has(key(x, y));
   for (let y = 0; y < MH; y++) for (let x = 0; x < MW; x++) if (M[y][x] === 'p' && !hiddenRoad.has(key(x, y))) auto(b, DIRT, isShownPath, x, y);
+  // A path (stig) is drawn by hand: a narrow, faint band of trodden earth with a few pebbles. It only joins the tiles before and
+  // after it on its own path, so it does not reach out to a road that runs beside it.
+  const links = new Map();
+  for (const e of EDGES) if (e.stig && edgeShown(e)) e.tiles.forEach(([x, y], i) => {
+    const l = links.get(key(x, y)) || new Set(); links.set(key(x, y), l);
+    for (const n of [e.tiles[i - 1], e.tiles[i + 1]]) if (n) l.add(`${n[0] - x},${n[1] - y}`);
+  });
+  const pr = rng(5);
+  for (let y = 0; y < MH; y++) for (let x = 0; x < MW; x++){
+    if (M[y][x] !== 's' || !links.has(key(x, y))) continue;
+    const X = x*TS, Y = y*TS, l = links.get(key(x, y));
+    b.fillStyle = 'rgba(191,121,88,.55)';
+    b.fillRect(X + 5, Y + 5, 6, 6);
+    if (l.has('0,-1')) b.fillRect(X + 5, Y, 6, 5);
+    if (l.has('0,1')) b.fillRect(X + 5, Y + 11, 6, 5);
+    if (l.has('-1,0')) b.fillRect(X, Y + 5, 5, 6);
+    if (l.has('1,0')) b.fillRect(X + 11, Y + 5, 5, 6);
+    b.fillStyle = 'rgba(115,62,57,.45)';
+    for (let i = 0; i < 2; i++) b.fillRect(X + 5 + Math.floor(pr()*6), Y + 5 + Math.floor(pr()*6), 1, 1);
+  }
   const over = document.createElement('canvas'); over.width = base.width; over.height = base.height;
   const o = over.getContext('2d');
   for (let y = 0; y < MH; y++) for (let x = 0; x < MW; x++) if (M[y][x] === 'b') drawBridgeTile(o, x, y);
@@ -961,11 +981,14 @@ $('#book').addEventListener('click', ev => {
 
 /* ---------- drottningens brev och räkningen i slottet ---------- */
 const INTRO_KEY = 'stjarnkartan:intro';
-const introSeen = () => { try { return localStorage.getItem(INTRO_KEY) === '1'; } catch (e) { return false; } };
-const markIntro = () => { try { localStorage.setItem(INTRO_KEY, '1'); } catch (e) { /* the letter is then shown again next time */ } };
+// The letter is shown once: remembered in the browser and in the saved game, so it is not shown again on a new device
+let introOpen = false;
+const introSeen = () => { if (S.intro) return true; try { return localStorage.getItem(INTRO_KEY) === '1'; } catch (e) { return false; } };
+const markIntro = () => { S.intro = true; saveSoon(); try { localStorage.setItem(INTRO_KEY, '1'); } catch (e) { /* the saved game remembers it */ } };
 function showIntro(){
   const D = berattelse.dialog;
-  startDialog(D.intro.map(l => ({ p: l.p, t: l.t })), () => [{ label: D.introKnapp, run: () => { markIntro(); toNode(); } }]);
+  introOpen = true;
+  startDialog(D.intro.map(l => ({ p: l.p, t: l.t })), () => [{ label: D.introKnapp, run: () => { introOpen = false; markIntro(); toNode(); } }]);
 }
 // At the castle the queen counts the animals in the book and says something that fits
 function startCount(){
@@ -1027,7 +1050,7 @@ function applyReal(events){
 // encrypted in the page (#lasNyckel) and opens with the password, like the portraits. Without the key nothing is saved.
 // Stars and stardust are never saved: they are counted from the runes and scrolls. Only what he has spent is saved.
 const SAVE = { repo: '', file: '', key: '', sha: null, timer: 0, off: false, loaded: false };
-const SAVED_FIELDS = ['node', 'built', 'valda', 'saker', 'steg', 'handlat', 'djur', 'fram', 'stopp', 'hittat', 'spent', 'kistor', 'agnAnvant', 'fiskbok', 'namn', 'bytt'];
+const SAVED_FIELDS = ['node', 'built', 'valda', 'saker', 'steg', 'handlat', 'djur', 'fram', 'stopp', 'hittat', 'spent', 'kistor', 'agnAnvant', 'fiskbok', 'namn', 'bytt', 'intro'];
 const b64 = text => { const bytes = new TextEncoder().encode(text); let s = ''; for (const b of bytes) s += String.fromCharCode(b); return btoa(s); };
 const unb64 = data => new TextDecoder().decode(Uint8Array.from(atob(data.replace(/\s/g, '')), c => c.charCodeAt(0)));
 function spend(n){ S.coins -= n; S.spent += n; }
@@ -1046,7 +1069,8 @@ async function loadSave(){
     if (!res.ok) throw new Error('GitHub ' + res.status);
     const file = await res.json();
     SAVE.sha = file.sha;
-    applySaved(JSON.parse(unb64(file.content)));
+    const data = JSON.parse(unb64(file.content)); data.intro = true;
+    applySaved(data);
     SAVE.loaded = true;
   } catch (err){
     console.error(err); SAVE.off = true;
@@ -1061,7 +1085,8 @@ function applySaved(data){
   lastRevealKey = ''; maskDirty = true; buildTerrain();
   cam.follow = true; centerOn(boy.x + 8, boy.y + 8, true);
   updateHud(); renderLog(); renderPack(); renderBook(); renderTickets(); renderFishBook();
-  if (!dlg) showNode();
+  if (S.intro && introOpen){ introOpen = false; markIntro(); toNode(); }
+  else if (!dlg) showNode();
 }
 function snapshot(){
   const data = { version: 1, sparad: new Date().toISOString() };

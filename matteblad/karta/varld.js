@@ -56,7 +56,7 @@
 
     // Roads between places, with an optional star gate. Bridges where a road crosses water.
     const EDGES = karta.vagar.map(v => {
-      const e = { a: v.a, b: v.b, pts: v.punkter };
+      const e = { a: v.a, b: v.b, pts: v.punkter, ...(v.stig ? { stig: true } : {}) };
       if (v.port) {
         const rule = berattelse.portar[`${v.a}|${v.b}`];
         if (!rule) throw new Error(`Porten ${v.a}|${v.b} saknas i berattelse.json`);
@@ -75,7 +75,8 @@
       }
       e.tiles = tiles;
       // A tile can belong to two roads (a stop on a bridge), so a bridge stays a bridge
-      for (const [x, y] of tiles) M[y][x] = M[y][x] === "w" || M[y][x] === "b" ? "b" : "p";
+      // A path (stig) is a narrow, faint trail: "s", unless a road already lies there
+      for (const [x, y] of tiles) M[y][x] = M[y][x] === "w" || M[y][x] === "b" ? "b" : e.stig ? (M[y][x] === "p" ? "p" : "s") : "p";
       if (e.gate) e.gate.edge = e;
     }
     const GATES = EDGES.filter(e => e.gate).map(e => e.gate);
