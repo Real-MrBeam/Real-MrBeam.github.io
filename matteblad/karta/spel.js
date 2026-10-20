@@ -41,12 +41,28 @@ const SIDE = ["................", ".....ooooo......", "....occwcco.....", "...oc
 const SIDE_A = ["....oppppo......", "....okkkkko.....", ".....oooooo....."];
 const SIDE_B = ["...oppoppo......", "..okkko.okkko...", "...ooo...ooo...."];
 
-const BOY = {
-  down: [FRONT.concat(LEGS_A), FRONT.concat(LEGS_B), FRONT.concat(LEGS_A), FRONT.concat(LEGS_C)].map(r => sprite(r, BOYPAL)),
-  up:   [BACK.concat(LEGS_A), BACK.concat(LEGS_B), BACK.concat(LEGS_A), BACK.concat(LEGS_C)].map(r => sprite(r, BOYPAL)),
-  right:[SIDE.concat(SIDE_A), SIDE.concat(SIDE_B)].map(r => sprite(r, BOYPAL)),
+// Clothes he can put on from the bag (Peter 2026-10-20). A hat replaces the five top rows (the cap), the same in every
+// direction. Boots change the colour of the shoes. Own pixel drawings.
+const HATS = {
+  fiskehatt: { rows: ["................", "....oooooooo....", "...oxxxxxxxxo...", "..oxxxxxxxrxxo..", "..oXXXXXXXXXXo.."], pal: { x: '#c9b27d', X: '#8b7a4a', r: '#e43b44' } },
+  strahatt: { rows: ["................", ".....oooooo.....", "....oaaaaaao....", "...oaRRRRRRao...", ".ooaaaaaaaaaaoo."], pal: { a: '#f4d27a', R: '#a22633' } },
+  trollkarlshatt: { rows: ["......oo........", ".....oTTo.......", "....oTTYTo......", "...oTTTTTTo.....", "..oQQQQQQQQQQo.."], pal: { T: '#3b5dc9', Q: '#29366f', Y: '#fee761' } },
+  blomsterkrans: { rows: ["................", ".....oooooo.....", "....ohhhhhho....", "...orhyhrhyho...", "...ohhhhhhhho..."], pal: { r: '#e43b44', y: '#fee761' } },
+  mjolnarmossa: { rows: ["................", "....ooooooo.....", "...ommmmmmmo....", "...ommmmmmmmo...", "...oMMMMMMMMo..."], pal: { m: '#f4f4f4', M: '#c0cbdc' } },
 };
-BOY.left = BOY.right.map(mirror);
+const BOOTS = { stovel: { k: '#6b3a20' } };
+let BOY = null;
+function buildBoy(pa = {}){
+  const hat = HATS[pa.huvud], pal = { ...BOYPAL, ...(hat ? hat.pal : {}), ...(BOOTS[pa.fotter] || {}) };
+  const top = rows => hat ? [...hat.rows, ...rows.slice(5)] : rows;
+  BOY = {
+    down: [FRONT.concat(LEGS_A), FRONT.concat(LEGS_B), FRONT.concat(LEGS_A), FRONT.concat(LEGS_C)].map(r => sprite(top(r), pal)),
+    up:   [BACK.concat(LEGS_A), BACK.concat(LEGS_B), BACK.concat(LEGS_A), BACK.concat(LEGS_C)].map(r => sprite(top(r), pal)),
+    right:[SIDE.concat(SIDE_A), SIDE.concat(SIDE_B)].map(r => sprite(top(r), pal)),
+  };
+  BOY.left = BOY.right.map(mirror);
+}
+buildBoy();
 
 // The animals: two frames each, drawn facing right and mirrored for walking left (data/djur.json, made by verktyg/gor-djur.mjs).
 // Names and texts are in berattelse.json (djur). Up to three animals follow the boy, the rest are in the animal book.
@@ -280,7 +296,7 @@ let REAL = null; // { stars, stoft, handelser } once the locked events have been
 const START = () => ({
   stars: REAL ? REAL.stars : startData.stjarnor, coins: REAL ? REAL.stoft : startData.stjarnstoft, node: startData.plats,
   built: Object.fromEntries(startData.byggt.map(id => [id, true])),
-  valda: {}, saker: [], steg: {}, handlat: {}, djur: [], fram: [], stopp: {}, hittat: [], spent: 0, kistor: [], agnAnvant: [], fiskbok: {}, namn: {}, bytt: {}, salt: {},
+  valda: {}, saker: [], steg: {}, handlat: {}, djur: [], fram: [], stopp: {}, hittat: [], spent: 0, kistor: [], agnAnvant: [], fiskbok: {}, namn: {}, bytt: {}, salt: {}, pa: {},
   sett: new Uint8Array(MW*MH),
   log: REAL ? REAL.handelser.slice() : startData.logg.map(r => ({ typ: 'runa', amne: r.amne, procent: Math.round(r.poang / r.max * 100), stjarnor: r.stjarnor, bonus: r.bonus })),
   testIdx: 0,
@@ -713,7 +729,7 @@ function sleepBlock(){
   return `<div class="plot"><div><b>${S.natt ? 'Det är natt i Glimmerdal' : 'Stugan'}</b><span>${S.natt ? 'Sov tills det blir morgon.' : 'Sov tills det blir natt.'}</span></div>${here ? '<button class="btn" type="button" data-sov="1">Sov</button>' : ''}</div>`;
 }
 function sleep(){
-  S.natt = !S.natt; saveSoon();
+  S.natt = !S.natt; saveSoon(); musicSync();
   toast(S.natt ? 'Du somnade i stugan och vaknade när månen var uppe.' : 'Du sov gott, och nu är det morgon igen.');
   showNode();
 }
@@ -722,6 +738,34 @@ function sleep(){
 const readEvent = el => { const e = el && S.log[+el.dataset.las]; if (e && e.text) openModal(eventSteps(e, true).slice(1), null); };
 $('#log').addEventListener('click', ev => readEvent(ev.target.closest('li[data-las]')));
 $('#log').addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key === ' '){ const li = ev.target.closest('li[data-las]'); if (li){ ev.preventDefault(); readEvent(li); } } });
+
+// Putting clothes on and off from the bag: one hat and one pair of boots at a time
+$('#pack').addEventListener('click', ev => {
+  const b = ev.target.closest('button[data-pa]'); if (!b) return;
+  const it = SAKER[b.dataset.pa]; if (!it || it.typ !== 'klader') return;
+  if (S.pa[it.plats] === b.dataset.pa) delete S.pa[it.plats]; else S.pa[it.plats] = b.dataset.pa;
+  buildBoy(S.pa); renderPack(); saveSoon();
+});
+
+/* ---------- musik ---------- */
+// Two own chip songs (karta/musik.js). If the music is on it starts at the first tap (browsers allow no sound before that).
+// The choice is remembered in the browser. At night only "Stjärnnatt" plays. The music pauses while the page is hidden.
+const MUSIC_KEY = 'glimmerdal:musik';
+const musicWanted = () => { try { return localStorage.getItem(MUSIC_KEY) !== 'av'; } catch (e) { return true; } };
+function musicButton(){ const b = $('#btnMusik'), on = !!(window.Musik && Musik.spelar); b.textContent = on ? '🔊' : '🔇'; b.setAttribute('aria-pressed', String(on)); }
+function musicSync(){ if (window.Musik) Musik.natt(!!S.natt); }
+addEventListener('pointerdown', function first(ev){
+  removeEventListener('pointerdown', first);
+  if (ev.target.closest('#btnMusik') || !window.Musik || !musicWanted()) return;
+  musicSync(); Musik.start(); musicButton();
+});
+$('#btnMusik').addEventListener('click', () => {
+  if (!window.Musik) return;
+  if (Musik.spelar){ Musik.stop(); try { localStorage.setItem(MUSIC_KEY, 'av'); } catch (e) { /* only this time */ } }
+  else { musicSync(); Musik.start(); try { localStorage.setItem(MUSIC_KEY, 'pa'); } catch (e) { /* only this time */ } }
+  musicButton();
+});
+document.addEventListener('visibilitychange', () => { if (window.Musik) Musik.paus(document.hidden); });
 
 /* ---------- tältet och nattfiskaren ---------- */
 // The tent behind the campfire in Skogsgläntan is closed by day. At night the night fisherman buys fish from the fish book and
@@ -996,11 +1040,16 @@ function startStop(id){
   const s = STOPP[id], key = 'stopp:' + id;
   runStep({ def: s.aventyr, key, end: (till, out) => finishStop(id, till, out) }, S.steg[key] || s.aventyr.start, []);
 }
+const itemFound = id => `Du hittade ${SAKER[id].namn.toLowerCase()}.${SAKER[id].typ === 'klader' ? ' Du kan ta på den i väskan.' : ''}`;
 function rewardText(till){
+  const main = rewardMain(till);
+  return till.extra ? `${main} ${itemFound(till.extra)}` : main;
+}
+function rewardMain(till){
   if (till.djur) return `${berattelse.djur[till.djur].art} skrevs in i djurboken.`;
   if (till.agn) return `Du fick ${SAKER[till.agn].namn.toLowerCase()}.`;
   if (till.stoft) return `Du fick ${till.stoft} stjärnstoft.`;
-  if (till.fynd) return `Du hittade ${SAKER[till.fynd].namn.toLowerCase()}. Den går att sälja.`;
+  if (till.fynd) return itemFound(till.fynd);
   return `En hemlig fiskeplats syns nu på kartan: ${NODES[till.fiskeplats].name}.`;
 }
 function finishStop(id, till, out){
@@ -1008,6 +1057,7 @@ function finishStop(id, till, out){
   if (till.djur) giveAnimal(till.djur, out[out.length - 1].t);
   if (till.agn && !S.saker.includes(till.agn)){ S.saker.push(till.agn); renderPack(); toast(rewardText(till)); }
   if (till.fynd && !S.saker.includes(till.fynd)){ S.saker.push(till.fynd); renderPack(); sparkle(boy.x + 8, boy.y + 2, 18); toast(rewardText(till)); }
+  if (till.extra && !S.saker.includes(till.extra)){ S.saker.push(till.extra); renderPack(); }
   if (till.stoft){ S.coins += till.stoft; updateHud('coins'); sparkle(boy.x + 8, boy.y + 2, 24); toast(rewardText(till)); }
   if (till.fiskeplats){ S.hittat.push(till.fiskeplats); buildTerrain(); sparkle(NODES[till.fiskeplats].x*TS + 8, NODES[till.fiskeplats].y*TS + 8, 26); toast(rewardText(till)); }
   startDialog([...out, { p: null, t: rewardText(till) }], () => [{ label: 'Tillbaka till kartan', alt: true, run: toNode }]);
@@ -1064,6 +1114,7 @@ function takeGift(p, id){
   const v = valOf(p), it = SAKER[id];
   if (S.handlat[p.id] || !v.gava.includes(id)) return;
   S.handlat[p.id] = id; if (!S.saker.includes(id)) S.saker.push(id);
+  if (v.extra && !S.saker.includes(v.extra)){ S.saker.push(v.extra); toast(`${PERS[v.person].namn} gav dig också ${SAKER[v.extra].namn.toLowerCase()}!`); }
   saveSoon(); renderPack();
   const after = () => v.byte ? startShop(p, true) : toNode();
   if (it.djur){ if (S.djur.includes(it.djur)) return after(); giveAnimal(it.djur, it.text, after); return; }
@@ -1117,7 +1168,7 @@ const INTRO_KEY = 'stjarnkartan:intro';
 // The letter is shown once: remembered in the browser and in the saved game, so it is not shown again on a new device
 let introOpen = false;
 const introSeen = () => { if (S.intro) return true; try { return localStorage.getItem(INTRO_KEY) === '1'; } catch (e) { return false; } };
-const markIntro = () => { S.intro = true; saveSoon(); try { localStorage.setItem(INTRO_KEY, '1'); } catch (e) { /* the saved game remembers it */ } };
+const markIntro = () => { S.intro = true; saveSoon(); try { if (!TEST) localStorage.setItem(INTRO_KEY, '1'); } catch (e) { /* the saved game remembers it */ } };
 function showIntro(){
   const D = berattelse.dialog;
   introOpen = true;
@@ -1135,7 +1186,8 @@ function startCount(){
 function renderPack(){
   const own = S.saker.filter(id => SAKER[id] && SAKER[id].typ !== 'djur' && !S.agnAnvant.includes(id)); // used baits are gone
   $('#pack').innerHTML = own.length
-    ? own.map(id => `<li><span><b>${esc(SAKER[id].namn)}</b> ${esc(SAKER[id].text)}</span></li>`).join('')
+    ? own.map(id => { const it = SAKER[id], on = it.typ === 'klader' && S.pa[it.plats] === id;
+        return `<li><span><b>${esc(it.namn)}</b> ${esc(it.text)}</span>${it.typ === 'klader' ? `<button class="btn${on ? '' : ' alt'} wear" type="button" data-pa="${id}">${on ? 'Ta av' : 'Ta på'}</button>` : ''}</li>`; }).join('')
     : '<li><span>Inget ännu. Bygg något och få en gåva!</span></li>';
 }
 
@@ -1184,7 +1236,7 @@ function applyReal(events){
 // encrypted in the page (#lasNyckel) and opens with the password, like the portraits. Without the key nothing is saved.
 // Stars and stardust are never saved: they are counted from the runes and scrolls. Only what he has spent is saved.
 const SAVE = { repo: '', file: '', key: '', sha: null, timer: 0, off: false, loaded: false };
-const SAVED_FIELDS = ['node', 'built', 'valda', 'saker', 'steg', 'handlat', 'djur', 'fram', 'stopp', 'hittat', 'spent', 'kistor', 'agnAnvant', 'fiskbok', 'namn', 'bytt', 'intro', 'natt', 'salt', 'lasta'];
+const SAVED_FIELDS = ['node', 'built', 'valda', 'saker', 'steg', 'handlat', 'djur', 'fram', 'stopp', 'hittat', 'spent', 'kistor', 'agnAnvant', 'fiskbok', 'namn', 'bytt', 'intro', 'natt', 'salt', 'lasta', 'pa'];
 const b64 = text => { const bytes = new TextEncoder().encode(text); let s = ''; for (const b of bytes) s += String.fromCharCode(b); return btoa(s); };
 const unb64 = data => new TextDecoder().decode(Uint8Array.from(atob(data.replace(/\s/g, '')), c => c.charCodeAt(0)));
 function spend(n){ S.coins -= n; S.spent += n; }
@@ -1195,7 +1247,11 @@ function gh(method, body){
     headers: { Authorization: `Bearer ${SAVE.key}`, Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' },
     body: body && JSON.stringify(body) });
 }
+// Debug mode (?debug in the address): the debug buttons show, and nothing is loaded from or saved to his game, so Peter can
+// try things out without touching the saved game. The browser's own memory (news, letter) is not touched either.
+const TEST = new URLSearchParams(location.search).has('debug');
 async function loadSave(){
+  if (TEST){ SAVE.off = true; return; }
   const el = document.getElementById('lasNyckel');
   if (!el || !el.classList.contains('unlocked') || SAVE.key) return;
   SAVE.repo = el.dataset.repo; SAVE.file = el.dataset.fil; SAVE.key = el.textContent.trim();
@@ -1216,6 +1272,8 @@ async function loadSave(){
 function applySaved(data){
   const shownHere = S.lasta || [];
   for (const k of SAVED_FIELDS) if (data[k] !== undefined) S[k] = data[k];
+  if (!S.pa) S.pa = {};
+  buildBoy(S.pa); musicSync();
   S.lasta = [...new Set([...(S.lasta || []), ...shownHere])];   // stories shown before the saved game had loaded stay seen
   if (typeof data.sett === 'string') S.sett = Uint8Array.from(atob(data.sett), c => c.charCodeAt(0));
   S.coins = (REAL ? REAL.stoft : startData.stjarnstoft) - S.spent;
@@ -1264,7 +1322,7 @@ const seenEvents = () => { let local = []; try { local = JSON.parse(localStorage
 function markSeen(ids){
   const all = [...new Set([...seenEvents(), ...ids])];
   S.lasta = all; saveSoon();
-  try { localStorage.setItem(NEWS_KEY, JSON.stringify(all)); } catch (e) { /* the saved game remembers it */ }
+  try { if (!TEST) localStorage.setItem(NEWS_KEY, JSON.stringify(all)); } catch (e) { /* the saved game remembers it */ }
 }
 // The text of a rune or scroll: the title, the story and what it gave. Used for the news and when he taps a line in the list.
 function eventSteps(e, last){
@@ -1389,7 +1447,7 @@ function pull(){
     const finds = (FISKE.fynd || []).filter(id => !S.saker.includes(id) && !S.salt['fynd:' + id]);
     if (finds.length && Math.random() < .2){
       const id = finds[Math.floor(Math.random() * finds.length)]; S.saker.push(id); renderPack(); saveSoon(); stopFishing();
-      return openModal([{ icon: FISH_BIG, title: SAKER[id].namn, text: `${FISKE.texter.fynd} ${SAKER[id].text}`, reward: 'Lades i väskan. Den går att sälja.', button: 'Till kartan' }], () => showNode());
+      return openModal([{ icon: FISH_BIG, title: SAKER[id].namn, text: `${FISKE.texter.fynd} ${SAKER[id].text}`, reward: SAKER[id].typ === 'klader' ? 'Lades i väskan. Du kan ta på den där.' : 'Lades i väskan.', button: 'Till kartan' }], () => showNode());
     }
     const list = FISKE.platser[fz.plats].fiskar, fresh = list.filter(id => S.fiskbok[id] === undefined);
     const pool = fresh.length && Math.random() < .6 ? fresh : list, id = pool[Math.floor(Math.random() * pool.length)];
@@ -1498,7 +1556,7 @@ $('#btnReset').addEventListener('click', () => {
   showIntro();
 });
 function restart(){
-  S = START(); boy.route = null; placeBoy(S.node); plotAnim.clear(); gateAnim.clear(); FX.length = 0; buildTerrain();
+  S = START(); buildBoy(S.pa); boy.route = null; placeBoy(S.node); plotAnim.clear(); gateAnim.clear(); FX.length = 0; buildTerrain();
   lastRevealKey = ''; maskDirty = true; revealAround(boy.x + 8, boy.y + 8);
   cam.follow = true; cam.focus = null; centerOn(boy.x + 8, boy.y + 8, true);
   dlg = null; updateHud(); renderLog(); renderPack(); renderBook(); renderTickets(); renderFishBook(); showNode();

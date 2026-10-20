@@ -498,9 +498,10 @@
       "varde": 8
     },
     "stovel": {
-      "namn": "Gammal stövel",
-      "text": "En blöt stövel med ett hål i. Någon har tappat den i vattnet.",
-      "typ": "fynd",
+      "namn": "Gamla stövlar",
+      "text": "Ett par blöta läderstövlar. De läcker lite, men de passar.",
+      "typ": "klader",
+      "plats": "fotter",
       "varde": 1
     },
     "nyckel": {
@@ -518,6 +519,77 @@
       "namn": "Lykta",
       "text": "En liten lykta som lyser upp runt dig när det är mörkt.",
       "typ": "verktyg"
+    },
+    "fiskehatt": {
+      "namn": "Fiskehatt",
+      "text": "En sliten fiskehatt med en röd fluga på brättet.",
+      "typ": "klader",
+      "plats": "huvud",
+      "varde": 2
+    },
+    "strahatt": {
+      "namn": "Stråhatt",
+      "text": "En gammal stråhatt med ett rött band. Den luktar sommar.",
+      "typ": "klader",
+      "plats": "huvud",
+      "varde": 3
+    },
+    "trollkarlshatt": {
+      "namn": "Trollkarlshatt",
+      "text": "En hög blå hatt med en gul stjärna. Den kittlar lite i hårbotten.",
+      "typ": "klader",
+      "plats": "huvud",
+      "varde": 6
+    },
+    "blomsterkrans": {
+      "namn": "Blomsterkrans",
+      "text": "En krans av ängsblommor som fåret inte hann äta upp.",
+      "typ": "klader",
+      "plats": "huvud",
+      "varde": 2
+    },
+    "mjolnarmossa": {
+      "namn": "Mjölnarmössa",
+      "text": "En vit mössa som har legat i kvarnen i hundra år. Den dammar mjöl.",
+      "typ": "klader",
+      "plats": "huvud",
+      "varde": 3
+    },
+    "konservburk": {
+      "namn": "Konservburk",
+      "text": "En tom, rostig burk. Det simmar ett litet räkdjur i den.",
+      "typ": "fynd",
+      "varde": 1
+    },
+    "glasflaska": {
+      "namn": "Glasflaska",
+      "text": "En grön glasflaska utan lock. Den tutar om man blåser i den.",
+      "typ": "fynd",
+      "varde": 1
+    },
+    "flaskpost": {
+      "namn": "Flaskpost",
+      "text": "En flaska med ett hoprullat brev. Bläcket har flutit ut, så ingen kan läsa det.",
+      "typ": "fynd",
+      "varde": 3
+    },
+    "drakfjall": {
+      "namn": "Drakfjäll",
+      "text": "Ett litet varmt fjäll som skimrar i rött och guld.",
+      "typ": "fynd",
+      "varde": 5
+    },
+    "flaskat": {
+      "namn": "Flaskat irrbloss",
+      "text": "En liten burk där ett blått ljus svävar runt.",
+      "typ": "fynd",
+      "varde": 4
+    },
+    "hastsko": {
+      "namn": "Silverhästsko",
+      "text": "En hästsko av silver, blank som bäckvatten.",
+      "typ": "fynd",
+      "varde": 6
     }
   },
   "bygg": {
@@ -726,7 +798,8 @@
           "gava": [
             "katten"
           ],
-          "gavaHej": "Har du råkat se en groda på vägen hit? Nej, tänkte väl det. Den här katten har bestämt sig för att flytta med dig."
+          "gavaHej": "Har du råkat se en groda på vägen hit? Nej, tänkte väl det. Den här katten har bestämt sig för att flytta med dig.",
+          "extra": "trollkarlshatt"
         },
         {
           "id": "grottan",
@@ -1243,14 +1316,14 @@
             ]
           },
           "f": {
-            "t": "Det sista vattnet rinner bort. På botten ligger ett gammalt mynt, och i den blöta jorden kryllar det av daggmaskar.",
+            "t": "Det sista vattnet rinner bort. På botten ligger ett gammalt mynt, och ur leran sticker en stråhatt upp.",
             "val": [
               {
-                "label": "Samla maskarna",
+                "label": "Ta stråhatten",
                 "kostnad": 0,
-                "text": "Du samlar maskarna i en burk. Fiskarna kommer att tacka dig, eller i alla fall inte klaga.",
+                "text": "Du skakar av leran. Hatten är hel, och bandet är fortfarande rött.",
                 "till": {
-                  "agn": "daggmask"
+                  "fynd": "strahatt"
                 }
               },
               {
@@ -1277,9 +1350,10 @@
               {
                 "label": "Plocka en bukett åt fåret",
                 "kostnad": 0,
-                "text": "Fåret äter upp hela buketten och följer sedan efter dig, ifall det finns mer. Hon ser ut som en Ulla, så det får hon heta.",
+                "text": "Fåret äter upp hela buketten och följer sedan efter dig, ifall det finns mer. Hon ser ut som en Ulla, så det får hon heta. Av blommorna som blev över flätar du en krans.",
                 "till": {
-                  "djur": "ulla"
+                  "djur": "ulla",
+                  "extra": "blomsterkrans"
                 }
               }
             ]
@@ -1396,9 +1470,10 @@
               {
                 "label": "Knyt en röd tygbit i vassen",
                 "kostnad": 0,
-                "text": "Du knyter fast en röd tygbit i vassen och märker ut platsen på kartan.",
+                "text": "Du knyter fast en röd tygbit i vassen och märker ut platsen på kartan. När du knyter fast tygbiten hittar du en flaska i vassen, med ett brev i.",
                 "till": {
-                  "fiskeplats": "vassen"
+                  "fiskeplats": "vassen",
+                  "extra": "flaskpost"
                 }
               }
             ]
@@ -1515,9 +1590,10 @@
               {
                 "label": "Bädda åt den i fickan",
                 "kostnad": 0,
-                "text": "Du lägger mossa i fickan, och Knaster kryper ner och somnar. Det ryker lite om fickan.",
+                "text": "Du lägger mossa i fickan, och Knaster kryper ner och somnar. Det ryker lite om fickan. I fickan ligger sedan ett litet fjäll som Knaster har tappat.",
                 "till": {
-                  "djur": "knaster"
+                  "djur": "knaster",
+                  "extra": "drakfjall"
                 }
               }
             ]
@@ -1634,9 +1710,10 @@
               {
                 "label": "Fråga om den vill följa med",
                 "kostnad": 0,
-                "text": "Flimmer blir dubbelt så stor av glädje och svävar efter dig.",
+                "text": "Flimmer blir dubbelt så stor av glädje och svävar efter dig. Flimmer lämnar en liten blå låga kvar i en burk åt dig, som tack.",
                 "till": {
-                  "djur": "flimmer"
+                  "djur": "flimmer",
+                  "extra": "flaskat"
                 }
               }
             ]
@@ -1753,9 +1830,10 @@
               {
                 "label": "Visa henne vägen ut",
                 "kostnad": 0,
-                "text": "Ni går upp i ljuset tillsammans. Tyra kisar mot solen och bestämmer sig för att följa med dig.",
+                "text": "Ni går upp i ljuset tillsammans. Tyra kisar mot solen och bestämmer sig för att följa med dig. På vägen ut hittar ni en gammal vit mössa på en spik vid trappan.",
                 "till": {
-                  "djur": "tyra"
+                  "djur": "tyra",
+                  "extra": "mjolnarmossa"
                 }
               }
             ]
@@ -1853,9 +1931,10 @@
               {
                 "label": "Kasta stjärnstoft på stranden",
                 "kostnad": 2,
-                "text": "En stig av ljus växer fram från bäcken upp på land. Bäckahästen följer den, och sedan följer hon dig. Bland tecknen på stenblocket står hennes namn: Silva.",
+                "text": "En stig av ljus växer fram från bäcken upp på land. Bäckahästen följer den, och sedan följer hon dig. Bland tecknen på stenblocket står hennes namn: Silva. Där stigen börjar ligger en hästsko av silver.",
                 "till": {
-                  "djur": "silva"
+                  "djur": "silva",
+                  "extra": "hastsko"
                 }
               }
             ]
@@ -2033,7 +2112,10 @@
     },
     "fynd": [
       "stovel",
-      "nyckel"
+      "nyckel",
+      "konservburk",
+      "glasflaska",
+      "fiskehatt"
     ]
   },
   "locka": [
