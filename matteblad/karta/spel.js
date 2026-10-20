@@ -960,7 +960,9 @@ function renderPanel(view){
     // No road buttons (Peter 2026-10-18): he walks by tapping the dots on the map, or with the arrow keys
     const plots = PLOTS.filter(p => p.node === n.id);
     const stop = STOPP[n.id];
-    h = `<span class="tag">Du är här</span><h2>${esc(n.name)}</h2><p>${esc(n.text)}</p><div class="panel-body">`;
+    // a place can have its own text for the night (berattelse.json platser natt)
+    const ptext = S.natt && berattelse.platser[n.id] && berattelse.platser[n.id].natt || n.text;
+    h = `<span class="tag">Du är här</span><h2>${esc(n.name)}</h2><p>${esc(ptext)}</p><div class="panel-body">`;
     // At night everything is closed except the tent, the fishing, and sleeping (and the letter) in Hemmet (Peter 2026-10-20)
     const day = !S.natt, before = h.length;
     if (day) for (const p of plots) h += plotBlock(p);

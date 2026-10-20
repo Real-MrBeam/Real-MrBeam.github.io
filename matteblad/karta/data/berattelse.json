@@ -12,7 +12,8 @@
     },
     "glanta": {
       "namn": "Skogsgläntan",
-      "text": "En solig glänta mitt i granskogen. När det mörknar rör sig små ljus mellan stammarna."
+      "text": "En solig glänta mitt i granskogen, där stigarna möts.",
+      "natt": "En glänta mitt i granskogen. I mörkret syns bara stammarna runt omkring."
     },
     "hemlig": {
       "namn": "Hemliga gläntan",
@@ -24,7 +25,7 @@
     },
     "sjo": {
       "namn": "Sjöviken",
-      "text": "En vik där vattnet ligger blankt och stilla. Ibland ringlar något stort långt under ytan."
+      "text": "En vik där vattnet ligger blankt och stilla. Vassen vajar längs stranden."
     },
     "fiske": {
       "namn": "Fiskeläget",
@@ -40,7 +41,8 @@
     },
     "angen": {
       "namn": "Ängen",
-      "text": "En äng där gräset når till midjan. Något rör sig mellan stråna, men det syns aldrig."
+      "text": "En äng där gräset når till midjan och blommorna står täta.",
+      "natt": "En äng där gräset når till midjan. I mörkret prasslar det svagt när vinden drar förbi."
     },
     "barsnaret": {
       "namn": "Bärsnåret",
@@ -48,15 +50,15 @@
     },
     "eken": {
       "namn": "Ihåliga eken",
-      "text": "En ek så gammal att ingen minns när den var ung. Stammen är ihålig, och ibland stiger det rök ur den."
+      "text": "En ek så gammal att ingen minns när den var ung. Stammen är ihålig, och kronan breder ut sig över stigen."
     },
     "dimmossen": {
       "namn": "Dimmossen",
-      "text": "En mosse där dimman aldrig lättar. Folk säger att man inte ska följa ljusen, men folk säger mycket."
+      "text": "En mosse där dimman nästan aldrig lättar. Gamla plankor leder ut över den blöta marken."
     },
     "kvarnen": {
       "namn": "Gamla kvarnen",
-      "text": "En gammal väderkvarn. Vingarna snurrar fast det inte blåser, och ingen mjölnare har synts här på många år."
+      "text": "En gammal väderkvarn med stora vingar. Ingen mjölnare har synts här på många år."
     },
     "stenblocket": {
       "namn": "Stenblocket",
@@ -76,7 +78,8 @@
     },
     "talt": {
       "namn": "Tältet",
-      "text": "Ett tält av ljus duk bakom lägerelden. Någon bor här, men på dagen är duken knuten."
+      "text": "Ett tält av ljus duk bakom lägerelden. Någon bor här, men på dagen är duken knuten.",
+      "natt": "Ett tält av ljus duk bakom lägerelden. Det lyser inifrån."
     }
   },
   "portar": {
