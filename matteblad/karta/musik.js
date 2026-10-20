@@ -218,5 +218,35 @@ function natt(v) {
 }
 function paus(hidden) { if (!P.ctx || !P.on) return; if (hidden) P.ctx.suspend(); else P.ctx.resume(); }
 
-root.Musik = { start, stop, paus, spela, natt, get spelar() { return P.on; }, lattar: SONGS.map(s => s.namn) };
+// ---------- the flute: a few short tunes, a soft sine tone with a little vibrato. It plays even when the music is off, and the
+// music is turned down while it plays. Musik.flojt(index) plays one tune and returns its length in seconds.
+const FLOJT = [
+  'E5 G5 A5 - G5 E5 D5 - - .',
+  'C6 B5 A5 G5 A5 - - . . .',
+  'G5 A5 B5 D6 - B5 G5 - - .',
+  'A5 C6 E6 - D6 C6 A5 - - .',
+  'D6 - C6 A5 G5 A5 C6 - D6 -',
+];
+function flojt(index) {
+  const AC = root.AudioContext || root.webkitAudioContext; if (!AC) return 0;
+  if (!P.ctx) { P.ctx = new AC(); P.master = P.ctx.createGain(); P.master.gain.value = 0; P.master.connect(P.ctx.destination); }
+  P.ctx.resume();
+  const ctx = P.ctx, out = ctx.createGain(); out.gain.value = .22; out.connect(ctx.destination);
+  const toks = FLOJT[((index % FLOJT.length) + FLOJT.length) % FLOJT.length].split(' '), step = .17, t0 = ctx.currentTime + .05;
+  toks.forEach((tok, i) => {
+    if (tok === '-' || tok === '.') return;
+    let n = 1; while (i + n < toks.length && toks[i + n] === '-') n++;
+    const t = t0 + i * step, len = n * step * .95;
+    const o = ctx.createOscillator(), g = ctx.createGain(), lfo = ctx.createOscillator(), depth = ctx.createGain();
+    o.type = 'sine'; o.frequency.value = freq(tok);
+    lfo.frequency.value = 5.5; depth.gain.value = freq(tok) * .006; lfo.connect(depth).connect(o.frequency);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(1, t + .04); g.gain.setValueAtTime(.85, t + len - .05); g.gain.linearRampToValueAtTime(0, t + len);
+    o.connect(g).connect(out); o.start(t); lfo.start(t); o.stop(t + len + .02); lfo.stop(t + len + .02);
+  });
+  const dur = toks.length * step + .1;
+  if (P.on) { const t = ctx.currentTime; P.master.gain.cancelScheduledValues(t); P.master.gain.setValueAtTime(P.master.gain.value, t); P.master.gain.linearRampToValueAtTime(P.vol * .3, t + .2); P.master.gain.setValueAtTime(P.vol * .3, t + dur); P.master.gain.linearRampToValueAtTime(P.vol, t + dur + .6); }
+  return dur;
+}
+
+root.Musik = { flojt, antalFlojt: FLOJT.length, start, stop, paus, spela, natt, get spelar() { return P.on; }, lattar: SONGS.map(s => s.namn) };
 })(typeof window !== 'undefined' ? window : globalThis);

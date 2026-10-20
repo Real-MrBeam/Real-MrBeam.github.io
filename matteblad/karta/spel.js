@@ -703,6 +703,10 @@ function drawNight(now, lv){
   ctx.save();
   ctx.globalCompositeOperation = 'multiply'; ctx.globalAlpha = lv;
   ctx.fillStyle = '#3d4f99'; ctx.fillRect(0, 0, MW*TS, MH*TS);
+  // the burning fires on top of the put-out ones, fading in with the night. They are drawn before the light, so the glow
+  // lies over the flames and not under them.
+  ctx.globalCompositeOperation = 'source-over';
+  for (const L of lights) if (L.k === 'fire' && L.i) tile(ctx, L.i, L.px, L.py);
   ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'lighter';
   for (const L of lights){
     const fire = L.k === 'fire', flick = fire && !reduceMotion ? .85 + .15 * Math.sin(now / 90 + L.x) * Math.sin(now / 53 + L.y) : 1;
@@ -719,10 +723,6 @@ function drawNight(now, lv){
     ctx.fillStyle = g; ctx.fillRect(bx - rad, by - rad, rad * 2, rad * 2);
   }
   ctx.globalCompositeOperation = 'source-over';
-  // the burning fires on top of the put-out ones, fading in with the night
-  ctx.globalAlpha = lv;
-  for (const L of lights) if (L.k === 'fire' && L.i) tile(ctx, L.i, L.px, L.py);
-  ctx.globalAlpha = 1;
   for (const L of lights){
     if (L.k === 'fire' || L.k === 'tent' || L.k === 'lamp') continue;
     const [w, h] = L.k === 'win' ? [6, 6] : [2, 4];
@@ -754,7 +754,16 @@ $('#log').addEventListener('click', ev => readEvent(ev.target.closest('li[data-l
 $('#log').addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key === ' '){ const li = ev.target.closest('li[data-las]'); if (li){ ev.preventDefault(); readEvent(li); } } });
 
 // Putting clothes on and off from the bag: one hat and one pair of boots at a time
+// The flute plays one of a few short tunes, the next one each time. Notes rise from the boy while it plays.
+let flojtNr = 0, flojtTill = 0;
+function playFlute(){
+  if (!window.Musik || performance.now() < flojtTill) return;
+  const dur = Musik.flojt(flojtNr++);
+  flojtTill = performance.now() + dur * 1000;
+  for (let i = 0; i < 5; i++) setTimeout(() => FX.push({ k: 'spark', x: boy.x + 10 + Math.random() * 4, y: boy.y - 4, vx: (Math.random() - .3) * 10, vy: -22 - Math.random() * 10, t: 0, life: 1.1, col: i % 2 ? '#fee761' : '#ffffff' }), i * dur * 180);
+}
 $('#pack').addEventListener('click', ev => {
+  if (ev.target.closest('button[data-flojt]')){ playFlute(); return; }
   const b = ev.target.closest('button[data-pa]'); if (!b) return;
   const it = SAKER[b.dataset.pa]; if (!it || it.typ !== 'klader') return;
   if (S.pa[it.plats] === b.dataset.pa) delete S.pa[it.plats]; else S.pa[it.plats] = b.dataset.pa;
@@ -1210,7 +1219,9 @@ function renderPack(){
   const own = S.saker.filter(id => SAKER[id] && SAKER[id].typ !== 'djur' && !S.agnAnvant.includes(id)); // used baits are gone
   $('#pack').innerHTML = own.length
     ? own.map(id => { const it = SAKER[id], on = it.typ === 'klader' && S.pa[it.plats] === id;
-        return `<li><span><b>${esc(it.namn)}</b> ${esc(it.text)}</span>${it.typ === 'klader' ? `<button class="btn${on ? '' : ' alt'} wear" type="button" data-pa="${id}">${on ? 'Ta av' : 'Ta på'}</button>` : ''}</li>`; }).join('')
+        const wear = it.typ === 'klader' ? `<button class="btn${on ? '' : ' alt'} wear" type="button" data-pa="${id}">${on ? 'Ta av' : 'Ta på'}</button>` : '';
+        const play = id === 'flojt' ? '<button class="btn alt wear" type="button" data-flojt="1">Spela</button>' : '';
+        return `<li><span><b>${esc(it.namn)}</b> ${esc(it.text)}</span>${wear}${play}</li>`; }).join('')
     : '<li><span>Inget ännu. Bygg något och få en gåva!</span></li>';
 }
 
