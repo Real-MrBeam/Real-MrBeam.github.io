@@ -1305,6 +1305,8 @@ function addSheet(){
 }
 $('#btnTest').addEventListener('click', addTest);
 $('#btnSheet').addEventListener('click', addSheet);
+// The debug buttons only show with ?debug in the address (Peter 2026-10-20), so the real map has no test buttons
+$('#debugToggle').hidden = !new URLSearchParams(location.search).has('debug');
 const DEBUG_LABEL = ['Debug: av', 'Debug: bygg A, ingen dimma', 'Debug: bygg B, ingen dimma', 'Debug: tomma tomter, ingen dimma'];
 $('#btnDebug').addEventListener('click', () => {
   DEBUG.mode = (DEBUG.mode + 1) % DEBUG_LABEL.length;
