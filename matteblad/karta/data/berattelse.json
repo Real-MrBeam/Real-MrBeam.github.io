@@ -370,37 +370,37 @@
     },
     "flotte": {
       "namn": "Flotte",
-      "text": "Tar dig nedför älven till ett fiskeställe. Om nätterna hörs något som liknar fiol från älven.",
+      "text": "En flotte av timmer, stadig nog för en. Om nätterna hörs något som liknar fiol från älven.",
       "typ": "verktyg"
     },
     "snorkel": {
       "namn": "Snorkel",
-      "text": "Med den kan du dyka efter skatter i sjön. Under bron glittrar något i djupet, men ingen vill dyka dit.",
+      "text": "En snorkel och ett par simglasögon. Under bron glittrar något i djupet, men ingen vill dyka dit.",
       "typ": "verktyg"
     },
     "roddbat": {
       "namn": "Roddbåt",
-      "text": "Tar dig mitt ut i sjön, där de ovanliga fiskarna finns. Folk säger att något stort simmar runt i sjön.",
+      "text": "En liten roddbåt med två åror. Folk säger att något stort simmar runt i sjön.",
       "typ": "verktyg"
     },
     "flugspo": {
       "namn": "Flugspö",
-      "text": "Fångar öring och harr i strömmen under broarna. Ibland låter forsen nästan som musik.",
+      "text": "Ett lätt spö med lång lina. Ibland låter forsen nästan som musik.",
       "typ": "verktyg"
     },
     "flugask": {
       "namn": "Flugask",
-      "text": "Ovanliga flugor som fisken regnbåge inte kan motstå.",
+      "text": "Ovanliga flugor i en liten ask.",
       "typ": "agn"
     },
     "hav": {
       "namn": "Håv",
-      "text": "Fångar grodor och småfisk vid stranden. Det sägs att det lyser i djupet om natten.",
+      "text": "En håv med långt skaft. Det sägs att det lyser i djupet om natten.",
       "typ": "verktyg"
     },
     "kraftbur": {
       "namn": "Kräftbur",
-      "text": "Läggs ut på kvällen och fångar kräftor medan du sover. Vassen vid sjön rör sig ibland fast det är vindstilla.",
+      "text": "En bur av nät och pinnar. Vassen vid sjön rör sig ibland fast det är vindstilla.",
       "typ": "verktyg"
     },
     "duvanpip": {
@@ -512,12 +512,12 @@
     },
     "metspo": {
       "namn": "Metspö",
-      "text": "Ett enkelt spö av hassel med flöte och krok. Med det kan du fiska vid broarna.",
+      "text": "Ett enkelt spö av hassel med flöte och krok.",
       "typ": "verktyg"
     },
     "lykta": {
       "namn": "Lykta",
-      "text": "En liten lykta som lyser upp runt dig när det är mörkt.",
+      "text": "En liten lykta med ett varmt ljus.",
       "typ": "verktyg"
     },
     "fiskehatt": {
