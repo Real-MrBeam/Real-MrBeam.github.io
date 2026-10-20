@@ -851,7 +851,7 @@ function letterBlock(){
   return `<div class="plot"><div><b>${esc(V.rubrik)}</b><span>${esc(V.text)}</span></div>${here ? `<button class="btn" type="button" data-brev="1">${esc(V.knapp)}</button>` : ''}</div>`;
 }
 function readLetter2(){
-  if (!S.brev2){ S.brev2 = true; saveSoon(); $('#btnLetter2').hidden = false; }
+  if (!S.brev2){ S.brev2 = true; saveSoon(); renderLetters(); }
   const icon = iconURL(SIGIL, 6);
   openModal(V.stycken.map((t, i) => ({ icon, title: V.titel, text: t, button: i === V.stycken.length - 1 ? 'Till kartan' : 'Läs vidare' })), () => showNode());
 }
@@ -1372,7 +1372,7 @@ function applySaved(data){
   const shownHere = S.lasta || [];
   for (const k of SAVED_FIELDS) if (data[k] !== undefined) S[k] = data[k];
   if (!S.pa) S.pa = {};
-  buildBoy(S.pa); musicSync(); $('#btnLetter2').hidden = !S.brev2;
+  buildBoy(S.pa); musicSync(); renderLetters();
   S.lasta = [...new Set([...(S.lasta || []), ...shownHere])];   // stories shown before the saved game had loaded stay seen
   if (typeof data.sett === 'string') S.sett = Uint8Array.from(atob(data.sett), c => c.charCodeAt(0));
   S.coins = (REAL ? REAL.stoft : startData.stjarnstoft) - S.spent;
@@ -1651,8 +1651,16 @@ $('#btnDebug').addEventListener('click', () => {
   $('#debugBtns').hidden = DEBUG.mode === 0;
   if (current && current.type !== 'walk' && current.type !== 'dialog') renderPanel(current);
 });
-$('#btnLetter').addEventListener('click', showIntro);
-$('#btnLetter2').addEventListener('click', readLetter2);
+// The letters in the collection: the queen's, and Stjärnväktarnas once he has picked it up. Tapped like the runes.
+const ENVELOPE = sprite(["oooooooooooo", "owwwwwwwwwwo", "oowwwwwwwwoo", "owowwwwwwowo", "owwowwwwowwo", "owwwoyyowwwo", "owwwwyywwwwo", "owwwwwwwwwwo", "oooooooooooo"], { o:'#3f2631', w:'#ead4aa', y:'#e43b44' });
+function renderLetters(){
+  const list = [{ id: 'drottningen', namn: 'Drottningens brev', text: 'Om djuren som gömmer sig i Glimmerdal.' }];
+  if (S.brev2 && V) list.push({ id: 'stjarnvaktarna', namn: V.titel, text: 'Förseglat med en silverstjärna med ett öga.' });
+  $('#letters').innerHTML = list.map(l => `<li class="readable" data-brev="${l.id}" role="button" tabindex="0" title="Läs brevet"><span><b>${esc(l.namn)}</b> ${esc(l.text)}</span></li>`).join('');
+}
+const openLetter = li => { if (!li) return; if (li.dataset.brev === 'drottningen') showIntro(); else readLetter2(); };
+$('#letters').addEventListener('click', ev => openLetter(ev.target.closest('li[data-brev]')));
+$('#letters').addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key === ' '){ const li = ev.target.closest('li[data-brev]'); if (li){ ev.preventDefault(); openLetter(li); } } });
 $('#btnReset').addEventListener('click', () => {
   stopSaving(); restart(); toast('Kartan är återställd.');
   try { localStorage.removeItem(INTRO_KEY); } catch (e) { /* nothing to clear */ }
@@ -1662,7 +1670,7 @@ function restart(){
   S = START(); buildBoy(S.pa); boy.route = null; placeBoy(S.node); plotAnim.clear(); gateAnim.clear(); FX.length = 0; buildTerrain();
   lastRevealKey = ''; maskDirty = true; revealAround(boy.x + 8, boy.y + 8);
   cam.follow = true; cam.focus = null; centerOn(boy.x + 8, boy.y + 8, true);
-  dlg = null; updateHud(); renderLog(); renderPack(); renderBook(); renderTickets(); renderFishBook(); showNode();
+  dlg = null; updateHud(); renderLog(); renderPack(); renderBook(); renderTickets(); renderFishBook(); renderLetters(); showNode();
 }
 
 /* ---------- pekare ---------- */
@@ -1710,7 +1718,7 @@ function start(data){
   if (data && data.S) S = data.S;
   placeBoy(S.node); lastRevealKey = ''; revealAround(boy.x + 8, boy.y + 8);
   STAR_URL = iconURL(STAR, 4); DUST_URL = iconURL(DUST, 4); LOCK_URL = iconURL(LOCK, 4); RUNE_URL = iconURL(RUNE, 4); SCROLL_URL = iconURL(SCROLL, 4);
-  FISH_BIG = iconURL(FISH, 8); $('#icoFish').src = iconURL(FISH, 4);
+  FISH_BIG = iconURL(FISH, 8); $('#icoFish').src = iconURL(FISH, 4); $('#icoLetter').src = iconURL(ENVELOPE, 3);
   TICKET_URL = iconURL(TICKET, 4); RUNE_BIG = iconURL(RUNE, 8); SCROLL_BIG = iconURL(SCROLL, 8); TICKET_BIG = iconURL(TICKET, 8); $('#icoTicket').src = TICKET_URL;
   $('#icoRunes').src = RUNE_URL; $('#icoBag').src = iconURL(BAG, 4); $('#icoBook').src = iconURL(BOOK, 4);
   $('#logoStar').src = STAR_URL; $('#icoStar').src = STAR_URL; $('#icoCoin').src = DUST_URL;
@@ -1718,7 +1726,7 @@ function start(data){
   buildTerrain();
   resize(); centerOn(boy.x + 8, boy.y + 8, true);
   updateHud(); renderLog(); renderPack(); renderBook(); renderTickets(); renderFishBook(); showNode();
-  musicButton(); musicSync(); $('#btnLetter2').hidden = !S.brev2;
+  musicButton(); musicSync(); renderLetters();
   loadPortraitImages();
   if (!introSeen()) showIntro();
   requestAnimationFrame(t => { lastT = t; frame(t); });
