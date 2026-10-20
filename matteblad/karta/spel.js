@@ -680,6 +680,10 @@ function nightLights(){
   for (const p of PLOTS) if (builtShown(p)) plotTiles(p).forEach((row, dy) => row.forEach((i, dx) => { const L = lightIn(i); if (L) list.push({ x: (p.x + dx)*TS + L[0], y: (p.y + dy)*TS + L[1], k: L[2] }); }));
   return list;
 }
+// A small rowing boat with a lantern drifts on the lake by Vassen, only at night (Peter 2026-10-20). Own drawing.
+const BOAT = sprite(["..........y.....", ".........oyo....", "..........o.....", "..........o.....", "oooooooooooooooo", "obbbbbbbbbbbbbbo", ".oBBBBBBBBBBBBo.", "..oBBBBBBBBBBo..", "...oooooooooo..."],
+  { o: '#3f2631', b: '#b86f50', B: '#733e39', y: '#fee761' });
+const boatAt = now => ({ x: 23*TS - 4 + Math.round(Math.sin(now / 5200) * 26), y: 18*TS + 2 + (reduceMotion ? 0 : Math.round(Math.sin(now / 700))) });
 function drawNight(now, lv){
   if (!WATER_STARS){
     const r = rng(11); WATER_STARS = [];
@@ -687,13 +691,15 @@ function drawNight(now, lv){
   }
   const seen = (x, y) => DEBUG.mode || seenAt(Math.floor(x / TS), Math.floor(y / TS));
   const lights = nightLights().filter(L => seen(L.x, L.y));
+  const bt = boatAt(now), boatSeen = seen(bt.x + 8, bt.y + 6);
+  if (boatSeen){ ctx.save(); ctx.globalAlpha = lv; ctx.drawImage(BOAT, bt.x, bt.y); ctx.restore(); lights.push({ x: bt.x + 10, y: bt.y + 1, k: 'lamp' }); }
   ctx.save();
   ctx.globalCompositeOperation = 'multiply'; ctx.globalAlpha = lv;
   ctx.fillStyle = '#3d4f99'; ctx.fillRect(0, 0, MW*TS, MH*TS);
   ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'lighter';
   for (const L of lights){
     const fire = L.k === 'fire', flick = fire && !reduceMotion ? .85 + .15 * Math.sin(now / 90 + L.x) * Math.sin(now / 53 + L.y) : 1;
-    const rad = (fire ? 30 : L.k === 'win' || L.k === 'tent' ? 20 : 12) * flick, c = fire ? '255,140,50' : '255,200,100';
+    const rad = (fire ? 30 : L.k === 'win' || L.k === 'tent' || L.k === 'lamp' ? 20 : 12) * flick, c = fire ? '255,140,50' : '255,200,100';
     const g = ctx.createRadialGradient(L.x, L.y, 0, L.x, L.y, rad);
     g.addColorStop(0, `rgba(${c},${.5 * lv})`); g.addColorStop(1, `rgba(${c},0)`);
     ctx.fillStyle = g; ctx.fillRect(L.x - rad, L.y - rad, rad * 2, rad * 2);
@@ -710,7 +716,7 @@ function drawNight(now, lv){
   for (const L of lights) if (L.k === 'fire' && L.i) tile(ctx, L.i, L.px, L.py);
   ctx.globalAlpha = 1;
   for (const L of lights){
-    if (L.k === 'fire' || L.k === 'tent') continue;
+    if (L.k === 'fire' || L.k === 'tent' || L.k === 'lamp') continue;
     const [w, h] = L.k === 'win' ? [6, 6] : [2, 4];
     ctx.fillStyle = `rgba(254,231,97,${.85 * lv})`; ctx.fillRect(Math.round(L.x - w / 2), Math.round(L.y - h / 2), w, h);
   }

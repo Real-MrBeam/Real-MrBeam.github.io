@@ -1,5 +1,6 @@
 // Djuren i Glimmerdal: the music. A tiny chip synth in the browser (pulse waves, a triangle bass and noise drums, like an old
-// game console) plays two songs of our own that take turns: "Glimmerdal" and "Stjärnnatt". No sound files, nothing downloaded.
+// game console) plays four songs of our own: two for the day ("Glimmerdal" and "Ängsdans") and two for the night ("Stjärnnatt"
+// and "Månsken"). The songs of the day or of the night take turns. No sound files, nothing downloaded.
 //
 // A song is a list of bars. Each bar has a chord (the bass and the arpeggio are made from it) and a melody of 8 steps (eighth notes):
 // a note such as "E5", "-" holds the note before, "." is a rest. The drums are a pattern of 8 steps per bar.
@@ -7,7 +8,7 @@
 //   Musik.start()   starts (after a click, browsers do not allow sound before that)
 //   Musik.stop()
 //   Musik.paus(true | false)   pauses while the page is hidden
-//   Musik.natt(true | false)   at night only "Stjärnnatt" is played, by day the two songs take turns
+//   Musik.natt(true | false)   switches between the songs of the day and the songs of the night
 //   Musik.spela(ctx, dest, index, t0)   schedules one whole song on any AudioContext (also an OfflineAudioContext), returns its length
 (function (root) {
 'use strict';
@@ -16,7 +17,7 @@ const NOTE = { C: 0, 'C#': 1, D: 2, 'D#': 3, E: 4, F: 5, 'F#': 6, G: 7, 'G#': 8,
 const freq = name => { const m = /^([A-G]#?)(\d)$/.exec(name); return 440 * 2 ** ((NOTE[m[1]] + 12 * (+m[2] + 1) - 69) / 12); };
 const CHORD = {
   C: ['C', 'E', 'G'], G: ['G', 'B', 'D'], Am: ['A', 'C', 'E'], F: ['F', 'A', 'C'],
-  Dm: ['D', 'F', 'A'], E: ['E', 'G#', 'B'], Em: ['E', 'G', 'B'],
+  Dm: ['D', 'F', 'A'], E: ['E', 'G#', 'B'], Em: ['E', 'G', 'B'], D: ['D', 'F#', 'A'],
 };
 
 // ---------- the two songs
@@ -55,7 +56,42 @@ const STJARNNATT = (() => {
     ljud: { lead: { form: .5, vol: .075 }, arp: { form: .125, vol: .03, oktav: 5, takt: 2 }, bas: { vol: .18 }, eko: .32 },
   };
 })();
-const SONGS = [GLIMMERDAL, STJARNNATT];
+const ANGSDANS = (() => {
+  const intro = [bar('G', '. . . . . . . .'), bar('G', '. . . . . . . .')];
+  const A = [
+    bar('G', 'B5 - D6 - B5 G5 A5 B5'), bar('D', 'A5 - F#5 - D5 - A5 -'), bar('Em', 'G5 - B5 - E6 - D6 B5'), bar('C', 'C6 - - - G5 - . .'),
+    bar('G', 'B5 - D6 - G6 - F#6 E6'), bar('D', 'D6 - A5 - F#5 - A5 -'), bar('C', 'E6 - C6 - G5 - E6 -'), bar('D', 'D6 - - - - - . .'),
+  ];
+  const B = [
+    bar('Em', 'E6 - D6 B5 G5 - B5 -'), bar('C', 'C6 - E6 - G5 - E6 -'), bar('G', 'D6 - B5 - G5 - B5 D6'), bar('D', 'F#6 - - - D6 - A5 -'),
+    bar('Em', 'G5 - B5 - E6 - G6 F#6'), bar('C', 'E6 - C6 - G5 - A5 B5'), bar('D', 'C6 - D6 - E6 - F#6 -'), bar('D', 'A6 - - - G6 F#6 E6 D6'),
+  ];
+  const slut = [...A.slice(0, 7), bar('G', 'G6 - - - - - - -')];
+  return {
+    namn: 'Ängsdans', bpm: 128, tid: 'dag',
+    takter: [...intro, ...A, ...B, ...A, ...B, ...slut],
+    trummor: { k: 'k . . . k . k .', s: '. . s . . . s .', h: 'h h h h h h h h' },
+    ljud: { lead: { form: .5, vol: .085 }, arp: { form: .25, vol: .03, oktav: 4, takt: 1 }, bas: { vol: .22 }, eko: 0 },
+  };
+})();
+const MANSKEN = (() => {
+  const intro = [bar('Dm', '. . . . . . . .'), bar('Dm', '. . . . . . . .')];
+  const A = [bar('Dm', 'F5 - - - A5 - D6 -'), bar('F', 'C6 - - - A5 - F5 -'), bar('C', 'E5 - - - G5 - C6 -'), bar('Am', 'A5 - - - - - . .')];
+  const A2 = [bar('Dm', 'D6 - - - C6 - A5 -'), bar('F', 'A5 - C6 - F6 - - -'), bar('G', 'D6 - - - B5 - G5 -'), bar('E', 'G#5 - - - - - . .')];
+  const B = [
+    bar('F', 'C6 - A5 - F5 - A5 -'), bar('C', 'G5 - E5 - C6 - - -'), bar('Dm', 'D6 - F6 - A6 - F6 -'), bar('Am', 'E6 - - - C6 - A5 -'),
+    bar('F', 'A5 - C6 - F6 - E6 D6'), bar('G', 'D6 - B5 - G5 - B5 -'), bar('Am', 'C6 - - - E6 - A6 -'), bar('Am', 'A6 - - - - - . .'),
+  ];
+  const slut = [...A.slice(0, 3), bar('Dm', 'D6 - - - - - - -')];
+  return {
+    namn: 'Månsken', bpm: 76, tid: 'natt',
+    takter: [...intro, ...A, ...A2, ...B, ...A, ...slut],
+    trummor: { k: 'k . . . . . . .', s: '. . . . . . . .', h: '. . . . h . . .' },
+    ljud: { lead: { form: .25, vol: .07 }, arp: { form: .125, vol: .03, oktav: 4, takt: 2 }, bas: { vol: .17 }, eko: .3 },
+  };
+})();
+GLIMMERDAL.tid = 'dag'; STJARNNATT.tid = 'natt';
+const SONGS = [GLIMMERDAL, STJARNNATT, ANGSDANS, MANSKEN];
 
 // ---------- the instruments
 const waves = new WeakMap();
@@ -135,7 +171,7 @@ function spela(ctx, dest, index, t0) {
 }
 
 // ---------- the player on the page: the songs take turns with a short pause between them
-const P = { ctx: null, master: null, bus: null, next: 0, end: 0, timer: 0, on: false, vol: .35, natt: false };
+const P = { ctx: null, master: null, bus: null, next: { dag: 0, natt: 0 }, end: 0, timer: 0, on: false, vol: .35, natt: false };
 // Off and on again carries on in the same song where it stopped (the sound is only paused). Day and night switch the song at once.
 function start() {
   if (P.on) return;
@@ -156,9 +192,11 @@ function tick() {
     if (P.bus) P.bus.disconnect();
     P.bus = P.ctx.createGain(); P.bus.connect(P.master);
     const t0 = now + (P.end ? 2 : .1);
-    const index = P.natt ? 1 : P.next;
+    // the songs of the day, or of the night, take turns
+    const tid = P.natt ? 'natt' : 'dag', list = SONGS.map((s, i) => i).filter(i => SONGS[i].tid === tid);
+    const index = list[P.next[tid] % list.length];
+    P.next[tid] = (P.next[tid] + 1) % list.length;
     P.end = t0 + spela(P.ctx, P.bus, index, t0);
-    if (!P.natt) P.next = (P.next + 1) % SONGS.length;
   }
 }
 function stop() {
