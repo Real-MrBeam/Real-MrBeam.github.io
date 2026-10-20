@@ -1,0 +1,74 @@
+/* Star Wars theme: a dark space frame with a cyan edge, an angular heading font and the colours of the light sabers. */
+@import url("https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=block");
+
+:root {
+  --frame: #0b1030;
+  --frame-inner: #2ce8f5;
+  --accent: #1f3a8a;
+  --part-1: #1f6fd1; /* blue saber */
+  --part-2: #2e9e44; /* green saber */
+  --part-3: #8e3fc4; /* purple saber */
+  --grid: #d3e3f5;
+  --grid-edge: #8fb0d6;
+}
+
+/* Frame: dark space with small stars along the edge, a bright thin line inside */
+.frame {
+  border: 3mm solid #0b1030;
+  border-radius: 5mm;
+  box-shadow: inset 0 0 0 .8mm #fff, inset 0 0 0 1.5mm #2ce8f5, 0 0 0 .5mm #2ce8f5;
+  background: transparent;
+}
+.frame::before {
+  content: "";
+  position: absolute;
+  inset: -3mm;
+  border-radius: 5mm;
+  background:
+    radial-gradient(circle at 12% 30%, #fff 0 .35mm, transparent .4mm),
+    radial-gradient(circle at 37% 70%, #ffe81f 0 .3mm, transparent .35mm),
+    radial-gradient(circle at 63% 20%, #fff 0 .3mm, transparent .35mm),
+    radial-gradient(circle at 88% 60%, #b8f7ff 0 .35mm, transparent .4mm);
+  background-size: 41mm 41mm;
+  -webkit-mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  padding: 3mm;
+  pointer-events: none;
+}
+.corner { height: 15mm; width: 15mm; }
+
+.foot {
+  font-family: "Orbitron", sans-serif;
+  font-weight: 700;
+  font-size: 8pt;
+  letter-spacing: .4mm;
+  background: #0b1030;
+  color: #ffe81f;
+  border-radius: 1mm;
+  padding: 0 4mm;
+  bottom: 5.4mm;
+}
+
+.sheet-head h1 {
+  font-family: "Orbitron", sans-serif;
+  font-weight: 900;
+  font-size: 25pt;
+  letter-spacing: .6mm;
+  color: #0b1030;
+  text-shadow: .5mm .5mm 0 #ffe81f;
+}
+.sheet-head.small h1 { font-size: 15pt; text-shadow: .35mm .35mm 0 #ffe81f; }
+.sheet-head .sub { font-family: "Orbitron", sans-serif; font-weight: 700; font-size: 11pt; color: var(--accent); }
+.sheet-head .saber { height: 22mm; }
+.sheet-head.small .saber { height: 13mm; }
+
+.part h2 .tag {
+  font-family: "Orbitron", sans-serif;
+  font-weight: 700;
+  font-size: 11pt;
+  border-radius: 1.2mm;
+  letter-spacing: .3mm;
+  box-shadow: 0 0 1.6mm var(--part-color);
+}
+.part h2::after { height: .8mm; box-shadow: 0 0 1.2mm var(--part-color); opacity: .6; }
+.num { font-family: "Orbitron", sans-serif; border-radius: 1.5mm; }
