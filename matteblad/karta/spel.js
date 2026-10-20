@@ -624,6 +624,10 @@ function frame(now){
     else { p.vx *= .92; p.vy *= .92; const r = Math.max(1, Math.round(p.r * (1 - p.t / p.life))); ctx.fillStyle = p.t < p.life*.5 ? '#ffffff' : '#c0cbdc'; ctx.fillRect(Math.round(p.x) - r, Math.round(p.y) - r, r*2, r*2); }
   }
 
+  // natt: fades in and out when he sleeps in Hemmet
+  nightLevel += ((S.natt ? 1 : 0) - nightLevel) * Math.min(1, dt * 1.6);
+  if (Math.abs(nightLevel - (S.natt ? 1 : 0)) < .005) nightLevel = S.natt ? 1 : 0;
+  if (nightLevel > 0) drawNight(now, nightLevel);
   // etiketter i skärmskala
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   const sx = wx => wx * scaleDev - ox, sy = wy => wy * scaleDev - oy;
@@ -638,6 +642,67 @@ function frame(now){
     pill(sx(n.x*TS + 8), sy(n.y*TS + (n.labelAbove ? -1 : 31)), [n.name], { color: here ? '#fee761' : '#ffffff', edge: here ? '#feae34' : '#3a4466' });
   }
   requestAnimationFrame(frame);
+}
+
+/* ---------- natten ---------- */
+// At night the map turns blue (multiply), windows glow yellow, the torches flicker and stars twinkle in the water.
+// The lights are the tiles in LIGHT_TILES: where on the tile the light sits, and what kind of light it is.
+let nightLevel = 0, STATIC_LIGHTS = null, WATER_STARS = null;
+const LIGHT_TILES = { 84: [8, 8, 'win'], 88: [8, 8, 'win'], 'o:27,2': [8, 8, 'win'], 125: [8, 8, 'slit'], 51: [8, 10, 'small'], 55: [8, 10, 'small'], 'o:18,10': [8, 4, 'fire'] };
+const lightIn = i => { for (const j of Array.isArray(i) ? i : [i]) if (LIGHT_TILES[j]) return LIGHT_TILES[j]; return null; };
+function nightLights(){
+  if (!STATIC_LIGHTS){
+    STATIC_LIGHTS = [];
+    const add = (i, px, py) => { const L = lightIn(i); if (L) STATIC_LIGHTS.push({ x: px + L[0], y: py + L[1], k: L[2] }); };
+    for (const o of OBJ) add(o.i, o.x*TS, o.y*TS);
+    CASTLE.forEach((row, dy) => row.forEach((i, dx) => add(i, CASTLE_X + dx*TS, CASTLE_Y + dy*TS)));
+  }
+  const list = STATIC_LIGHTS.slice();
+  for (const p of PLOTS) if (builtShown(p)) plotTiles(p).forEach((row, dy) => row.forEach((i, dx) => { const L = lightIn(i); if (L) list.push({ x: (p.x + dx)*TS + L[0], y: (p.y + dy)*TS + L[1], k: L[2] }); }));
+  return list;
+}
+function drawNight(now, lv){
+  if (!WATER_STARS){
+    const r = rng(11); WATER_STARS = [];
+    for (let y = 0; y < MH; y++) for (let x = 0; x < MW; x++) if (M[y][x] === 'w' && r() < .3) WATER_STARS.push({ x: x*TS + 2 + Math.floor(r()*12), y: y*TS + 2 + Math.floor(r()*12), ph: r() * 6.3, sp: 500 + r() * 900 });
+  }
+  const seen = (x, y) => DEBUG.mode || seenAt(Math.floor(x / TS), Math.floor(y / TS));
+  const lights = nightLights().filter(L => seen(L.x, L.y));
+  ctx.save();
+  ctx.globalCompositeOperation = 'multiply'; ctx.globalAlpha = lv;
+  ctx.fillStyle = '#3d4f99'; ctx.fillRect(0, 0, MW*TS, MH*TS);
+  ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'lighter';
+  for (const L of lights){
+    const fire = L.k === 'fire', flick = fire && !reduceMotion ? .85 + .15 * Math.sin(now / 90 + L.x) * Math.sin(now / 53 + L.y) : 1;
+    const rad = (fire ? 30 : L.k === 'win' ? 20 : 12) * flick, c = fire ? '255,140,50' : '255,200,100';
+    const g = ctx.createRadialGradient(L.x, L.y, 0, L.x, L.y, rad);
+    g.addColorStop(0, `rgba(${c},${.5 * lv})`); g.addColorStop(1, `rgba(${c},0)`);
+    ctx.fillStyle = g; ctx.fillRect(L.x - rad, L.y - rad, rad * 2, rad * 2);
+  }
+  ctx.globalCompositeOperation = 'source-over';
+  for (const L of lights){
+    if (L.k === 'fire') continue;
+    const [w, h] = L.k === 'win' ? [6, 6] : [2, 4];
+    ctx.fillStyle = `rgba(254,231,97,${.85 * lv})`; ctx.fillRect(Math.round(L.x - w / 2), Math.round(L.y - h / 2), w, h);
+  }
+  for (const st of WATER_STARS){
+    if (!seen(st.x, st.y)) continue;
+    const a = reduceMotion ? .6 : Math.sin(now / st.sp + st.ph);
+    if (a < .35) continue;
+    ctx.fillStyle = `rgba(255,255,255,${Math.min(1, a) * lv})`; ctx.fillRect(st.x, st.y, 1, 1);
+    if (a > .9){ ctx.fillStyle = `rgba(255,255,255,${.5 * lv})`; ctx.fillRect(st.x - 1, st.y, 3, 1); ctx.fillRect(st.x, st.y - 1, 1, 3); }
+  }
+  ctx.restore();
+}
+// Sleeping in Hemmet turns day into night and night into day. The choice is saved.
+function sleepBlock(){
+  const here = S.node === 'hem' && !boy.route;
+  return `<div class="plot"><div><b>${S.natt ? 'Det är natt i Glimmerdal' : 'Stugan'}</b><span>${S.natt ? 'Stjärnorna lyser och fönstren glöder.' : 'Här kan du sova tills det blir natt.'}</span></div>${here ? `<button class="btn" type="button" data-sov="1">${S.natt ? 'Vakna' : 'Sov'}</button>` : ''}</div>`;
+}
+function sleep(){
+  S.natt = !S.natt; saveSoon();
+  toast(S.natt ? 'Du somnade i stugan och vaknade när månen var uppe.' : 'Du sov gott, och nu är det morgon igen.');
+  showNode();
 }
 
 /* ---------- panel ---------- */
@@ -666,6 +731,7 @@ function renderPanel(view){
     h = `<span class="tag">Du är här</span><h2>${esc(n.name)}</h2><p>${esc(n.text)}</p><div class="panel-body">`;
     for (const p of plots) h += plotBlock(p);
     if (stop) h += stopBlock(n.id);
+    if (n.id === 'hem') h += sleepBlock();
     if (FISKE.platser[n.id]) h += fishBlock(n.id);
     if (FISKE.platser[n.id] && FISKE.platser[n.id].lan) h += lanBlock(n.id);
     for (const r of LOCKA) if (r.plats === n.id) h += lureBlock(r);
@@ -722,6 +788,7 @@ panel.addEventListener('click', ev => {
   else if (b.dataset.slott) startCount();
   else if (b.dataset.kista) openChest();
   else if (b.dataset.fiska) startFishing(b.dataset.fiska);
+  else if (b.dataset.sov) sleep();
   else if (b.dataset.lan) talkFisher(b.dataset.lan);
   else if (b.dataset.locka) lure(b.dataset.locka);
   else if (b.dataset.redskap !== undefined){ fishing.redskap = b.dataset.redskap; renderFishing(); }
@@ -1050,7 +1117,7 @@ function applyReal(events){
 // encrypted in the page (#lasNyckel) and opens with the password, like the portraits. Without the key nothing is saved.
 // Stars and stardust are never saved: they are counted from the runes and scrolls. Only what he has spent is saved.
 const SAVE = { repo: '', file: '', key: '', sha: null, timer: 0, off: false, loaded: false };
-const SAVED_FIELDS = ['node', 'built', 'valda', 'saker', 'steg', 'handlat', 'djur', 'fram', 'stopp', 'hittat', 'spent', 'kistor', 'agnAnvant', 'fiskbok', 'namn', 'bytt', 'intro'];
+const SAVED_FIELDS = ['node', 'built', 'valda', 'saker', 'steg', 'handlat', 'djur', 'fram', 'stopp', 'hittat', 'spent', 'kistor', 'agnAnvant', 'fiskbok', 'namn', 'bytt', 'intro', 'natt'];
 const b64 = text => { const bytes = new TextEncoder().encode(text); let s = ''; for (const b of bytes) s += String.fromCharCode(b); return btoa(s); };
 const unb64 = data => new TextDecoder().decode(Uint8Array.from(atob(data.replace(/\s/g, '')), c => c.charCodeAt(0)));
 function spend(n){ S.coins -= n; S.spent += n; }
