@@ -590,6 +590,11 @@
       "text": "En hästsko av silver, blank som bäckvatten.",
       "typ": "fynd",
       "varde": 6
+    },
+    "flojt": {
+      "namn": "Flöjt",
+      "text": "En liten flöjt av vass. Nattfiskaren vet inte vad den är till, men han ler lite när han säljer den.",
+      "typ": "verktyg"
     }
   },
   "bygg": {
@@ -2153,7 +2158,8 @@
     },
     "saljer": {
       "metspo": 5,
-      "lykta": 6
+      "lykta": 6,
+      "flojt": 4
     },
     "kopt": "Använd det väl. Fisken nappar bäst när man har tålamod."
   }

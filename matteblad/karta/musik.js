@@ -74,20 +74,21 @@ const ANGSDANS = (() => {
     ljud: { lead: { form: .5, vol: .085 }, arp: { form: .25, vol: .03, oktav: 4, takt: 1 }, bas: { vol: .22 }, eko: 0 },
   };
 })();
+// Månsken: still the night, but lighter and more hopeful (Peter 2026-10-20): F major, a calm tempo, a melody that climbs
 const MANSKEN = (() => {
-  const intro = [bar('Dm', '. . . . . . . .'), bar('Dm', '. . . . . . . .')];
-  const A = [bar('Dm', 'F5 - - - A5 - D6 -'), bar('F', 'C6 - - - A5 - F5 -'), bar('C', 'E5 - - - G5 - C6 -'), bar('Am', 'A5 - - - - - . .')];
-  const A2 = [bar('Dm', 'D6 - - - C6 - A5 -'), bar('F', 'A5 - C6 - F6 - - -'), bar('G', 'D6 - - - B5 - G5 -'), bar('E', 'G#5 - - - - - . .')];
+  const intro = [bar('F', '. . . . . . . .'), bar('F', '. . . . . . . .')];
+  const A = [bar('F', 'A5 - C6 - F6 - E6 C6'), bar('C', 'E6 - - - D6 - C6 -'), bar('Dm', 'D6 - F6 - A6 - G6 F6'), bar('C', 'E6 - - - - - . .')];
+  const A2 = [bar('F', 'A5 - C6 - F6 - G6 A6'), bar('Am', 'G6 - E6 - C6 - E6 -'), bar('G', 'D6 - G6 - B5 - D6 -'), bar('C', 'C6 - - - - - . .')];
   const B = [
-    bar('F', 'C6 - A5 - F5 - A5 -'), bar('C', 'G5 - E5 - C6 - - -'), bar('Dm', 'D6 - F6 - A6 - F6 -'), bar('Am', 'E6 - - - C6 - A5 -'),
-    bar('F', 'A5 - C6 - F6 - E6 D6'), bar('G', 'D6 - B5 - G5 - B5 -'), bar('Am', 'C6 - - - E6 - A6 -'), bar('Am', 'A6 - - - - - . .'),
+    bar('Dm', 'F6 - E6 D6 A5 - D6 -'), bar('Am', 'E6 - C6 - A5 - C6 E6'), bar('F', 'F6 - - - C6 - A5 -'), bar('C', 'G5 - C6 - E6 - G6 -'),
+    bar('Dm', 'A6 - G6 F6 D6 - F6 -'), bar('G', 'G6 - D6 - B5 - D6 -'), bar('C', 'E6 - G6 - C6 - E6 -'), bar('C', 'D6 - - - E6 - G6 -'),
   ];
-  const slut = [...A.slice(0, 3), bar('Dm', 'D6 - - - - - - -')];
+  const slut = [...A.slice(0, 3), bar('F', 'F6 - - - - - - -')];
   return {
-    namn: 'Månsken', bpm: 76, tid: 'natt',
+    namn: 'Månsken', bpm: 88, tid: 'natt',
     takter: [...intro, ...A, ...A2, ...B, ...A, ...slut],
     trummor: { k: 'k . . . . . . .', s: '. . . . . . . .', h: '. . . . h . . .' },
-    ljud: { lead: { form: .25, vol: .07 }, arp: { form: .125, vol: .03, oktav: 4, takt: 2 }, bas: { vol: .17 }, eko: .3 },
+    ljud: { lead: { form: .25, vol: .07 }, arp: { form: .125, vol: .028, oktav: 4, takt: 1 }, bas: { vol: .17 }, eko: .25 },
   };
 })();
 GLIMMERDAL.tid = 'dag'; STJARNNATT.tid = 'natt';
