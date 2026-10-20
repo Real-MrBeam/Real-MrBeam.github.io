@@ -508,6 +508,16 @@
       "text": "En stor, rostig nyckel. Vad den går till vet ingen.",
       "typ": "fynd",
       "varde": 2
+    },
+    "metspo": {
+      "namn": "Metspö",
+      "text": "Ett enkelt spö av hassel med flöte och krok. Med det kan du fiska vid broarna.",
+      "typ": "verktyg"
+    },
+    "lykta": {
+      "namn": "Lykta",
+      "text": "En liten lykta som lyser upp runt dig när det är mörkt.",
+      "typ": "verktyg"
     }
   },
   "bygg": {
@@ -1924,7 +1934,6 @@
       "hav",
       "snorkel"
     ],
-    "metspo": "Metspö",
     "djur": [
       {
         "djur": "nacken",
@@ -2019,7 +2028,8 @@
       "agnFelPlats": "Agnet lockar något, men inte här. Det finns nog ett annat vatten där det passar bättre.",
       "agnFelRedskap": "Något nere i vattnet är sugen på agnet, men det går inte att få upp det med det här redskapet.",
       "platsFelAgn": "Något rör sig nere i vattnet här, men det vill ha något annat än det du erbjuder.",
-      "fynd": "Något tungt hänger på kroken. Det är ingen fisk."
+      "fynd": "Något tungt hänger på kroken. Det är ingen fisk.",
+      "ingetSpo": "Du har inget att fiska med. Någon i skogen sägs sälja spön, men bara på natten."
     },
     "fynd": [
       "stovel",
@@ -2047,8 +2057,8 @@
     "knapp": "Prata med nattfiskaren",
     "rubrikDag": "Tältet är stängt",
     "rubrikNatt": "Det lyser i tältet",
-    "hej": "God natt, eller god kväll, beroende på hur man ser det. Jag köper fisk och fina fynd. Men bara en av varje sort, jag har inte plats för mer.",
-    "inget": "Du har inget jag vill köpa just nu. Kom tillbaka när du har fiskat eller hittat något fint.",
+    "hej": "God natt, eller god kväll, beroende på hur man ser det. Jag köper fisk, men bara en av varje sort. Och jag har lite att sälja.",
+    "inget": "Du har ingen fisk jag vill köpa just nu. Men titta gärna på det jag säljer.",
     "tack": "Tack. Den tar jag väl hand om.",
     "fisk": {
       "abborre": 1,
@@ -2058,6 +2068,11 @@
       "groda": 1,
       "harr": 3,
       "regnbage": 3
-    }
+    },
+    "saljer": {
+      "metspo": 5,
+      "lykta": 6
+    },
+    "kopt": "Använd det väl. Fisken nappar bäst när man har tålamod."
   }
 }

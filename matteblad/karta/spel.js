@@ -682,6 +682,12 @@ function drawNight(now, lv){
     g.addColorStop(0, `rgba(${c},${.5 * lv})`); g.addColorStop(1, `rgba(${c},0)`);
     ctx.fillStyle = g; ctx.fillRect(L.x - rad, L.y - rad, rad * 2, rad * 2);
   }
+  if (S.saker.includes('lykta')){
+    const bx = boy.x + 8, by = boy.y + 4, rad = 34 + (reduceMotion ? 0 : Math.sin(now / 300) * 2);
+    const g = ctx.createRadialGradient(bx, by, 0, bx, by, rad);
+    g.addColorStop(0, `rgba(255,210,120,${.55 * lv})`); g.addColorStop(1, 'rgba(255,210,120,0)');
+    ctx.fillStyle = g; ctx.fillRect(bx - rad, by - rad, rad * 2, rad * 2);
+  }
   ctx.globalCompositeOperation = 'source-over';
   // the burning fires on top of the put-out ones, fading in with the night
   ctx.globalAlpha = lv;
@@ -723,15 +729,27 @@ function tentBlock(){
 function tradeOffers(){
   const H = berattelse.handel, out = [];
   for (const [id, n] of Object.entries(H.fisk)) if (S.fiskbok[id] > 0 && !S.salt['fisk:' + id]) out.push({ key: 'fisk:' + id, namn: FISKE.fiskar[id].namn, text: FISKE.fiskar[id].text, n, sell: () => { S.fiskbok[id]--; renderFishBook(); } });
-  for (const id of S.saker) if (SAKER[id] && SAKER[id].typ === 'fynd' && !S.salt['fynd:' + id]) out.push({ key: 'fynd:' + id, namn: SAKER[id].namn, text: SAKER[id].text, n: SAKER[id].varde, sell: () => { S.saker = S.saker.filter(x => x !== id); renderPack(); } });
   return out;
 }
 function startTrade(seen){
   const H = berattelse.handel, offers = tradeOffers();
+  const wares = Object.entries(H.saljer || {}).filter(([id]) => !S.saker.includes(id));
   startDialog([{ p: H.person, t: offers.length ? H.hej : H.inget }], () => [
+    ...wares.map(([id, n]) => ({ label: `Köp ${esc(SAKER[id].namn.toLowerCase())} ${price(n)}<small>${esc(SAKER[id].text)}</small>`, poor: S.coins < n, run: () => buyFrom(id, n) })),
     ...offers.map(o => ({ label: `Sälj ${esc(o.namn.toLowerCase())} ${price(o.n)}<small>${esc(o.text)}</small>`, run: () => sellTo(o) })),
     { label: 'Tillbaka till kartan', alt: true, run: toNode },
   ], seen);
+}
+function buyFrom(id, n){
+  if (S.saker.includes(id)) return;
+  if (S.coins < n){ toast(berattelse.dialog.ingaStoft.replace('{n}', n - S.coins)); return; }
+  spend(n); updateHud('coins'); S.saker.push(id); renderPack(); saveSoon();
+  sparkle(boy.x + 8, boy.y + 2, 18);
+  toast(`Du köpte ${SAKER[id].namn.toLowerCase()}!`);
+  startDialog([{ p: berattelse.handel.person, t: berattelse.handel.kopt }], () => [
+    { label: 'Något mer', run: () => startTrade(true) },
+    { label: 'Tillbaka till kartan', alt: true, run: toNode },
+  ]);
 }
 function sellTo(o){
   if (S.salt[o.key]) return;
@@ -739,7 +757,7 @@ function sellTo(o){
   sparkle(boy.x + 8, boy.y + 2, 18, '#2ce8f5');
   toast(`Du sålde ${o.namn.toLowerCase()} för ${o.n} stjärnstoft.`);
   startDialog([{ p: berattelse.handel.person, t: berattelse.handel.tack }], () => [
-    { label: 'Sälja något mer', run: () => startTrade(true) },
+    { label: 'Något mer', run: () => startTrade(true) },
     { label: 'Tillbaka till kartan', alt: true, run: toNode },
   ]);
 }
@@ -1112,7 +1130,7 @@ function startCount(){
 function renderPack(){
   const own = S.saker.filter(id => SAKER[id] && SAKER[id].typ !== 'djur' && !S.agnAnvant.includes(id)); // used baits are gone
   $('#pack').innerHTML = own.length
-    ? own.map(id => `<li><span><b>${esc(SAKER[id].namn)}</b> ${esc(SAKER[id].text)}</span>${SAKER[id].typ === 'fynd' ? `<span class="st">${price(SAKER[id].varde)}</span>` : ''}</li>`).join('')
+    ? own.map(id => `<li><span><b>${esc(SAKER[id].namn)}</b> ${esc(SAKER[id].text)}</span></li>`).join('')
     : '<li><span>Inget ännu. Bygg något och få en gåva!</span></li>';
 }
 
@@ -1277,10 +1295,11 @@ function openModal(steps, done){
 // otherwise it is an ordinary fish for the fish book.
 const FISKE = berattelse.fiske;
 let fishing = null; // { plats, redskap, agn, phase: 'val' | 'vanta' | 'nu', timers }
-const myTools = () => FISKE.redskap.filter(id => S.saker.includes(id));
+const myTools = () => ['metspo', ...FISKE.redskap].filter(id => S.saker.includes(id));
 const myBaits = () => S.saker.filter(id => SAKER[id] && SAKER[id].typ === 'agn' && !S.agnAnvant.includes(id));
 function fishBlock(id){
   const T = FISKE.texter, here = S.node === id && !boy.route;
+  if (!myTools().length) return `<div class="plot"><div><b>${esc(T.rubrik)}</b><span>${esc(T.ingetSpo)}</span></div></div>`;
   return `<div class="plot"><div><b>${esc(T.rubrik)}</b></div>${here ? `<button class="btn" type="button" data-fiska="${id}">${esc(T.knapp)}</button>` : ''}</div>`;
 }
 // A fisherman on a bridge lends a tool for a fish of a kind he has caught there
@@ -1297,7 +1316,7 @@ function talkFisher(id){
   openModal([{ icon: FISH_BIG, title: L.rubrik, text: L.tack, reward: `${SAKER[L.ger].namn} lades i väskan.`, button: 'Till kartan' }], () => showNode());
 }
 function startFishing(id){
-  fishing = { plats: id, redskap: 'metspo', agn: '', phase: 'val', timers: [] };
+  fishing = { plats: id, redskap: myTools()[0], agn: '', phase: 'val', timers: [] };
   renderFishing();
 }
 function stopFishing(){ if (fishing) fishing.timers.forEach(clearTimeout); fishing = null; }
@@ -1310,7 +1329,7 @@ function renderFishing(){
     const tool = (id, name) => `<button class="btn${fz.redskap === id ? '' : ' alt'}" type="button" data-redskap="${id}">${esc(name)}</button>`;
     const bait = (id, name) => `<button class="btn${fz.agn === id ? '' : ' alt'}" type="button" data-agn="${id}">${esc(name)}</button>`;
     h += `<p>${esc(T.valj)}</p><div class="panel-body">
-      <div><p class="sub">Redskap</p><div class="roads">${tool('metspo', FISKE.metspo)}${myTools().map(id => tool(id, SAKER[id].namn)).join('')}</div></div>
+      <div><p class="sub">Redskap</p><div class="roads">${myTools().map(id => tool(id, SAKER[id].namn)).join('')}</div></div>
       <div><p class="sub">Agn</p><div class="roads">${bait('', T.utanAgn)}${myBaits().map(id => bait(id, SAKER[id].namn)).join('')}</div></div>
       <div class="roads"><button class="btn" type="button" data-kasta="1">${esc(T.kasta)}</button><button class="btn alt" type="button" data-back="1">${esc(T.tillbaka)}</button></div></div>`;
   } else if (fz.phase === 'vanta' || fz.phase === 'nu'){
