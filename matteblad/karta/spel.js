@@ -774,6 +774,7 @@ function drawNight(now, lv){
 }
 // Sleeping in Hemmet turns day into night and night into day. The choice is saved.
 function sleepBlock(){
+  if (!TEST) return '';   // the night is not ready yet: sleeping only works in debug mode (Peter 2026-10-20)
   const here = S.node === 'hem' && !boy.route;
   return `<div class="plot"><div><b>${S.natt ? 'Det är natt i Glimmerdal' : 'Stugan'}</b><span>${S.natt ? 'Sov tills det blir morgon.' : 'Sov tills det blir natt.'}</span></div>${here ? '<button class="btn" type="button" data-sov="1">Sov</button>' : ''}</div>`;
 }
@@ -1323,10 +1324,11 @@ const KAT = {
   sarskilt: { namn: 'Särskilt', ico: sprite(["........", ".yy.....", "y..y....", "y..yyyyy", ".yy..y.y", "........", "........", "........"], { y:'#fee761' }) },
   redskap: { namn: 'Redskap', ico: sprite(["....ss..", "....ss..", "....ss..", "....ss..", "s...ss..", "ss..ss..", ".ssss...", "..ss...."], { s:'#c0cbdc' }) },
   agn: { namn: 'Agn', ico: sprite(["........", "pp......", "ppp...pp", ".ppp.ppp", "..ppppp.", "...ppp..", "........", "........"], { p:'#f6757a' }) },
+  lockbete: { namn: 'Lockbeten', ico: sprite(["........", "..oooo..", ".owwwwo.", ".oyyyyo.", ".oyYyyo.", ".oyyyyo.", "..oooo..", "........"], { o:'#8b5a3c', w:'#ead4aa', y:'#feae34', Y:'#fee761' }) },
   klader: { namn: 'Kläder', ico: sprite(["........", "...yy...", "..yyyy..", "..yyyy..", "..RRRR..", "yyyyyyyy", ".yyyyyy.", "........"], { y:'#f4d27a', R:'#e43b44' }) },
   fynd: { namn: 'Fynd', ico: sprite(["........", ".cccccc.", "cwCccCcc", "cCccccCc", ".cCccCc.", "..cCCc..", "...cc...", "........"], { c:'#2ce8f5', C:'#0e5cae', w:'#ffffff' }) },
 };
-const KAT_ORDER = ['sarskilt', 'redskap', 'agn', 'klader', 'fynd'];
+const KAT_ORDER = ['sarskilt', 'redskap', 'agn', 'lockbete', 'klader', 'fynd'];
 const katOf = id => SPECIAL.includes(id) ? 'sarskilt' : SAKER[id].typ === 'verktyg' ? 'redskap' : SAKER[id].typ;
 let KAT_URL = null;
 const katIcon = k => { if (!KAT_URL) KAT_URL = Object.fromEntries(Object.entries(KAT).map(([key, v]) => [key, iconURL(v.ico, 3)])); return KAT_URL[k]; };
@@ -1429,6 +1431,7 @@ function applySaved(data){
   const shownHere = S.lasta || [];
   for (const k of SAVED_FIELDS) if (data[k] !== undefined) S[k] = data[k];
   if (!S.pa) S.pa = {};
+  if (!TEST) S.natt = false;
   if (data.lyktaTand){ S.tant = { ...(S.tant || {}), lykta: true }; }   // the lantern was saved on its own before
   buildBoy(S.pa); musicSync(); renderLetters();
   S.lasta = [...new Set([...(S.lasta || []), ...shownHere])];   // stories shown before the saved game had loaded stay seen
@@ -1573,7 +1576,8 @@ function renderFishing(){
 }
 function cast(){
   const fz = fishing; fz.phase = 'vanta'; renderFishing();
-  const wait = 1500 + Math.random() * 2500;
+  // each place has its own wait (fiske.platser vanta: shortest and longest, ms): quick in the rapids, slow in the reeds
+  const [lo, hi] = FISKE.platser[fz.plats].vanta || [1500, 4000], wait = lo + Math.random() * (hi - lo);
   fz.timers.push(setTimeout(() => { fz.phase = 'nu'; renderFishing(); }, wait));
   fz.timers.push(setTimeout(() => { if (fz.phase === 'nu') miss(FISKE.texter.sent); }, wait + 1100));
 }
@@ -1606,8 +1610,9 @@ function pull(){
       const id = finds[Math.floor(Math.random() * finds.length)]; S.saker.push(id); renderPack(); saveSoon(); stopFishing();
       return openModal([{ icon: FISH_BIG, title: SAKER[id].namn, text: `${FISKE.texter.fynd} ${SAKER[id].text}`, reward: SAKER[id].typ === 'klader' ? 'Lades i väskan. Du kan ta på den där.' : 'Lades i väskan.', button: 'Till kartan' }], () => showNode());
     }
+    // the list of a place repeats a fish as many times as it is common there; a kind he has not caught is a little more likely
     const list = FISKE.platser[fz.plats].fiskar, fresh = list.filter(id => S.fiskbok[id] === undefined);
-    const pool = fresh.length && Math.random() < .6 ? fresh : list, id = pool[Math.floor(Math.random() * pool.length)];
+    const pool = fresh.length && Math.random() < .35 ? fresh : list, id = pool[Math.floor(Math.random() * pool.length)];
     const isNew = S.fiskbok[id] === undefined; S.fiskbok[id] = (S.fiskbok[id] || 0) + 1; renderFishBook();
     const fish = FISKE.fiskar[id];
     step = { icon: catchIcon(id), title: fish.namn, text: fish.text, reward: isNew ? 'Ny i fiskboken.' : `Du har fått ${S.fiskbok[id]} sådana nu.`, button: 'Till kartan' };

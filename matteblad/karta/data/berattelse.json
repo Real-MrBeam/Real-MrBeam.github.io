@@ -323,7 +323,7 @@
     "honungsburk": {
       "namn": "Honungsburk",
       "text": "Honung från Bosses bin, söt och tjock. Björnarna i skogen sägs inte kunna motstå den, och de är inte ensamma om det.",
-      "typ": "agn"
+      "typ": "lockbete"
     },
     "humleagg": {
       "namn": "Humleägg",
@@ -369,7 +369,7 @@
     "appelpaj": {
       "namn": "Äppelpaj",
       "text": "Nybakad och fortfarande ljummen. Björnarna i skogen följer doften långa vägar.",
-      "typ": "agn"
+      "typ": "lockbete"
     },
     "flotte": {
       "namn": "Flotte",
@@ -1975,8 +1975,10 @@
       "sodrabron": {
         "fiskar": [
           "abborre",
+          "abborre",
+          "abborre",
           "gadda",
-          "krafta"
+          "gadda"
         ],
         "lan": {
           "rubrik": "En gammal fiskare sitter på bron",
@@ -1986,10 +1988,16 @@
           "saknas": "Den gamla fiskaren fnyser. 'Fångar du en gädda härifrån, så lånar jag ut min håv.'",
           "tack": "Den gamla fiskaren skrattar och slår sig på knät. 'En gädda! Då är håven din. Jag fiskar bättre utan.'",
           "klar": "Du har redan en håv."
-        }
+        },
+        "vanta": [
+          2500,
+          5500
+        ]
       },
       "norrabron": {
         "fiskar": [
+          "oring",
+          "oring",
           "oring",
           "harr",
           "regnbage"
@@ -2002,14 +2010,23 @@
           "saknas": "Fiskaren nickar mot forsen. 'Ta upp en harr med metspöet, så ska du få låna ett riktigt flugspö av mig.'",
           "tack": "Fiskaren vänder fisken i handen och ler. 'Det där var en fin harr. Här, ta mitt flugspö. Jag har fler hemma.'",
           "klar": "Du har redan ett flugspö."
-        }
+        },
+        "vanta": [
+          1200,
+          3000
+        ]
       },
       "vassen": {
         "fiskar": [
-          "abborre",
-          "gadda",
+          "krafta",
+          "krafta",
           "groda",
-          "krafta"
+          "groda",
+          "gadda"
+        ],
+        "vanta": [
+          3500,
+          7500
         ]
       }
     },
@@ -2048,7 +2065,6 @@
         ],
         "agn": [
           "snackor",
-          "honungsburk",
           "trolldryck"
         ],
         "text": "Vassen böjer sig. En puckel, och sedan en till, glider fram genom vattnet. Ett vänligt huvud på en lång hals tittar upp och nosar på agnet."
