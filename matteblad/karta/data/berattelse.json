@@ -303,196 +303,100 @@
     }
   },
   "saker": {
-    "kristallykta": {
-      "namn": "Kristallykta",
-      "pris": 8,
-      "text": "En lykta av kristall som lyser upp mörka platser.",
-      "typ": "verktyg"
-    },
     "geleagg": {
       "namn": "Gelé-ägg",
-      "pris": 12,
       "text": "Kläcks till Gelé, en grön geleklump som studsar efter dig vart du går.",
       "typ": "djur",
       "djur": "gele"
     },
     "honungsburk": {
       "namn": "Honungsburk",
-      "pris": 6,
       "text": "Honung från Bosses bin, söt och tjock. Björnarna i skogen sägs inte kunna motstå den, och de är inte ensamma om det.",
       "typ": "agn"
     },
     "humleagg": {
       "namn": "Humleägg",
-      "pris": 12,
       "text": "Kläcks till Bumbus, en tjock humla med vingar som glittrar.",
       "typ": "djur",
       "djur": "bumbus"
     },
-    "hopprep": {
-      "namn": "Hopprep",
-      "pris": 5,
-      "text": "Gremlinen i tornets källare har tråkigt och vill gärna hoppa rep.",
-      "typ": "verktyg"
-    },
     "jattemorot": {
       "namn": "Jättemorot",
-      "pris": 6,
       "text": "Haren Hopp följer med vem som helst för en morot av den här storleken.",
       "typ": "djur",
       "djur": "hare"
     },
-    "fropase": {
-      "namn": "Fröpåse",
-      "pris": 4,
-      "text": "Sätt fröna på en tom plats, så växer en blomma upp på kartan.",
-      "typ": "verktyg"
-    },
-    "kikare": {
-      "namn": "Kikare",
-      "pris": 8,
-      "text": "Med den ser du var de gömda kistorna finns på kartan.",
-      "typ": "verktyg"
-    },
     "fagelfro": {
       "namn": "Fågelfrö",
-      "pris": 5,
       "text": "Lockar fram kråkan Kaxig, som bestämmer sig för att följa med.",
       "typ": "djur",
       "djur": "kraka"
     },
     "glodsvamp": {
       "namn": "Glödsvamp",
-      "pris": 6,
       "text": "Lyser som en lykta och lockar fram djur i mörkt vatten.",
       "typ": "agn"
     },
     "sporpase": {
       "namn": "Sporpåse",
-      "pris": 10,
       "text": "Ur påsen växer Gnissel, en liten gremlin som samlar på glitter.",
       "typ": "djur",
       "djur": "gnissel"
     },
-    "flygdryck": {
-      "namn": "Flygdryck",
-      "pris": 12,
-      "text": "Några klunkar, och du flyger över älven till Fågelön, en hemlig plats.",
-      "typ": "verktyg"
-    },
     "katten": {
       "namn": "Skuggkatt",
-      "pris": 15,
       "text": "Den svarta katten Sot hoppar upp på din axel och stannar där.",
       "typ": "djur",
       "djur": "sot"
     },
-    "stenhacka": {
-      "namn": "Stenhacka",
-      "pris": 10,
-      "text": "Hackar sönder stenraset som spärrar genvägen mellan Höstskogen och Tornet.",
-      "typ": "verktyg"
-    },
     "klippan": {
       "namn": "Stenväsen",
-      "pris": 15,
       "text": "Det lilla stenväsendet Klippan rullar efter dig vart du går.",
       "typ": "djur",
       "djur": "klippan"
     },
     "appelpaj": {
       "namn": "Äppelpaj",
-      "pris": 6,
       "text": "Nybakad och fortfarande ljummen. Björnarna i skogen följer doften långa vägar.",
       "typ": "agn"
     },
-    "appelkorg": {
-      "namn": "Äppelkorg",
-      "pris": 4,
-      "text": "En korg röda äpplen att ge bort till någon som förtjänar ett tack.",
-      "typ": "verktyg"
-    },
     "flotte": {
       "namn": "Flotte",
-      "pris": 12,
       "text": "Tar dig nedför älven till ett fiskeställe. Om nätterna hörs något som liknar fiol från älven.",
-      "typ": "verktyg"
-    },
-    "fagelholk": {
-      "namn": "Fågelholk",
-      "pris": 5,
-      "text": "Häng upp den, så flyttar en ovanlig fågel in på kartan.",
       "typ": "verktyg"
     },
     "snorkel": {
       "namn": "Snorkel",
-      "pris": 8,
       "text": "Med den kan du dyka efter skatter i sjön. Under bron glittrar något i djupet, men ingen vill dyka dit.",
-      "typ": "verktyg"
-    },
-    "badring": {
-      "namn": "Badring",
-      "pris": 5,
-      "text": "Ser bra ut på bild. Mer än så gör den inte.",
       "typ": "verktyg"
     },
     "roddbat": {
       "namn": "Roddbåt",
-      "pris": 14,
       "text": "Tar dig mitt ut i sjön, där de ovanliga fiskarna finns. Folk säger att något stort simmar runt i sjön.",
-      "typ": "verktyg"
-    },
-    "kompass": {
-      "namn": "Kompass",
-      "pris": 6,
-      "text": "Visar vägen till närmaste stängda port.",
       "typ": "verktyg"
     },
     "flugspo": {
       "namn": "Flugspö",
-      "pris": 10,
       "text": "Fångar öring och harr i strömmen under broarna. Ibland låter forsen nästan som musik.",
       "typ": "verktyg"
     },
     "flugask": {
       "namn": "Flugask",
-      "pris": 6,
       "text": "Ovanliga flugor som fisken regnbåge inte kan motstå.",
       "typ": "agn"
     },
     "hav": {
       "namn": "Håv",
-      "pris": 6,
       "text": "Fångar grodor och småfisk vid stranden. Det sägs att det lyser i djupet om natten.",
       "typ": "verktyg"
     },
     "kraftbur": {
       "namn": "Kräftbur",
-      "pris": 10,
       "text": "Läggs ut på kvällen och fångar kräftor medan du sover. Vassen vid sjön rör sig ibland fast det är vindstilla.",
-      "typ": "verktyg"
-    },
-    "stjarnkikare": {
-      "namn": "Stjärnkikare",
-      "pris": 10,
-      "text": "Visar stjärnfall på kartan, och där de landar ligger det glitter kvar.",
-      "typ": "verktyg"
-    },
-    "stjarnkarta": {
-      "namn": "Stjärnkarta",
-      "pris": 8,
-      "text": "En inramad karta över himlen, som den såg ut innan stjärnorna föll. Den får plats i prisskåpet.",
-      "typ": "verktyg"
-    },
-    "brevduva": {
-      "namn": "Brevduva",
-      "pris": 10,
-      "text": "Flyger med brev till slottet, och vakten skickar tillbaka en hemlighet.",
       "typ": "verktyg"
     },
     "duvanpip": {
       "namn": "Stjärnduva",
-      "pris": 15,
       "text": "Duvan Pip slår sig ner på din keps och följer med.",
       "typ": "djur",
       "djur": "pip"
@@ -529,7 +433,6 @@
     },
     "ostbitar": {
       "namn": "Ostbitar",
-      "pris": 6,
       "text": "Osttärningar från idrottsfikat. De luktar starkt, och inte bara för människor.",
       "typ": "agn"
     },
@@ -537,6 +440,12 @@
       "namn": "Trolldryck",
       "text": "En liten flaska som bubblar av sig själv. Fråga inte vad som är i den.",
       "typ": "agn"
+    },
+    "stjarnuggla": {
+      "namn": "Stjärnuggla",
+      "text": "En liten uggla som flög in genom kupolen och inte vill flytta.",
+      "typ": "djur",
+      "djur": "hoo"
     }
   },
   "bygg": {
@@ -553,11 +462,10 @@
           "forlorare": "Stenar i stället för bin, alltså. Jag flyttar kuporna över ån, men bina kommer att sura i en vecka. Jag också.",
           "forlorarePerson": "bosse",
           "tack": "Tack. Vänta tills det skymmer, så börjar stenarna glöda. Det är inget trick, den här gången.",
-          "butikHej": "Det som blir över efter föreställningarna hamnar här. En lykta av kristall, till exempel, och ett ägg som egentligen inte borde finnas.",
-          "saljer": [
-            "kristallykta",
+          "gava": [
             "geleagg"
-          ]
+          ],
+          "gavaHej": "Det som blir över efter föreställningarna hamnar hos mig. Det här ägget borde egentligen inte finnas, så det är bäst att du tar hand om det."
         },
         {
           "id": "bikupor",
@@ -570,11 +478,11 @@
           "forlorare": "Inga stenar, alltså. Då får publiken på marknaden nöja sig med mina vanliga trick. Men hälsa bina att de är skyldiga mig en föreställning.",
           "forlorarePerson": "mira",
           "tack": "Tack. Bina säger ingenting, men de arbetar hårdare när de är nöjda. Det märks på honungen.",
-          "butikHej": "Humlorna här är inte riktigt som andra humlor, men det är en lång historia. Jag har honung på burk och ett humleägg.",
-          "saljer": [
+          "gava": [
             "honungsburk",
             "humleagg"
-          ]
+          ],
+          "gavaHej": "Humlorna här är inte riktigt som andra humlor, men det är en lång historia. Välj en gåva som tack: en burk honung eller ett humleägg."
         }
       ]
     },
@@ -616,11 +524,10 @@
           "kostnad": 12,
           "byggnad": "hinderbana",
           "tack": "Perfekt. Nu får rasterna äntligen lite fart, och jag slipper höra att det är tråkigt ute.",
-          "butikHej": "Jag har lite utrustning över: ett hopprep och några ostbitar från fikat. Inget av det är farligt, i alla fall inte särskilt.",
-          "saljer": [
-            "hopprep",
+          "gava": [
             "ostbitar"
-          ]
+          ],
+          "gavaHej": "Här, några ostbitar från fikat. Det är inte farligt, i alla fall inte särskilt. Ta dem som tack."
         },
         {
           "id": "vaxthus",
@@ -630,11 +537,10 @@
           "kostnad": 12,
           "byggnad": "vaxthus",
           "tack": "Tack. Trettio år har jag jobbat här och aldrig sett glas växa ur jorden. Det blir bra.",
-          "butikHej": "Morötterna blev lite stora i år, om du undrar. Jag har en jättemorot och en påse frön.",
-          "saljer": [
-            "jattemorot",
-            "fropase"
-          ]
+          "gava": [
+            "jattemorot"
+          ],
+          "gavaHej": "Morötterna blev lite stora i år, om du undrar. Ta den här som tack."
         }
       ]
     },
@@ -676,11 +582,10 @@
           "kostnad": 12,
           "byggnad": "utkikstorn",
           "tack": "Tack. Härifrån kan jag räkna varenda fågel i skogen. Och några som inte borde finnas, men dem räknar jag också.",
-          "butikHej": "Jag har en kikare och en påse fågelfrö. Med det ena ser du fåglarna, med det andra kommer de till dig.",
-          "saljer": [
-            "kikare",
+          "gava": [
             "fagelfro"
-          ]
+          ],
+          "gavaHej": "Ta en påse fågelfrö som tack. Med det ena ser du fåglarna, och med det andra kommer de till dig."
         },
         {
           "id": "svampring",
@@ -690,11 +595,11 @@
           "kostnad": 12,
           "byggnad": "svampring",
           "tack": "Ringen har inte lyst så här på hundra år. Den kommer att minnas dig.",
-          "butikHej": "Allt som växer i mörker vill till slut ut i ljuset. Jag har en svamp som glöder och en påse sporer med egen vilja.",
-          "saljer": [
+          "gava": [
             "glodsvamp",
             "sporpase"
-          ]
+          ],
+          "gavaHej": "Allt som växer i mörker vill till slut ut i ljuset. Välj en gåva: en svamp som glöder eller en påse sporer med egen vilja."
         }
       ]
     },
@@ -737,11 +642,6 @@
           "byggnad": "hexstuga",
           "bekrafta": "Hulda bygger sin häxstuga för {n} stjärnstoft. Grottan i berget får du då aldrig se.",
           "tack": "Välkommen in. Smaka gärna på drycken, men fråga inte vad som är i den. Svaret brukar förstöra smaken.",
-          "butikHej": "Har du råkat se en groda på vägen hit? Nej, tänkte väl det. Jag har en dryck som får dig att flyga, och en katt som har bestämt sig för att flytta.",
-          "saljer": [
-            "flygdryck",
-            "katten"
-          ],
           "forlorare": "Bron över bäcken blev din väg in. Klippan står kvar, brant och tyst, och vad som fanns där uppe får förbli en gåta.",
           "forlorarePerson": null,
           "byte": {
@@ -750,7 +650,11 @@
             "knapp": "Byt: en groda mot en trolldryck",
             "saknas": "Jag behöver en groda till grytan. En liten, helst. Kom tillbaka när du har fångat en, så blandar jag något åt dig.",
             "tack": "En groda! Perfekt. Här är en liten flaska, men fråga inte vad som är i den. Något stort i vattnet gillar den."
-          }
+          },
+          "gava": [
+            "katten"
+          ],
+          "gavaHej": "Har du råkat se en groda på vägen hit? Nej, tänkte väl det. Den här katten har bestämt sig för att flytta med dig."
         },
         {
           "id": "grottan",
@@ -761,11 +665,6 @@
           "byggnad": "grotta",
           "bekrafta": "Torvald bygger ut sin grotta för {n} stjärnstoft. Häxans stuga får du då aldrig se.",
           "tack": "Välkommen, då. Folk tror att troll äter sina gäster. Jag föredrar svamp, den pratar mindre.",
-          "butikHej": "Jag har en stenhacka och en liten sten som inte riktigt är en sten. Och ser du en kräfta någonstans, så tänk på mig.",
-          "saljer": [
-            "stenhacka",
-            "klippan"
-          ],
           "forlorare": "Stegen av ljus blev din väg in. Stigen med irrblossen har vuxit igen, och ingen vet längre vart den ledde.",
           "forlorarePerson": null,
           "byte": {
@@ -774,7 +673,11 @@
             "knapp": "Byt: en kräfta mot blanka snäckor",
             "saknas": "Har du en kräfta? Trollen älskar kräftor. Kom tillbaka när du har fångat en, så får du snäckor av mig.",
             "tack": "Mmm, kräfta. Tack. Här har du några snäckor från bäcken. Djuren i djupet sägs älska dem."
-          }
+          },
+          "gava": [
+            "klippan"
+          ],
+          "gavaHej": "Den här lilla stenen är inte riktigt en sten. Den har bestämt sig för att följa med dig. Och ser du en kräfta någonstans, så tänk på mig."
         }
       ]
     },
@@ -816,11 +719,10 @@
           "kostnad": 15,
           "byggnad": "fruktlund",
           "tack": "Tack, snälla du. Om några år står här ett helt hav av äppelträd, och då bjuder jag på paj. Det gör jag förresten redan nu.",
-          "butikHej": "Äpplen i alla former. Jag har äppelpaj och en hel korg äpplen.",
-          "saljer": [
-            "appelpaj",
-            "appelkorg"
-          ]
+          "gava": [
+            "appelpaj"
+          ],
+          "gavaHej": "Ta en nybakad äppelpaj som tack. Den är fortfarande ljummen."
         },
         {
           "id": "sagverk",
@@ -830,11 +732,10 @@
           "kostnad": 15,
           "byggnad": "sagverk",
           "tack": "Äntligen. Byn har väntat på plank i flera år, och nu blir det hus av det.",
-          "butikHej": "Allt jag gör är av trä, utom kaffet. Just nu har jag en flotte och en fågelholk.",
-          "saljer": [
-            "flotte",
-            "fagelholk"
-          ]
+          "gava": [
+            "flotte"
+          ],
+          "gavaHej": "Här, ta en flotte som tack. Den tar dig nedför älven."
         }
       ]
     },
@@ -876,11 +777,10 @@
           "kostnad": 20,
           "byggnad": "brygga",
           "tack": "Tack. Nu får sjön en riktig brygga, och härifrån ser jag varenda en som badar.",
-          "butikHej": "Snorkeln kan visa dig saker under ytan. Badringen är mest för syns skull, men den flyter i alla fall.",
-          "saljer": [
-            "snorkel",
-            "badring"
-          ]
+          "gava": [
+            "snorkel"
+          ],
+          "gavaHej": "Ta snorkeln som tack. Den kan visa dig saker under ytan."
         },
         {
           "id": "bathus",
@@ -890,11 +790,10 @@
           "kostnad": 20,
           "byggnad": "bathus",
           "tack": "Tack. Nu har båten tak över sig, och det har jag också när det regnar. Nästa sommar seglar vi längre än någon har seglat.",
-          "butikHej": "Roddbåt eller kompass? Båten tar dig ut på sjön, och kompassen visar vägen vidare.",
-          "saljer": [
-            "roddbat",
-            "kompass"
-          ]
+          "gava": [
+            "roddbat"
+          ],
+          "gavaHej": "En roddbåt som tack. Den tar dig ut på sjön."
         }
       ]
     },
@@ -911,11 +810,11 @@
           "forlorare": "Flugor, alltså. Min farfar hade skakat på huvudet. Näten får väl torka på staketet ett tag till.",
           "forlorarePerson": "nisse",
           "tack": "Tack. Nu finns det en riktig fiskebutik vid älven. Kom tillbaka när du vill lära dig kasta, det tar bara några år.",
-          "butikHej": "Ett flugspö kräver tålamod, men det betalar sig. Jag har spön och en ask med ovanliga flugor.",
-          "saljer": [
+          "gava": [
             "flugspo",
             "flugask"
-          ]
+          ],
+          "gavaHej": "Ett flugspö kräver tålamod, men det betalar sig. Välj en gåva: ett spö eller en ask med ovanliga flugor."
         },
         {
           "id": "natbod",
@@ -928,11 +827,11 @@
           "forlorare": "Då fiskar jag med spö uppströms i stället. Fisken bryr sig ändå inte om var butiken står.",
           "forlorarePerson": "fia",
           "tack": "Tack. Nu får näten torka i solen som förr, och jag slipper ha dem hängande i köket.",
-          "butikHej": "Vad du fångar beror på var du lägger ut redskapen. Jag har håvar och kräftburar, gjorda på gamla sättet.",
-          "saljer": [
+          "gava": [
             "hav",
             "kraftbur"
-          ]
+          ],
+          "gavaHej": "Vad du fångar beror på var du lägger ut redskapen. Välj en gåva: en håv eller en kräftbur."
         }
       ]
     },
@@ -974,11 +873,10 @@
           "kostnad": 20,
           "byggnad": "observatorium",
           "tack": "Tack. Sedan stjärnorna föll har himlen varit svår att läsa, och det har hållit mig vaken om nätterna. Nu kan jag börja förstå vad som hände.",
-          "butikHej": "Himlen har mer att berätta än man tror, om man vet hur man tittar. Jag har en stjärnkikare och en karta över himlen som den såg ut förr.",
-          "saljer": [
-            "stjarnkikare",
-            "stjarnkarta"
-          ]
+          "gava": [
+            "stjarnuggla"
+          ],
+          "gavaHej": "Mitt i natten kom en liten uggla in genom kupolen och vägrar flytta. Jag tror att den hellre vill följa med dig."
         },
         {
           "id": "duvslag",
@@ -988,11 +886,10 @@
           "kostnad": 20,
           "byggnad": "duvslag",
           "tack": "Tack. De har bott ute i alla väder. Nu har de ett hem.",
-          "butikHej": "Brevduvor. Och en duva som har bestämt sig för att följa med någon, ser det ut som.",
-          "saljer": [
-            "brevduva",
+          "gava": [
             "duvanpip"
-          ]
+          ],
+          "gavaHej": "Pip här har bestämt sig för att följa med någon. Det verkar vara du."
         }
       ]
     }
@@ -1048,9 +945,6 @@
         "t": "{n} djur. Den här boken ska stå i slottets bibliotek i hundra år. Jag har aldrig sett något liknande."
       }
     ],
-    "enGang": "Du får bara köpa en sak av mig, så välj med omsorg.",
-    "redanHandlat": "Vi har redan gjort affär, du och jag, och det andra stannar hos mig.",
-    "kop": "Ditt val: {namn} för {pris} stjärnstoft. Hos {person} får du bara handla en gång, så den andra saken blir kvar. Ska det bli så?",
     "djurbok": {
       "rubrik": "Djurboken",
       "tom": "Inga djur än. De gömmer sig längs vägarna, så ge dig ut och leta.",
@@ -1062,7 +956,10 @@
     },
     "stoppKlar": "Här har du redan varit.",
     "stoppFortsatt": "Fortsätt äventyret",
-    "saknarHint": "Du saknar {n} stjärnstoft. Mer får du för rätta svar på matteblad."
+    "saknarHint": "Du saknar {n} stjärnstoft. Mer får du för rätta svar på matteblad.",
+    "gavaTagen": "Du har redan fått min gåva. Tack igen för bygget.",
+    "gavaSenare": "Ta gåvan senare",
+    "gavaTa": "Ta emot {namn}"
   },
   "djur": {
     "gele": {
@@ -1169,6 +1066,12 @@
       "art": "Höstbjörn",
       "text": "En stor, lurvig björn med ett orange skimmer i pälsen, precis som löven i Höstskogen.",
       "hur": "Lockades fram med något sött i Höstskogen."
+    },
+    "hoo": {
+      "namn": "Hoo",
+      "art": "Stjärnuggla",
+      "text": "En liten uggla med violetta fjädrar och en stjärna i pannan. Den sitter helst uppe i kupolen och tittar på himlen.",
+      "hur": "Flög in genom observatoriets kupol och ville inte flytta."
     }
   },
   "stopp": {

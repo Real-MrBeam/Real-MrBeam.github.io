@@ -675,7 +675,8 @@ function plotBlock(p){
   if (p.prebuilt) return `<div class="plot" data-plot="${p.id}"><div><b>${esc(p.name)}</b><span>Byggd.</span></div></div>`;
   const b = BYGG[p.bygg], v = valOf(p), here = S.node === p.node && !boy.route;
   if (v){
-    const shop = here ? `<button class="btn" type="button" data-shop="${p.id}">Handla hos ${esc(PERS[v.person].namn)}</button>` : '';
+    const label = !S.handlat[p.id] ? `Ta emot gåva från ${esc(PERS[v.person].namn)}` : v.byte ? `Prata med ${esc(PERS[v.person].namn)}` : '';
+    const shop = here && label ? `<button class="btn" type="button" data-shop="${p.id}">${label}</button>` : '';
     return `<div class="plot" data-plot="${p.id}"><div><b>${esc(v.namn)}</b><span>Byggd av ${esc(PERS[v.person].namn)}.</span></div>${shop}</div>`;
   }
   const names = b.val.map(x => esc(PERS[x.person].namn)).join(' och ');
@@ -875,20 +876,22 @@ function doBuild(p, v){
   setTimeout(() => sparkle(p.x*TS + 24, p.y*TS + 18, 18), 420);
   updateHud('coins'); toast(`Du byggde ${v.namn.toLowerCase()} för ${v.kostnad} stjärnstoft!`);
   const lines = v.forlorare ? [{ p: v.forlorarePerson ?? null, t: v.forlorare }] : [];
-  startDialog([...lines, { p: v.person, t: v.tack }], () => [
-    { label: `Handla hos ${esc(PERS[v.person].namn)}`, run: () => startShop(p) },
-    { label: 'Tillbaka till kartan', alt: true, run: toNode },
+  startDialog([...lines, { p: v.person, t: v.tack }, { p: v.person, t: v.gavaHej }], () => [
+    ...giftButtons(p, v),
+    { label: berattelse.dialog.gavaSenare, alt: true, run: toNode },
   ]);
 }
-// A person only sells one thing to him, once: he picks one of the two and cannot come back for the other.
+// Each person thanks him for the building with a gift (one of one, or one of two), once. Torvald and Hulda also trade for a fish.
+function giftButtons(p, v){
+  return v.gava.map(id => {
+    const it = SAKER[id];
+    return { label: v.gava.length === 1 ? `${esc(berattelse.dialog.gavaTa.replace('{namn}', it.namn.toLowerCase()))}<small>${esc(it.text)}</small>` : `${esc(it.namn)}<small>${esc(it.text)}</small>`, run: () => takeGift(p, id) };
+  });
+}
 function startShop(p, seen){
-  const v = valOf(p), had = S.handlat[p.id], D = berattelse.dialog;
-  startDialog([{ p: v.person, t: had ? D.redanHandlat : `${v.butikHej} ${D.enGang}` }], () => [
-    ...v.saljer.map(id => {
-      const it = SAKER[id], own = had === id;
-      const tail = own ? 'Köpt. ' : had ? 'Du har redan handlat här. ' : '';
-      return { label: `${esc(it.namn)} ${had ? '' : price(it.pris)}<small>${tail}${esc(it.text)}</small>`, disabled: !!had, poor: !had && S.coins < it.pris, run: () => confirmBuy(p, id) };
-    }),
+  const v = valOf(p), had = S.handlat[p.id];
+  startDialog([{ p: v.person, t: had ? berattelse.dialog.gavaTagen : v.gavaHej }], () => [
+    ...(had ? [] : giftButtons(p, v)),
     ...(v.byte ? [{ label: `${esc(v.byte.knapp)}${S.bytt[p.id] ? '<small>Redan bytt.</small>' : ''}`, disabled: !!S.bytt[p.id], run: () => tradeFish(p, v) }] : []),
     { label: 'Tillbaka till kartan', alt: true, run: toNode },
   ], seen);
@@ -904,25 +907,15 @@ function tradeFish(p, v){
   toast(`${SAKER[T.ger].namn} lades i väskan.`);
   startDialog([{ p: v.person, t: T.tack }], () => back);
 }
-function confirmBuy(p, id){
+function takeGift(p, id){
   const v = valOf(p), it = SAKER[id];
-  if (S.coins < it.pris){ toast(berattelse.dialog.ingaStoft.replace('{n}', it.pris - S.coins)); return; }
-  const text = berattelse.dialog.kop.replace('{namn}', it.namn.toLowerCase()).replace('{pris}', it.pris).replace('{person}', PERS[v.person].namn);
-  startDialog([{ p: null, t: text }], () => [
-    { label: `Ja, köp ${price(it.pris)}`, run: () => buy(p, id) },
-    { label: 'Nej, vänta', alt: true, run: () => startShop(p, true) },
-  ]);
-}
-function buy(p, id){
-  const it = SAKER[id];
-  if (S.saker.includes(id) || S.handlat[p.id]) return;
-  if (S.coins < it.pris){ toast(berattelse.dialog.ingaStoft.replace('{n}', it.pris - S.coins)); return; }
-  spend(it.pris); saveSoon(); S.saker.push(id); S.handlat[p.id] = id;
-  updateHud('coins');
-  if (it.djur) giveAnimal(it.djur, it.text);
-  else toast(`Du köpte ${it.namn.toLowerCase()}!`);
-  renderPack();
-  startShop(p, true);
+  if (S.handlat[p.id] || !v.gava.includes(id)) return;
+  S.handlat[p.id] = id; if (!S.saker.includes(id)) S.saker.push(id);
+  saveSoon(); renderPack();
+  const after = () => v.byte ? startShop(p, true) : toNode();
+  if (it.djur){ if (S.djur.includes(it.djur)) return after(); giveAnimal(it.djur, it.text, after); return; }
+  toast(`Du fick ${it.namn.toLowerCase()}!`);
+  after();
 }
 
 /* ---------- djurboken ---------- */
@@ -984,10 +977,10 @@ function startCount(){
 }
 
 function renderPack(){
-  const own = S.saker.filter(id => SAKER[id].typ !== 'djur' && !S.agnAnvant.includes(id)); // used baits are gone
+  const own = S.saker.filter(id => SAKER[id] && SAKER[id].typ !== 'djur' && !S.agnAnvant.includes(id)); // used baits are gone
   $('#pack').innerHTML = own.length
     ? own.map(id => `<li><span><b>${esc(SAKER[id].namn)}</b> ${esc(SAKER[id].text)}</span></li>`).join('')
-    : '<li><span>Inget ännu. Bygg något och handla!</span></li>';
+    : '<li><span>Inget ännu. Bygg något och få en gåva!</span></li>';
 }
 
 /* ---------- HUD, toast, logg ---------- */
@@ -1148,7 +1141,7 @@ function openModal(steps, done){
 const FISKE = berattelse.fiske;
 let fishing = null; // { plats, redskap, agn, phase: 'val' | 'vanta' | 'nu', timers }
 const myTools = () => FISKE.redskap.filter(id => S.saker.includes(id));
-const myBaits = () => S.saker.filter(id => SAKER[id].typ === 'agn' && !S.agnAnvant.includes(id));
+const myBaits = () => S.saker.filter(id => SAKER[id] && SAKER[id].typ === 'agn' && !S.agnAnvant.includes(id));
 function fishBlock(id){
   const T = FISKE.texter, here = S.node === id && !boy.route;
   return `<div class="plot"><div><b>${esc(T.rubrik)}</b></div>${here ? `<button class="btn" type="button" data-fiska="${id}">${esc(T.knapp)}</button>` : ''}</div>`;

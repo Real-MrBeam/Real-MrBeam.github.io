@@ -671,6 +671,48 @@
       ]
     ]
   },
+  "hoo": {
+    "lyft": 0,
+    "farger": {"o":"#3f2631","u":"#8a6fb5","U":"#5a4580","c":"#e6d9f7","w":"#ffffff","k":"#181425","a":"#feae34","s":"#fee761"},
+    "bilder": [
+      [
+        "................",
+        "...oo......oo...",
+        "..ouuoooooouuo..",
+        "..ouuuuuuuuuuo..",
+        "..ouuuussuuuuo..",
+        "..ouuuuuuuuuuo..",
+        "..ouuwwuuwwuuo..",
+        "..ouuwkuukwuuo..",
+        "..ouuuuaauuuuo..",
+        "..UuuuuuuuuuuU..",
+        "..UuuuccccuuuU..",
+        "..ouuuccccuuuo..",
+        "...oUUccccUUo...",
+        "....oUccccUo....",
+        ".....oooooo.....",
+        "................"
+      ],
+      [
+        "...oo......oo...",
+        "..ouuoooooouuo..",
+        "..ouuuuuuuuuuo..",
+        "..ouuuussuuuuo..",
+        "..ouuuuuuuuuuo..",
+        "..ouuwwuuwwuuo..",
+        "..ouuwkuukwuuo..",
+        "..ouuuuaauuuuo..",
+        "..ouuuuuuuuuuo..",
+        "..UuuuuuuuuuuU..",
+        "..UuuuccccuuuU..",
+        "..ouuuccccuuuo..",
+        "...oUUccccUUo...",
+        "....oUccccUo....",
+        ".....oooooo.....",
+        "................"
+      ]
+    ]
+  },
   "brumma": {
     "lyft": 0,
     "farger": {"o":"#3f2631","b":"#8b5a3c","B":"#5d3a26","a":"#d77643","m":"#d9b38c","k":"#181425"},
