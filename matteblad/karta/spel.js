@@ -1666,12 +1666,22 @@ function debugGive(id){
   else if (!S.saker.includes(id)) S.saker.push(id);
   if (S.agnAnvant.includes(id)) S.agnAnvant = S.agnAnvant.filter(x => x !== id);
 }
+// The list is grouped by category (as in the bag, then the animals) and can be searched by name
+let giveSearch = '';
+function giveList(){
+  const q = giveSearch.trim().toLowerCase();
+  const left = Object.keys(SAKER).filter(id => (SAKER[id].typ === 'djur' ? !S.djur.includes(SAKER[id].djur) : !S.saker.includes(id) || S.agnAnvant.includes(id)) && (!q || SAKER[id].namn.toLowerCase().includes(q)));
+  const groups = [...KAT_ORDER, 'djur'].map(k => [k, left.filter(id => (SAKER[id].typ === 'djur' ? 'djur' : katOf(id)) === k)]).filter(([, ids]) => ids.length);
+  $('#giveList').innerHTML = groups.map(([k, ids]) => `<p class="sub">${k === 'djur' ? 'Djur' : KAT[k].namn}</p><div class="roads">${ids.map(id => `<button class="btn alt" type="button" data-ge="${id}">${esc(SAKER[id].namn)}</button>`).join('')}</div>`).join('') || '<p>Inget att ge.</p>';
+}
 function showGive(){
   current = { type: 'give' };
-  const left = Object.keys(SAKER).filter(id => SAKER[id].typ === 'djur' ? !S.djur.includes(SAKER[id].djur) : !S.saker.includes(id) || S.agnAnvant.includes(id));
-  panel.innerHTML = `<span class="tag">Debug</span><h2>Ge sak</h2><div class="panel-body"><div class="roads">${left.map(id => `<button class="btn alt" type="button" data-ge="${id}">${esc(SAKER[id].namn)}</button>`).join('') || '<p>Du har allt.</p>'}<button class="btn" type="button" data-back="1">Tillbaka</button></div></div>`;
+  panel.innerHTML = `<span class="tag">Debug</span><h2>Ge sak</h2><div class="panel-body"><input id="giveSearch" type="search" placeholder="Sök sak" autocomplete="off" style="font:inherit;font-size:10px;padding:6px 8px;background:var(--night);color:var(--text);border:2px solid var(--slate)" value="${esc(giveSearch)}"><div id="giveList"></div><div class="roads"><button class="btn" type="button" data-back="1">Tillbaka</button></div></div>`;
+  $('#giveSearch').addEventListener('input', e => { giveSearch = e.target.value; giveList(); });
+  giveList();
 }
-panel.addEventListener('click', ev => { const b = ev.target.closest('button[data-ge]'); if (!b) return; debugGive(b.dataset.ge); renderPack(); renderBook(); toast(`${SAKER[b.dataset.ge].namn} lades till.`); showGive(); });
+panel.addEventListener('click', ev => { const b = ev.target.closest('button[data-ge]'); if (!b) return; debugGive(b.dataset.ge); renderPack(); renderBook(); toast(`${SAKER[b.dataset.ge].namn} lades till.`); giveList(); });
+$('#btnGeFisk').addEventListener('click', () => { for (const id in FISKE.fiskar) S.fiskbok[id] = (S.fiskbok[id] || 0) + 1; renderFishBook(); toast('En av varje fisk lades i fiskboken.'); });
 $('#btnGe').addEventListener('click', showGive);
 $('#btnGeAlla').addEventListener('click', () => { for (const id in SAKER) if (SAKER[id].typ !== 'djur') debugGive(id); renderPack(); toast('Alla saker lades i väskan.'); });
 $('#btnGeDjur').addEventListener('click', () => { for (const id in SAKER) if (SAKER[id].typ === 'djur') debugGive(id); for (const id in berattelse.djur) if (!S.djur.includes(id)) S.djur.push(id); renderBook(); toast('Alla djur skrevs in i djurboken.'); });
