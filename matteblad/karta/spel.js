@@ -854,13 +854,15 @@ function tentBlock(){
 }
 function tradeOffers(){
   const H = berattelse.handel, out = [];
-  for (const [id, n] of Object.entries(H.fisk)) if (S.fiskbok[id] > 0 && !S.salt['fisk:' + id]) out.push({ key: 'fisk:' + id, namn: FISKE.fiskar[id].namn, text: FISKE.fiskar[id].text, n, sell: () => { S.fiskbok[id]--; renderFishBook(); } });
+  for (const [id, n] of Object.entries(H.fisk)) if (S.fiskbok[id] > 0 && !S.salt['fisk:' + id]) out.push({ key: 'fisk:' + id, namn: FISKE.fiskar[id].namn, text: FISKE.fiskar[id].text, n, tack: H.tack && H.tack[id], sell: () => { S.fiskbok[id]--; renderFishBook(); } });
   return out;
 }
 function startTrade(seen){
   const H = berattelse.handel, offers = tradeOffers();
   const wares = Object.entries(H.saljer || {}).filter(([id]) => !S.saker.includes(id));
-  startDialog([{ p: H.person, t: offers.length ? H.hej : H.inget }], () => [
+  // what he says depends on whether he has something to sell and whether there is fish to buy
+  const hello = offers.length && wares.length ? H.hej : wares.length ? H.baraSaljer : offers.length ? H.baraKoper : H.inget;
+  startDialog([{ p: H.person, t: hello }], () => [
     ...wares.map(([id, n]) => ({ label: `Köp ${esc(SAKER[id].namn.toLowerCase())} ${price(n)}<small>${esc(SAKER[id].text)}</small>`, poor: S.coins < n, run: () => buyFrom(id, n) })),
     ...offers.map(o => ({ label: `Sälj ${esc(o.namn.toLowerCase())} ${price(o.n)}<small>${esc(o.text)}</small>`, run: () => sellTo(o) })),
     { label: 'Tillbaka till kartan', alt: true, run: toNode },
@@ -872,7 +874,8 @@ function buyFrom(id, n){
   spend(n); updateHud('coins'); S.saker.push(id); renderPack(); saveSoon();
   sparkle(boy.x + 8, boy.y + 2, 18);
   toast(`Du köpte ${SAKER[id].namn.toLowerCase()}!`);
-  startDialog([{ p: berattelse.handel.person, t: berattelse.handel.kopt }], () => [
+  const K = berattelse.handel.kopt;
+  startDialog([{ p: berattelse.handel.person, t: typeof K === 'string' ? K : K[id] }], () => [
     { label: 'Något mer', run: () => startTrade(true) },
     { label: 'Tillbaka till kartan', alt: true, run: toNode },
   ]);
@@ -882,7 +885,7 @@ function sellTo(o){
   o.sell(); S.salt[o.key] = true; earn(o.n); saveSoon();
   sparkle(boy.x + 8, boy.y + 2, 18, '#2ce8f5');
   toast(`Du sålde ${o.namn.toLowerCase()} för ${o.n} stjärnstoft.`);
-  startDialog([{ p: berattelse.handel.person, t: berattelse.handel.tack }], () => [
+  startDialog([{ p: berattelse.handel.person, t: o.tack || 'Tack. Den tar jag väl hand om.' }], () => [
     { label: 'Något mer', run: () => startTrade(true) },
     { label: 'Tillbaka till kartan', alt: true, run: toNode },
   ]);
