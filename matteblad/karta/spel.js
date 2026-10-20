@@ -1640,6 +1640,22 @@ $('#btnTest').addEventListener('click', addTest);
 $('#btnSheet').addEventListener('click', addSheet);
 // The debug buttons only show with ?debug in the address (Peter 2026-10-20), so the real map has no test buttons
 $('#debugToggle').hidden = !new URLSearchParams(location.search).has('debug');
+// Debug: give things. "Ge sak" lists every thing he has not got, a tap gives it. Animals are put straight in the book.
+function debugGive(id){
+  const it = SAKER[id]; if (!it) return;
+  if (it.typ === 'djur'){ if (!S.djur.includes(it.djur)){ S.djur.push(it.djur); if (S.fram.length < MAX_FRAM) S.fram.push(it.djur); } }
+  else if (!S.saker.includes(id)) S.saker.push(id);
+  if (S.agnAnvant.includes(id)) S.agnAnvant = S.agnAnvant.filter(x => x !== id);
+}
+function showGive(){
+  current = { type: 'give' };
+  const left = Object.keys(SAKER).filter(id => SAKER[id].typ === 'djur' ? !S.djur.includes(SAKER[id].djur) : !S.saker.includes(id) || S.agnAnvant.includes(id));
+  panel.innerHTML = `<span class="tag">Debug</span><h2>Ge sak</h2><div class="panel-body"><div class="roads">${left.map(id => `<button class="btn alt" type="button" data-ge="${id}">${esc(SAKER[id].namn)}</button>`).join('') || '<p>Du har allt.</p>'}<button class="btn" type="button" data-back="1">Tillbaka</button></div></div>`;
+}
+panel.addEventListener('click', ev => { const b = ev.target.closest('button[data-ge]'); if (!b) return; debugGive(b.dataset.ge); renderPack(); renderBook(); toast(`${SAKER[b.dataset.ge].namn} lades till.`); showGive(); });
+$('#btnGe').addEventListener('click', showGive);
+$('#btnGeAlla').addEventListener('click', () => { for (const id in SAKER) if (SAKER[id].typ !== 'djur') debugGive(id); renderPack(); toast('Alla saker lades i väskan.'); });
+$('#btnGeDjur').addEventListener('click', () => { for (const id in SAKER) if (SAKER[id].typ === 'djur') debugGive(id); for (const id in berattelse.djur) if (!S.djur.includes(id)) S.djur.push(id); renderBook(); toast('Alla djur skrevs in i djurboken.'); });
 // Debug: switch day and night at once, without sleeping in Hemmet
 const nattLabel = () => { $('#btnNatt').textContent = S.natt ? 'Dag' : 'Natt'; };
 $('#btnNatt').addEventListener('click', () => { S.natt = !S.natt; musicSync(); showNode(); nattLabel(); });
