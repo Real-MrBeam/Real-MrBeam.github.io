@@ -1589,10 +1589,13 @@ function pull(){
   stopFishing();
   openModal([step], () => showNode());
 }
+// Each fish in the book has its own picture (CATCH), at its own size so the long pike is not squeezed
+const FISH_ICON = {};
+const fishIcon = id => FISH_ICON[id] || (FISH_ICON[id] = iconURL(CATCH[id] || FISH, 3));
 function renderFishBook(){
   const ids = Object.keys(FISKE.fiskar).filter(id => S.fiskbok[id] !== undefined);
   $('#fishbook').innerHTML = ids.length
-    ? ids.map(id => `<li><span><b>${esc(FISKE.fiskar[id].namn)}</b> ${esc(FISKE.fiskar[id].text)}</span><span class="st">${S.fiskbok[id] ? S.fiskbok[id] + ' st' : 'inga kvar'}</span></li>`).join('')
+    ? ids.map(id => `<li><span class="fishico"><img class="pix" src="${fishIcon(id)}" alt=""></span><span><b>${esc(FISKE.fiskar[id].namn)}</b> ${esc(FISKE.fiskar[id].text)}</span><span class="st">${S.fiskbok[id] ? S.fiskbok[id] + ' st' : 'inga kvar'}</span></li>`).join('')
     : '<li><span>Inga fiskar ännu.</span></li>';
 }
 
