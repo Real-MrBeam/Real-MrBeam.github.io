@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Resultat: Dagbok för alla mina mattefans, blad 3</title>
+<base href="../../">
+<style>
+  body { margin: 0; font-family: "Segoe UI", Arial, sans-serif; background: #f3f6fa; color: #1d1d1f; }
+  main { max-width: 760px; margin: 0 auto; padding: 32px 16px; }
+  .back { color: #2b4c7e; font-weight: 600; text-decoration: none; }
+  h1 { margin: 12px 0 4px; color: #2b4c7e; font-size: 28px; }
+  .sub { margin: 0 0 20px; color: #666; }
+  .summary { display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: center;
+             background: #fff; border-radius: 16px; padding: 20px 24px; box-shadow: 0 2px 8px rgba(0,0,0,.08);
+             border-top: 6px solid #d1495b; }
+  .score { font-size: 40px; font-weight: 800; margin: 0; }
+  .score small { font-size: 20px; font-weight: 600; color: #666; }
+  .message { margin: 6px 0 0; font-size: 18px; }  h2 { margin: 28px 0 12px; font-size: 20px; }
+  ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
+  .error { background: #fff; border-radius: 14px; padding: 16px 20px; box-shadow: 0 2px 8px rgba(0,0,0,.06);
+           border-left: 6px solid #2b4c7e; }
+  .task { font-weight: 700; color: #2b4c7e; }
+  .q { font-size: 18px; margin: 4px 0 8px; }
+  .answers { display: flex; gap: 24px; flex-wrap: wrap; font-size: 18px; }
+  .answers s { color: #b3261e; }
+  .answers .right b { color: #2e7d32; font-size: 22px; }
+  .tip { margin: 10px 0 0; color: #333; }
+  .allright { background: #fff; border-radius: 14px; padding: 16px 20px; font-size: 18px; }
+  .facit { display: inline-block; margin-top: 24px; padding: 12px 20px; border-radius: 999px; background: #2b4c7e;
+           color: #fff; text-decoration: none; font-weight: 600; }
+  
+  .prize { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 10px;
+           border-radius: 14px; text-decoration: none; color: #1d1d1f;
+           border: 5px solid transparent;
+           background: linear-gradient(#fff, #fff) padding-box,
+                       linear-gradient(135deg, #fff3a8 0%, #d4a72c 25%, #fff1a0 50%, #b8860b 75%, #f6dc72 100%) border-box;
+           box-shadow: inset 0 0 0 2px #fff, inset 0 0 0 3px #d4a72c, 0 2px 10px rgba(184, 134, 11, .35); }
+  .prize .level { background: var(--prize); color: #fff; font-weight: 700; font-size: 12px; padding: 2px 10px;
+                  border-radius: 999px; text-transform: uppercase; letter-spacing: .5px; }
+  /* Fixed slots for picture and name, so the box keeps its size when the ball is opened. */
+  .prize .art { display: flex; align-items: center; justify-content: center; }
+  .prize.small .art { width: 80px; height: 68px; }
+  .prize.large .art { width: 110px; height: 100px; }
+  .prize img { image-rendering: pixelated; }
+  .prize.small .ballimg { width: 56px; height: 56px; }
+  .prize.large .ballimg { width: 96px; height: 96px; }
+  .prize .pokeimg { display: none; width: 100%; height: 100%; object-fit: contain; image-rendering: auto; }
+  .prize .pokeimg[src$=".svg"] { image-rendering: pixelated; }
+  .prize .name { font-weight: 700; height: 20px; line-height: 20px; white-space: nowrap; }
+  .prize.large .name { font-size: 20px; height: 26px; line-height: 26px; }
+  .prize.secret .name { visibility: hidden; }
+  .prize.secret.opened .name { visibility: visible; }
+  .prize.secret.opened .ballimg { display: none; }
+  .prize.secret.opened .pokeimg { display: block; }
+  /* Unopened prize: a light band travels around the gold frame and the glow pulses. */
+  .prize.secret:not(.opened) { background: linear-gradient(#fff, #fff) padding-box,
+                       linear-gradient(110deg, #b8860b 0%, #d4a72c 30%, #fff3b0 43%, #ffffff 50%, #fff3b0 57%, #d4a72c 70%, #b8860b 100%) border-box;
+           background-size: 100% 100%, 300% 100%;
+           animation: goldshine 2.2s linear infinite, goldglow 2.2s ease-in-out infinite; }
+  @keyframes goldshine { from { background-position: 0 0, 100% 0; } to { background-position: 0 0, 0% 0; } }
+  @keyframes goldglow {
+    50% { box-shadow: inset 0 0 0 2px #fff, inset 0 0 0 3px #d4a72c, 0 0 18px 2px rgba(255, 196, 30, .8); }
+  }
+  @media (prefers-reduced-motion: reduce) { .prize { animation: none !important; } }
+  
+  .reveal { font: inherit; color: #1d1d1f; cursor: pointer; width: 220px; padding: 10px 10px 12px;
+            display: flex; flex-direction: column; align-items: center; gap: 4px;
+            border-radius: 14px; border: 5px solid transparent;
+           background: linear-gradient(#fff, #fff) padding-box,
+                       linear-gradient(135deg, #fff3a8 0%, #d4a72c 25%, #fff1a0 50%, #b8860b 75%, #f6dc72 100%) border-box;
+           box-shadow: inset 0 0 0 2px #fff, inset 0 0 0 3px #d4a72c, 0 2px 10px rgba(184, 134, 11, .35); }
+  .reveal .level { background: var(--prize); color: #fff; font-weight: 700; font-size: 12px; padding: 2px 10px;
+                   border-radius: 999px; text-transform: uppercase; letter-spacing: .5px; }
+  .reveal .stage { position: relative; width: 190px; height: 170px; }
+  .reveal .ball { position: absolute; left: 45px; top: 35px; width: 100px; height: 100px; transform-origin: 50% 100%;
+                  transition: transform .2s; }
+  .reveal .ball svg { width: 100%; height: 100%; overflow: visible; }
+  .reveal .lid { transform-box: view-box; transform-origin: 6px 50px; }
+  .reveal[data-typ="kista"] .lid { transform-origin: 1px 7px; }
+  .reveal[data-typ="kista"] .poke { image-rendering: pixelated; }
+  .reveal[data-typ="dagbok"] .lid { transform-origin: 14px 50px; }
+  .reveal[data-typ="dagbok"].open .lid { animation-name: coverflip; }
+  /* Halfway through the flip the front of the cover is hidden and its light inside shows. */
+  .reveal[data-typ="dagbok"].open .lid .front { animation: coverfront .2s linear 1.25s forwards; }
+  .reveal[data-typ="dagbok"].open .lid .inside { animation: coverinside .2s linear 1.25s forwards; }
+  @keyframes coverflip { to { transform: scaleX(-1); } }
+  @keyframes coverfront { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+  @keyframes coverinside { 0%, 49% { opacity: 0; } 50%, 100% { opacity: 1; } }
+  .reveal .poke { position: absolute; left: 20px; top: 0; width: 150px; height: 150px; opacity: 0; transform: scale(0); }
+  .reveal .flash { position: absolute; left: 75px; top: 65px; width: 40px; height: 40px; border-radius: 50%; opacity: 0;
+                   background: radial-gradient(circle, #fff 0%, #fff8c8 40%, rgba(255,255,255,0) 70%); }
+  /* Stars start at the centre of the ball. Size, colour, angle and distance come from --s, --c, --a and --d. */
+  .reveal .spark { position: absolute; z-index: 2; left: 95px; top: 85px; width: var(--s); height: var(--s);
+                   margin: calc(var(--s) / -2) 0 0 calc(var(--s) / -2); font-size: var(--s); line-height: var(--s);
+                   text-align: center; color: var(--c); opacity: 0; pointer-events: none;
+                   text-shadow: 0 0 4px #d4a72c, 0 0 12px #ffd23f; }
+  .reveal .caption { height: 32px; display: flex; align-items: center; justify-content: center; }
+  .reveal .hint { font-weight: 700; color: var(--prize); animation: pulse 1.2s ease-in-out infinite; }
+  .reveal .name { display: none; font-weight: 700; font-size: 22px; line-height: 32px; }
+  .reveal:hover .ball { transform: rotate(-6deg); }
+
+  .reveal.open .hint { display: none; }
+  .reveal.open .name { display: block; animation: fadein .4s ease-out 1.8s both; }
+  .reveal.open .ball { animation: shake 1.2s ease-in-out, away .4s ease-in 1.55s forwards; }
+  .reveal.open .lid { animation: lidopen .2s cubic-bezier(.2, .9, .3, 1.2) 1.25s forwards; }
+  .reveal.open .flash { animation: flash .5s ease-out 1.3s forwards; }
+  .reveal.open .spark { animation: spark .6s cubic-bezier(.1, .9, .2, 1) 1.3s forwards; }
+  .reveal.open .poke { animation: pop .5s cubic-bezier(.2, 1.6, .4, 1) 1.35s forwards; }
+  .reveal.noimg .poke { display: none; }
+  .reveal.shown * { animation-duration: 0s !important; animation-delay: 0s !important; }
+
+  /* Closed and while the ball shakes (.charging): the gold frame shines. At the bang (.bang, set by the
+     script 1.3 s after the click) the frame shakes once and then stands still. */
+  .reveal:not(.open), .reveal.charging { background: linear-gradient(#fff, #fff) padding-box,
+                       linear-gradient(110deg, #b8860b 0%, #d4a72c 30%, #fff3b0 43%, #ffffff 50%, #fff3b0 57%, #d4a72c 70%, #b8860b 100%) border-box;
+           background-size: 100% 100%, 300% 100%;
+           animation: goldshine 2.2s linear infinite, goldglow 2.2s ease-in-out infinite; }
+  .reveal.bang { animation: frameshake .45s ease-in-out; }
+  @keyframes frameshake {
+    0%, 100% { transform: none; }
+    15% { transform: translateX(-5px) rotate(-2.5deg); }
+    35% { transform: translateX(5px) rotate(2.5deg); box-shadow: inset 0 0 0 2px #fff, inset 0 0 0 3px #d4a72c, 0 0 26px 4px rgba(255, 196, 30, .9); }
+    55% { transform: translateX(-3px) rotate(-1.5deg); }
+    75% { transform: translateX(2px) rotate(1deg); }
+  }
+
+  @keyframes pulse { 50% { opacity: .55; } }
+  @keyframes fadein { from { opacity: 0; transform: translateY(6px); } }
+  @keyframes shake {
+    0%, 30%, 65%, 100% { transform: rotate(0); }
+    10%, 45%, 80% { transform: rotate(-16deg); }
+    20%, 55%, 90% { transform: rotate(16deg); }
+  }
+  @keyframes away { to { transform: translate(-64px, 30px) scale(.35); } }
+  @keyframes lidopen { to { transform: rotate(-65deg); } }
+  @keyframes flash { 0% { opacity: 0; transform: scale(.5); } 25% { opacity: 1; } 100% { opacity: 0; transform: scale(6); } }
+  @keyframes spark {
+    0% { opacity: 1; transform: rotate(var(--a)) translateY(0) scale(.3); }
+    70% { opacity: 1; }
+    100% { opacity: 0; transform: rotate(var(--a)) translateY(calc(var(--d) * -1)) scale(1); }
+  }
+  @keyframes pop { from { opacity: 0; transform: translateY(50px) scale(0); } to { opacity: 1; transform: translateY(-6px) scale(1); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal.open * { animation-duration: .01s !important; animation-delay: 0s !important; }
+    .reveal, .reveal .hint { animation: none !important; }
+  }
+  @media (max-width: 560px) { .summary { grid-template-columns: 1fr; justify-items: start; } }
+</style>
+</head>
+<body>
+<main>
+  <a class="back" href="index.html">← Alla blad</a>
+  <h1>Resultat: Dagbok för alla mina mattefans, blad 3</h1>
+  <p class="sub">Blad 3: Fyll på med nollor</p>
+
+  <div class="las" data-enc="v1.6d2327a95a836d5c.QBr8+yoW/pVr9RKDH4/C2jiphh/3r/rohu1+prNYphnyINd68BwmuHtSQldtQHXglNjVo/WzUGc6/KSOFT21rlkAhNNc8Py/+lRPbRXEr/WFCVxAnHFqYh36j+irVjPi+m9ovLUjF3wHC8h32Kh3kNUUFB4SDAJiiGFMX6hMbIdvYQzDzAtmGrR257ELbkTcKDc1+bHnxm9SqAU8c7Ku2UoSR53c9WdTI9IpRQJ8ds8ZR7leDlOawJeYaqZuyFbgbOlNsrNV0d+WymZLrAt0/NzGbQWOW1yf7Rfb0QpQmnnIkrZmB/gUc6+yzB8FmZ3rbTx1NzhdkFNQpzc2Xha4f+c+xiJDwNl54kSNF3xCdrvzVGy77HHyZPYRGRESbH5KzNnSp4k8zd3dUB7tmzdPwxApeuZTEeyjt50O7yaYauoQUHWJvOe0HEh4ImTANMZazCFIGJoxZJoqqetAMkMt3sCC+66CUCSsve7sGqzoWUuMkO24fUAnVqsXFVlTWAszODZBbL7B2zUUfAo6/iIsWzfX7MYpWMpjGAZ9yrDqmzaq/0Km/r9mQlIzPeoULuNzSsYFx/VG9tqcHkJ2D7Du1XReSs+s/a4kQcnwL5twESHyHCCQJy9+pwDm2cuwbNZRgXYZmjl8bawT0nJQ1i1qwGrHzqn/4Uvu2KUYM4DRcbs=.NFNP9WNLJtLbcagn.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">
+    <section class="las-locked">
+      <svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" fill="currentColor"/><path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      <p><b>Resultatet är låst</b></p>
+      <p>Skriv lösenordet för att se hur det gick.</p>
+      <button type="button" data-las-open>Skriv lösenord</button>
+    </section>
+  </div>
+  <noscript><p>Resultatet kräver JavaScript för att låsas upp.</p></noscript>
+</main>
+<script src="mallar/las.js" data-las="las/las.json" defer></script>
+<script>
+  // Click opens the ball, a second click closes it. The state is remembered in this browser,
+  // so an opened ball is shown open (without the animation) next time. #oppen plays it without saving.
+  // While the ball shakes the frame keeps shining (.charging); at the bang, 1.3 s in, it shakes once (.bang).
+  // The ball only exists after the locked content has been opened, so this runs on "las:unlocked".
+  const BANG_MS = 1300;
+  function initReveal() {
+  document.querySelectorAll(".reveal:not([data-init])").forEach(el => {
+    el.dataset.init = "1";
+    const key = el.dataset.key;
+    let timer;
+    const open = () => {
+      el.classList.add("open", "charging");
+      timer = setTimeout(() => el.classList.replace("charging", "bang"), BANG_MS);
+    };
+    const close = () => el.classList.remove("open", "shown", "charging", "bang");
+
+    let stored = false;
+    try { stored = localStorage.getItem(key) === "open"; } catch {}
+    if (location.hash === "#oppen") open();
+    else if (stored) el.classList.add("open", "shown");
+
+    el.addEventListener("click", () => {
+      clearTimeout(timer);
+      const opening = !el.classList.contains("open");
+      close();
+      if (opening) open();
+      try { opening ? localStorage.setItem(key, "open") : localStorage.removeItem(key); } catch {}
+    });
+  });
+  }
+  document.addEventListener("las:unlocked", initReveal);
+</script>
+</body>
+</html>
