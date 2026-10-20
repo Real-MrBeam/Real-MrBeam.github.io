@@ -576,8 +576,7 @@
     "flaskat": {
       "namn": "Flaskat irrbloss",
       "text": "En liten burk där ett blått ljus svävar runt.",
-      "typ": "fynd",
-      "varde": 4
+      "typ": "verktyg"
     },
     "hastsko": {
       "namn": "Silverhästsko",

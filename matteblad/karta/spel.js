@@ -750,10 +750,11 @@ function drawNight(now, lv){
     g.addColorStop(0, `rgba(${c},${.5 * lv})`); g.addColorStop(1, `rgba(${c},0)`);
     ctx.fillStyle = g; ctx.fillRect(L.x - rad, L.y - rad, rad * 2, rad * 2);
   }
-  if (S.lyktaTand && S.saker.includes('lykta')){
-    const bx = boy.x + 8, by = boy.y + 4, rad = 22 + (reduceMotion ? 0 : Math.sin(now / 300) * 1.5);
+  for (const [id, col] of [['lykta', '255,210,120'], ['flaskat', '90,170,255']]){
+    if (!S.tant || !S.tant[id] || !S.saker.includes(id)) continue;
+    const bx = boy.x + 8, by = boy.y + 4, rad = 22 + (reduceMotion ? 0 : Math.sin(now / 300 + (id === 'flaskat' ? 2 : 0)) * 1.5);
     const g = ctx.createRadialGradient(bx, by, 0, bx, by, rad);
-    g.addColorStop(0, `rgba(255,210,120,${.32 * lv})`); g.addColorStop(1, 'rgba(255,210,120,0)');
+    g.addColorStop(0, `rgba(${col},${.32 * lv})`); g.addColorStop(1, `rgba(${col},0)`);
     ctx.fillStyle = g; ctx.fillRect(bx - rad, by - rad, rad * 2, rad * 2);
   }
   ctx.globalCompositeOperation = 'source-over';
@@ -799,7 +800,11 @@ function playFlute(){
 function useItem(id){
   const it = SAKER[id]; if (!it) return;
   if (id === 'flojt') return playFlute();
-  if (id === 'lykta'){ S.lyktaTand = !S.lyktaTand; toast(S.lyktaTand ? 'Du tände lyktan.' : 'Du släckte lyktan.'); renderPack(); saveSoon(); return; }
+  if (id === 'lykta' || id === 'flaskat'){
+    S.tant = S.tant || {}; S.tant[id] = !S.tant[id];
+    toast(id === 'lykta' ? (S.tant[id] ? 'Du tände lyktan.' : 'Du släckte lyktan.') : (S.tant[id] ? 'Irrblosset vaknar och lyser blått.' : 'Irrblosset somnar i burken.'));
+    renderPack(); saveSoon(); return;
+  }
   if (it.typ !== 'klader') return;
   if (S.pa[it.plats] === id) delete S.pa[it.plats]; else S.pa[it.plats] = id;
   buildBoy(S.pa); renderPack(); saveSoon();
@@ -1312,7 +1317,7 @@ function startCount(){
 }
 
 // Categories of things in the bag, each with its own small pixel icon (Peter 2026-10-20). Special things have a secret or a task.
-const SPECIAL = ['lykta', 'flojt'];
+const SPECIAL = ['lykta', 'flaskat', 'flojt'];
 const KAT = {
   sarskilt: { namn: 'Särskilt', ico: sprite(["........", ".yy.....", "y..y....", "y..yyyyy", ".yy..y.y", "........", "........", "........"], { y:'#fee761' }) },
   redskap: { namn: 'Redskap', ico: sprite(["....ss..", "....ss..", "....ss..", "....ss..", "s...ss..", "ss..ss..", ".ssss...", "..ss...."], { s:'#c0cbdc' }) },
@@ -1330,9 +1335,10 @@ function renderPack(){
   $('#pack').innerHTML = own.length
     ? own.map(id => { const it = SAKER[id], on = it.typ === 'klader' && S.pa[it.plats] === id;
         // Things that can be used are tapped like the runes in the list: clothes go on and off, the lantern is lit, the flute plays
-        const usable = it.typ === 'klader' || id === 'lykta' || id === 'flojt';
-        const lit = id === 'lykta' && S.lyktaTand;
-        const title = it.typ === 'klader' ? (on ? 'Ta av' : 'Ta på') : id === 'lykta' ? (lit ? 'Släck lyktan' : 'Tänd lyktan') : id === 'flojt' ? 'Spela' : '';
+        const light = id === 'lykta' || id === 'flaskat';
+        const usable = it.typ === 'klader' || light || id === 'flojt';
+        const lit = light && S.tant && S.tant[id];
+        const title = it.typ === 'klader' ? (on ? 'Ta av' : 'Ta på') : light ? (lit ? 'Släck' : 'Tänd') : id === 'flojt' ? 'Spela' : '';
         const state = on ? 'på' : lit ? 'tänd' : '';
         const k = katOf(id);
         return `<li${usable ? ` class="readable" data-use="${id}" role="button" tabindex="0" title="${title}"` : ''}><img class="pix" src="${katIcon(k)}" alt="${KAT[k].namn}" title="${KAT[k].namn}"><span><b>${esc(it.namn)}</b> ${esc(it.text)}</span>${state ? `<span class="st">${state}</span>` : ''}</li>`; }).join('')
@@ -1385,7 +1391,7 @@ function applyReal(events){
 // encrypted in the page (#lasNyckel) and opens with the password, like the portraits. Without the key nothing is saved.
 // Stars and stardust are never saved: they are counted from the runes and scrolls. Only what he has spent is saved.
 const SAVE = { repo: '', file: '', key: '', sha: null, timer: 0, off: false, loaded: false };
-const SAVED_FIELDS = ['node', 'built', 'valda', 'saker', 'steg', 'handlat', 'djur', 'fram', 'stopp', 'hittat', 'spent', 'kistor', 'agnAnvant', 'fiskbok', 'namn', 'bytt', 'intro', 'natt', 'salt', 'lasta', 'pa', 'lyktaTand', 'brev2'];
+const SAVED_FIELDS = ['node', 'built', 'valda', 'saker', 'steg', 'handlat', 'djur', 'fram', 'stopp', 'hittat', 'spent', 'kistor', 'agnAnvant', 'fiskbok', 'namn', 'bytt', 'intro', 'natt', 'salt', 'lasta', 'pa', 'tant', 'brev2'];
 const b64 = text => { const bytes = new TextEncoder().encode(text); let s = ''; for (const b of bytes) s += String.fromCharCode(b); return btoa(s); };
 const unb64 = data => new TextDecoder().decode(Uint8Array.from(atob(data.replace(/\s/g, '')), c => c.charCodeAt(0)));
 function spend(n){ S.coins -= n; S.spent += n; }
@@ -1422,6 +1428,7 @@ function applySaved(data){
   const shownHere = S.lasta || [];
   for (const k of SAVED_FIELDS) if (data[k] !== undefined) S[k] = data[k];
   if (!S.pa) S.pa = {};
+  if (data.lyktaTand){ S.tant = { ...(S.tant || {}), lykta: true }; }   // the lantern was saved on its own before
   buildBoy(S.pa); musicSync(); renderLetters();
   S.lasta = [...new Set([...(S.lasta || []), ...shownHere])];   // stories shown before the saved game had loaded stay seen
   if (typeof data.sett === 'string') S.sett = Uint8Array.from(atob(data.sett), c => c.charCodeAt(0));
