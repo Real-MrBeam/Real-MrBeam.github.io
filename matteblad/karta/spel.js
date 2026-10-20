@@ -1309,7 +1309,8 @@ function renderLog(fresh){
     const left = e.typ === 'runa'
       ? `<img class="pix" src="${RUNE_URL}" alt=""><span><b>${esc(e.amne || 'Runa')}</b> ${[where ? 'vid ' + esc(where) : '', e.procent != null ? e.procent + ' %' : ''].filter(Boolean).join(', ')}</span>`
       : `<img class="pix" src="${SCROLL_URL}" alt=""><span><b>${esc(e.amne || 'Pergamentrulle')}</b> ${where ? 'vid ' + esc(where) + ', ' : ''}${e.ratt} av ${e.av} rätt</span>`;
-    const right = e.typ === 'runa' ? `${'★'.repeat(e.stjarnor)}${e.bonus ? ' +1' : ''}` : `<img class="pix" src="${DUST_URL}" alt="">${e.stoft}`;
+    // the stars are the same pixel star as up in the corner, with a number, like the stardust on the scrolls
+    const right = e.typ === 'runa' ? `<img class="pix" src="${STAR_URL}" alt="">${e.stjarnor + (e.bonus || 0)}<span class="sr"> stjärnor</span>` : `<img class="pix" src="${DUST_URL}" alt="">${e.stoft}`;
     const n = S.log.length - 1 - i;
     return `<li class="${fresh && i === 0 ? 'new' : ''}${e.text ? ' readable' : ''}"${e.text ? ` data-las="${n}" role="button" tabindex="0" title="Läs historien"` : ''}>${left}<span class="st">${right}</span></li>`;
   }).join('') : '<li><span>Inga runor eller rullar ännu.</span></li>';
