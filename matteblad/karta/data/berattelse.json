@@ -63,21 +63,25 @@
     },
     "stenblocket": {
       "namn": "Stenblocket",
-      "text": "Ett stenblock täckt av tecken som ingen kan läsa. Under det porlar en bäck."
+      "text": "Ett stenblock täckt av tecken som ingen kan läsa. Under det porlar en bäck.",
+      "rykte": "I bäcken under stenblocket kryper kräftor. De går inte på kroken, men de kryper gärna in i en bur."
     },
     "sodrabron": {
       "namn": "Södra bron",
-      "text": "En bro över älven där strömmen går lugn. Ett bra ställe att fiska på."
+      "text": "En bro över älven där strömmen går lugn. Ett bra ställe att fiska på.",
+      "rykte": "Under Södra bron står abborrarna i stim, och längre ner lurar gäddan."
     },
     "norrabron": {
       "namn": "Norra bron",
       "text": "En bro över älven, nära tornet. Här är strömmen stark och vattnet mörkt och djupt.",
       "natt": "En bro över älven, nära tornet. Från det mörka vattnet hörs något som liknar fiol.",
-      "rykteNatt": "Vid Norra bron spelar någon fiol i älven om nätterna. Om man ändå hade något som kunde ta en ut på vattnet."
+      "rykteNatt": "Vid Norra bron spelar någon fiol i älven om nätterna. Om man ändå hade något som kunde ta en ut på vattnet.",
+      "rykte": "I forsen vid Norra bron hoppar öringen. Ibland syns en lila glans, det är harren."
     },
     "vassen": {
       "namn": "Vassen",
-      "text": "En gömd brygga i vassen. Ingen annan vet att den finns, och så får det gärna förbli."
+      "text": "En gömd brygga i vassen. Ingen annan vet att den finns, och så får det gärna förbli.",
+      "rykte": "Det kväker i vassen hela tiden. Grodorna sitter för nära kanten för ett spö."
     },
     "talt": {
       "namn": "Tältet",
@@ -818,8 +822,9 @@
             "ger": "trolldryck",
             "pris": 4,
             "knapp": "Köp en trolldryck",
-            "hej": "Jag har en trolldryck över. Du får den för fyra stjärnstoft, eller så byter vi mot något glittrigt du har hittat.",
-            "tack": "Här. Fråga inte vad som är i den."
+            "hej": "Jag har en trolldryck över. Du får den för fyra stjärnstoft. Eller om du har ett drakfjäll till grytan, då byter vi.",
+            "tack": "Här. Fråga inte vad som är i den.",
+            "fynd": "drakfjall"
           },
           "gava": [
             "katten"
@@ -2009,7 +2014,8 @@
           "tack": "\"Där ser man. Håven är din. Jag fiskar bättre utan.\"",
           "klar": "Du har redan en håv.",
           "pris": 5,
-          "hej": "Den gamla fiskaren fnyser vänligt. \"Min håv kan du få för fem stjärnstoft. Eller har du hittat något fint? Jag samlar på sådant.\""
+          "hej": "Den gamla fiskaren fnyser vänligt. \"Min håv kan du få för fem stjärnstoft. Eller om du hittar en gammal glasflaska. Jag samlar på sådana.\"",
+          "fynd": "glasflaska"
         },
         "vanta": [
           2500,
@@ -2031,7 +2037,8 @@
           "tack": "Fiskaren ler. \"Ta väl hand om det. Forsen är snällare mot den som har tålamod.\"",
           "klar": "Du har redan ett flugspö.",
           "pris": 6,
-          "hej": "Fiskaren nickar mot forsen. \"Vill du ha mitt gamla flugspö? Du får det för sex stjärnstoft, eller så byter vi mot något fint du har hittat.\""
+          "hej": "Fiskaren nickar mot forsen. \"Mitt gamla flugspö kan du få för sex stjärnstoft. Men jag tappade en stor nyckel i älven för länge sedan. Hittar du den byter jag gärna.\"",
+          "fynd": "nyckel"
         },
         "vanta": [
           1200,

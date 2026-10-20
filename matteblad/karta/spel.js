@@ -1263,7 +1263,7 @@ function tradeFish(p, v){
   const T = v.byte, back = [{ label: 'Tillbaka', alt: true, run: () => startShop(p, true) }];
   if (S.bytt[p.id]) return startShop(p, true);
   // Hulda sells her potion or swaps it for a find; Torvald still wants a crayfish
-  if (T.pris) return sellOrSwap({ who: v.person, hej: T.hej, tack: T.tack, ger: T.ger, pris: T.pris, back: () => startShop(p, true), done: () => { S.bytt[p.id] = true; } });
+  if (T.pris) return sellOrSwap({ who: v.person, hej: T.hej, tack: T.tack, ger: T.ger, pris: T.pris, fynd: T.fynd, back: () => startShop(p, true), done: () => { S.bytt[p.id] = true; } });
   if (!(S.fiskbok[T.vill] > 0)) return startDialog([{ p: v.person, t: T.saknas }], () => back);
   S.fiskbok[T.vill]--; S.bytt[p.id] = true;
   if (!S.saker.includes(T.ger)) S.saker.push(T.ger);
@@ -1587,11 +1587,11 @@ function lanBlock(id){
 function talkFisher(id){
   const L = FISKE.platser[id].lan;
   if (S.saker.includes(L.ger)) return;
-  sellOrSwap({ who: null, hej: L.hej, tack: L.tack, ger: L.ger, pris: L.pris, back: toNode, done: () => {} });
+  sellOrSwap({ who: null, hej: L.hej, tack: L.tack, ger: L.ger, pris: L.pris, fynd: L.fynd, back: toNode, done: () => {} });
 }
-// Someone sells a thing for stardust, or swaps it for one of his finds (the fishermen on the bridges, Hulda). Peter 2026-10-21.
+// Someone sells a thing for stardust, or swaps it for the one find he or she wants (the fishermen on the bridges, Hulda). Peter 2026-10-21.
 function sellOrSwap(o){
-  const finds = S.saker.filter(id => SAKER[id] && SAKER[id].typ === 'fynd');
+  const finds = o.fynd && S.saker.includes(o.fynd) ? [o.fynd] : [];
   const give = how => {
     if (S.saker.includes(o.ger)) return o.back();
     if (how === 'pris'){ if (S.coins < o.pris){ toast(berattelse.dialog.ingaStoft.replace('{n}', o.pris - S.coins)); return; } spend(o.pris); updateHud('coins'); }
