@@ -752,13 +752,22 @@ $('#pack').addEventListener('click', ev => {
 // The choice is remembered in the browser. At night only "Stjärnnatt" plays. The music pauses while the page is hidden.
 const MUSIC_KEY = 'glimmerdal:musik';
 const musicWanted = () => { try { return localStorage.getItem(MUSIC_KEY) !== 'av'; } catch (e) { return true; } };
-function musicButton(){ const b = $('#btnMusik'), on = !!(window.Musik && Musik.spelar); b.textContent = on ? '🔊' : '🔇'; b.setAttribute('aria-pressed', String(on)); }
+const SPEAKER = ["....ww......", "...www...y..", "wwwgww.y..y.", "wwgggw..y..y", "wwgggw..y..y", "wwwgww.y..y.", "...www...y..", "....ww......"];
+const SPEAKER_OFF = ["....ww......", "...www......", "wwwgww.r..r.", "wwgggw..rr..", "wwgggw..rr..", "wwwgww.r..r.", "...www......", "....ww......"];
+const SPEAKER_PAL = { w: '#ffffff', g: '#c0cbdc', y: '#fee761', r: '#e43b44' };
+let SPEAKER_URLS = null;
+function musicButton(){
+  if (!SPEAKER_URLS) SPEAKER_URLS = [iconURL(sprite(SPEAKER, SPEAKER_PAL), 3), iconURL(sprite(SPEAKER_OFF, SPEAKER_PAL), 3)];
+  const b = $('#btnMusik'), on = !!(window.Musik && Musik.spelar);
+  $('#icoMusik').src = SPEAKER_URLS[on ? 0 : 1]; b.title = on ? 'Stäng av musiken' : 'Sätt på musiken'; b.setAttribute('aria-pressed', String(on));
+}
 function musicSync(){ if (window.Musik) Musik.natt(!!S.natt); }
-addEventListener('pointerdown', function first(ev){
-  removeEventListener('pointerdown', first);
-  if (ev.target.closest('#btnMusik') || !window.Musik || !musicWanted()) return;
+function firstGesture(ev){
+  removeEventListener('pointerdown', firstGesture); removeEventListener('keydown', firstGesture);
+  if ((ev.target.closest && ev.target.closest('#btnMusik')) || !window.Musik || !musicWanted()) return;
   musicSync(); Musik.start(); musicButton();
-});
+}
+addEventListener('pointerdown', firstGesture); addEventListener('keydown', firstGesture);
 $('#btnMusik').addEventListener('click', () => {
   if (!window.Musik) return;
   if (Musik.spelar){ Musik.stop(); try { localStorage.setItem(MUSIC_KEY, 'av'); } catch (e) { /* only this time */ } }
@@ -1615,6 +1624,7 @@ function start(data){
   buildTerrain();
   resize(); centerOn(boy.x + 8, boy.y + 8, true);
   updateHud(); renderLog(); renderPack(); renderBook(); renderTickets(); renderFishBook(); showNode();
+  musicButton(); musicSync();
   loadPortraitImages();
   if (!introSeen()) showIntro();
   requestAnimationFrame(t => { lastT = t; frame(t); });

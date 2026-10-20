@@ -136,21 +136,23 @@ function spela(ctx, dest, index, t0) {
 
 // ---------- the player on the page: the songs take turns with a short pause between them
 const P = { ctx: null, master: null, bus: null, next: 0, end: 0, timer: 0, on: false, vol: .35, natt: false };
+// Off and on again carries on in the same song where it stopped (the sound is only paused). Day and night switch the song at once.
 function start() {
   if (P.on) return;
   const AC = root.AudioContext || root.webkitAudioContext; if (!AC) return;
-  if (!P.ctx) { P.ctx = new AC(); P.master = P.ctx.createGain(); P.master.connect(P.ctx.destination); }
+  if (!P.ctx) { P.ctx = new AC(); P.master = P.ctx.createGain(); P.master.gain.value = 0; P.master.connect(P.ctx.destination); }
   P.on = true;
-  P.master.gain.cancelScheduledValues(P.ctx.currentTime); P.master.gain.setValueAtTime(P.vol, P.ctx.currentTime);
-  P.ctx.resume();
-  P.end = 0;
-  tick();
-  P.timer = setInterval(tick, 500);
+  P.ctx.resume().then(() => {
+    const t = P.ctx.currentTime;
+    P.master.gain.cancelScheduledValues(t); P.master.gain.setValueAtTime(P.master.gain.value, t); P.master.gain.linearRampToValueAtTime(P.vol, t + .4);
+    tick();
+  });
+  if (!P.timer) P.timer = setInterval(tick, 500);
 }
 function tick() {
   if (!P.on || P.ctx.state !== 'running') return;
   const now = P.ctx.currentTime;
-  if (now >= P.end) {   // the song is over (or none has started): the next one, after a pause of two seconds
+  if (now >= P.end) {   // the song is over (or none has started): the next one, after a short pause
     if (P.bus) P.bus.disconnect();
     P.bus = P.ctx.createGain(); P.bus.connect(P.master);
     const t0 = now + (P.end ? 2 : .1);
@@ -161,14 +163,21 @@ function tick() {
 }
 function stop() {
   if (!P.on) return;
-  P.on = false; clearInterval(P.timer);
+  P.on = false;
   const t = P.ctx.currentTime;
-  P.master.gain.setValueAtTime(P.master.gain.value, t); P.master.gain.linearRampToValueAtTime(0, t + .3);
-  const bus = P.bus; P.bus = null;
-  setTimeout(() => { if (bus) bus.disconnect(); if (!P.on) P.ctx.suspend(); }, 400);
-  P.end = 0;
+  P.master.gain.cancelScheduledValues(t); P.master.gain.setValueAtTime(P.master.gain.value, t); P.master.gain.linearRampToValueAtTime(0, t + .3);
+  setTimeout(() => { if (!P.on) P.ctx.suspend(); }, 350);
+}
+// The song that is playing fades out, and the right one for day or night starts
+function natt(v) {
+  v = !!v; if (P.natt === v) return;
+  P.natt = v;
+  if (!P.ctx) return;
+  const old = P.bus; P.bus = null; P.end = 0;
+  if (old) { const t = P.ctx.currentTime; old.gain.setValueAtTime(old.gain.value, t); old.gain.linearRampToValueAtTime(0, t + .8); setTimeout(() => old.disconnect(), 1000); }
+  tick();
 }
 function paus(hidden) { if (!P.ctx || !P.on) return; if (hidden) P.ctx.suspend(); else P.ctx.resume(); }
 
-root.Musik = { start, stop, paus, spela, natt: v => { P.natt = !!v; }, get spelar() { return P.on; }, lattar: SONGS.map(s => s.namn) };
+root.Musik = { start, stop, paus, spela, natt, get spelar() { return P.on; }, lattar: SONGS.map(s => s.namn) };
 })(typeof window !== 'undefined' ? window : globalThis);
