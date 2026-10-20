@@ -125,6 +125,9 @@ const CATCH = {
   krafta: sprite([".oo......oo.", "orro....orro", "orrro..orrro", ".oorroorroo.", "..orkrrkro..", "..oRrrrrRo..", ".ooRrrrrRoo.", "..oRrrrrRo..", ".ooRrrrrRoo.", "...oRrrRo...", "..oRRRRRRo..", "..oooooooo.."], { o:'#3f2631', k:'#262b44', r:'#e43b44', R:'#a22633' }),
 };
 const catchIcon = id => iconURL(CATCH[id] || FISH, 8);
+// A pixel arrow for the link back to the worksheets (the font has no clear arrow)
+const ARROW = sprite(["...o.....", "..oyo....", ".oyyooooo", "oyyyyyyyo", ".oyyooooo", "..oyo....", "...o....."], { o:'#3f2631', y:'#fee761' });
+document.querySelectorAll('img.back-arrow').forEach(im => { im.src = iconURL(ARROW, 2); });
 const LOCK = sprite(["..sss..", ".s...s.", ".s...s.", "ooooooo", "oyyyyyo", "oyyoyyo", "oyyyyyo", "ooooooo"], { o:'#3f2631', y:'#feae34', s:'#c0cbdc' });
 const GATEPAL = { o:'#3f2631', S:'#c0cbdc', s:'#8b9bb4', w:'#b86f50', W:'#733e39', y:'#feae34', Y:'#fee761' };
 const GATE_TOP = ["................", "oooooooooooooooo", "oSSSSSSSSSSSSSSo", "osssssssssssssso", "oooooooooooooooo"];
@@ -1656,6 +1659,8 @@ panel.addEventListener('click', ev => { const b = ev.target.closest('button[data
 $('#btnGe').addEventListener('click', showGive);
 $('#btnGeAlla').addEventListener('click', () => { for (const id in SAKER) if (SAKER[id].typ !== 'djur') debugGive(id); renderPack(); toast('Alla saker lades i väskan.'); });
 $('#btnGeDjur').addEventListener('click', () => { for (const id in SAKER) if (SAKER[id].typ === 'djur') debugGive(id); for (const id in berattelse.djur) if (!S.djur.includes(id)) S.djur.push(id); renderBook(); toast('Alla djur skrevs in i djurboken.'); });
+// Debug: which song is playing
+if (new URLSearchParams(location.search).has('debug')) setInterval(() => { $('#debugLat').textContent = window.Musik && Musik.spelar ? `Spelar: ${Musik.lat}` : 'Musiken är av'; }, 500);
 // Debug: switch day and night at once, without sleeping in Hemmet
 const nattLabel = () => { $('#btnNatt').textContent = S.natt ? 'Dag' : 'Natt'; };
 $('#btnNatt').addEventListener('click', () => { S.natt = !S.natt; musicSync(); showNode(); nattLabel(); });

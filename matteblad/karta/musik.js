@@ -197,7 +197,7 @@ function tick() {
     const tid = P.natt ? 'natt' : 'dag', list = SONGS.map((s, i) => i).filter(i => SONGS[i].tid === tid);
     const index = list[P.next[tid] % list.length];
     P.next[tid] = (P.next[tid] + 1) % list.length;
-    P.end = t0 + spela(P.ctx, P.bus, index, t0);
+    P.end = t0 + spela(P.ctx, P.bus, index, t0); P.lat = SONGS[index].namn;
   }
 }
 function stop() {
@@ -249,5 +249,5 @@ function flojt(index) {
   return dur;
 }
 
-root.Musik = { flojt, antalFlojt: FLOJT.length, start, stop, paus, spela, natt, get spelar() { return P.on; }, lattar: SONGS.map(s => s.namn) };
+root.Musik = { flojt, antalFlojt: FLOJT.length, start, stop, paus, spela, natt, get spelar() { return P.on; }, get lat() { return P.lat || ''; }, lattar: SONGS.map(s => s.namn) };
 })(typeof window !== 'undefined' ? window : globalThis);
