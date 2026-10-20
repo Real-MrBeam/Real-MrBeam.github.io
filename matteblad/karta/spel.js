@@ -718,6 +718,11 @@ function sleep(){
   showNode();
 }
 
+// Reading a rune or a scroll again: tap it in the list
+const readEvent = el => { const e = el && S.log[+el.dataset.las]; if (e && e.text) openModal(eventSteps(e, true).slice(1), null); };
+$('#log').addEventListener('click', ev => readEvent(ev.target.closest('li[data-las]')));
+$('#log').addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key === ' '){ const li = ev.target.closest('li[data-las]'); if (li){ ev.preventDefault(); readEvent(li); } } });
+
 /* ---------- tältet och nattfiskaren ---------- */
 // The tent behind the campfire in Skogsgläntan is closed by day. At night the night fisherman buys fish from the fish book and
 // finds from the pack, one of each kind (S.salt), so it is a collection to sell and no way to make endless stardust.
@@ -1151,7 +1156,8 @@ function renderLog(fresh){
       ? `<img class="pix" src="${RUNE_URL}" alt=""><span><b>${esc(e.amne || 'Runa')}</b> ${[where ? 'vid ' + esc(where) : '', e.procent != null ? e.procent + ' %' : ''].filter(Boolean).join(', ')}</span>`
       : `<img class="pix" src="${SCROLL_URL}" alt=""><span><b>${esc(e.amne || 'Pergamentrulle')}</b> ${where ? 'vid ' + esc(where) + ', ' : ''}${e.ratt} av ${e.av} rätt</span>`;
     const right = e.typ === 'runa' ? `${'★'.repeat(e.stjarnor)}${e.bonus ? ' +1' : ''}` : `<img class="pix" src="${DUST_URL}" alt="">${e.stoft}`;
-    return `<li class="${fresh && i === 0 ? 'new' : ''}">${left}<span class="st">${right}</span></li>`;
+    const n = S.log.length - 1 - i;
+    return `<li class="${fresh && i === 0 ? 'new' : ''}${e.text ? ' readable' : ''}"${e.text ? ` data-las="${n}" role="button" tabindex="0" title="Läs historien"` : ''}>${left}<span class="st">${right}</span></li>`;
   }).join('') : '<li><span>Inga runor eller rullar ännu.</span></li>';
 }
 const starsFor = pct => berattelse.regler.stjarnor.find(r => pct >= r.minProcent).antal;
@@ -1178,7 +1184,7 @@ function applyReal(events){
 // encrypted in the page (#lasNyckel) and opens with the password, like the portraits. Without the key nothing is saved.
 // Stars and stardust are never saved: they are counted from the runes and scrolls. Only what he has spent is saved.
 const SAVE = { repo: '', file: '', key: '', sha: null, timer: 0, off: false, loaded: false };
-const SAVED_FIELDS = ['node', 'built', 'valda', 'saker', 'steg', 'handlat', 'djur', 'fram', 'stopp', 'hittat', 'spent', 'kistor', 'agnAnvant', 'fiskbok', 'namn', 'bytt', 'intro', 'natt', 'salt'];
+const SAVED_FIELDS = ['node', 'built', 'valda', 'saker', 'steg', 'handlat', 'djur', 'fram', 'stopp', 'hittat', 'spent', 'kistor', 'agnAnvant', 'fiskbok', 'namn', 'bytt', 'intro', 'natt', 'salt', 'lasta'];
 const b64 = text => { const bytes = new TextEncoder().encode(text); let s = ''; for (const b of bytes) s += String.fromCharCode(b); return btoa(s); };
 const unb64 = data => new TextDecoder().decode(Uint8Array.from(atob(data.replace(/\s/g, '')), c => c.charCodeAt(0)));
 function spend(n){ S.coins -= n; S.spent += n; }
@@ -1208,7 +1214,9 @@ async function loadSave(){
   }
 }
 function applySaved(data){
+  const shownHere = S.lasta || [];
   for (const k of SAVED_FIELDS) if (data[k] !== undefined) S[k] = data[k];
+  S.lasta = [...new Set([...(S.lasta || []), ...shownHere])];   // stories shown before the saved game had loaded stay seen
   if (typeof data.sett === 'string') S.sett = Uint8Array.from(atob(data.sett), c => c.charCodeAt(0));
   S.coins = (REAL ? REAL.stoft : startData.stjarnstoft) - S.spent;
   boy.route = null; placeBoy(S.node); plotAnim.clear(); petState.clear();
@@ -1251,24 +1259,31 @@ function stopSaving(){ if (SAVE.key && !SAVE.off){ SAVE.off = true; toast('Sparn
 // News: a rune or scroll he has not seen on this device is told as a short story the first time
 const NEWS_KEY = 'glimmerdal:handelser';
 let newsQueue = [];
-const seenEvents = () => { try { return JSON.parse(localStorage.getItem(NEWS_KEY) || '[]'); } catch (e) { return []; } };
+// Seen events are remembered in the browser and in the saved game (S.lasta), so they are not told again on every start
+const seenEvents = () => { let local = []; try { local = JSON.parse(localStorage.getItem(NEWS_KEY) || '[]'); } catch (e) { /* only the saved game */ } return [...new Set([...local, ...(S.lasta || [])])]; };
+function markSeen(ids){
+  const all = [...new Set([...seenEvents(), ...ids])];
+  S.lasta = all; saveSoon();
+  try { localStorage.setItem(NEWS_KEY, JSON.stringify(all)); } catch (e) { /* the saved game remembers it */ }
+}
+// The text of a rune or scroll: the title, the story and what it gave. Used for the news and when he taps a line in the list.
+function eventSteps(e, last){
+  const rune = e.typ === 'runa', where = placeName(e.plats);
+  const title = rune ? (e.amne ? `Runa: ${e.amne}` : 'Du hittade en runa') : e.amne ? `Pergamentrulle: ${e.amne}` : 'Du hittade en pergamentrulle';
+  const reward = rune
+    ? `Runan gav ${e.stjarnor} ${e.stjarnor === 1 ? 'stjärna' : 'stjärnor'}${e.bonus ? ', och en extra för att du tolkade bättre än förra gången' : ''}.`
+    : `Rullen gav ${e.stoft} stjärnstoft.`;
+  return [
+    { icon: rune ? RUNE_BIG : SCROLL_BIG, title, text: where ? `Den låg vid ${where}.` : '', button: rune ? 'Tolka runan' : 'Öppna rullen' },
+    { icon: rune ? RUNE_BIG : SCROLL_BIG, title, text: e.text, reward, button: last ? 'Till kartan' : 'Nästa' },
+  ];
+}
 function showNews(){
   const list = newsQueue; newsQueue = [];
-  const steps = list.flatMap((e, i) => {
-    const rune = e.typ === 'runa', where = placeName(e.plats), last = i === list.length - 1;
-    const title = rune ? (e.amne ? `Runa: ${e.amne}` : 'Du hittade en runa') : e.amne ? `Pergamentrulle: ${e.amne}` : 'Du hittade en pergamentrulle';
-    const reward = rune
-      ? `Runan gav ${e.stjarnor} ${e.stjarnor === 1 ? 'stjärna' : 'stjärnor'}${e.bonus ? ', och en extra för att du tolkade bättre än förra gången' : ''}.`
-      : `Rullen gav ${e.stoft} stjärnstoft.`;
-    return [
-      { icon: rune ? RUNE_BIG : SCROLL_BIG, title, text: where ? (rune ? `Den låg vid ${where}.` : `Den låg vid ${where}.`) : '', button: rune ? 'Tolka runan' : 'Öppna rullen' },
-      { icon: rune ? RUNE_BIG : SCROLL_BIG, title, text: e.text, reward, button: last ? 'Till kartan' : 'Nästa' },
-    ];
-  });
-  openModal(steps, () => {
-    try { localStorage.setItem(NEWS_KEY, JSON.stringify([...new Set([...seenEvents(), ...list.map(e => e.id)])])); } catch (e) { /* shown again next time */ }
-    updateHud('stars'); renderTickets();
-  });
+  // marked as seen as soon as they are shown, so they never come back even if he closes the page halfway
+  markSeen(list.map(e => e.id));
+  const steps = list.flatMap((e, i) => eventSteps(e, i === list.length - 1));
+  openModal(steps, () => { updateHud('stars'); renderTickets(); });
 }
 // A box over the map with a picture, a title, a text and one button, step by step
 // If the field is left empty the name stays as it was
