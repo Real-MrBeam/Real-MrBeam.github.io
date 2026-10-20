@@ -259,7 +259,7 @@ let REAL = null; // { stars, stoft, handelser } once the locked events have been
 const START = () => ({
   stars: REAL ? REAL.stars : startData.stjarnor, coins: REAL ? REAL.stoft : startData.stjarnstoft, node: startData.plats,
   built: Object.fromEntries(startData.byggt.map(id => [id, true])),
-  valda: {}, saker: [], steg: {}, handlat: {}, djur: [], fram: [], stopp: {}, hittat: [], spent: 0, kistor: [], agnAnvant: [], fiskbok: {}, namn: {},
+  valda: {}, saker: [], steg: {}, handlat: {}, djur: [], fram: [], stopp: {}, hittat: [], spent: 0, kistor: [], agnAnvant: [], fiskbok: {}, namn: {}, bytt: {},
   sett: new Uint8Array(MW*MH),
   log: REAL ? REAL.handelser.slice() : startData.logg.map(r => ({ typ: 'runa', amne: r.amne, procent: Math.round(r.poang / r.max * 100), stjarnor: r.stjarnor, bonus: r.bonus })),
   testIdx: 0,
@@ -647,6 +647,7 @@ function renderPanel(view){
     for (const p of plots) h += plotBlock(p);
     if (stop) h += stopBlock(n.id);
     if (FISKE.platser[n.id]) h += fishBlock(n.id);
+    if (FISKE.platser[n.id] && FISKE.platser[n.id].lan) h += lanBlock(n.id);
     for (const r of LOCKA) if (r.plats === n.id) h += lureBlock(r);
     if (n.id === CHEST_AT.node && pendingTickets().length) h += `<div class="plot"><div><b>En guldkista står vid skolan</b></div><button class="btn" type="button" data-kista="1">Öppna kistan</button></div>`;
     if (n.id === 'slott') h += `<div><button class="btn" type="button" data-slott="1">${esc(berattelse.dialog.slottKnapp)}</button></div>`;
@@ -700,6 +701,7 @@ panel.addEventListener('click', ev => {
   else if (b.dataset.slott) startCount();
   else if (b.dataset.kista) openChest();
   else if (b.dataset.fiska) startFishing(b.dataset.fiska);
+  else if (b.dataset.lan) talkFisher(b.dataset.lan);
   else if (b.dataset.locka) lure(b.dataset.locka);
   else if (b.dataset.redskap !== undefined){ fishing.redskap = b.dataset.redskap; renderFishing(); }
   else if (b.dataset.agn !== undefined){ fishing.agn = b.dataset.agn; renderFishing(); }
@@ -783,13 +785,15 @@ function startTyping(){
   say.onclick = finish;
 }
 const toNode = () => { dlg = null; showNode(); if (newsQueue.length) showNews(); };
+// A short clue on a choice he cannot pay for yet: how much is missing and where more comes from
+const missing = cost => S.coins < cost ? ` ${berattelse.dialog.saknarHint.replace('{n}', cost - S.coins)}` : '';
 // A price in a button: the stardust icon and the number in bold
 const price = n => `<span class="price"><img class="pix" src="${DUST_URL}" alt="">${n}<span class="sr"> stjärnstoft</span></span>`;
 function startBuild(p){
   const b = BYGG[p.bygg];
   if (b.aventyr) return startAdventure(p);
   startDialog(b.val.map(v => ({ p: v.talar === null ? null : v.person, t: v.onskan })), () => [
-    ...b.val.map(v => ({ label: `Låt ${esc(PERS[v.person].namn)} bygga ${price(v.kostnad)}<small>${esc(v.namn)}</small>`, poor: S.coins < v.kostnad, run: () => confirmBuild(p, v) })),
+    ...b.val.map(v => ({ label: `Låt ${esc(PERS[v.person].namn)} bygga ${price(v.kostnad)}<small>${esc(v.namn)}${missing(v.kostnad)}</small>`, poor: S.coins < v.kostnad, run: () => confirmBuild(p, v) })),
     { label: berattelse.dialog.tankLiteTill, alt: true, run: toNode },
   ]);
 }
@@ -810,7 +814,7 @@ function startAdventure(p){
 function runStep(ad, id, pre){
   const st = ad.def.steg[id];
   startDialog([...pre, { p: st.p ?? null, t: st.t }], () => [
-    ...st.val.map(o => ({ label: o.kostnad ? `${esc(o.label)} ${price(o.kostnad)}` : esc(o.label), poor: S.coins < o.kostnad, run: () => takeStep(ad, o) })),
+    ...st.val.map(o => ({ label: o.kostnad ? `${esc(o.label)} ${price(o.kostnad)}${missing(o.kostnad) ? `<small>${missing(o.kostnad)}</small>` : ''}` : esc(o.label), poor: S.coins < o.kostnad, run: () => takeStep(ad, o) })),
     { label: berattelse.dialog.tankLiteTill, alt: true, run: toNode },
   ]);
 }
@@ -885,8 +889,20 @@ function startShop(p, seen){
       const tail = own ? 'Köpt. ' : had ? 'Du har redan handlat här. ' : '';
       return { label: `${esc(it.namn)} ${had ? '' : price(it.pris)}<small>${tail}${esc(it.text)}</small>`, disabled: !!had, poor: !had && S.coins < it.pris, run: () => confirmBuy(p, id) };
     }),
+    ...(v.byte ? [{ label: `${esc(v.byte.knapp)}${S.bytt[p.id] ? '<small>Redan bytt.</small>' : ''}`, disabled: !!S.bytt[p.id], run: () => tradeFish(p, v) }] : []),
     { label: 'Tillbaka till kartan', alt: true, run: toNode },
   ], seen);
+}
+// Torvald and Hulda take one catch from his fish book and give a bait for it, once
+function tradeFish(p, v){
+  const T = v.byte, back = [{ label: 'Tillbaka', alt: true, run: () => startShop(p, true) }];
+  if (S.bytt[p.id]) return startShop(p, true);
+  if (!(S.fiskbok[T.vill] > 0)) return startDialog([{ p: v.person, t: T.saknas }], () => back);
+  S.fiskbok[T.vill]--; S.bytt[p.id] = true;
+  if (!S.saker.includes(T.ger)) S.saker.push(T.ger);
+  renderFishBook(); renderPack(); saveSoon();
+  toast(`${SAKER[T.ger].namn} lades i väskan.`);
+  startDialog([{ p: v.person, t: T.tack }], () => back);
 }
 function confirmBuy(p, id){
   const v = valOf(p), it = SAKER[id];
@@ -1018,7 +1034,7 @@ function applyReal(events){
 // encrypted in the page (#lasNyckel) and opens with the password, like the portraits. Without the key nothing is saved.
 // Stars and stardust are never saved: they are counted from the runes and scrolls. Only what he has spent is saved.
 const SAVE = { repo: '', file: '', key: '', sha: null, timer: 0, off: false, loaded: false };
-const SAVED_FIELDS = ['node', 'built', 'valda', 'saker', 'steg', 'handlat', 'djur', 'fram', 'stopp', 'hittat', 'spent', 'kistor', 'agnAnvant', 'fiskbok', 'namn'];
+const SAVED_FIELDS = ['node', 'built', 'valda', 'saker', 'steg', 'handlat', 'djur', 'fram', 'stopp', 'hittat', 'spent', 'kistor', 'agnAnvant', 'fiskbok', 'namn', 'bytt'];
 const b64 = text => { const bytes = new TextEncoder().encode(text); let s = ''; for (const b of bytes) s += String.fromCharCode(b); return btoa(s); };
 const unb64 = data => new TextDecoder().decode(Uint8Array.from(atob(data.replace(/\s/g, '')), c => c.charCodeAt(0)));
 function spend(n){ S.coins -= n; S.spent += n; }
@@ -1137,6 +1153,19 @@ function fishBlock(id){
   const T = FISKE.texter, here = S.node === id && !boy.route;
   return `<div class="plot"><div><b>${esc(T.rubrik)}</b></div>${here ? `<button class="btn" type="button" data-fiska="${id}">${esc(T.knapp)}</button>` : ''}</div>`;
 }
+// A fisherman on a bridge lends a tool for a fish of a kind he has caught there
+function lanBlock(id){
+  const L = FISKE.platser[id].lan, here = S.node === id && !boy.route, got = S.saker.includes(L.ger);
+  return `<div class="plot"><div><b>${esc(L.rubrik)}</b>${got ? `<span>${esc(L.klar)}</span>` : ''}</div>${here && !got ? `<button class="btn" type="button" data-lan="${id}">${esc(L.knapp)}</button>` : ''}</div>`;
+}
+function talkFisher(id){
+  const L = FISKE.platser[id].lan;
+  if (S.saker.includes(L.ger)) return;
+  if (!(S.fiskbok[L.vill] > 0)) return openModal([{ icon: FISH_BIG, title: L.rubrik, text: L.saknas, button: 'Till kartan' }], () => showNode());
+  S.fiskbok[L.vill]--; S.saker.push(L.ger);
+  renderFishBook(); renderPack(); saveSoon();
+  openModal([{ icon: FISH_BIG, title: L.rubrik, text: L.tack, reward: `${SAKER[L.ger].namn} lades i väskan.`, button: 'Till kartan' }], () => showNode());
+}
 function startFishing(id){
   fishing = { plats: id, redskap: 'metspo', agn: '', phase: 'val', timers: [] };
   renderFishing();
@@ -1170,13 +1199,22 @@ function cast(){
   fz.timers.push(setTimeout(() => { if (fz.phase === 'nu') miss(FISKE.texter.sent); }, wait + 1100));
 }
 function miss(text){ const fz = fishing; fz.timers.forEach(clearTimeout); fz.timers = []; fz.phase = 'miss'; fz.miss = text; renderFishing(); }
+// What the water says when a bait is offered at a wrong place or with a wrong tool (only for animals he has not found yet)
+function missText(fz){
+  const T = FISKE.texter, open = FISKE.djur.filter(r => !S.djur.includes(r.djur));
+  const baitOk = open.filter(r => r.agn.includes(fz.agn));
+  if (baitOk.some(r => r.plats === fz.plats && !r.redskap.includes(fz.redskap))) return T.agnFelRedskap;
+  if (baitOk.length) return T.agnFelPlats;
+  if (open.some(r => r.plats === fz.plats)) return T.platsFelAgn;
+  return T.ingetNapp;
+}
 function pull(){
   const fz = fishing;
   if (fz.phase !== 'nu') return miss(FISKE.texter.tidigt);
   fz.timers.forEach(clearTimeout); fz.timers = [];
   const rule = FISKE.djur.find(r => r.plats === fz.plats && r.redskap.includes(fz.redskap) && r.agn.includes(fz.agn) && !S.djur.includes(r.djur));
   // A bait is only used up when a water animal bites. With the wrong place or tool nothing takes it, and he keeps it.
-  if (fz.agn && !rule) return miss(FISKE.texter.ingetNapp);
+  if (fz.agn && !rule) return miss(missText(fz));
   if (fz.agn){ S.agnAnvant.push(fz.agn); renderPack(); }
   sparkle(boy.x + 8, boy.y + 2, 20, '#2ce8f5');
   let step;
@@ -1184,9 +1222,9 @@ function pull(){
     stopFishing(); giveAnimal(rule.djur, rule.text, () => showNode());
     return saveSoon();
   } else {
-    const list = FISKE.platser[fz.plats].fiskar, fresh = list.filter(id => !S.fiskbok[id]);
+    const list = FISKE.platser[fz.plats].fiskar, fresh = list.filter(id => S.fiskbok[id] === undefined);
     const pool = fresh.length && Math.random() < .6 ? fresh : list, id = pool[Math.floor(Math.random() * pool.length)];
-    const isNew = !S.fiskbok[id]; S.fiskbok[id] = (S.fiskbok[id] || 0) + 1; renderFishBook();
+    const isNew = S.fiskbok[id] === undefined; S.fiskbok[id] = (S.fiskbok[id] || 0) + 1; renderFishBook();
     const fish = FISKE.fiskar[id];
     step = { icon: FISH_BIG, title: fish.namn, text: fish.text, reward: isNew ? 'Ny i fiskboken.' : `Du har fått ${S.fiskbok[id]} sådana nu.`, button: 'Till kartan' };
   }
@@ -1195,9 +1233,9 @@ function pull(){
   openModal([step], () => showNode());
 }
 function renderFishBook(){
-  const ids = Object.keys(FISKE.fiskar).filter(id => S.fiskbok[id]);
+  const ids = Object.keys(FISKE.fiskar).filter(id => S.fiskbok[id] !== undefined);
   $('#fishbook').innerHTML = ids.length
-    ? ids.map(id => `<li><span><b>${esc(FISKE.fiskar[id].namn)}</b> ${esc(FISKE.fiskar[id].text)}</span><span class="st">${S.fiskbok[id]} st</span></li>`).join('')
+    ? ids.map(id => `<li><span><b>${esc(FISKE.fiskar[id].namn)}</b> ${esc(FISKE.fiskar[id].text)}</span><span class="st">${S.fiskbok[id] ? S.fiskbok[id] + ' st' : 'inga kvar'}</span></li>`).join('')
     : '<li><span>Inga fiskar ännu. Fiska vid broarna.</span></li>';
 }
 

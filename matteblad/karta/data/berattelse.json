@@ -329,12 +329,6 @@
       "typ": "djur",
       "djur": "bumbus"
     },
-    "springskor": {
-      "namn": "Springskor",
-      "pris": 10,
-      "text": "Med dem går du dubbelt så fort på kartan.",
-      "typ": "verktyg"
-    },
     "hopprep": {
       "namn": "Hopprep",
       "pris": 5,
@@ -532,6 +526,17 @@
       "namn": "Blanka snäckor",
       "text": "Mörka, blanka snäckor från bäcken. Djuren i djupet sägs älska dem.",
       "typ": "agn"
+    },
+    "ostbitar": {
+      "namn": "Ostbitar",
+      "pris": 6,
+      "text": "Osttärningar från idrottsfikat. De luktar starkt, och inte bara för människor.",
+      "typ": "agn"
+    },
+    "trolldryck": {
+      "namn": "Trolldryck",
+      "text": "En liten flaska som bubblar av sig själv. Fråga inte vad som är i den.",
+      "typ": "agn"
     }
   },
   "bygg": {
@@ -611,10 +616,10 @@
           "kostnad": 12,
           "byggnad": "hinderbana",
           "tack": "Perfekt. Nu får rasterna äntligen lite fart, och jag slipper höra att det är tråkigt ute.",
-          "butikHej": "Jag har lite utrustning över: springskor och ett hopprep. Inget av det är farligt, i alla fall inte särskilt.",
+          "butikHej": "Jag har lite utrustning över: ett hopprep och några ostbitar från fikat. Inget av det är farligt, i alla fall inte särskilt.",
           "saljer": [
-            "springskor",
-            "hopprep"
+            "hopprep",
+            "ostbitar"
           ]
         },
         {
@@ -738,7 +743,14 @@
             "katten"
           ],
           "forlorare": "Bron över bäcken blev din väg in. Klippan står kvar, brant och tyst, och vad som fanns där uppe får förbli en gåta.",
-          "forlorarePerson": null
+          "forlorarePerson": null,
+          "byte": {
+            "vill": "groda",
+            "ger": "trolldryck",
+            "knapp": "Byt: en groda mot en trolldryck",
+            "saknas": "Jag behöver en groda till grytan. En liten, helst. Kom tillbaka när du har fångat en, så blandar jag något åt dig.",
+            "tack": "En groda! Perfekt. Här är en liten flaska, men fråga inte vad som är i den. Något stort i vattnet gillar den."
+          }
         },
         {
           "id": "grottan",
@@ -755,7 +767,14 @@
             "klippan"
           ],
           "forlorare": "Stegen av ljus blev din väg in. Stigen med irrblossen har vuxit igen, och ingen vet längre vart den ledde.",
-          "forlorarePerson": null
+          "forlorarePerson": null,
+          "byte": {
+            "vill": "krafta",
+            "ger": "snackor",
+            "knapp": "Byt: en kräfta mot blanka snäckor",
+            "saknas": "Har du en kräfta? Trollen älskar kräftor. Kom tillbaka när du har fångat en, så får du snäckor av mig.",
+            "tack": "Mmm, kräfta. Tack. Här har du några snäckor från bäcken. Djuren i djupet sägs älska dem."
+          }
         }
       ]
     },
@@ -980,7 +999,7 @@
   },
   "dialog": {
     "val": "Valet gäller för alltid. Ska du bygga?",
-    "tankLiteTill": "Tänk efter lite",
+    "tankLiteTill": "Gå tillbaka",
     "ingaStoft": "Du saknar {n} stjärnstoft. Mer får du för rätta svar på matteblad.",
     "intro": [
       {
@@ -1042,7 +1061,8 @@
       "brev": "Läs drottningens brev"
     },
     "stoppKlar": "Här har du redan varit.",
-    "stoppFortsatt": "Fortsätt äventyret"
+    "stoppFortsatt": "Fortsätt äventyret",
+    "saknarHint": "Du saknar {n} stjärnstoft. Mer får du för rätta svar på matteblad."
   },
   "djur": {
     "gele": {
@@ -1895,14 +1915,32 @@
           "abborre",
           "gadda",
           "krafta"
-        ]
+        ],
+        "lan": {
+          "rubrik": "En gammal fiskare sitter på bron",
+          "knapp": "Prata med fiskaren",
+          "vill": "gadda",
+          "ger": "hav",
+          "saknas": "Den gamla fiskaren fnyser. 'Fångar du en gädda härifrån, så lånar jag ut min håv.'",
+          "tack": "Den gamla fiskaren skrattar och slår sig på knät. 'En gädda! Då är håven din. Jag fiskar bättre utan.'",
+          "klar": "Du har redan en håv."
+        }
       },
       "norrabron": {
         "fiskar": [
           "oring",
           "harr",
           "regnbage"
-        ]
+        ],
+        "lan": {
+          "rubrik": "En fiskare står vid räcket",
+          "knapp": "Prata med fiskaren",
+          "vill": "harr",
+          "ger": "flugspo",
+          "saknas": "Fiskaren nickar mot forsen. 'Ta upp en harr med metspöet, så ska du få låna ett riktigt flugspö av mig.'",
+          "tack": "Fiskaren vänder fisken i handen och ler. 'Det där var en fin harr. Här, ta mitt flugspö. Jag har fler hemma.'",
+          "klar": "Du har redan ett flugspö."
+        }
       },
       "vassen": {
         "fiskar": [
@@ -1940,12 +1978,17 @@
         "djur": "sigge",
         "plats": "vassen",
         "redskap": [
+          "flugspo",
+          "flotte",
           "kraftbur",
-          "roddbat"
+          "roddbat",
+          "hav",
+          "snorkel"
         ],
         "agn": [
           "snackor",
-          "honungsburk"
+          "honungsburk",
+          "trolldryck"
         ],
         "text": "Vassen böjer sig. En puckel, och sedan en till, glider fram genom vattnet. Ett vänligt huvud på en lång hals tittar upp och nosar på agnet."
       },
@@ -1958,7 +2001,8 @@
         ],
         "agn": [
           "glodsvamp",
-          "lysmask"
+          "lysmask",
+          "ostbitar"
         ],
         "text": "Ljuset sjunker ner i det mörka vattnet under bron. Där nere glittrar fjäll, och en smal ormdrake ringlar upp mot ljuset och lägger sig i din hand."
       }
@@ -2006,7 +2050,10 @@
       "sent": "Flötet hann komma upp igen innan du drog. Fisken slapp, men agnet sitter kvar.",
       "igen": "Försök igen",
       "tillbaka": "Tillbaka",
-      "ingetNapp": "Något nosade på agnet men släppte det igen. Agnet sitter kvar, kanske passar det bättre någon annanstans."
+      "ingetNapp": "Något nosade på agnet men släppte det igen. Agnet sitter kvar, kanske passar det bättre någon annanstans.",
+      "agnFelPlats": "Agnet lockar något, men inte här. Det finns nog ett annat vatten där det passar bättre.",
+      "agnFelRedskap": "Något nere i vattnet är sugen på agnet, men det går inte att få upp det med det här redskapet.",
+      "platsFelAgn": "Något rör sig nere i vattnet här, men det vill ha något annat än det du erbjuder."
     }
   },
   "locka": [
