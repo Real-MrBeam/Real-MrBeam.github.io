@@ -716,10 +716,10 @@ function drawNight(now, lv){
     g.addColorStop(0, `rgba(${c},${.5 * lv})`); g.addColorStop(1, `rgba(${c},0)`);
     ctx.fillStyle = g; ctx.fillRect(L.x - rad, L.y - rad, rad * 2, rad * 2);
   }
-  if (S.saker.includes('lykta')){
-    const bx = boy.x + 8, by = boy.y + 4, rad = 34 + (reduceMotion ? 0 : Math.sin(now / 300) * 2);
+  if (S.lyktaTand && S.saker.includes('lykta')){
+    const bx = boy.x + 8, by = boy.y + 4, rad = 22 + (reduceMotion ? 0 : Math.sin(now / 300) * 1.5);
     const g = ctx.createRadialGradient(bx, by, 0, bx, by, rad);
-    g.addColorStop(0, `rgba(255,210,120,${.55 * lv})`); g.addColorStop(1, 'rgba(255,210,120,0)');
+    g.addColorStop(0, `rgba(255,210,120,${.32 * lv})`); g.addColorStop(1, 'rgba(255,210,120,0)');
     ctx.fillStyle = g; ctx.fillRect(bx - rad, by - rad, rad * 2, rad * 2);
   }
   ctx.globalCompositeOperation = 'source-over';
@@ -762,13 +762,16 @@ function playFlute(){
   flojtTill = performance.now() + dur * 1000;
   for (let i = 0; i < 5; i++) setTimeout(() => FX.push({ k: 'spark', x: boy.x + 10 + Math.random() * 4, y: boy.y - 4, vx: (Math.random() - .3) * 10, vy: -22 - Math.random() * 10, t: 0, life: 1.1, col: i % 2 ? '#fee761' : '#ffffff' }), i * dur * 180);
 }
-$('#pack').addEventListener('click', ev => {
-  if (ev.target.closest('button[data-flojt]')){ playFlute(); return; }
-  const b = ev.target.closest('button[data-pa]'); if (!b) return;
-  const it = SAKER[b.dataset.pa]; if (!it || it.typ !== 'klader') return;
-  if (S.pa[it.plats] === b.dataset.pa) delete S.pa[it.plats]; else S.pa[it.plats] = b.dataset.pa;
+function useItem(id){
+  const it = SAKER[id]; if (!it) return;
+  if (id === 'flojt') return playFlute();
+  if (id === 'lykta'){ S.lyktaTand = !S.lyktaTand; toast(S.lyktaTand ? 'Du tände lyktan.' : 'Du släckte lyktan.'); renderPack(); saveSoon(); return; }
+  if (it.typ !== 'klader') return;
+  if (S.pa[it.plats] === id) delete S.pa[it.plats]; else S.pa[it.plats] = id;
   buildBoy(S.pa); renderPack(); saveSoon();
-});
+}
+$('#pack').addEventListener('click', ev => { const li = ev.target.closest('li[data-use]'); if (li) useItem(li.dataset.use); });
+$('#pack').addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key === ' '){ const li = ev.target.closest('li[data-use]'); if (li){ ev.preventDefault(); useItem(li.dataset.use); } } });
 
 /* ---------- musik ---------- */
 // Two own chip songs (karta/musik.js). If the music is on it starts at the first tap (browsers allow no sound before that).
@@ -1219,9 +1222,12 @@ function renderPack(){
   const own = S.saker.filter(id => SAKER[id] && SAKER[id].typ !== 'djur' && !S.agnAnvant.includes(id)); // used baits are gone
   $('#pack').innerHTML = own.length
     ? own.map(id => { const it = SAKER[id], on = it.typ === 'klader' && S.pa[it.plats] === id;
-        const wear = it.typ === 'klader' ? `<button class="btn${on ? '' : ' alt'} wear" type="button" data-pa="${id}">${on ? 'Ta av' : 'Ta på'}</button>` : '';
-        const play = id === 'flojt' ? '<button class="btn alt wear" type="button" data-flojt="1">Spela</button>' : '';
-        return `<li><span><b>${esc(it.namn)}</b> ${esc(it.text)}</span>${wear}${play}</li>`; }).join('')
+        // Things that can be used are tapped like the runes in the list: clothes go on and off, the lantern is lit, the flute plays
+        const usable = it.typ === 'klader' || id === 'lykta' || id === 'flojt';
+        const lit = id === 'lykta' && S.lyktaTand;
+        const title = it.typ === 'klader' ? (on ? 'Ta av' : 'Ta på') : id === 'lykta' ? (lit ? 'Släck lyktan' : 'Tänd lyktan') : id === 'flojt' ? 'Spela' : '';
+        const state = on ? 'på' : lit ? 'tänd' : '';
+        return `<li${usable ? ` class="readable" data-use="${id}" role="button" tabindex="0" title="${title}"` : ''}><span><b>${esc(it.namn)}</b> ${esc(it.text)}</span>${state ? `<span class="st">${state}</span>` : ''}</li>`; }).join('')
     : '<li><span>Inget ännu. Bygg något och få en gåva!</span></li>';
 }
 
@@ -1270,7 +1276,7 @@ function applyReal(events){
 // encrypted in the page (#lasNyckel) and opens with the password, like the portraits. Without the key nothing is saved.
 // Stars and stardust are never saved: they are counted from the runes and scrolls. Only what he has spent is saved.
 const SAVE = { repo: '', file: '', key: '', sha: null, timer: 0, off: false, loaded: false };
-const SAVED_FIELDS = ['node', 'built', 'valda', 'saker', 'steg', 'handlat', 'djur', 'fram', 'stopp', 'hittat', 'spent', 'kistor', 'agnAnvant', 'fiskbok', 'namn', 'bytt', 'intro', 'natt', 'salt', 'lasta', 'pa'];
+const SAVED_FIELDS = ['node', 'built', 'valda', 'saker', 'steg', 'handlat', 'djur', 'fram', 'stopp', 'hittat', 'spent', 'kistor', 'agnAnvant', 'fiskbok', 'namn', 'bytt', 'intro', 'natt', 'salt', 'lasta', 'pa', 'lyktaTand'];
 const b64 = text => { const bytes = new TextEncoder().encode(text); let s = ''; for (const b of bytes) s += String.fromCharCode(b); return btoa(s); };
 const unb64 = data => new TextDecoder().decode(Uint8Array.from(atob(data.replace(/\s/g, '')), c => c.charCodeAt(0)));
 function spend(n){ S.coins -= n; S.spent += n; }

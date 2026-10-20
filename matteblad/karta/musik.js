@@ -238,8 +238,9 @@ function flojt(index) {
     let n = 1; while (i + n < toks.length && toks[i + n] === '-') n++;
     const t = t0 + i * step, len = n * step * .95;
     const o = ctx.createOscillator(), g = ctx.createGain(), lfo = ctx.createOscillator(), depth = ctx.createGain();
-    o.type = 'sine'; o.frequency.value = freq(tok);
-    lfo.frequency.value = 5.5; depth.gain.value = freq(tok) * .006; lfo.connect(depth).connect(o.frequency);
+    const f = freq(tok) * .75;   // a fourth lower than written, a softer, deeper flute
+    o.type = 'sine'; o.frequency.value = f;
+    lfo.frequency.value = 5.5; depth.gain.value = f * .006; lfo.connect(depth).connect(o.frequency);
     g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(1, t + .04); g.gain.setValueAtTime(.85, t + len - .05); g.gain.linearRampToValueAtTime(0, t + len);
     o.connect(g).connect(out); o.start(t); lfo.start(t); o.stop(t + len + .02); lfo.stop(t + len + .02);
   });
