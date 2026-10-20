@@ -2162,5 +2162,18 @@
       "flojt": 4
     },
     "kopt": "Använd det väl. Fisken nappar bäst när man har tålamod."
+  },
+  "stjarnvaktarna": {
+    "rubrik": "Ett brev ligger på trappan",
+    "text": "Ingen syns till. Brevet är förseglat med en liten silverstjärna.",
+    "knapp": "Ta upp brevet",
+    "lasKnapp": "Läs brevet med silverstjärnan",
+    "titel": "Brev från Stjärnväktarna",
+    "stycken": [
+      "Till dig som läser runor. Vi har sett dig. Du tolkar tecknen som ingen annan förstår, och ur dina rullar rinner stjärnstoft.",
+      "Den natten stjärnorna föll såg vi något grått röra sig mellan byarna. Vi tror att Gråskuggan låste in himlens stjärnor i runorna och pergamentrullarna, och att bara den som räknar rätt kan släppa ut dem.",
+      "Tolka varenda runa. Öppna varje rulle. Varje gång lyser himlen lite starkare.",
+      "Berätta inte för någon om det här brevet. Vi vet inte vem som lyssnar. En silverstjärna med ett öga är vårt tecken. Du kommer att se det igen.\n\nStjärnväktarna"
+    ]
   }
 }

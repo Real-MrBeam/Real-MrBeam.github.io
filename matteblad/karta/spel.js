@@ -743,7 +743,7 @@ function sleepBlock(){
   return `<div class="plot"><div><b>${S.natt ? 'Det är natt i Glimmerdal' : 'Stugan'}</b><span>${S.natt ? 'Sov tills det blir morgon.' : 'Sov tills det blir natt.'}</span></div>${here ? '<button class="btn" type="button" data-sov="1">Sov</button>' : ''}</div>`;
 }
 function sleep(){
-  S.natt = !S.natt; saveSoon(); musicSync();
+  S.natt = !S.natt; saveSoon(); musicSync(); nattLabel();
   toast(S.natt ? 'Du somnade i stugan och vaknade när månen var uppe.' : 'Du sov gott, och nu är det morgon igen.');
   showNode();
 }
@@ -801,6 +801,23 @@ $('#btnMusik').addEventListener('click', () => {
   musicButton();
 });
 document.addEventListener('visibilitychange', () => { if (window.Musik) Musik.paus(document.hidden); });
+
+/* ---------- Stjärnväktarnas brev ---------- */
+// A secret society, Stjärnväktarna, leaves a letter on the step of Hemmet at night, once he has opened his first rune or scroll.
+// It can be read again with its own button. Their sign is a silver star with an eye (SIGIL, own drawing).
+const SIGIL = sprite([".....o.....", "....owo....", "....owo....", "...owwwo...", "oowwwkwwwoo", ".owwekewwo.", "oowwwkwwwoo", "...owwwo...", "....owo....", "....owo....", ".....o....."],
+  { o: '#3a4466', w: '#c0cbdc', e: '#ffffff', k: '#262b44' });
+const V = berattelse.stjarnvaktarna;
+const letterWaiting = () => V && !S.brev2 && S.natt && S.log.some(e => e.text);
+function letterBlock(){
+  const here = S.node === 'hem' && !boy.route;
+  return `<div class="plot"><div><b>${esc(V.rubrik)}</b><span>${esc(V.text)}</span></div>${here ? `<button class="btn" type="button" data-brev="1">${esc(V.knapp)}</button>` : ''}</div>`;
+}
+function readLetter2(){
+  if (!S.brev2){ S.brev2 = true; saveSoon(); $('#btnLetter2').hidden = false; }
+  const icon = iconURL(SIGIL, 6);
+  openModal(V.stycken.map((t, i) => ({ icon, title: V.titel, text: t, button: i === V.stycken.length - 1 ? 'Till kartan' : 'Läs vidare' })), () => showNode());
+}
 
 /* ---------- tältet och nattfiskaren ---------- */
 // The tent behind the campfire in Skogsgläntan is closed by day. At night the night fisherman buys fish from the fish book and
@@ -873,6 +890,7 @@ function renderPanel(view){
     for (const p of plots) h += plotBlock(p);
     if (stop) h += stopBlock(n.id);
     if (n.id === 'hem') h += sleepBlock();
+    if (n.id === 'hem' && letterWaiting()) h += letterBlock();
     if (berattelse.handel && n.id === berattelse.handel.plats) h += tentBlock();
     if (FISKE.platser[n.id]) h += fishBlock(n.id);
     if (FISKE.platser[n.id] && FISKE.platser[n.id].lan) h += lanBlock(n.id);
@@ -931,6 +949,7 @@ panel.addEventListener('click', ev => {
   else if (b.dataset.kista) openChest();
   else if (b.dataset.fiska) startFishing(b.dataset.fiska);
   else if (b.dataset.sov) sleep();
+  else if (b.dataset.brev) readLetter2();
   else if (b.dataset.handel) startTrade();
   else if (b.dataset.lan) talkFisher(b.dataset.lan);
   else if (b.dataset.locka) lure(b.dataset.locka);
@@ -1276,7 +1295,7 @@ function applyReal(events){
 // encrypted in the page (#lasNyckel) and opens with the password, like the portraits. Without the key nothing is saved.
 // Stars and stardust are never saved: they are counted from the runes and scrolls. Only what he has spent is saved.
 const SAVE = { repo: '', file: '', key: '', sha: null, timer: 0, off: false, loaded: false };
-const SAVED_FIELDS = ['node', 'built', 'valda', 'saker', 'steg', 'handlat', 'djur', 'fram', 'stopp', 'hittat', 'spent', 'kistor', 'agnAnvant', 'fiskbok', 'namn', 'bytt', 'intro', 'natt', 'salt', 'lasta', 'pa', 'lyktaTand'];
+const SAVED_FIELDS = ['node', 'built', 'valda', 'saker', 'steg', 'handlat', 'djur', 'fram', 'stopp', 'hittat', 'spent', 'kistor', 'agnAnvant', 'fiskbok', 'namn', 'bytt', 'intro', 'natt', 'salt', 'lasta', 'pa', 'lyktaTand', 'brev2'];
 const b64 = text => { const bytes = new TextEncoder().encode(text); let s = ''; for (const b of bytes) s += String.fromCharCode(b); return btoa(s); };
 const unb64 = data => new TextDecoder().decode(Uint8Array.from(atob(data.replace(/\s/g, '')), c => c.charCodeAt(0)));
 function spend(n){ S.coins -= n; S.spent += n; }
@@ -1313,7 +1332,7 @@ function applySaved(data){
   const shownHere = S.lasta || [];
   for (const k of SAVED_FIELDS) if (data[k] !== undefined) S[k] = data[k];
   if (!S.pa) S.pa = {};
-  buildBoy(S.pa); musicSync();
+  buildBoy(S.pa); musicSync(); $('#btnLetter2').hidden = !S.brev2;
   S.lasta = [...new Set([...(S.lasta || []), ...shownHere])];   // stories shown before the saved game had loaded stay seen
   if (typeof data.sett === 'string') S.sett = Uint8Array.from(atob(data.sett), c => c.charCodeAt(0));
   S.coins = (REAL ? REAL.stoft : startData.stjarnstoft) - S.spent;
@@ -1581,6 +1600,9 @@ $('#btnTest').addEventListener('click', addTest);
 $('#btnSheet').addEventListener('click', addSheet);
 // The debug buttons only show with ?debug in the address (Peter 2026-10-20), so the real map has no test buttons
 $('#debugToggle').hidden = !new URLSearchParams(location.search).has('debug');
+// Debug: switch day and night at once, without sleeping in Hemmet
+const nattLabel = () => { $('#btnNatt').textContent = S.natt ? 'Dag' : 'Natt'; };
+$('#btnNatt').addEventListener('click', () => { S.natt = !S.natt; musicSync(); showNode(); nattLabel(); });
 const DEBUG_LABEL = ['Debug: av', 'Debug: bygg A, ingen dimma', 'Debug: bygg B, ingen dimma', 'Debug: tomma tomter, ingen dimma'];
 $('#btnDebug').addEventListener('click', () => {
   DEBUG.mode = (DEBUG.mode + 1) % DEBUG_LABEL.length;
@@ -1590,6 +1612,7 @@ $('#btnDebug').addEventListener('click', () => {
   if (current && current.type !== 'walk' && current.type !== 'dialog') renderPanel(current);
 });
 $('#btnLetter').addEventListener('click', showIntro);
+$('#btnLetter2').addEventListener('click', readLetter2);
 $('#btnReset').addEventListener('click', () => {
   stopSaving(); restart(); toast('Kartan är återställd.');
   try { localStorage.removeItem(INTRO_KEY); } catch (e) { /* nothing to clear */ }
@@ -1655,7 +1678,7 @@ function start(data){
   buildTerrain();
   resize(); centerOn(boy.x + 8, boy.y + 8, true);
   updateHud(); renderLog(); renderPack(); renderBook(); renderTickets(); renderFishBook(); showNode();
-  musicButton(); musicSync();
+  musicButton(); musicSync(); $('#btnLetter2').hidden = !S.brev2;
   loadPortraitImages();
   if (!introSeen()) showIntro();
   requestAnimationFrame(t => { lastT = t; frame(t); });
