@@ -20,8 +20,8 @@
     }
   },
   "pris": [
-    { "minProcent": 100, "niva": "Guld", "namn": "Guldstjärna", "bild": "pris/guld.svg", "farg": "#b8860b", "text": "Alla rätt! Öppna dagboken och se vad du fått i guld!" },
-    { "minProcent": 95, "niva": "Silver", "namn": "Silverstjärna", "bild": "pris/silver.svg", "farg": "#7d848c", "text": "Nästan perfekt! Öppna dagboken och se vad du fått i silver!" },
+    { "minProcent": 90.01, "niva": "Guld", "namn": "Guldstjärna", "bild": "pris/guld.svg", "farg": "#b8860b", "text": "Nästan alla rätt! Öppna dagboken och se vad du fått i guld!" },
+    { "minProcent": 80, "niva": "Silver", "namn": "Silverstjärna", "bild": "pris/silver.svg", "farg": "#7d848c", "text": "Mycket bra! Öppna dagboken och se vad du fått i silver!" },
     { "minProcent": 70, "niva": "Brons", "namn": "Bronsstjärna", "bild": "pris/brons.svg", "farg": "#8a4f1d", "text": "Snyggt jobbat! Öppna dagboken och se vad du fått i brons!" },
     { "minProcent": 0, "niva": "Smiley", "namn": "Glad smiley", "bild": "pris/smiley.svg", "farg": "#c99a00", "text": "Bra kämpat! Öppna dagboken och se vad du fått! Kolla tipsen nedan." }
   ]
