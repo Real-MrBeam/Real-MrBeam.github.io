@@ -8,8 +8,8 @@
     "bildUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/{pokedex}.png"
   },
   "pris": [
-    { "minProcent": 90.01, "niva": "Mytisk", "namn": "Mew", "pokedex": 151, "bild": "pris/mastarboll.svg", "farg": "#7b3fa0", "text": "Nästan alla rätt! Du fångade en mytisk Pokémon." },
-    { "minProcent": 80, "niva": "Legendarisk", "namn": "Lugia", "pokedex": 249, "bild": "pris/ultraboll.svg", "farg": "#c49a1c", "text": "Mycket bra! Du fångade en legendarisk Pokémon." },
+    { "minProcent": 100, "niva": "Mytisk", "namn": "Mew", "pokedex": 151, "bild": "pris/mastarboll.svg", "farg": "#7b3fa0", "text": "Alla rätt! Du fångade en mytisk Pokémon." },
+    { "minProcent": 95, "niva": "Legendarisk", "namn": "Lugia", "pokedex": 249, "bild": "pris/ultraboll.svg", "farg": "#c49a1c", "text": "Nästan perfekt! Du fångade en legendarisk Pokémon." },
     { "minProcent": 70, "niva": "Sällsynt", "namn": "Charizard", "pokedex": 6, "bild": "pris/superboll.svg", "farg": "#2a75bb", "text": "Snyggt jobbat! Du fångade en sällsynt Pokémon." },
     { "minProcent": 0, "niva": "Vanlig", "namn": "Pikachu", "pokedex": 25, "bild": "pris/pokeboll.svg", "farg": "#e3350d", "text": "Bra kämpat! Du fångade en Pokémon. Kolla tipsen nedan." }
   ]
