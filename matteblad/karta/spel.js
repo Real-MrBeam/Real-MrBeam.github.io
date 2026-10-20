@@ -108,6 +108,23 @@ const TICKET = sprite([
 const FISH = sprite([
   "............", "..oooo....o.", ".obbbbo..obo", "obwbbbbooBbo", "obkbbbbbbBo.", "obbbbbbbbBo.", "obbbbbbooBbo",
   ".oBBBBo..oBo", "..oooo....o."], { o:'#3f2631', b:'#8b9bb4', B:'#5a6988', w:'#ffffff', k:'#262b44' });
+// The float on the line, and the splash when it is pulled under
+const FLOAT = sprite(["...oo...", "...oo...", "..orro..", ".orrrro.", ".orrrro.", ".owwwwo.", ".owwwwo.", "..owwo..", "...oo..."], { o:'#3f2631', r:'#e43b44', w:'#ffffff' });
+const SPLASH = sprite(["..w....w....", "w..w..w..w.w", ".w.wwwww.w..", "..wwbbbbww..", ".wwbbbbbbww."], { w:'#ffffff', b:'#c0eaff' });
+// A picture for each kind of catch: the plain fish with other colours and markings, and own shapes for the pike, the grayling,
+// the frog and the crayfish (own drawings)
+const FISH_ROWS = ["............", "..oooo....o.", ".obbbbo..obo", "obwbbbbooBbo", "obkbbbbbbBo.", "obbbbbbbbBo.", "obbbbbbooBbo", ".oBBBBo..oBo", "..oooo....o."];
+const markFish = (pal, mark) => sprite(FISH_ROWS.map((r, y) => [...r].map((c, x) => c === 'b' && mark(x, y) || c).join('')), { o:'#3f2631', w:'#ffffff', k:'#262b44', ...pal });
+const CATCH = {
+  abborre: markFish({ b:'#a8b84a', B:'#e07a2c', s:'#3e4a1c' }, (x, y) => (x === 4 || x === 7) && y > 1 && y < 7 ? 's' : ''),
+  oring: markFish({ b:'#b08a5a', B:'#7a5a36', d:'#e43b44', e:'#262b44' }, (x, y) => ({ '4,4': 'd', '6,2': 'e', '7,5': 'd', '5,6': 'e', '8,4': 'e' })[x + ',' + y] || ''),
+  regnbage: markFish({ b:'#c0cbdc', B:'#8b9bb4', p:'#f6757a' }, (x, y) => y === 4 && x > 1 && x < 9 ? 'p' : ''),
+  gadda: sprite(["..oooooooooo..o.", ".owkggdgggdggoBo", "ooygggggggggggBo", ".oGGGGGGGGGGGoBo", "..oooooooooo..o."], { o:'#3f2631', k:'#262b44', g:'#6e8f3a', G:'#46602a', d:'#d8e08a', y:'#c9b27d', B:'#46602a' }),
+  harr: sprite(["...oooo.....", "..oPPPPo....", "..oooo....o.", ".obbbbo..obo", "obwbbbbooBbo", "obkbbbbbbBo.", "obbbbbbbbBo.", "obbbbbbooBbo", ".oBBBBo..oBo", "..oooo....o."], { o:'#3f2631', w:'#ffffff', k:'#262b44', b:'#9a8fb5', B:'#68386c', P:'#b55088' }),
+  groda: sprite(["..oo....oo..", ".owko..owko.", ".oggooooggo.", "oggggggggggo", "oggllllllggo", "oggllllllggo", ".oggggggggo.", "ogo.oggo.ogo", "oo..oooo..oo"], { o:'#3f2631', w:'#ffffff', k:'#262b44', g:'#63c74d', l:'#c6e07a' }),
+  krafta: sprite([".oo......oo.", "orro....orro", "orrro..orrro", ".oorroorroo.", "..orkrrkro..", "..oRrrrrRo..", ".ooRrrrrRoo.", "..oRrrrrRo..", ".ooRrrrrRoo.", "...oRrrRo...", "..oRRRRRRo..", "..oooooooo.."], { o:'#3f2631', k:'#262b44', r:'#e43b44', R:'#a22633' }),
+};
+const catchIcon = id => iconURL(CATCH[id] || FISH, 8);
 const LOCK = sprite(["..sss..", ".s...s.", ".s...s.", "ooooooo", "oyyyyyo", "oyyoyyo", "oyyyyyo", "ooooooo"], { o:'#3f2631', y:'#feae34', s:'#c0cbdc' });
 const GATEPAL = { o:'#3f2631', S:'#c0cbdc', s:'#8b9bb4', w:'#b86f50', W:'#733e39', y:'#feae34', Y:'#fee761' };
 const GATE_TOP = ["................", "oooooooooooooooo", "oSSSSSSSSSSSSSSo", "osssssssssssssso", "oooooooooooooooo"];
@@ -479,7 +496,8 @@ function drawNode(n, now, reachable){
   ellipse(cx, cy + 1, 7, 4.5, 'rgba(63,38,49,.35)');
   ellipse(cx, cy, 7, 4.5, '#3f2631');
   ellipse(cx, cy, 6, 3.5, reachable ? '#ead4aa' : '#8b9bb4');
-  ellipse(cx, cy, 3.5, 2, reachable ? (n.id === 'slott' ? '#e43b44' : '#feae34') : '#5a6988');
+  // the centre is yellow while something is left to do at the place, grey when all is done (Peter 2026-10-20)
+  ellipse(cx, cy, 3.5, 2, !reachable ? '#5a6988' : n.id === 'slott' ? '#e43b44' : nodeActive(n.id) ? '#feae34' : '#8b9bb4');
   ctx.fillStyle = reachable ? '#ffffff' : '#c0cbdc'; ctx.fillRect(cx - 4, cy - 2, 2, 1);
 }
 const FLAG_PLOT = FLAGS.map(f => PLOTS.find(p => f.x >= p.x*TS && f.x < (p.x + 3)*TS && f.y >= p.y*TS && f.y < (p.y + 3)*TS));
@@ -707,13 +725,7 @@ function drawNight(now, lv){
   // lies over the flames and not under them.
   ctx.globalCompositeOperation = 'source-over';
   for (const L of lights) if (L.k === 'fire' && L.i) tile(ctx, L.i, L.px, L.py);
-  // places where something is still left to do keep their plate light at night, with a soft glow
-  for (const id in NODES){
-    const n = NODES[id];
-    if (!nodeShown(id) || !seen(n.x*TS + 8, n.y*TS + 8) || !nodeActive(id)) continue;
-    drawNode(n, now, true);
-    lights.push({ x: n.x*TS + 8, y: n.y*TS + 10, k: 'plate' });
-  }
+
   ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'lighter';
   for (const L of lights){
     const fire = L.k === 'fire', flick = fire && !reduceMotion ? .85 + .15 * Math.sin(now / 90 + L.x) * Math.sin(now / 53 + L.y) : 1;
@@ -1494,7 +1506,7 @@ function renderFishing(){
       <div class="roads"><button class="btn" type="button" data-kasta="1">${esc(T.kasta)}</button><button class="btn alt" type="button" data-back="1">${esc(T.tillbaka)}</button></div></div>`;
   } else if (fz.phase === 'vanta' || fz.phase === 'nu'){
     h += `<p aria-live="polite">${esc(fz.phase === 'nu' ? T.nu : T.vanta)}</p><div class="panel-body">
-      <div class="pond${fz.phase === 'nu' ? ' dip' : ''}"><span class="float"></span></div>
+      <div class="pond${fz.phase === 'nu' ? ' dip' : ''}">${fz.phase === 'nu' ? `<img class="splash pix" src="${iconURL(SPLASH, 3)}" alt="">` : `<img class="float pix" src="${iconURL(FLOAT, 3)}" alt="">`}</div>
       <div class="roads"><button class="btn" type="button" data-dra="1">${esc(T.dra)}</button></div></div>`;
   } else {
     h += `<p>${esc(fz.miss)}</p><div class="panel-body"><div class="roads"><button class="btn" type="button" data-igen="1">${esc(T.igen)}</button><button class="btn alt" type="button" data-back="1">${esc(T.tillbaka)}</button></div></div>`;
@@ -1540,7 +1552,7 @@ function pull(){
     const pool = fresh.length && Math.random() < .6 ? fresh : list, id = pool[Math.floor(Math.random() * pool.length)];
     const isNew = S.fiskbok[id] === undefined; S.fiskbok[id] = (S.fiskbok[id] || 0) + 1; renderFishBook();
     const fish = FISKE.fiskar[id];
-    step = { icon: FISH_BIG, title: fish.namn, text: fish.text, reward: isNew ? 'Ny i fiskboken.' : `Du har fått ${S.fiskbok[id]} sådana nu.`, button: 'Till kartan' };
+    step = { icon: catchIcon(id), title: fish.namn, text: fish.text, reward: isNew ? 'Ny i fiskboken.' : `Du har fått ${S.fiskbok[id]} sådana nu.`, button: 'Till kartan' };
   }
   saveSoon();
   stopFishing();
