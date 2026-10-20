@@ -280,7 +280,7 @@ let REAL = null; // { stars, stoft, handelser } once the locked events have been
 const START = () => ({
   stars: REAL ? REAL.stars : startData.stjarnor, coins: REAL ? REAL.stoft : startData.stjarnstoft, node: startData.plats,
   built: Object.fromEntries(startData.byggt.map(id => [id, true])),
-  valda: {}, saker: [], steg: {}, handlat: {}, djur: [], fram: [], stopp: {}, hittat: [], spent: 0, kistor: [], agnAnvant: [], fiskbok: {}, namn: {}, bytt: {},
+  valda: {}, saker: [], steg: {}, handlat: {}, djur: [], fram: [], stopp: {}, hittat: [], spent: 0, kistor: [], agnAnvant: [], fiskbok: {}, namn: {}, bytt: {}, salt: {},
   sett: new Uint8Array(MW*MH),
   log: REAL ? REAL.handelser.slice() : startData.logg.map(r => ({ typ: 'runa', amne: r.amne, procent: Math.round(r.poang / r.max * 100), stjarnor: r.stjarnor, bonus: r.bonus })),
   testIdx: 0,
@@ -651,7 +651,7 @@ function frame(now){
 let nightLevel = 0, STATIC_LIGHTS = null, WATER_STARS = null;
 // The burning torch and campfire, and the same put out (own tiles in openrpg.png, verktyg/gor-egna-rutor.py)
 const FIRE_OUT = { 'o:18,10': 'o:8,16', 'o:21,12': 'o:9,16' };
-const LIGHT_TILES = { 84: [8, 8, 'win'], 88: [8, 8, 'win'], 'o:27,2': [8, 8, 'win'], 125: [8, 8, 'slit'], 51: [8, 10, 'small'], 55: [8, 10, 'small'], 'o:18,10': [8, 4, 'fire'], 'o:21,12': [8, 9, 'fire'] };
+const LIGHT_TILES = { 84: [8, 8, 'win'], 88: [8, 8, 'win'], 'o:27,2': [8, 8, 'win'], 125: [8, 8, 'slit'], 51: [8, 10, 'small'], 55: [8, 10, 'small'], 'o:18,10': [8, 4, 'fire'], 'o:21,12': [8, 9, 'fire'], 'o:28,15': [8, 8, 'tent'] };
 const lightIn = i => { for (const j of Array.isArray(i) ? i : [i]) if (LIGHT_TILES[j]) return LIGHT_TILES[j]; return null; };
 function nightLights(){
   if (!STATIC_LIGHTS){
@@ -677,7 +677,7 @@ function drawNight(now, lv){
   ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'lighter';
   for (const L of lights){
     const fire = L.k === 'fire', flick = fire && !reduceMotion ? .85 + .15 * Math.sin(now / 90 + L.x) * Math.sin(now / 53 + L.y) : 1;
-    const rad = (fire ? 30 : L.k === 'win' ? 20 : 12) * flick, c = fire ? '255,140,50' : '255,200,100';
+    const rad = (fire ? 30 : L.k === 'win' || L.k === 'tent' ? 20 : 12) * flick, c = fire ? '255,140,50' : '255,200,100';
     const g = ctx.createRadialGradient(L.x, L.y, 0, L.x, L.y, rad);
     g.addColorStop(0, `rgba(${c},${.5 * lv})`); g.addColorStop(1, `rgba(${c},0)`);
     ctx.fillStyle = g; ctx.fillRect(L.x - rad, L.y - rad, rad * 2, rad * 2);
@@ -688,7 +688,7 @@ function drawNight(now, lv){
   for (const L of lights) if (L.k === 'fire' && L.i) tile(ctx, L.i, L.px, L.py);
   ctx.globalAlpha = 1;
   for (const L of lights){
-    if (L.k === 'fire') continue;
+    if (L.k === 'fire' || L.k === 'tent') continue;
     const [w, h] = L.k === 'win' ? [6, 6] : [2, 4];
     ctx.fillStyle = `rgba(254,231,97,${.85 * lv})`; ctx.fillRect(Math.round(L.x - w / 2), Math.round(L.y - h / 2), w, h);
   }
@@ -710,6 +710,38 @@ function sleep(){
   S.natt = !S.natt; saveSoon();
   toast(S.natt ? 'Du somnade i stugan och vaknade när månen var uppe.' : 'Du sov gott, och nu är det morgon igen.');
   showNode();
+}
+
+/* ---------- tältet och nattfiskaren ---------- */
+// The tent behind the campfire in Skogsgläntan is closed by day. At night the night fisherman buys fish from the fish book and
+// finds from the pack, one of each kind (S.salt), so it is a collection to sell and no way to make endless stardust.
+function tentBlock(){
+  const H = berattelse.handel, here = S.node === H.plats && !boy.route;
+  if (!S.natt) return `<div class="plot"><div><b>${esc(H.rubrikDag)}</b><span>${esc(H.stangt)}</span></div></div>`;
+  return `<div class="plot"><div><b>${esc(H.rubrikNatt)}</b></div>${here ? `<button class="btn" type="button" data-handel="1">${esc(H.knapp)}</button>` : ''}</div>`;
+}
+function tradeOffers(){
+  const H = berattelse.handel, out = [];
+  for (const [id, n] of Object.entries(H.fisk)) if (S.fiskbok[id] > 0 && !S.salt['fisk:' + id]) out.push({ key: 'fisk:' + id, namn: FISKE.fiskar[id].namn, text: FISKE.fiskar[id].text, n, sell: () => { S.fiskbok[id]--; renderFishBook(); } });
+  for (const id of S.saker) if (SAKER[id] && SAKER[id].typ === 'fynd' && !S.salt['fynd:' + id]) out.push({ key: 'fynd:' + id, namn: SAKER[id].namn, text: SAKER[id].text, n: SAKER[id].varde, sell: () => { S.saker = S.saker.filter(x => x !== id); renderPack(); } });
+  return out;
+}
+function startTrade(seen){
+  const H = berattelse.handel, offers = tradeOffers();
+  startDialog([{ p: H.person, t: offers.length ? H.hej : H.inget }], () => [
+    ...offers.map(o => ({ label: `Sälj ${esc(o.namn.toLowerCase())} ${price(o.n)}<small>${esc(o.text)}</small>`, run: () => sellTo(o) })),
+    { label: 'Tillbaka till kartan', alt: true, run: toNode },
+  ], seen);
+}
+function sellTo(o){
+  if (S.salt[o.key]) return;
+  o.sell(); S.salt[o.key] = true; earn(o.n); saveSoon();
+  sparkle(boy.x + 8, boy.y + 2, 18, '#2ce8f5');
+  toast(`Du sålde ${o.namn.toLowerCase()} för ${o.n} stjärnstoft.`);
+  startDialog([{ p: berattelse.handel.person, t: berattelse.handel.tack }], () => [
+    { label: 'Sälja något mer', run: () => startTrade(true) },
+    { label: 'Tillbaka till kartan', alt: true, run: toNode },
+  ]);
 }
 
 /* ---------- panel ---------- */
@@ -739,6 +771,7 @@ function renderPanel(view){
     for (const p of plots) h += plotBlock(p);
     if (stop) h += stopBlock(n.id);
     if (n.id === 'hem') h += sleepBlock();
+    if (berattelse.handel && n.id === berattelse.handel.plats) h += tentBlock();
     if (FISKE.platser[n.id]) h += fishBlock(n.id);
     if (FISKE.platser[n.id] && FISKE.platser[n.id].lan) h += lanBlock(n.id);
     for (const r of LOCKA) if (r.plats === n.id) h += lureBlock(r);
@@ -796,6 +829,7 @@ panel.addEventListener('click', ev => {
   else if (b.dataset.kista) openChest();
   else if (b.dataset.fiska) startFishing(b.dataset.fiska);
   else if (b.dataset.sov) sleep();
+  else if (b.dataset.handel) startTrade();
   else if (b.dataset.lan) talkFisher(b.dataset.lan);
   else if (b.dataset.locka) lure(b.dataset.locka);
   else if (b.dataset.redskap !== undefined){ fishing.redskap = b.dataset.redskap; renderFishing(); }
@@ -943,12 +977,14 @@ function rewardText(till){
   if (till.djur) return `${berattelse.djur[till.djur].art} skrevs in i djurboken.`;
   if (till.agn) return `Du fick ${SAKER[till.agn].namn.toLowerCase()}.`;
   if (till.stoft) return `Du fick ${till.stoft} stjärnstoft.`;
+  if (till.fynd) return `Du hittade ${SAKER[till.fynd].namn.toLowerCase()}. Den går att sälja.`;
   return `En hemlig fiskeplats syns nu på kartan: ${NODES[till.fiskeplats].name}.`;
 }
 function finishStop(id, till, out){
   S.stopp[id] = till; delete S.steg['stopp:' + id]; saveSoon();
   if (till.djur) giveAnimal(till.djur, out[out.length - 1].t);
   if (till.agn && !S.saker.includes(till.agn)){ S.saker.push(till.agn); renderPack(); toast(rewardText(till)); }
+  if (till.fynd && !S.saker.includes(till.fynd)){ S.saker.push(till.fynd); renderPack(); sparkle(boy.x + 8, boy.y + 2, 18); toast(rewardText(till)); }
   if (till.stoft){ S.coins += till.stoft; updateHud('coins'); sparkle(boy.x + 8, boy.y + 2, 24); toast(rewardText(till)); }
   if (till.fiskeplats){ S.hittat.push(till.fiskeplats); buildTerrain(); sparkle(NODES[till.fiskeplats].x*TS + 8, NODES[till.fiskeplats].y*TS + 8, 26); toast(rewardText(till)); }
   startDialog([...out, { p: null, t: rewardText(till) }], () => [{ label: 'Tillbaka till kartan', alt: true, run: toNode }]);
@@ -1076,7 +1112,7 @@ function startCount(){
 function renderPack(){
   const own = S.saker.filter(id => SAKER[id] && SAKER[id].typ !== 'djur' && !S.agnAnvant.includes(id)); // used baits are gone
   $('#pack').innerHTML = own.length
-    ? own.map(id => `<li><span><b>${esc(SAKER[id].namn)}</b> ${esc(SAKER[id].text)}</span></li>`).join('')
+    ? own.map(id => `<li><span><b>${esc(SAKER[id].namn)}</b> ${esc(SAKER[id].text)}</span>${SAKER[id].typ === 'fynd' ? `<span class="st">${price(SAKER[id].varde)}</span>` : ''}</li>`).join('')
     : '<li><span>Inget ännu. Bygg något och få en gåva!</span></li>';
 }
 
@@ -1124,10 +1160,12 @@ function applyReal(events){
 // encrypted in the page (#lasNyckel) and opens with the password, like the portraits. Without the key nothing is saved.
 // Stars and stardust are never saved: they are counted from the runes and scrolls. Only what he has spent is saved.
 const SAVE = { repo: '', file: '', key: '', sha: null, timer: 0, off: false, loaded: false };
-const SAVED_FIELDS = ['node', 'built', 'valda', 'saker', 'steg', 'handlat', 'djur', 'fram', 'stopp', 'hittat', 'spent', 'kistor', 'agnAnvant', 'fiskbok', 'namn', 'bytt', 'intro', 'natt'];
+const SAVED_FIELDS = ['node', 'built', 'valda', 'saker', 'steg', 'handlat', 'djur', 'fram', 'stopp', 'hittat', 'spent', 'kistor', 'agnAnvant', 'fiskbok', 'namn', 'bytt', 'intro', 'natt', 'salt'];
 const b64 = text => { const bytes = new TextEncoder().encode(text); let s = ''; for (const b of bytes) s += String.fromCharCode(b); return btoa(s); };
 const unb64 = data => new TextDecoder().decode(Uint8Array.from(atob(data.replace(/\s/g, '')), c => c.charCodeAt(0)));
 function spend(n){ S.coins -= n; S.spent += n; }
+// Stardust he earns (selling to the night fisherman) is saved as negative spending, since the rest is counted from the scrolls
+function earn(n){ spend(-n); updateHud('coins'); }
 function gh(method, body){
   return fetch(`https://api.github.com/repos/${SAVE.repo}/contents/${SAVE.file}`, { method, cache: 'no-store', keepalive: method === 'PUT',
     headers: { Authorization: `Bearer ${SAVE.key}`, Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' },
@@ -1314,6 +1352,11 @@ function pull(){
     stopFishing(); giveAnimal(rule.djur, rule.text, () => showNode());
     return saveSoon();
   } else {
+    const finds = (FISKE.fynd || []).filter(id => !S.saker.includes(id) && !S.salt['fynd:' + id]);
+    if (finds.length && Math.random() < .2){
+      const id = finds[Math.floor(Math.random() * finds.length)]; S.saker.push(id); renderPack(); saveSoon(); stopFishing();
+      return openModal([{ icon: FISH_BIG, title: SAKER[id].namn, text: `${FISKE.texter.fynd} ${SAKER[id].text}`, reward: 'Lades i väskan. Den går att sälja.', button: 'Till kartan' }], () => showNode());
+    }
     const list = FISKE.platser[fz.plats].fiskar, fresh = list.filter(id => S.fiskbok[id] === undefined);
     const pool = fresh.length && Math.random() < .6 ? fresh : list, id = pool[Math.floor(Math.random() * pool.length)];
     const isNew = S.fiskbok[id] === undefined; S.fiskbok[id] = (S.fiskbok[id] || 0) + 1; renderFishBook();
