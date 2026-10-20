@@ -48,6 +48,7 @@ const HATS = {
   strahatt: { rows: ["................", ".....oooooo.....", "....oaaaaaao....", "...oaRRRRRRao...", ".ooaaaaaaaaaaoo."], pal: { a: '#f4d27a', R: '#a22633' } },
   trollkarlshatt: { rows: ["......oo........", ".....oTTo.......", "....oTTYTo......", "...oTTTTTTo.....", "..oQQQQQQQQQQo.."], pal: { T: '#3b5dc9', Q: '#29366f', Y: '#fee761' } },
   blomsterkrans: { rows: ["................", ".....oooooo.....", "....ohhhhhho....", "...orhyhrhyho...", "...ohhhhhhhho..."], pal: { r: '#e43b44', y: '#fee761' } },
+  seglarmossa: { rows: ["................", ".....oooooo.....", "....onnnnnno....", "...ovvvvvvvvo...", "...oNNNNNNNNNo.."], pal: { n: '#2a4a8a', N: '#1b2f5a', v: '#ffffff' } },
   mjolnarmossa: { rows: ["................", "....ooooooo.....", "...ommmmmmmo....", "...ommmmmmmmo...", "...oMMMMMMMMo..."], pal: { m: '#f4f4f4', M: '#c0cbdc' } },
 };
 const BOOTS = { stovel: { k: '#6b3a20' } };
@@ -328,7 +329,7 @@ let REAL = null; // { stars, stoft, handelser } once the locked events have been
 const START = () => ({
   stars: REAL ? REAL.stars : startData.stjarnor, coins: REAL ? REAL.stoft : startData.stjarnstoft, node: startData.plats,
   built: Object.fromEntries(startData.byggt.map(id => [id, true])),
-  valda: {}, saker: [], steg: {}, handlat: {}, djur: [], fram: [], stopp: {}, hittat: [], spent: 0, kistor: [], agnAnvant: [], fiskbok: {}, namn: {}, bytt: {}, salt: {}, pa: {},
+  valda: {}, saker: [], steg: {}, handlat: {}, djur: [], fram: [], stopp: {}, hittat: [], spent: 0, kistor: [], agnAnvant: [], fiskbok: {}, namn: {}, bytt: {}, salt: {}, pa: {}, rykten: [],
   sett: new Uint8Array(MW*MH),
   log: REAL ? REAL.handelser.slice() : startData.logg.map(r => ({ typ: 'runa', amne: r.amne, procent: Math.round(r.poang / r.max * 100), stjarnor: r.stjarnor, bonus: r.bonus })),
   testIdx: 0,
@@ -963,6 +964,7 @@ function renderPanel(view){
     const stop = STOPP[n.id];
     // a place can have its own text for the night (berattelse.json platser natt)
     const ptext = S.natt && berattelse.platser[n.id] && berattelse.platser[n.id].natt || n.text;
+    if (!boy.route) setTimeout(() => hearRumor(`plats:${n.id}:${S.natt ? 'natt' : 'dag'}`), 600);
     h = `<span class="tag">Du är här</span><h2>${esc(n.name)}</h2><p>${esc(ptext)}</p><div class="panel-body">`;
     // At night everything is closed except the tent, the fishing, and sleeping (and the letter) in Hemmet (Peter 2026-10-20)
     const day = !S.natt, before = h.length;
@@ -1332,7 +1334,24 @@ const KAT_ORDER = ['sarskilt', 'redskap', 'agn', 'lockbete', 'klader', 'fynd'];
 const katOf = id => SPECIAL.includes(id) ? 'sarskilt' : SAKER[id].typ === 'verktyg' ? 'redskap' : SAKER[id].typ;
 let KAT_URL = null;
 const katIcon = k => { if (!KAT_URL) KAT_URL = Object.fromEntries(Object.entries(KAT).map(([key, v]) => [key, iconURL(v.ico, 3)])); return KAT_URL[k]; };
+// Rumours: the hints that used to be in the texts of things. A thing's rumour (saker rykte) is heard when he gets it, a place's
+// (platser rykte, rykteNatt) when he comes there. S.rykten keeps them in the order he heard them.
+const RUMOR_ICO = sprite([".oooooo.", "owwwwwwo", "owkwkwko", "owwwwwwo", ".oooooo.", "..oo....", ".o......", "........"], { o:'#c0cbdc', w:'#ffffff', k:'#3a4466' });
+function rumorText(key){
+  const [kind, id, when] = key.split(':');
+  if (kind === 'sak') return SAKER[id] && SAKER[id].rykte;
+  const p = berattelse.platser[id]; return p && (when === 'natt' ? p.rykteNatt : p.rykte);
+}
+function hearRumor(key){
+  if (!rumorText(key) || S.rykten.includes(key)) return;
+  S.rykten.push(key); saveSoon(); toast(`Nytt rykte: ${rumorText(key)}`); renderRumors();
+}
+function renderRumors(){
+  const list = S.rykten.map(rumorText).filter(Boolean).reverse();
+  $('#rykten').innerHTML = list.length ? list.map(t => `<li><span>${esc(t)}</span></li>`).join('') : `<li><span>${esc(berattelse.dialog.rykten.tom)}</span></li>`;
+}
 function renderPack(){
+  if (S.rykten) for (const id of S.saker) if (SAKER[id] && SAKER[id].rykte && !S.rykten.includes('sak:' + id)) hearRumor('sak:' + id);
   const own = S.saker.filter(id => SAKER[id] && SAKER[id].typ !== 'djur' && !S.agnAnvant.includes(id)) // used baits are gone
     .sort((a, b) => KAT_ORDER.indexOf(katOf(a)) - KAT_ORDER.indexOf(katOf(b)));
   $('#pack').innerHTML = own.length
@@ -1394,7 +1413,7 @@ function applyReal(events){
 // encrypted in the page (#lasNyckel) and opens with the password, like the portraits. Without the key nothing is saved.
 // Stars and stardust are never saved: they are counted from the runes and scrolls. Only what he has spent is saved.
 const SAVE = { repo: '', file: '', key: '', sha: null, timer: 0, off: false, loaded: false };
-const SAVED_FIELDS = ['node', 'built', 'valda', 'saker', 'steg', 'handlat', 'djur', 'fram', 'stopp', 'hittat', 'spent', 'kistor', 'agnAnvant', 'fiskbok', 'namn', 'bytt', 'intro', 'natt', 'salt', 'lasta', 'pa', 'tant', 'brev2'];
+const SAVED_FIELDS = ['node', 'built', 'valda', 'saker', 'steg', 'handlat', 'djur', 'fram', 'stopp', 'hittat', 'spent', 'kistor', 'agnAnvant', 'fiskbok', 'namn', 'bytt', 'intro', 'natt', 'salt', 'lasta', 'pa', 'tant', 'brev2', 'rykten'];
 const b64 = text => { const bytes = new TextEncoder().encode(text); let s = ''; for (const b of bytes) s += String.fromCharCode(b); return btoa(s); };
 const unb64 = data => new TextDecoder().decode(Uint8Array.from(atob(data.replace(/\s/g, '')), c => c.charCodeAt(0)));
 function spend(n){ S.coins -= n; S.spent += n; }
@@ -1431,9 +1450,10 @@ function applySaved(data){
   const shownHere = S.lasta || [];
   for (const k of SAVED_FIELDS) if (data[k] !== undefined) S[k] = data[k];
   if (!S.pa) S.pa = {};
+  if (!S.rykten) S.rykten = [];
   if (!TEST) S.natt = false;
   if (data.lyktaTand){ S.tant = { ...(S.tant || {}), lykta: true }; }   // the lantern was saved on its own before
-  buildBoy(S.pa); musicSync(); renderLetters();
+  buildBoy(S.pa); musicSync(); renderLetters(); renderRumors();
   S.lasta = [...new Set([...(S.lasta || []), ...shownHere])];   // stories shown before the saved game had loaded stay seen
   if (typeof data.sett === 'string') S.sett = Uint8Array.from(atob(data.sett), c => c.charCodeAt(0));
   S.coins = (REAL ? REAL.stoft : startData.stjarnstoft) - S.spent;
@@ -1577,7 +1597,8 @@ function renderFishing(){
 function cast(){
   const fz = fishing; fz.phase = 'vanta'; renderFishing();
   // each place has its own wait (fiske.platser vanta: shortest and longest, ms): quick in the rapids, slow in the reeds
-  const [lo, hi] = FISKE.platser[fz.plats].vanta || [1500, 4000], wait = lo + Math.random() * (hi - lo);
+  const [lo, hi] = FISKE.platser[fz.plats].vanta || [1500, 4000];
+  const wait = (lo + Math.random() * (hi - lo)) * (fz.agn && SAKER[fz.agn].effekt === 'snabb' ? .5 : 1);   // with worms it bites sooner
   fz.timers.push(setTimeout(() => { fz.phase = 'nu'; renderFishing(); }, wait));
   fz.timers.push(setTimeout(() => { if (fz.phase === 'nu') miss(FISKE.texter.sent); }, wait + 1100));
 }
@@ -1596,9 +1617,15 @@ function pull(){
   if (fz.phase !== 'nu') return miss(FISKE.texter.tidigt);
   fz.timers.forEach(clearTimeout); fz.timers = [];
   const rule = FISKE.djur.find(r => r.plats === fz.plats && r.redskap.includes(fz.redskap) && r.agn.includes(fz.agn) && !S.djur.includes(r.djur));
-  // A bait is only used up when a water animal bites. With the wrong place or tool nothing takes it, and he keeps it.
-  if (fz.agn && !rule) return miss(missText(fz));
-  if (fz.agn){ S.agnAnvant.push(fz.agn); renderPack(); }
+  // A bait for an animal is only used up when the animal bites. With the wrong place or tool nothing takes it, and he keeps it.
+  // A bait with an effect (berattelse saker effekt) works on ordinary fish: worms bite sooner, the dough brings a new kind.
+  const effekt = fz.agn && SAKER[fz.agn].effekt;
+  if (fz.agn && !rule && !effekt) return miss(missText(fz));
+  // what this tool can take in this water (fiske.fangar): kräftor only in the kräftbur, grodor only in the håv
+  const can = FISKE.fangar && FISKE.fangar[fz.redskap];
+  const list = FISKE.platser[fz.plats].fiskar.filter(id => !can || can.includes(id));
+  if (!rule && !list.length) return miss(FISKE.texter.ingetHar);
+  if (fz.agn && (rule || effekt === 'ny')){ S.agnAnvant.push(fz.agn); renderPack(); }
   sparkle(boy.x + 8, boy.y + 2, 20, '#2ce8f5');
   let step;
   if (rule){
@@ -1606,13 +1633,13 @@ function pull(){
     return saveSoon();
   } else {
     const finds = (FISKE.fynd || []).filter(id => !S.saker.includes(id) && !S.salt['fynd:' + id]);
-    if (finds.length && Math.random() < .2){
+    if (effekt !== 'ny' && finds.length && Math.random() < .2){
       const id = finds[Math.floor(Math.random() * finds.length)]; S.saker.push(id); renderPack(); saveSoon(); stopFishing();
       return openModal([{ icon: FISH_BIG, title: SAKER[id].namn, text: `${FISKE.texter.fynd} ${SAKER[id].text}`, reward: SAKER[id].typ === 'klader' ? 'Lades i väskan. Du kan ta på den där.' : 'Lades i väskan.', button: 'Till kartan' }], () => showNode());
     }
     // the list of a place repeats a fish as many times as it is common there; a kind he has not caught is a little more likely
-    const list = FISKE.platser[fz.plats].fiskar, fresh = list.filter(id => S.fiskbok[id] === undefined);
-    const pool = fresh.length && Math.random() < .35 ? fresh : list, id = pool[Math.floor(Math.random() * pool.length)];
+    const fresh = list.filter(id => S.fiskbok[id] === undefined);
+    const pool = fresh.length && (effekt === 'ny' || Math.random() < .35) ? fresh : list, id = pool[Math.floor(Math.random() * pool.length)];
     const isNew = S.fiskbok[id] === undefined; S.fiskbok[id] = (S.fiskbok[id] || 0) + 1; renderFishBook();
     const fish = FISKE.fiskar[id];
     step = { icon: catchIcon(id), title: fish.namn, text: fish.text, reward: isNew ? 'Ny i fiskboken.' : `Du har fått ${S.fiskbok[id]} sådana nu.`, button: 'Till kartan' };
@@ -1765,7 +1792,7 @@ function restart(){
   S = START(); buildBoy(S.pa); boy.route = null; placeBoy(S.node); plotAnim.clear(); gateAnim.clear(); FX.length = 0; buildTerrain();
   lastRevealKey = ''; maskDirty = true; revealAround(boy.x + 8, boy.y + 8);
   cam.follow = true; cam.focus = null; centerOn(boy.x + 8, boy.y + 8, true);
-  dlg = null; updateHud(); renderLog(); renderPack(); renderBook(); renderTickets(); renderFishBook(); renderLetters(); showNode();
+  dlg = null; updateHud(); renderLog(); renderPack(); renderBook(); renderTickets(); renderFishBook(); renderLetters(); renderRumors(); showNode();
 }
 
 /* ---------- pekare ---------- */
@@ -1813,7 +1840,7 @@ function start(data){
   if (data && data.S) S = data.S;
   placeBoy(S.node); lastRevealKey = ''; revealAround(boy.x + 8, boy.y + 8);
   STAR_URL = iconURL(STAR, 4); DUST_URL = iconURL(DUST, 4); LOCK_URL = iconURL(LOCK, 4); RUNE_URL = iconURL(RUNE, 4); SCROLL_URL = iconURL(SCROLL, 4);
-  FISH_BIG = iconURL(FISH, 8); $('#icoFish').src = iconURL(FISH, 4); $('#icoLetter').src = iconURL(ENVELOPE, 3);
+  FISH_BIG = iconURL(FISH, 8); $('#icoFish').src = iconURL(FISH, 4); $('#icoLetter').src = iconURL(ENVELOPE, 3); $('#icoRykten').src = iconURL(RUMOR_ICO, 3);
   TICKET_URL = iconURL(TICKET, 4); RUNE_BIG = iconURL(RUNE, 8); SCROLL_BIG = iconURL(SCROLL, 8); TICKET_BIG = iconURL(TICKET, 8); $('#icoTicket').src = TICKET_URL;
   $('#icoRunes').src = RUNE_URL; $('#icoBag').src = iconURL(BAG, 4); $('#icoBook').src = iconURL(BOOK, 4);
   $('#logoStar').src = STAR_URL; $('#icoStar').src = STAR_URL; $('#icoCoin').src = DUST_URL;
@@ -1821,7 +1848,7 @@ function start(data){
   buildTerrain();
   resize(); centerOn(boy.x + 8, boy.y + 8, true);
   updateHud(); renderLog(); renderPack(); renderBook(); renderTickets(); renderFishBook(); showNode();
-  musicButton(); musicSync(); renderLetters();
+  musicButton(); musicSync(); renderLetters(); renderRumors();
   loadPortraitImages();
   if (!introSeen()) showIntro();
   requestAnimationFrame(t => { lastT = t; frame(t); });

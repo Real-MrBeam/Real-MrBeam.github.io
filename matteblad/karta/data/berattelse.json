@@ -25,7 +25,8 @@
     },
     "sjo": {
       "namn": "Sjöviken",
-      "text": "En vik där vattnet ligger blankt och stilla. Vassen vajar längs stranden."
+      "text": "En vik där vattnet ligger blankt och stilla. Vassen vajar längs stranden.",
+      "rykte": "Folk säger att något stort simmar runt i sjön."
     },
     "fiske": {
       "namn": "Fiskeläget",
@@ -70,7 +71,9 @@
     },
     "norrabron": {
       "namn": "Norra bron",
-      "text": "En bro över älven, nära tornet. Här är strömmen stark och vattnet mörkt och djupt."
+      "text": "En bro över älven, nära tornet. Här är strömmen stark och vattnet mörkt och djupt.",
+      "natt": "En bro över älven, nära tornet. Från det mörka vattnet hörs något som liknar fiol.",
+      "rykteNatt": "Vid Norra bron spelar någon fiol i älven om nätterna. Om man ändå hade något som kunde ta en ut på vattnet."
     },
     "vassen": {
       "namn": "Vassen",
@@ -322,8 +325,9 @@
     },
     "honungsburk": {
       "namn": "Honungsburk",
-      "text": "Honung från Bosses bin, söt och tjock. Björnarna i skogen sägs inte kunna motstå den, och de är inte ensamma om det.",
-      "typ": "lockbete"
+      "text": "Honung från Bosses bin, söt och tjock.",
+      "typ": "lockbete",
+      "rykte": "Björnarna i skogen sägs inte kunna motstå honung."
     },
     "humleagg": {
       "namn": "Humleägg",
@@ -345,8 +349,9 @@
     },
     "glodsvamp": {
       "namn": "Glödsvamp",
-      "text": "Lyser som en lykta och lockar fram djur i mörkt vatten.",
-      "typ": "agn"
+      "text": "En svamp som lyser som en liten lykta.",
+      "typ": "agn",
+      "rykte": "Något i mörkt vatten sägs gilla ljus."
     },
     "sporpase": {
       "namn": "Sporpåse",
@@ -368,28 +373,27 @@
     },
     "appelpaj": {
       "namn": "Äppelpaj",
-      "text": "Nybakad och fortfarande ljummen. Björnarna i skogen följer doften långa vägar.",
-      "typ": "lockbete"
+      "text": "Nybakad och fortfarande ljummen.",
+      "typ": "lockbete",
+      "rykte": "Björnarna i skogen följer doften av äppelpaj långa vägar."
     },
     "flotte": {
       "namn": "Flotte",
-      "text": "En flotte av timmer, stadig nog för en. Om nätterna hörs något som liknar fiol från älven.",
-      "typ": "verktyg"
+      "text": "En flotte av timmer, stadig nog för en.",
+      "typ": "verktyg",
+      "rykte": "Om nätterna hörs något som liknar fiol från älven."
     },
     "snorkel": {
       "namn": "Snorkel",
-      "text": "En snorkel och ett par simglasögon. Under bron glittrar något i djupet, men ingen vill dyka dit.",
-      "typ": "verktyg"
-    },
-    "roddbat": {
-      "namn": "Roddbåt",
-      "text": "En liten roddbåt med två åror. Folk säger att något stort simmar runt i sjön.",
-      "typ": "verktyg"
+      "text": "En snorkel och ett par simglasögon.",
+      "typ": "verktyg",
+      "rykte": "Under Södra bron glittrar något i djupet, men ingen vill dyka dit."
     },
     "flugspo": {
       "namn": "Flugspö",
-      "text": "Ett lätt spö med lång lina. Ibland låter forsen nästan som musik.",
-      "typ": "verktyg"
+      "text": "Ett lätt spö med lång lina.",
+      "typ": "verktyg",
+      "rykte": "Vid Norra bron låter forsen ibland nästan som musik."
     },
     "flugask": {
       "namn": "Flugask",
@@ -398,13 +402,15 @@
     },
     "hav": {
       "namn": "Håv",
-      "text": "En håv med långt skaft. Det sägs att det lyser i djupet om natten.",
-      "typ": "verktyg"
+      "text": "En håv med långt skaft.",
+      "typ": "verktyg",
+      "rykte": "Det sägs att det lyser i djupet under Södra bron."
     },
     "kraftbur": {
       "namn": "Kräftbur",
-      "text": "En bur av nät och pinnar. Vassen vid sjön rör sig ibland fast det är vindstilla.",
-      "typ": "verktyg"
+      "text": "En bur av nät och pinnar.",
+      "typ": "verktyg",
+      "rykte": "Vassen vid sjön rör sig ibland fast det är vindstilla."
     },
     "duvanpip": {
       "namn": "Stjärnduva",
@@ -415,12 +421,15 @@
     "daggmask": {
       "namn": "Daggmaskar",
       "text": "En burk med feta daggmaskar.",
-      "typ": "agn"
+      "typ": "agn",
+      "rykte": "Med daggmask nappar det fortare.",
+      "effekt": "snabb"
     },
     "blabar": {
       "namn": "Lysande blåbär",
-      "text": "Blåbär som lyser svagt i mörkret. Sjödjur sägs älska dem.",
-      "typ": "agn"
+      "text": "Blåbär som lyser svagt i mörkret.",
+      "typ": "agn",
+      "rykte": "Det stora som simmar i sjön sägs älska lysande bär."
     },
     "lysmask": {
       "namn": "Lysmaskar",
@@ -434,18 +443,22 @@
     },
     "degkula": {
       "namn": "Mjölnarens degkula",
-      "text": "En fast kula av mjölnarens deg. Fiskarna sägs inte kunna motstå den.",
-      "typ": "agn"
+      "text": "En fast kula av mjölnarens deg.",
+      "typ": "agn",
+      "rykte": "Med mjölnarens deg nappar en fisk man aldrig har fått förut.",
+      "effekt": "ny"
     },
     "snackor": {
       "namn": "Blanka snäckor",
-      "text": "Mörka, blanka snäckor från bäcken. Djuren i djupet sägs älska dem.",
-      "typ": "agn"
+      "text": "Mörka, blanka snäckor från bäcken.",
+      "typ": "agn",
+      "rykte": "Djuren i djupet sägs älska blanka snäckor."
     },
     "ostbitar": {
       "namn": "Ostbitar",
-      "text": "Osttärningar från idrottsfikat. De luktar starkt, och inte bara för människor.",
-      "typ": "agn"
+      "text": "Osttärningar från idrottsfikat. De luktar starkt.",
+      "typ": "agn",
+      "rykte": "Något under bron lär gilla stark lukt."
     },
     "trolldryck": {
       "namn": "Trolldryck",
@@ -598,6 +611,13 @@
       "typ": "klader",
       "plats": "rygg",
       "varde": 4
+    },
+    "seglarmossa": {
+      "namn": "Seglarmössa",
+      "text": "En blå mössa med vitt band, som Siri har seglat med i många år.",
+      "typ": "klader",
+      "plats": "huvud",
+      "varde": 3
     }
   },
   "bygg": {
@@ -737,7 +757,7 @@
           "gava": [
             "fagelfro"
           ],
-          "gavaHej": "Ta en påse fågelfrö som tack. Med det ena ser du fåglarna, och med det andra kommer de till dig."
+          "gavaHej": "Ta en påse fågelfrö som tack. Strö ut lite, så kommer fåglarna till dig."
         },
         {
           "id": "svampring",
@@ -888,7 +908,7 @@
           "gava": [
             "flotte"
           ],
-          "gavaHej": "Här, ta en flotte som tack. Den tar dig nedför älven."
+          "gavaHej": "Här, ta en flotte som tack. Den flyter, det har jag provat själv."
         }
       ]
     },
@@ -944,9 +964,9 @@
           "byggnad": "bathus",
           "tack": "Tack. Nu har båten tak över sig, och det har jag också när det regnar. Nästa sommar seglar vi längre än någon har seglat.",
           "gava": [
-            "roddbat"
+            "seglarmossa"
           ],
-          "gavaHej": "En roddbåt som tack. Den tar dig ut på sjön."
+          "gavaHej": "Tack. Ta min gamla seglarmössa, den har varit med på fler resor än jag kan räkna."
         }
       ]
     },
@@ -1112,7 +1132,11 @@
     "saknarHint": "Du saknar {n} stjärnstoft. Mer får du för rätta svar på matteblad.",
     "gavaTagen": "Du har redan fått min gåva. Tack igen för bygget.",
     "gavaSenare": "Ta gåvan senare",
-    "gavaTa": "Ta emot {namn}"
+    "gavaTa": "Ta emot {namn}",
+    "rykten": {
+      "rubrik": "Rykten",
+      "tom": "Inga rykten än."
+    }
   },
   "djur": {
     "gele": {
@@ -2034,7 +2058,6 @@
       "flugspo",
       "flotte",
       "kraftbur",
-      "roddbat",
       "hav",
       "snorkel"
     ],
@@ -2059,13 +2082,13 @@
           "flugspo",
           "flotte",
           "kraftbur",
-          "roddbat",
           "hav",
           "snorkel"
         ],
         "agn": [
           "snackor",
-          "trolldryck"
+          "trolldryck",
+          "blabar"
         ],
         "text": "Vassen böjer sig. En puckel, och sedan en till, glider fram genom vattnet. Ett vänligt huvud på en lång hals tittar upp och nosar på agnet."
       },
@@ -2132,7 +2155,8 @@
       "agnFelRedskap": "Något nere i vattnet är sugen på agnet, men det går inte att få upp det med det här redskapet.",
       "platsFelAgn": "Något rör sig nere i vattnet här, men det vill ha något annat än det du erbjuder.",
       "fynd": "Något tungt hänger på kroken. Det är ingen fisk.",
-      "ingetSpo": "Du har inget att fiska med. Någon i skogen sägs sälja spön, men bara på natten."
+      "ingetSpo": "Du har inget att fiska med. Någon i skogen sägs sälja spön, men bara på natten.",
+      "ingetHar": "Det här redskapet fångar inget i det här vattnet."
     },
     "fynd": [
       "stovel",
@@ -2140,7 +2164,29 @@
       "konservburk",
       "glasflaska",
       "fiskehatt"
-    ]
+    ],
+    "fangar": {
+      "metspo": [
+        "abborre",
+        "gadda",
+        "oring",
+        "harr",
+        "regnbage"
+      ],
+      "flugspo": [
+        "oring",
+        "harr",
+        "regnbage"
+      ],
+      "hav": [
+        "groda"
+      ],
+      "kraftbur": [
+        "krafta"
+      ],
+      "flotte": [],
+      "snorkel": []
+    }
   },
   "locka": [
     {
