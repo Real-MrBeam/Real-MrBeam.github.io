@@ -51,14 +51,26 @@ const HATS = {
   mjolnarmossa: { rows: ["................", "....ooooooo.....", "...ommmmmmmo....", "...ommmmmmmmo...", "...oMMMMMMMMo..."], pal: { m: '#f4f4f4', M: '#c0cbdc' } },
 };
 const BOOTS = { stovel: { k: '#6b3a20' } };
+// A cape on the back: seen behind the arms from the front, over the whole back from behind, flowing out behind from the side
+const CAPES = { rodcape: { V: '#e43b44', W: '#a22633' } };
+function addCape(rows, view){
+  const set = (r, x, c) => r.slice(0, x) + c + r.slice(x + 1);
+  return rows.map((r, y) => {
+    if (view === 'up' && y >= 8 && y <= 12) return r.replace(/[dgGy]/g, (c, x) => (x === 4 || x === 11) ? 'W' : 'V');
+    if (view === 'down' && y === 9){ r = set(r, 5, 'V'); return set(r, 10, 'V'); }          // the ties over the shoulders
+    if (view === 'down' && y >= 12 && y <= 14){ r = set(r, 2, 'V'); r = set(r, 13, 'V'); r = set(r, 1, 'o'); return set(r, 14, 'o'); }   // the hem below the arms
+    if (view === 'side' && y >= 9 && y <= 14){ r = set(r, 2, r[2] === '.' ? 'V' : r[2]); r = set(r, 1, 'V'); return set(r, 0, 'o'); }
+    return r;
+  });
+}
 let BOY = null;
 function buildBoy(pa = {}){
-  const hat = HATS[pa.huvud], pal = { ...BOYPAL, ...(hat ? hat.pal : {}), ...(BOOTS[pa.fotter] || {}) };
-  const top = rows => hat ? [...hat.rows, ...rows.slice(5)] : rows;
+  const hat = HATS[pa.huvud], cape = CAPES[pa.rygg], pal = { ...BOYPAL, ...(hat ? hat.pal : {}), ...(BOOTS[pa.fotter] || {}), ...(cape || {}) };
+  const top = (rows, view) => { const r = hat ? [...hat.rows, ...rows.slice(5)] : rows; return cape ? addCape(r, view) : r; };
   BOY = {
-    down: [FRONT.concat(LEGS_A), FRONT.concat(LEGS_B), FRONT.concat(LEGS_A), FRONT.concat(LEGS_C)].map(r => sprite(top(r), pal)),
-    up:   [BACK.concat(LEGS_A), BACK.concat(LEGS_B), BACK.concat(LEGS_A), BACK.concat(LEGS_C)].map(r => sprite(top(r), pal)),
-    right:[SIDE.concat(SIDE_A), SIDE.concat(SIDE_B)].map(r => sprite(top(r), pal)),
+    down: [FRONT.concat(LEGS_A), FRONT.concat(LEGS_B), FRONT.concat(LEGS_A), FRONT.concat(LEGS_C)].map(r => sprite(top(r, 'down'), pal)),
+    up:   [BACK.concat(LEGS_A), BACK.concat(LEGS_B), BACK.concat(LEGS_A), BACK.concat(LEGS_C)].map(r => sprite(top(r, 'up'), pal)),
+    right:[SIDE.concat(SIDE_A), SIDE.concat(SIDE_B)].map(r => sprite(top(r, 'side'), pal)),
   };
   BOY.left = BOY.right.map(mirror);
 }

@@ -567,12 +567,6 @@
       "typ": "fynd",
       "varde": 1
     },
-    "flaskpost": {
-      "namn": "Flaskpost",
-      "text": "En flaska med ett hoprullat brev. Bläcket har flutit ut, så ingen kan läsa det.",
-      "typ": "fynd",
-      "varde": 3
-    },
     "drakfjall": {
       "namn": "Drakfjäll",
       "text": "Ett litet varmt fjäll som skimrar i rött och guld.",
@@ -595,6 +589,13 @@
       "namn": "Flöjt",
       "text": "En liten flöjt av vass. Nattfiskaren vet inte vad den är till, men han ler lite när han säljer den.",
       "typ": "verktyg"
+    },
+    "rodcape": {
+      "namn": "Röd cape",
+      "text": "En röd cape som någon har glömt i vassen. Den fladdrar fint när man går.",
+      "typ": "klader",
+      "plats": "rygg",
+      "varde": 4
     }
   },
   "bygg": {
@@ -1475,10 +1476,10 @@
               {
                 "label": "Knyt en röd tygbit i vassen",
                 "kostnad": 0,
-                "text": "Du knyter fast en röd tygbit i vassen och märker ut platsen på kartan. När du knyter fast tygbiten hittar du en flaska i vassen, med ett brev i.",
+                "text": "Du knyter fast en röd tygbit i vassen och märker ut platsen på kartan. Längre in i vassen hänger en hel röd cape som någon har glömt.",
                 "till": {
                   "fiskeplats": "vassen",
-                  "extra": "flaskpost"
+                  "extra": "rodcape"
                 }
               }
             ]
