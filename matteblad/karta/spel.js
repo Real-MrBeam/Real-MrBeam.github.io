@@ -843,10 +843,9 @@ document.addEventListener('visibilitychange', () => { if (window.Musik) Musik.pa
 
 // Is there still something to do at a place? Used at night to keep the plate light.
 function nodeActive(id){
-  if (S.natt){   // at night only the fishing, the tent and the letter are open
-    const fp = FISKE.platser[id];
-    if (fp && FISKE.djur.some(r => r.plats === id && !S.djur.includes(r.djur))) return true;
-    if (berattelse.handel && id === berattelse.handel.plats && (Object.keys(berattelse.handel.saljer || {}).some(x => !S.saker.includes(x)) || tradeOffers().length)) return true;
+  if (S.natt){   // at night the tent is open, and the fishing places if he has something to fish with, and the letter
+    if (berattelse.handel && id === berattelse.handel.plats) return true;
+    if (FISKE.platser[id] && myTools().length) return true;
     return id === 'hem' && letterWaiting();
   }
   for (const p of PLOTS) if (p.node === id && !p.prebuilt){
