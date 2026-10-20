@@ -838,6 +838,12 @@ document.addEventListener('visibilitychange', () => { if (window.Musik) Musik.pa
 
 // Is there still something to do at a place? Used at night to keep the plate light.
 function nodeActive(id){
+  if (S.natt){   // at night only the fishing, the tent and the letter are open
+    const fp = FISKE.platser[id];
+    if (fp && FISKE.djur.some(r => r.plats === id && !S.djur.includes(r.djur))) return true;
+    if (berattelse.handel && id === berattelse.handel.plats && (Object.keys(berattelse.handel.saljer || {}).some(x => !S.saker.includes(x)) || tradeOffers().length)) return true;
+    return id === 'hem' && letterWaiting();
+  }
   for (const p of PLOTS) if (p.node === id && !p.prebuilt){
     if (!S.built[p.id]) return true;
     const v = valOf(p);
@@ -860,6 +866,14 @@ function nodeActive(id){
 const SIGIL = sprite([".....o.....", "....owo....", "....owo....", "...owwwo...", "oowwwkwwwoo", ".owwekewwo.", "oowwwkwwwoo", "...owwwo...", "....owo....", "....owo....", ".....o....."],
   { o: '#3a4466', w: '#c0cbdc', e: '#ffffff', k: '#262b44' });
 const V = berattelse.stjarnvaktarna;
+// The letter is spoken by the sign itself: the silver star with an eye is its portrait, like the queen's in her letter
+const OTHER_WHO = { stjarnvaktarna: { namn: 'Stjärnväktarna', yrke: 'Hemligt sällskap' } };
+function sigilPortrait(){
+  if (PORTRAIT_IMG.stjarnvaktarna) return;
+  const c = document.createElement('canvas'); c.width = 32; c.height = 32; const x = c.getContext('2d'); x.imageSmoothingEnabled = false;
+  x.fillStyle = '#181425'; x.fillRect(0, 0, 32, 32); x.drawImage(SIGIL, 0, 0, 11, 11, 5, 5, 22, 22);
+  PORTRAIT_IMG.stjarnvaktarna = c;
+}
 const letterWaiting = () => V && !S.brev2 && S.natt && S.log.some(e => e.text);
 function letterBlock(){
   const here = S.node === 'hem' && !boy.route;
@@ -868,7 +882,8 @@ function letterBlock(){
 function readLetter2(){
   if (!S.brev2){ S.brev2 = true; saveSoon(); renderLetters(); }
   // shown like the queen's letter: line by line in the dialog box under the map
-  startDialog(V.stycken.map(t => ({ p: null, t })), () => [{ label: 'Tillbaka till kartan', alt: true, run: toNode }]);
+  sigilPortrait();
+  startDialog(V.stycken.map(t => ({ p: 'stjarnvaktarna', t })), () => [{ label: 'Tillbaka till kartan', alt: true, run: toNode }]);
 }
 
 /* ---------- tältet och nattfiskaren ---------- */
@@ -942,16 +957,19 @@ function renderPanel(view){
     const plots = PLOTS.filter(p => p.node === n.id);
     const stop = STOPP[n.id];
     h = `<span class="tag">Du är här</span><h2>${esc(n.name)}</h2><p>${esc(n.text)}</p><div class="panel-body">`;
-    for (const p of plots) h += plotBlock(p);
-    if (stop) h += stopBlock(n.id);
+    // At night everything is closed except the tent, the fishing, and sleeping (and the letter) in Hemmet (Peter 2026-10-20)
+    const day = !S.natt, before = h.length;
+    if (day) for (const p of plots) h += plotBlock(p);
+    if (day && stop) h += stopBlock(n.id);
     if (n.id === 'hem') h += sleepBlock();
     if (n.id === 'hem' && letterWaiting()) h += letterBlock();
     if (berattelse.handel && n.id === berattelse.handel.plats) h += tentBlock();
     if (FISKE.platser[n.id]) h += fishBlock(n.id);
-    if (FISKE.platser[n.id] && FISKE.platser[n.id].lan) h += lanBlock(n.id);
-    for (const r of LOCKA) if (r.plats === n.id) h += lureBlock(r);
-    if (n.id === CHEST_AT.node && pendingTickets().length) h += `<div class="plot"><div><b>En guldkista står vid skolan</b></div><button class="btn" type="button" data-kista="1">Öppna kistan</button></div>`;
-    if (n.id === 'slott') h += `<div><button class="btn" type="button" data-slott="1">${esc(berattelse.dialog.slottKnapp)}</button></div>`;
+    if (day && FISKE.platser[n.id] && FISKE.platser[n.id].lan) h += lanBlock(n.id);
+    if (day) for (const r of LOCKA) if (r.plats === n.id) h += lureBlock(r);
+    if (day && n.id === CHEST_AT.node && pendingTickets().length) h += `<div class="plot"><div><b>En guldkista står vid skolan</b></div><button class="btn" type="button" data-kista="1">Öppna kistan</button></div>`;
+    if (day && n.id === 'slott') h += `<div><button class="btn" type="button" data-slott="1">${esc(berattelse.dialog.slottKnapp)}</button></div>`;
+    if (!day && h.length === before) h += `<p class="sub" style="text-transform:none;letter-spacing:0">Det är natt. Här sover alla.</p>`;
     h += `</div>`;
   } else if (view.type === 'gate'){
     const g = view.gate, e = g.edge, open = S.stars >= g.req;
@@ -965,7 +983,7 @@ function renderPanel(view){
     const p = view.plot, n = NODES[p.node];
     h = `<span class="tag">Tomt i ${esc(n.name)}</span><h2>${esc(p.name)}</h2><p>${S.built[p.id] ? 'Det här har du byggt. Det står kvar på kartan för alltid.' : `Kostar ${p.cost} stjärnstoft. Stjärnstoft får du för rätta svar på matteblad.`}</p><div class="panel-body">${plotBlock(p)}<div class="roads"><button class="btn alt" type="button" data-back="1">Tillbaka</button></div></div>`;
   } else if (view.type === 'dialog'){
-    const L = dlg.lines[dlg.i], who = L.p ? PERS[L.p] : null;
+    const L = dlg.lines[dlg.i], who = L.p ? (PERS[L.p] || OTHER_WHO[L.p]) : null;
     h = `<div class="dlg">${who ? '<canvas class="portrait pix" width="32" height="32" aria-hidden="true"></canvas>' : ''}<div class="dlg-body"><div class="who">${who ? `<b>${esc(who.namn)}</b> <span>${esc(who.yrke)}</span>` : '<span class="tag">Berättare</span>'}</div><p class="say" aria-live="polite"></p><div class="dlg-btns" hidden></div></div></div>`;
   }
   panel.innerHTML = h;
@@ -1055,7 +1073,8 @@ document.addEventListener('las:unlocked', loadPortraitImages);
 function drawPortrait(cv, id, blink){
   const img = PORTRAIT_IMG[id];
   if (img){
-    if (cv.width !== img.naturalWidth){ cv.width = img.naturalWidth; cv.height = img.naturalHeight; }
+    const w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;   // an image, or a canvas (the sign)
+    if (cv.width !== w){ cv.width = w; cv.height = h; }
     const x = cv.getContext('2d'); x.imageSmoothingEnabled = false; x.clearRect(0, 0, cv.width, cv.height); x.drawImage(img, 0, 0);
     return;
   }
