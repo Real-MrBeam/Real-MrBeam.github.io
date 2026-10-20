@@ -1262,6 +1262,8 @@ function startShop(p, seen){
 function tradeFish(p, v){
   const T = v.byte, back = [{ label: 'Tillbaka', alt: true, run: () => startShop(p, true) }];
   if (S.bytt[p.id]) return startShop(p, true);
+  // Hulda sells her potion or swaps it for a find; Torvald still wants a crayfish
+  if (T.pris) return sellOrSwap({ who: v.person, hej: T.hej, tack: T.tack, ger: T.ger, pris: T.pris, back: () => startShop(p, true), done: () => { S.bytt[p.id] = true; } });
   if (!(S.fiskbok[T.vill] > 0)) return startDialog([{ p: v.person, t: T.saknas }], () => back);
   S.fiskbok[T.vill]--; S.bytt[p.id] = true;
   if (!S.saker.includes(T.ger)) S.saker.push(T.ger);
@@ -1585,10 +1587,24 @@ function lanBlock(id){
 function talkFisher(id){
   const L = FISKE.platser[id].lan;
   if (S.saker.includes(L.ger)) return;
-  if (!(S.fiskbok[L.vill] > 0)) return openModal([{ icon: FISH_BIG, title: L.rubrik, text: L.saknas, button: 'Till kartan' }], () => showNode());
-  S.fiskbok[L.vill]--; S.saker.push(L.ger);
-  renderFishBook(); renderPack(); saveSoon();
-  openModal([{ icon: FISH_BIG, title: L.rubrik, text: L.tack, reward: `${SAKER[L.ger].namn} lades i väskan.`, button: 'Till kartan' }], () => showNode());
+  sellOrSwap({ who: null, hej: L.hej, tack: L.tack, ger: L.ger, pris: L.pris, back: toNode, done: () => {} });
+}
+// Someone sells a thing for stardust, or swaps it for one of his finds (the fishermen on the bridges, Hulda). Peter 2026-10-21.
+function sellOrSwap(o){
+  const finds = S.saker.filter(id => SAKER[id] && SAKER[id].typ === 'fynd');
+  const give = how => {
+    if (S.saker.includes(o.ger)) return o.back();
+    if (how === 'pris'){ if (S.coins < o.pris){ toast(berattelse.dialog.ingaStoft.replace('{n}', o.pris - S.coins)); return; } spend(o.pris); updateHud('coins'); }
+    else S.saker = S.saker.filter(x => x !== how);
+    S.saker.push(o.ger); o.done(); renderPack(); saveSoon();
+    toast(`${SAKER[o.ger].namn} lades i väskan.`);
+    startDialog([{ p: o.who, t: o.tack }], () => [{ label: 'Tillbaka', alt: true, run: o.back }]);
+  };
+  startDialog([{ p: o.who, t: o.hej }], () => [
+    { label: `Köp ${esc(SAKER[o.ger].namn.toLowerCase())} ${price(o.pris)}`, poor: S.coins < o.pris, run: () => give('pris') },
+    ...finds.map(id => ({ label: `Byt mot ${esc(SAKER[id].namn.toLowerCase())}<small>${esc(SAKER[id].text)}</small>`, run: () => give(id) })),
+    { label: 'Tillbaka', alt: true, run: o.back },
+  ]);
 }
 function startFishing(id){
   fishing = { plats: id, redskap: myTools()[0], agn: '', phase: 'val', timers: [] };

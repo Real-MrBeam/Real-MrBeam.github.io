@@ -815,16 +815,16 @@
           "forlorare": "Bron över bäcken blev din väg in. Klippan står kvar, brant och tyst, och vad som fanns där uppe får förbli en gåta.",
           "forlorarePerson": null,
           "byte": {
-            "vill": "groda",
             "ger": "trolldryck",
-            "knapp": "Byt: en groda mot en trolldryck",
-            "saknas": "Jag behöver en groda till grytan. En liten, helst. Kom tillbaka när du har fångat en, så blandar jag något åt dig.",
-            "tack": "En groda! Perfekt. Här är en liten flaska, men fråga inte vad som är i den. Något stort i vattnet gillar den."
+            "pris": 4,
+            "knapp": "Köp en trolldryck",
+            "hej": "Jag har en trolldryck över. Du får den för fyra stjärnstoft, eller så byter vi mot något glittrigt du har hittat.",
+            "tack": "Här. Fråga inte vad som är i den."
           },
           "gava": [
             "katten"
           ],
-          "gavaHej": "Har du råkat se en groda på vägen hit? Nej, tänkte väl det. Den här katten har bestämt sig för att flytta med dig.",
+          "gavaHej": "Välkommen in. Den här katten har bestämt sig för att flytta med dig.",
           "extra": "trollkarlshatt"
         },
         {
@@ -2005,11 +2005,11 @@
         "lan": {
           "rubrik": "En gammal fiskare sitter på bron",
           "knapp": "Prata med fiskaren",
-          "vill": "gadda",
           "ger": "hav",
-          "saknas": "Den gamla fiskaren fnyser. 'Fångar du en gädda härifrån, så lånar jag ut min håv.'",
-          "tack": "Den gamla fiskaren skrattar och slår sig på knät. 'En gädda! Då är håven din. Jag fiskar bättre utan.'",
-          "klar": "Du har redan en håv."
+          "tack": "\"Där ser man. Håven är din. Jag fiskar bättre utan.\"",
+          "klar": "Du har redan en håv.",
+          "pris": 5,
+          "hej": "Den gamla fiskaren fnyser vänligt. \"Min håv kan du få för fem stjärnstoft. Eller har du hittat något fint? Jag samlar på sådant.\""
         },
         "vanta": [
           2500,
@@ -2027,11 +2027,11 @@
         "lan": {
           "rubrik": "En fiskare står vid räcket",
           "knapp": "Prata med fiskaren",
-          "vill": "harr",
           "ger": "flugspo",
-          "saknas": "Fiskaren nickar mot forsen. 'Ta upp en harr med metspöet, så ska du få låna ett riktigt flugspö av mig.'",
-          "tack": "Fiskaren vänder fisken i handen och ler. 'Det där var en fin harr. Här, ta mitt flugspö. Jag har fler hemma.'",
-          "klar": "Du har redan ett flugspö."
+          "tack": "Fiskaren ler. \"Ta väl hand om det. Forsen är snällare mot den som har tålamod.\"",
+          "klar": "Du har redan ett flugspö.",
+          "pris": 6,
+          "hej": "Fiskaren nickar mot forsen. \"Vill du ha mitt gamla flugspö? Du får det för sex stjärnstoft, eller så byter vi mot något fint du har hittat.\""
         },
         "vanta": [
           1200,
