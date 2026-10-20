@@ -64,7 +64,7 @@
     "stenblocket": {
       "namn": "Stenblocket",
       "text": "Ett stenblock täckt av tecken som ingen kan läsa. Under det porlar en bäck.",
-      "rykte": "I bäcken under stenblocket kryper kräftor. De går inte på kroken, men de kryper gärna in i en bur."
+      "rykte": "I bäcken under stenblocket kryper kräftor."
     },
     "sodrabron": {
       "namn": "Södra bron",
@@ -81,7 +81,7 @@
     "vassen": {
       "namn": "Vassen",
       "text": "En gömd brygga i vassen. Ingen annan vet att den finns, och så får det gärna förbli.",
-      "rykte": "Det kväker i vassen hela tiden. Grodorna sitter för nära kanten för ett spö."
+      "rykte": "Det kväker i vassen hela tiden."
     },
     "talt": {
       "namn": "Tältet",
