@@ -537,8 +537,8 @@ function drawActors(now){
 }
 function pill(x, y, parts, opts){
   opts = opts || {};
-  const fs = Math.round(11.5 * dpr), gap = Math.round(4*dpr);
-  ctx.font = `600 ${fs}px "Pixelify Sans", system-ui, sans-serif`;
+  const fs = Math.round(8 * dpr), gap = Math.round(4*dpr);
+  ctx.font = `${fs}px "Press Start 2P", ui-monospace, monospace`;
   const items = parts.map(p => {
     if (typeof p === 'string') return { t: p, w: Math.ceil(ctx.measureText(p).width) };
     const s = Math.max(1, Math.round(dpr * 13 / p.height));
@@ -680,10 +680,10 @@ function nightLights(){
   for (const p of PLOTS) if (builtShown(p)) plotTiles(p).forEach((row, dy) => row.forEach((i, dx) => { const L = lightIn(i); if (L) list.push({ x: (p.x + dx)*TS + L[0], y: (p.y + dy)*TS + L[1], k: L[2] }); }));
   return list;
 }
-// A small rowing boat with a lantern drifts on the lake by Vassen, only at night (Peter 2026-10-20). Own drawing.
-const BOAT = sprite(["..........y.....", ".........oyo....", "..........o.....", "..........o.....", "oooooooooooooooo", "obbbbbbbbbbbbbbo", ".oBBBBBBBBBBBBo.", "..oBBBBBBBBBBo..", "...oooooooooo..."],
-  { o: '#3f2631', b: '#b86f50', B: '#733e39', y: '#fee761' });
-const boatAt = now => ({ x: 23*TS - 4 + Math.round(Math.sin(now / 5200) * 26), y: 18*TS + 2 + (reduceMotion ? 0 : Math.round(Math.sin(now / 700))) });
+// A small sailing ship drifts on the lake by Vassen, only at night (Peter 2026-10-20). bild/skepp.png is CyanShip from Mini World
+// Sprites (Shade, CC0, opengameart.org/content/miniworld-sprites): three frames of 32 x 32, the bow to the left.
+const SHIP = new Image(); SHIP.src = 'bild/skepp.png';
+const boatAt = now => ({ x: 23*TS - 12 + Math.round(Math.sin(now / 5200) * 22), y: 17*TS + 4 + (reduceMotion ? 0 : Math.round(Math.sin(now / 700))), right: Math.cos(now / 5200) > 0 });
 function drawNight(now, lv){
   if (!WATER_STARS){
     const r = rng(11); WATER_STARS = [];
@@ -691,15 +691,23 @@ function drawNight(now, lv){
   }
   const seen = (x, y) => DEBUG.mode || seenAt(Math.floor(x / TS), Math.floor(y / TS));
   const lights = nightLights().filter(L => seen(L.x, L.y));
-  const bt = boatAt(now), boatSeen = seen(bt.x + 8, bt.y + 6);
-  if (boatSeen){ ctx.save(); ctx.globalAlpha = lv; ctx.drawImage(BOAT, bt.x, bt.y); ctx.restore(); lights.push({ x: bt.x + 10, y: bt.y + 1, k: 'lamp' }); }
+  const bt = boatAt(now), boatSeen = SHIP.complete && seen(bt.x + 16, bt.y + 16);
+  if (boatSeen){
+    const f = reduceMotion ? 0 : Math.floor(now / 350) % 3;
+    ctx.save(); ctx.globalAlpha = lv;
+    if (bt.right){ ctx.translate(bt.x + 32, bt.y); ctx.scale(-1, 1); ctx.drawImage(SHIP, f*32, 0, 32, 32, 0, 0, 32, 32); }   // sailing to the right: the bow turns
+    else ctx.drawImage(SHIP, f*32, 0, 32, 32, bt.x, bt.y, 32, 32);
+    ctx.restore();
+    lights.push({ x: bt.x + 16, y: bt.y + 14, k: 'lamp' });
+  }
   ctx.save();
   ctx.globalCompositeOperation = 'multiply'; ctx.globalAlpha = lv;
   ctx.fillStyle = '#3d4f99'; ctx.fillRect(0, 0, MW*TS, MH*TS);
   ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'lighter';
   for (const L of lights){
     const fire = L.k === 'fire', flick = fire && !reduceMotion ? .85 + .15 * Math.sin(now / 90 + L.x) * Math.sin(now / 53 + L.y) : 1;
-    const rad = (fire ? 30 : L.k === 'win' || L.k === 'tent' || L.k === 'lamp' ? 20 : 12) * flick, c = fire ? '255,140,50' : '255,200,100';
+    // the ship on the lake glows a mysterious blue, everything else warm
+    const rad = (fire ? 30 : L.k === 'lamp' ? 26 : L.k === 'win' || L.k === 'tent' ? 20 : 12) * flick, c = fire ? '255,140,50' : L.k === 'lamp' ? '90,170,255' : '255,200,100';
     const g = ctx.createRadialGradient(L.x, L.y, 0, L.x, L.y, rad);
     g.addColorStop(0, `rgba(${c},${.5 * lv})`); g.addColorStop(1, `rgba(${c},0)`);
     ctx.fillStyle = g; ctx.fillRect(L.x - rad, L.y - rad, rad * 2, rad * 2);
