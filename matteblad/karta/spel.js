@@ -1280,8 +1280,22 @@ function startCount(){
   ]);
 }
 
+// Categories of things in the bag, each with its own small pixel icon (Peter 2026-10-20). Special things have a secret or a task.
+const SPECIAL = ['lykta', 'flojt'];
+const KAT = {
+  sarskilt: { namn: 'Särskilt', ico: sprite(["........", ".yy.....", "y..y....", "y..yyyyy", ".yy..y.y", "........", "........", "........"], { y:'#fee761' }) },
+  redskap: { namn: 'Redskap', ico: sprite(["....ss..", "....ss..", "....ss..", "....ss..", "s...ss..", "ss..ss..", ".ssss...", "..ss...."], { s:'#c0cbdc' }) },
+  agn: { namn: 'Agn', ico: sprite(["........", "pp......", "ppp...pp", ".ppp.ppp", "..ppppp.", "...ppp..", "........", "........"], { p:'#f6757a' }) },
+  klader: { namn: 'Kläder', ico: sprite(["........", "...yy...", "..yyyy..", "..yyyy..", "..RRRR..", "yyyyyyyy", ".yyyyyy.", "........"], { y:'#f4d27a', R:'#e43b44' }) },
+  fynd: { namn: 'Fynd', ico: sprite(["........", ".cccccc.", "cwCccCcc", "cCccccCc", ".cCccCc.", "..cCCc..", "...cc...", "........"], { c:'#2ce8f5', C:'#0e5cae', w:'#ffffff' }) },
+};
+const KAT_ORDER = ['sarskilt', 'redskap', 'agn', 'klader', 'fynd'];
+const katOf = id => SPECIAL.includes(id) ? 'sarskilt' : SAKER[id].typ === 'verktyg' ? 'redskap' : SAKER[id].typ;
+let KAT_URL = null;
+const katIcon = k => { if (!KAT_URL) KAT_URL = Object.fromEntries(Object.entries(KAT).map(([key, v]) => [key, iconURL(v.ico, 3)])); return KAT_URL[k]; };
 function renderPack(){
-  const own = S.saker.filter(id => SAKER[id] && SAKER[id].typ !== 'djur' && !S.agnAnvant.includes(id)); // used baits are gone
+  const own = S.saker.filter(id => SAKER[id] && SAKER[id].typ !== 'djur' && !S.agnAnvant.includes(id)) // used baits are gone
+    .sort((a, b) => KAT_ORDER.indexOf(katOf(a)) - KAT_ORDER.indexOf(katOf(b)));
   $('#pack').innerHTML = own.length
     ? own.map(id => { const it = SAKER[id], on = it.typ === 'klader' && S.pa[it.plats] === id;
         // Things that can be used are tapped like the runes in the list: clothes go on and off, the lantern is lit, the flute plays
@@ -1289,7 +1303,8 @@ function renderPack(){
         const lit = id === 'lykta' && S.lyktaTand;
         const title = it.typ === 'klader' ? (on ? 'Ta av' : 'Ta på') : id === 'lykta' ? (lit ? 'Släck lyktan' : 'Tänd lyktan') : id === 'flojt' ? 'Spela' : '';
         const state = on ? 'på' : lit ? 'tänd' : '';
-        return `<li${usable ? ` class="readable" data-use="${id}" role="button" tabindex="0" title="${title}"` : ''}><span><b>${esc(it.namn)}</b> ${esc(it.text)}</span>${state ? `<span class="st">${state}</span>` : ''}</li>`; }).join('')
+        const k = katOf(id);
+        return `<li${usable ? ` class="readable" data-use="${id}" role="button" tabindex="0" title="${title}"` : ''}><img class="pix" src="${katIcon(k)}" alt="${KAT[k].namn}" title="${KAT[k].namn}"><span><b>${esc(it.namn)}</b> ${esc(it.text)}</span>${state ? `<span class="st">${state}</span>` : ''}</li>`; }).join('')
     : '<li><span>Inget ännu. Bygg något och få en gåva!</span></li>';
 }
 
