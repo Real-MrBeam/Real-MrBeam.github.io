@@ -1726,6 +1726,7 @@ $('#btnGeFisk').addEventListener('click', () => { for (const id in FISKE.fiskar)
 $('#btnGe').addEventListener('click', showGive);
 $('#btnGeAlla').addEventListener('click', () => { for (const id in SAKER) if (SAKER[id].typ !== 'djur') debugGive(id); renderPack(); toast('Alla saker lades i väskan.'); });
 $('#btnGeDjur').addEventListener('click', () => { for (const id in SAKER) if (SAKER[id].typ === 'djur') debugGive(id); for (const id in berattelse.djur) if (!S.djur.includes(id)) S.djur.push(id); renderBook(); toast('Alla djur skrevs in i djurboken.'); });
+$('#btnNasta').addEventListener('click', () => { if (window.Musik){ if (!Musik.spelar){ musicSync(); Musik.start(); musicButton(); } else Musik.nasta(); } });
 // Debug: which song is playing
 if (new URLSearchParams(location.search).has('debug')) setInterval(() => { $('#debugLat').textContent = window.Musik && Musik.spelar ? `Spelar: ${Musik.lat}` : 'Musiken är av'; }, 500);
 // Debug: switch day and night at once, without sleeping in Hemmet

@@ -1,6 +1,6 @@
 // Djuren i Glimmerdal: the music. A tiny chip synth in the browser (pulse waves, a triangle bass and noise drums, like an old
-// game console) plays four songs of our own: two for the day ("Glimmerdal" and "Ängsdans") and two for the night ("Stjärnnatt"
-// and "Månsken"). The songs of the day or of the night take turns. No sound files, nothing downloaded.
+// game console) plays six songs of our own: three for the day ("Glimmerdal", "Ängsdans" and "Morgondagg") and three for the
+// night ("Stjärnnatt", "Månsken" and "Nattugglan"). The songs of the day or of the night take turns. No sound files, nothing downloaded.
 //
 // A song is a list of bars. Each bar has a chord (the bass and the arpeggio are made from it) and a melody of 8 steps (eighth notes):
 // a note such as "E5", "-" holds the note before, "." is a rest. The drums are a pattern of 8 steps per bar.
@@ -91,8 +91,42 @@ const MANSKEN = (() => {
     ljud: { lead: { form: .25, vol: .07 }, arp: { form: .125, vol: .028, oktav: 4, takt: 1 }, bas: { vol: .17 }, eko: .25 },
   };
 })();
+// Morgondagg: calm and sparse by day, long notes and air between them, but hopeful (Peter 2026-10-20)
+const MORGONDAGG = (() => {
+  const intro = [bar('C', '. . . . . . . .'), bar('C', '. . . . . . . .')];
+  const A = [bar('C', 'E5 - - - G5 - - -'), bar('G', 'D5 - - - G5 - - -'), bar('Am', 'C6 - - - B5 - A5 -'), bar('F', 'A5 - - - - - . .')];
+  const A2 = [bar('C', 'E5 - - - G5 - C6 -'), bar('G', 'D6 - - - B5 - - -'), bar('F', 'A5 - - - C6 - F6 -'), bar('G', 'E6 - - - D6 - . .')];
+  const B = [
+    bar('Am', 'C6 - - - E6 - - -'), bar('F', 'C6 - - - A5 - - -'), bar('C', 'G5 - - - C6 - E6 -'), bar('G', 'D6 - - - - - . .'),
+    bar('Am', 'E6 - - - D6 - C6 -'), bar('F', 'A5 - - - C6 - - -'), bar('G', 'B5 - D6 - G6 - - -'), bar('C', 'E6 - - - - - - -'),
+  ];
+  const slut = [...A.slice(0, 3), bar('C', 'C6 - - - - - - -')];
+  return {
+    namn: 'Morgondagg', bpm: 92, tid: 'dag',
+    takter: [...intro, ...A, ...A2, ...B, ...A2, ...slut],
+    trummor: { k: 'k . . . . . . .', s: '. . . . . . . .', h: '. . . . h . . .' },
+    ljud: { lead: { form: .25, vol: .065 }, arp: { form: .125, vol: .025, oktav: 4, takt: 2 }, bas: { vol: .15 }, eko: .15 },
+  };
+})();
+// Nattugglan: a gentle mystery for the night, in A minor with a slow call that answers itself
+const NATTUGGLAN = (() => {
+  const intro = [bar('Am', '. . . . . . . .'), bar('Am', '. . . . . . . .')];
+  const A = [bar('Am', 'A5 - C6 - E6 - - -'), bar('Em', 'B5 - - - G5 - E5 -'), bar('F', 'A5 - C6 - F6 - E6 -'), bar('G', 'D6 - - - - - . .')];
+  const A2 = [bar('Am', 'A5 - C6 - E6 - A6 -'), bar('Em', 'G6 - E6 - B5 - - -'), bar('Dm', 'A5 - F5 - D6 - C6 -'), bar('E', 'B5 - - - G#5 - . .')];
+  const B = [
+    bar('F', 'C6 - - - A5 - C6 -'), bar('C', 'E6 - - - G5 - - -'), bar('Dm', 'F6 - - - E6 - D6 -'), bar('Am', 'C6 - - - - - . .'),
+    bar('F', 'A5 - C6 - F6 - - -'), bar('G', 'D6 - B5 - G5 - B5 -'), bar('E', 'G#5 - B5 - E6 - - -'), bar('E', 'D6 - - - B5 - G#5 -'),
+  ];
+  const slut = [...A.slice(0, 3), bar('Am', 'A5 - - - - - - -')];
+  return {
+    namn: 'Nattugglan', bpm: 80, tid: 'natt',
+    takter: [...intro, ...A, ...A2, ...B, ...A, ...slut],
+    trummor: { k: 'k . . . . . . .', s: '. . . . . . . .', h: '. . . . h . . .' },
+    ljud: { lead: { form: .5, vol: .068 }, arp: { form: .125, vol: .028, oktav: 5, takt: 2 }, bas: { vol: .16 }, eko: .3 },
+  };
+})();
 GLIMMERDAL.tid = 'dag'; STJARNNATT.tid = 'natt';
-const SONGS = [GLIMMERDAL, STJARNNATT, ANGSDANS, MANSKEN];
+const SONGS = [GLIMMERDAL, STJARNNATT, ANGSDANS, MANSKEN, MORGONDAGG, NATTUGGLAN];
 
 // ---------- the instruments
 const waves = new WeakMap();
@@ -216,6 +250,13 @@ function natt(v) {
   if (old) { const t = P.ctx.currentTime; old.gain.setValueAtTime(old.gain.value, t); old.gain.linearRampToValueAtTime(0, t + .8); setTimeout(() => old.disconnect(), 1000); }
   tick();
 }
+// Skip to the next song of the day or the night (a debug button): the song fades out and the next one starts
+function nasta() {
+  if (!P.ctx || !P.on) return;
+  const old = P.bus; P.bus = null; P.end = 0;
+  if (old) { const t = P.ctx.currentTime; old.gain.setValueAtTime(old.gain.value, t); old.gain.linearRampToValueAtTime(0, t + .4); setTimeout(() => old.disconnect(), 600); }
+  tick();
+}
 function paus(hidden) { if (!P.ctx || !P.on) return; if (hidden) P.ctx.suspend(); else P.ctx.resume(); }
 
 // ---------- the flute: a few short tunes, a soft sine tone with a little vibrato. It plays even when the music is off, and the
@@ -249,5 +290,5 @@ function flojt(index) {
   return dur;
 }
 
-root.Musik = { flojt, antalFlojt: FLOJT.length, start, stop, paus, spela, natt, get spelar() { return P.on; }, get lat() { return P.lat || ''; }, lattar: SONGS.map(s => s.namn) };
+root.Musik = { flojt, nasta, antalFlojt: FLOJT.length, start, stop, paus, spela, natt, get spelar() { return P.on; }, get lat() { return P.lat || ''; }, lattar: SONGS.map(s => s.namn) };
 })(typeof window !== 'undefined' ? window : globalThis);
