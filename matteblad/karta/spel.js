@@ -1370,10 +1370,19 @@ function hearRumor(key){
   if (!rumorText(key) || S.rykten.includes(key)) return;
   S.rykten.push(key); saveSoon(); toast(`Nytt rykte: ${rumorText(key)}`); renderRumors();
 }
+// A rumour can be ticked off like a checklist: tap it and it is struck through and green (S.ryktenKlara), tap again to undo
 function renderRumors(){
-  const list = S.rykten.map(rumorText).filter(Boolean).reverse();
-  $('#rykten').innerHTML = list.length ? list.map(t => `<li><span>${esc(t)}</span></li>`).join('') : `<li><span>${esc(berattelse.dialog.rykten.tom)}</span></li>`;
+  const keys = S.rykten.filter(rumorText).reverse(), done = S.ryktenKlara || [];
+  $('#rykten').innerHTML = keys.length ? keys.map(k => `<li class="readable rumor${done.includes(k) ? ' klar' : ''}" data-rykte="${esc(k)}" role="button" tabindex="0" aria-pressed="${done.includes(k)}" title="${done.includes(k) ? 'Markera som inte klar' : 'Markera som klar'}"><span>${esc(rumorText(k))}</span>${done.includes(k) ? '<span class="st">klar</span>' : ''}</li>`).join('') : `<li><span>${esc(berattelse.dialog.rykten.tom)}</span></li>`;
 }
+function toggleRumor(li){
+  if (!li) return;
+  const k = li.dataset.rykte; S.ryktenKlara = S.ryktenKlara || [];
+  S.ryktenKlara = S.ryktenKlara.includes(k) ? S.ryktenKlara.filter(x => x !== k) : [...S.ryktenKlara, k];
+  renderRumors(); saveSoon();
+}
+$('#rykten').addEventListener('click', ev => toggleRumor(ev.target.closest('li[data-rykte]')));
+$('#rykten').addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key === ' '){ const li = ev.target.closest('li[data-rykte]'); if (li){ ev.preventDefault(); toggleRumor(li); } } });
 function renderPack(){
   if (S.rykten) for (const id of S.saker) if (SAKER[id] && SAKER[id].rykte && !S.rykten.includes('sak:' + id)) hearRumor('sak:' + id);
   const own = S.saker.filter(id => SAKER[id] && SAKER[id].typ !== 'djur' && !S.agnAnvant.includes(id)) // used baits are gone
@@ -1437,7 +1446,7 @@ function applyReal(events){
 // encrypted in the page (#lasNyckel) and opens with the password, like the portraits. Without the key nothing is saved.
 // Stars and stardust are never saved: they are counted from the runes and scrolls. Only what he has spent is saved.
 const SAVE = { repo: '', file: '', key: '', sha: null, timer: 0, off: false, loaded: false };
-const SAVED_FIELDS = ['node', 'built', 'valda', 'saker', 'steg', 'handlat', 'djur', 'fram', 'stopp', 'hittat', 'spent', 'kistor', 'agnAnvant', 'fiskbok', 'namn', 'bytt', 'intro', 'natt', 'salt', 'lasta', 'pa', 'tant', 'brev2', 'rykten', 'brevFiske'];
+const SAVED_FIELDS = ['node', 'built', 'valda', 'saker', 'steg', 'handlat', 'djur', 'fram', 'stopp', 'hittat', 'spent', 'kistor', 'agnAnvant', 'fiskbok', 'namn', 'bytt', 'intro', 'natt', 'salt', 'lasta', 'pa', 'tant', 'brev2', 'rykten', 'brevFiske', 'ryktenKlara'];
 const b64 = text => { const bytes = new TextEncoder().encode(text); let s = ''; for (const b of bytes) s += String.fromCharCode(b); return btoa(s); };
 const unb64 = data => new TextDecoder().decode(Uint8Array.from(atob(data.replace(/\s/g, '')), c => c.charCodeAt(0)));
 function spend(n){ S.coins -= n; S.spent += n; }
