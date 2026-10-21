@@ -1550,10 +1550,9 @@ function eventSteps(e, last){
 }
 function showNews(){
   const list = newsQueue; newsQueue = [];
-  // marked as seen as soon as they are shown, so they never come back even if he closes the page halfway
-  markSeen(list.map(e => e.id));
+  // a rune or scroll stays new until he has read its story to the end (Peter 2026-10-21): closing the page halfway shows it again
   const steps = list.flatMap((e, i) => eventSteps(e, i === list.length - 1));
-  openModal(steps, () => { updateHud('stars'); renderTickets(); });
+  openModal(steps, () => { markSeen(list.map(e => e.id)); updateHud('stars'); renderTickets(); });
 }
 // A box over the map with a picture, a title, a text and one button, step by step
 // If the field is left empty the name stays as it was
