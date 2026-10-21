@@ -1812,6 +1812,12 @@ function showGive(){
   giveList();
 }
 panel.addEventListener('click', ev => { const b = ev.target.closest('button[data-ge]'); if (!b) return; debugGive(b.dataset.ge); renderPack(); renderBook(); toast(`${SAKER[b.dataset.ge].namn} lades till.`); giveList(); });
+$('#btnGeRykten').addEventListener('click', () => {
+  const keys = [...Object.keys(SAKER).filter(id => SAKER[id].rykte).map(id => 'sak:' + id),
+    ...Object.entries(berattelse.platser).flatMap(([id, p]) => [p.rykte && `plats:${id}:dag`, p.rykteNatt && `plats:${id}:natt`].filter(Boolean))];
+  for (const k of keys) if (!S.rykten.includes(k)) S.rykten.push(k);
+  renderRumors(); toast('Alla rykten lades i listan.');
+});
 $('#btnGeFisk').addEventListener('click', () => { for (const id in FISKE.fiskar) S.fiskbok[id] = (S.fiskbok[id] || 0) + 1; renderFishBook(); toast('En av varje fisk lades i fiskboken.'); });
 $('#btnGe').addEventListener('click', showGive);
 $('#btnGeAlla').addEventListener('click', () => { for (const id in SAKER) if (SAKER[id].typ !== 'djur') debugGive(id); renderPack(); toast('Alla saker lades i väskan.'); });
