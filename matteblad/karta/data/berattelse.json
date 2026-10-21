@@ -46,8 +46,8 @@
     },
     "angen": {
       "namn": "Ängen",
-      "text": "En äng där gräset når till midjan och blommorna står täta.",
-      "natt": "En äng där gräset når till midjan. Över stråna dansar små ljus.",
+      "text": "En äng där gräset når till midjan och blommorna står täta. I gräset ligger en liten damm.",
+      "natt": "En äng där gräset når till midjan. Över stråna och dammen dansar små ljus.",
       "rykteNatt": "Över Ängen dansar ljus om nätterna, och ett av dem är större än de andra."
     },
     "barsnaret": {
@@ -97,6 +97,12 @@
       "text": "Ett tält av ljus duk bakom lägerelden. Någon bor här, men på dagen är duken knuten.",
       "natt": "Ett tält av ljus duk bakom lägerelden. Det lyser inifrån.",
       "rykteNatt": "Nattfiskaren har sett en grå skugga gå över bron mot Höstskogen."
+    },
+    "udden": {
+      "namn": "Udden",
+      "text": "En smal udde av gräs sticker ut i sjön. Någon har lagt en platt sten vid vattnet att sitta på.",
+      "natt": "Månen speglar sig i sjön. Bakom dig lyser tältet mellan träden.",
+      "rykteNatt": "Nattfiskaren säger att laken och gösen bara nappar vid Udden när det är mörkt."
     }
   },
   "portar": {
@@ -2106,7 +2112,9 @@
         "fiskar": [
           "groda",
           "groda",
-          "gadda"
+          "gadda",
+          "sutare",
+          "sutare"
         ],
         "vanta": [
           3500,
@@ -2120,11 +2128,58 @@
       },
       "stenblocket": {
         "fiskar": [
-          "krafta"
+          "krafta",
+          "krafta",
+          "simpa"
         ],
         "vanta": [
           3000,
           6000
+        ]
+      },
+      "angen": {
+        "fiskar": [
+          "ruda",
+          "ruda",
+          "ruda",
+          "ruda",
+          "ruda"
+        ],
+        "fiskarNatt": [
+          "stjarnruda"
+        ],
+        "vanta": [
+          2000,
+          5000
+        ]
+      },
+      "udden": {
+        "fiskar": [
+          "mort",
+          "mort",
+          "mort",
+          "abborre"
+        ],
+        "fiskarNatt": [
+          "lake",
+          "lake",
+          "gos"
+        ],
+        "vanta": [
+          2500,
+          6000
+        ]
+      },
+      "sjo": {
+        "fiskar": [
+          "braxen",
+          "braxen",
+          "sik",
+          "abborre"
+        ],
+        "vanta": [
+          3000,
+          6500
         ]
       }
     },
@@ -2182,39 +2237,161 @@
     "fiskar": {
       "abborre": {
         "namn": "Abborre",
-        "text": "Randig och kaxig. Biter på nästan vad som helst."
+        "text": "Randig och kaxig. Biter på nästan vad som helst.",
+        "vikt": [
+          0.1,
+          1.5
+        ],
+        "kamp": "ryck"
       },
       "gadda": {
         "namn": "Gädda",
-        "text": "Lång och snabb, med fler tänder än man vill räkna."
+        "text": "Lång och snabb, med fler tänder än man vill räkna.",
+        "vikt": [
+          0.8,
+          6
+        ],
+        "kamp": "ryck"
       },
       "krafta": {
         "namn": "Kräfta",
-        "text": "Går baklänges och nyper gärna."
+        "text": "Går baklänges och nyper gärna.",
+        "vikt": [
+          0.03,
+          0.15
+        ]
       },
       "oring": {
         "namn": "Öring",
-        "text": "Prickig och stark. Trivs där vattnet forsar."
+        "text": "Prickig och stark. Trivs där vattnet forsar.",
+        "vikt": [
+          0.3,
+          3
+        ],
+        "kamp": "hopp"
       },
       "harr": {
         "namn": "Harr",
-        "text": "Har en ryggfena som ett segel och glänser i lila."
+        "text": "Har en ryggfena som ett segel och glänser i lila.",
+        "vikt": [
+          0.2,
+          1.5
+        ],
+        "kamp": "hopp"
       },
       "regnbage": {
         "namn": "Regnbåge",
-        "text": "Skimrar i alla färger när solen träffar den."
+        "text": "Skimrar i alla färger när solen träffar den.",
+        "vikt": [
+          0.3,
+          2.5
+        ],
+        "kamp": "hopp"
       },
       "groda": {
         "namn": "Groda",
-        "text": "Ingen fisk, men den hoppade upp på kroken ändå."
+        "text": "Ingen fisk, men den hoppade upp på kroken ändå.",
+        "vikt": [
+          0.02,
+          0.1
+        ]
       },
       "mansik": {
         "namn": "Månsik",
-        "text": "Silvervit och blank som månen. Den simmar bara när det är mörkt."
+        "text": "Silvervit och blank som månen. Den simmar bara när det är mörkt.",
+        "vikt": [
+          0.2,
+          1.2
+        ],
+        "kamp": "lugn"
       },
       "lysal": {
         "namn": "Lysål",
-        "text": "En lång ål som glöder svagt grönt. Den kryper gärna in i burar om natten."
+        "text": "En lång ål som glöder svagt grönt. Den kryper gärna in i burar om natten.",
+        "vikt": [
+          0.3,
+          1.8
+        ]
+      },
+      "ruda": {
+        "namn": "Ruda",
+        "text": "Rund och guldbrun. Den klarar sig i minsta damm, till och med när dammen fryser till is.",
+        "vikt": [
+          0.1,
+          1
+        ],
+        "kamp": "lugn"
+      },
+      "stjarnruda": {
+        "namn": "Stjärnruda",
+        "text": "En ruda med en liten stjärna på sidan. Den har simmat i dammen sedan natten då stjärnorna föll.",
+        "vikt": [
+          0.2,
+          1.2
+        ],
+        "kamp": "lugn"
+      },
+      "sutare": {
+        "namn": "Sutare",
+        "text": "Grönguld och hal, med röda ögon. Den bökar i dyn mellan vasstråna.",
+        "vikt": [
+          0.3,
+          2.5
+        ],
+        "kamp": "tung"
+      },
+      "mort": {
+        "namn": "Mört",
+        "text": "Liten och silvrig, med röda ögon och röda fenor. Den finns i nästan varje sjö.",
+        "vikt": [
+          0.05,
+          0.5
+        ],
+        "kamp": "lugn"
+      },
+      "lake": {
+        "namn": "Lake",
+        "text": "Lång och spräcklig, med ett skägg under hakan. Den jagar bara när det är mörkt.",
+        "vikt": [
+          0.3,
+          2.5
+        ],
+        "kamp": "tung"
+      },
+      "gos": {
+        "namn": "Gös",
+        "text": "Har ögon som lyser i mörkret, så den ser bytet innan bytet ser den.",
+        "vikt": [
+          0.5,
+          4
+        ],
+        "kamp": "ryck"
+      },
+      "braxen": {
+        "namn": "Braxen",
+        "text": "Hög och platt som en tallrik, och väldigt slemmig. Den simmar i stora stim.",
+        "vikt": [
+          0.5,
+          3.5
+        ],
+        "kamp": "tung"
+      },
+      "sik": {
+        "namn": "Sik",
+        "text": "Silvrig och smal, med en liten mun. Den trivs i klart och kallt vatten.",
+        "vikt": [
+          0.3,
+          2
+        ],
+        "kamp": "lugn"
+      },
+      "simpa": {
+        "namn": "Simpa",
+        "text": "Ett stort huvud på en liten kropp. Den gömmer sig under stenarna i bäcken.",
+        "vikt": [
+          0.02,
+          0.08
+        ]
       }
     },
     "texter": {
@@ -2238,7 +2415,16 @@
       "ingetSpo": "Du har inget att fiska med. Någon i skogen sägs sälja spön, men bara på natten.",
       "ingetHar": "Det här redskapet fångar inget i det här vattnet.",
       "tillbaka3": "Du har redan tre sådana, så du släpper tillbaka den i vattnet.",
-      "slut": "Det är slut på fisk här för det här redskapet. Du har redan tre av varje sort som går att få."
+      "kamp": "Fisken sitter på kroken! Veva in den, men vänta när den drar.",
+      "vevaNu": "Veva!",
+      "drar": "Den drar! Vänta.",
+      "hoppar": "Den hoppar! Vänta.",
+      "forFort": "Lugnt, veva inte så fort!",
+      "veva": "Veva",
+      "linan": "Linan",
+      "brast": "Linan gick av, och fisken simmade iväg. Vänta när den drar, så håller linan.",
+      "loss": "Du vevade inte på en stund, och fisken slet sig loss.",
+      "tillbakaRekord": "Den är tyngre än alla du har fått förut! Du skriver in vikten i fiskboken och släpper tillbaka den, du har ju redan tre."
     },
     "fynd": [
       "stovel",
@@ -2254,7 +2440,15 @@
         "oring",
         "harr",
         "regnbage",
-        "mansik"
+        "mansik",
+        "ruda",
+        "stjarnruda",
+        "sutare",
+        "mort",
+        "lake",
+        "gos",
+        "braxen",
+        "sik"
       ],
       "flugspo": [
         "oring",
@@ -2266,12 +2460,52 @@
       ],
       "kraftbur": [
         "krafta",
-        "lysal"
+        "lysal",
+        "simpa"
       ],
       "flotte": [],
       "snorkel": []
     },
-    "max": 3
+    "max": 3,
+    "kamp": {
+      "lugn": {
+        "tryck": [
+          3,
+          5
+        ],
+        "drar": 0.25,
+        "kraft": 0.35
+      },
+      "ryck": {
+        "tryck": [
+          6,
+          10
+        ],
+        "drar": 0.8,
+        "kraft": 0.55
+      },
+      "hopp": {
+        "tryck": [
+          5,
+          8
+        ],
+        "drar": 0.7,
+        "kraft": 0.3,
+        "hopp": true
+      },
+      "tung": {
+        "tryck": [
+          7,
+          11
+        ],
+        "drar": 0.6,
+        "kraft": 0.4
+      }
+    },
+    "spon": [
+      "metspo",
+      "flugspo"
+    ]
   },
   "locka": [
     {

@@ -29,8 +29,8 @@
       else throw new Error("Okänd form i karta.json mark");
     }
 
-    // Water: a lake, a river along x and a channel along y
-    const { sjo, alv, kanal } = karta.vatten;
+    // Water: a lake, a river along x, a channel along y and small ponds (dammar, the one on Ängen 2026-10-21)
+    const { sjo, alv, kanal, dammar = [] } = karta.vatten;
     const LAKE = { cx: sjo.cx * TS, cy: sjo.cy * TS, rx: sjo.rx * TS, ry: sjo.ry * TS };
     function waterD(X, Y) {
       const ex = (X - LAKE.cx) / LAKE.rx, ey = (Y - LAKE.cy) / LAKE.ry;
@@ -42,6 +42,7 @@
         const sc = kanal.y * TS + Math.sin(X / 11) * 1.5;
         d = Math.max(d, kanal.bredd - Math.abs(Y - sc));
       }
+      for (const p of dammar) d = Math.max(d, (1 - Math.hypot((X - p.cx * TS) / (p.rx * TS), (Y - p.cy * TS) / (p.ry * TS))) * p.ry * TS);
       return d;
     }
     for (let y = 0; y < MH; y++) for (let x = 0; x < MW; x++) if (waterD(x * TS + 8, y * TS + 8) > 0) M[y][x] = "w";

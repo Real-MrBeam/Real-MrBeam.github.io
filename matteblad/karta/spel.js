@@ -137,6 +137,16 @@ const CATCH = {
   mansik: markFish({ b:'#e6ecf5', B:'#9fb0c8', m:'#ffffff' }, (x, y) => y === 3 && x > 2 && x < 8 ? 'm' : ''),
   lysal: sprite(["................", ".ooooooooooo..o.", "owkgggGggggGooGo", "oggggggggggggggo", ".oooooooooooooo."], { o:'#3f2631', w:'#ffffff', k:'#262b44', g:'#7ad97a', G:'#c6f0a0' }),
   groda: sprite(["..oo....oo..", ".owko..owko.", ".oggooooggo.", "oggggggggggo", "oggllllllggo", "oggllllllggo", ".oggggggggo.", "ogo.oggo.ogo", "oo..oooo..oo"], { o:'#3f2631', w:'#ffffff', k:'#262b44', g:'#63c74d', l:'#c6e07a' }),
+  // the nine new kinds (2026-10-21)
+  ruda: markFish({ b:'#d9a441', B:'#a0702c', s:'#b8862f' }, (x, y) => (x + y) % 3 === 0 && y > 2 && y < 7 ? 's' : ''),
+  stjarnruda: markFish({ b:'#f0d878', B:'#c09a40', y:'#ffffff' }, (x, y) => ({ '5,3': 'y', '4,4': 'y', '5,4': 'y', '6,4': 'y', '5,5': 'y' })[x + ',' + y] || ''),
+  sutare: markFish({ b:'#5d7a32', B:'#3e5222', k:'#e43b44', g:'#c9b27d' }, (x, y) => y === 6 && x > 1 && x < 7 ? 'g' : ''),
+  mort: markFish({ b:'#c0cbdc', B:'#d04848', k:'#e43b44', s:'#8b9bb4' }, (x, y) => y === 2 ? 's' : ''),
+  sik: markFish({ b:'#dfe6ef', B:'#7f93ad', s:'#9fb4cc' }, (x, y) => y <= 3 ? 's' : ''),
+  braxen: sprite(["....ooo.....", "...obbbo....", "..obbbbboo.o", ".owbbbbbbobo", "obkbbbbbbBo.", "obbbbbbbbBo.", "obbbbbbbbobo", ".oBBBBBBo.Bo", "..oBBBBo...o", "...oooo....."], { o:'#3f2631', w:'#ffffff', k:'#262b44', b:'#a89a6a', B:'#6a6040' }),
+  lake: sprite(["................", ".ooooooooooo..o.", "owkbbBbbbBbbooBo", "obbbbbbBbbbBbbbo", ".ooooooooooooooo", "..oo............"], { o:'#3f2631', w:'#ffffff', k:'#262b44', b:'#8a7a4a', B:'#5a4a2a' }),
+  gos: sprite(["....o.o.o.......", "..oooooooooo..o.", ".owkgsggsggsgoBo", "ooggggggggggggBo", ".oGGGGGGGGGGGoBo", "..oooooooooo..o."], { o:'#3f2631', w:'#fee761', k:'#262b44', g:'#9aa58a', s:'#4a5a3a', G:'#6a755a', B:'#4a5a3a' }),
+  simpa: sprite(["..ooo.......", ".obbbooo.o..", "owkbbsbbooBo", "obbbbbbbbbBo", "obsbbbsbooBo", ".oFFoooo..o.", "..oo........"], { o:'#3f2631', w:'#ffffff', k:'#262b44', b:'#8b7a5a', s:'#4a3a2a', B:'#5a4a3a', F:'#a08a5a' }),
   krafta: sprite([".oo......oo.", "orro....orro", "orrro..orrro", ".oorroorroo.", "..orkrrkro..", "..oRrrrrRo..", ".ooRrrrrRoo.", "..oRrrrrRo..", ".ooRrrrrRoo.", "...oRrrRo...", "..oRRRRRRo..", "..oooooooo.."], { o:'#3f2631', k:'#262b44', r:'#e43b44', R:'#a22633' }),
 };
 const catchIcon = id => iconURL(CATCH[id] || FISH, 8);
@@ -331,7 +341,7 @@ let REAL = null; // { stars, stoft, handelser } once the locked events have been
 const START = () => ({
   stars: REAL ? REAL.stars : startData.stjarnor, coins: REAL ? REAL.stoft : startData.stjarnstoft, node: startData.plats,
   built: Object.fromEntries(startData.byggt.map(id => [id, true])),
-  valda: {}, saker: [], steg: {}, handlat: {}, djur: [], fram: [], stopp: {}, hittat: [], spent: 0, kistor: [], agnAnvant: [], fiskbok: {}, namn: {}, bytt: {}, salt: {}, pa: {}, rykten: [],
+  valda: {}, saker: [], steg: {}, handlat: {}, djur: [], fram: [], stopp: {}, hittat: [], spent: 0, kistor: [], agnAnvant: [], fiskbok: {}, rekord: {}, namn: {}, bytt: {}, salt: {}, pa: {}, rykten: [],
   sett: new Uint8Array(MW*MH),
   log: REAL ? REAL.handelser.slice() : startData.logg.map(r => ({ typ: 'runa', amne: r.amne, procent: Math.round(r.poang / r.max * 100), stjarnor: r.stjarnor, bonus: r.bonus })),
   testIdx: 0,
@@ -874,6 +884,7 @@ function nodeActive(id){
   const fp = FISKE.platser[id];
   if (fp && FISKE.djur.some(r => r.plats === id && !S.djur.includes(r.djur))) return true;
   if (fp && fp.lan && !S.saker.includes(fp.lan.ger)) return true;
+  if (fp && myTools().some(t => (FISKE.fangar[t] || []).some(f => fp.fiskar.includes(f) && S.fiskbok[f] === undefined))) return true;
   if (LOCKA.some(r => r.plats === id && !S.djur.includes(r.djur))) return true;
   if (berattelse.handel && id === berattelse.handel.plats && S.natt && (Object.keys(berattelse.handel.saljer || {}).some(x => !S.saker.includes(x)) || tradeOffers().length)) return true;
   if (id === 'hem' && letterWaiting()) return true;
@@ -1076,6 +1087,7 @@ panel.addEventListener('click', ev => {
   else if (b.dataset.agn !== undefined){ fishing.agn = b.dataset.agn; renderFishing(); }
   else if (b.dataset.kasta) cast();
   else if (b.dataset.dra) pull();
+  else if (b.dataset.veva) veva();
   else if (b.dataset.igen){ fishing.phase = 'val'; renderFishing(); }
   else if (b.dataset.stopp) startStop(b.dataset.stopp);
   else if (b.dataset.dlgnext !== undefined){ dlg.i++; renderPanel({ type: 'dialog' }); }
@@ -1475,7 +1487,7 @@ function applyReal(events){
 // encrypted in the page (#lasNyckel) and opens with the password, like the portraits. Without the key nothing is saved.
 // Stars and stardust are never saved: they are counted from the runes and scrolls. Only what he has spent is saved.
 const SAVE = { repo: '', file: '', key: '', sha: null, timer: 0, off: false, loaded: false };
-const SAVED_FIELDS = ['node', 'built', 'valda', 'saker', 'steg', 'handlat', 'djur', 'fram', 'stopp', 'hittat', 'spent', 'kistor', 'agnAnvant', 'fiskbok', 'namn', 'bytt', 'intro', 'natt', 'salt', 'lasta', 'pa', 'tant', 'brev2', 'rykten', 'brevFiske', 'ryktenKlara'];
+const SAVED_FIELDS = ['node', 'built', 'valda', 'saker', 'steg', 'handlat', 'djur', 'fram', 'stopp', 'hittat', 'spent', 'kistor', 'agnAnvant', 'fiskbok', 'namn', 'bytt', 'intro', 'natt', 'salt', 'lasta', 'pa', 'tant', 'brev2', 'rykten', 'brevFiske', 'ryktenKlara', 'rekord'];
 const b64 = text => { const bytes = new TextEncoder().encode(text); let s = ''; for (const b of bytes) s += String.fromCharCode(b); return btoa(s); };
 const unb64 = data => new TextDecoder().decode(Uint8Array.from(atob(data.replace(/\s/g, '')), c => c.charCodeAt(0)));
 function spend(n){ S.coins -= n; S.spent += n; }
@@ -1607,7 +1619,7 @@ function openModal(steps, done){
 // bait (each kind of bait only once). A water animal bites at its own place with one of its tools and one of its baits,
 // otherwise it is an ordinary fish for the fish book.
 const FISKE = berattelse.fiske;
-let fishing = null; // { plats, redskap, agn, phase: 'val' | 'vanta' | 'nu', timers }
+let fishing = null; // { plats, redskap, agn, phase: 'val' | 'vanta' | 'nu' | 'kamp' | 'miss', timers, loop, kamp }
 const myTools = () => ['metspo', ...FISKE.redskap].filter(id => S.saker.includes(id));
 const myBaits = () => S.saker.filter(id => SAKER[id] && SAKER[id].typ === 'agn' && !S.agnAnvant.includes(id));
 function fishBlock(id){
@@ -1646,7 +1658,7 @@ function startFishing(id){
   fishing = { plats: id, redskap: myTools()[0], agn: '', phase: 'val', timers: [] };
   renderFishing();
 }
-function stopFishing(){ if (fishing) fishing.timers.forEach(clearTimeout); fishing = null; }
+function stopFishing(){ if (fishing){ fishing.timers.forEach(clearTimeout); clearInterval(fishing.loop); } fishing = null; }
 function renderFishing(){
   const T = FISKE.texter, fz = fishing, n = NODES[fz.plats];
   current = { type: 'fish' };
@@ -1663,10 +1675,17 @@ function renderFishing(){
     h += `<p aria-live="polite">${esc(fz.phase === 'nu' ? T.nu : T.vanta)}</p><div class="panel-body">
       <div class="pond${fz.phase === 'nu' ? ' dip' : ''}">${fz.phase === 'nu' ? `<img class="splash pix" src="${iconURL(SPLASH, 3)}" alt="">` : `<img class="float pix" src="${iconURL(FLOAT, 3)}" alt="">`}</div>
       <div class="roads"><button class="btn" type="button" data-dra="1">${esc(T.dra)}</button></div></div>`;
+  } else if (fz.phase === 'kamp'){
+    // the fish is a shadow under the water until it is landed; the line runs from the shore (left) to its mouth
+    h += `<p aria-live="polite" class="kamp-text">${esc(T.kamp)}</p><div class="panel-body">
+      <div class="pond kamp"><span class="lina"></span><img class="fisk pix" src="${fishIcon(fz.kamp.id)}" alt=""></div>
+      <div class="meter kamp-mat"><div class="bar"><i></i></div><span>${esc(T.linan)}</span></div>
+      <div class="roads"><button class="btn veva" type="button" data-veva="1">${esc(T.veva)}</button></div></div>`;
   } else {
     h += `<p>${esc(fz.miss)}</p><div class="panel-body"><div class="roads"><button class="btn" type="button" data-igen="1">${esc(T.igen)}</button><button class="btn alt" type="button" data-back="1">${esc(T.tillbaka)}</button></div></div>`;
   }
   panel.innerHTML = h;
+  if (fz.phase === 'kamp') drawFight();
 }
 // The ordinary fish this tool can take at this place (fiske.fangar), and whether all of them are already full (fiske.max of each)
 const MAXFISK = FISKE.max || 99;
@@ -1676,8 +1695,7 @@ const catchable = fz => { const can = FISKE.fangar && FISKE.fangar[fz.redskap]; 
 const fishedOut = fz => { const l = catchable(fz); return l.length > 0 && l.every(id => (S.fiskbok[id] || 0) >= MAXFISK); };
 function cast(){
   const fz = fishing;
-  // without bait for an animal, a place where he already has three of every kind is fished out
-  if (!fz.agn && fishedOut(fz)) return miss(FISKE.texter.slut);
+  // a place is never fished out: with three of a kind there is still a heavier one to catch (rekord)
   fz.phase = 'vanta'; renderFishing();
   // each place has its own wait (fiske.platser vanta: shortest and longest, ms): quick in the rapids, slow in the reeds
   const [lo, hi] = FISKE.platser[fz.plats].vanta || [1500, 4000];
@@ -1685,7 +1703,7 @@ function cast(){
   fz.timers.push(setTimeout(() => { fz.phase = 'nu'; renderFishing(); }, wait));
   fz.timers.push(setTimeout(() => { if (fz.phase === 'nu') miss(FISKE.texter.sent); }, wait + 1100));
 }
-function miss(text){ const fz = fishing; fz.timers.forEach(clearTimeout); fz.timers = []; fz.phase = 'miss'; fz.miss = text; renderFishing(); }
+function miss(text){ const fz = fishing; fz.timers.forEach(clearTimeout); fz.timers = []; clearInterval(fz.loop); fz.loop = 0; fz.kamp = null; fz.phase = 'miss'; fz.miss = text; renderFishing(); }
 // What the water says when a bait is offered at a wrong place or with a wrong tool (only for animals he has not found yet)
 function missText(fz){
   const T = FISKE.texter, open = FISKE.djur.filter(r => !S.djur.includes(r.djur));
@@ -1708,31 +1726,97 @@ function pull(){
   const can = FISKE.fangar && FISKE.fangar[fz.redskap];
   const list = placeFish(fz.plats).filter(id => !can || can.includes(id));
   if (!rule && !list.length) return miss(FISKE.texter.ingetHar);
-  if (fz.agn && (rule || effekt === 'ny')){ S.agnAnvant.push(fz.agn); renderPack(); }
-  sparkle(boy.x + 8, boy.y + 2, 20, '#2ce8f5');
-  let step;
   if (rule){
+    S.agnAnvant.push(fz.agn); renderPack();
+    sparkle(boy.x + 8, boy.y + 2, 20, '#2ce8f5');
     stopFishing(); giveAnimal(rule.djur, rule.text, () => showNode());
     return saveSoon();
-  } else {
-    const finds = fishedOut(fz) ? [] : (FISKE.fynd || []).filter(id => !S.saker.includes(id) && !S.salt['fynd:' + id]);
-    if (effekt !== 'ny' && finds.length && Math.random() < .2){
-      const id = finds[Math.floor(Math.random() * finds.length)]; S.saker.push(id); renderPack(); saveSoon(); stopFishing();
-      // the picture of what it is: the find gem, or the hat for clothes
-      return openModal([{ icon: iconURL(KAT[katOf(id)].ico, 8), title: SAKER[id].namn, text: `${FISKE.texter.fynd} ${SAKER[id].text}`, reward: SAKER[id].typ === 'klader' ? 'Lades i väskan. Du kan ta på den där.' : 'Lades i väskan.', button: 'Till kartan' }], () => showNode());
-    }
-    // the list of a place repeats a fish as many times as it is common there; a kind he has not caught is a little more likely
-    const fresh = list.filter(id => S.fiskbok[id] === undefined);
-    const pool = fresh.length && (effekt === 'ny' || Math.random() < .35) ? fresh : list, id = pool[Math.floor(Math.random() * pool.length)];
-    const fish = FISKE.fiskar[id];
-    // three of a kind is enough: a fourth goes back into the water
-    if ((S.fiskbok[id] || 0) >= MAXFISK){ stopFishing(); return openModal([{ icon: catchIcon(id), title: fish.namn, text: FISKE.texter.tillbaka3, button: 'Till kartan' }], () => showNode()); }
-    const isNew = S.fiskbok[id] === undefined; S.fiskbok[id] = (S.fiskbok[id] || 0) + 1; renderFishBook();
-    step = { icon: catchIcon(id), title: fish.namn, text: fish.text, reward: isNew ? 'Ny i fiskboken.' : `Du har fått ${S.fiskbok[id]} sådana nu.`, button: 'Till kartan' };
   }
-  saveSoon();
-  stopFishing();
+  const finds = fishedOut(fz) ? [] : (FISKE.fynd || []).filter(id => !S.saker.includes(id) && !S.salt['fynd:' + id]);
+  if (effekt !== 'ny' && finds.length && Math.random() < .2){
+    const id = finds[Math.floor(Math.random() * finds.length)]; S.saker.push(id); renderPack(); saveSoon(); stopFishing();
+    sparkle(boy.x + 8, boy.y + 2, 20, '#2ce8f5');
+    // the picture of what it is: the find gem, or the hat for clothes
+    return openModal([{ icon: iconURL(KAT[katOf(id)].ico, 8), title: SAKER[id].namn, text: `${FISKE.texter.fynd} ${SAKER[id].text}`, reward: SAKER[id].typ === 'klader' ? 'Lades i väskan. Du kan ta på den där.' : 'Lades i väskan.', button: 'Till kartan' }], () => showNode());
+  }
+  // the list of a place repeats a fish as many times as it is common there; a kind he has not caught is a little more likely
+  const fresh = list.filter(id => S.fiskbok[id] === undefined);
+  const pool = fresh.length && (effekt === 'ny' || Math.random() < .35) ? fresh : list, id = pool[Math.floor(Math.random() * pool.length)];
+  const kg = weigh(id);
+  if (FISKE.spon.includes(fz.redskap) && FISKE.fiskar[id].kamp) return startFight(id, kg);
+  land(id, kg);
+}
+// Every fish gets a weight within its kind (fiske.fiskar vikt, kg). Most are small, a big one is rare.
+const weigh = id => { const [lo, hi] = FISKE.fiskar[id].vikt; return Math.round((lo + (hi - lo) * Math.random() ** 2) * 100) / 100; };
+const kgText = kg => kg.toFixed(2).replace('.', ',');
+// The fish is up: into the fish book (three of a kind), and the heaviest of each kind is his record (S.rekord). A fourth
+// of a kind goes back into the water, but if it is heavier its weight is still written in.
+function land(id, kg){
+  const fz = fishing, fish = FISKE.fiskar[id], T = FISKE.texter;
+  if (fz.agn && SAKER[fz.agn].effekt === 'ny'){ S.agnAnvant.push(fz.agn); renderPack(); }
+  sparkle(boy.x + 8, boy.y + 2, 20, '#2ce8f5');
+  const rec = S.rekord[id], best = rec === undefined || kg > rec;
+  if (best) S.rekord[id] = kg;
+  let step;
+  if ((S.fiskbok[id] || 0) >= MAXFISK){
+    step = { icon: catchIcon(id), title: fish.namn, text: best ? T.tillbakaRekord : T.tillbaka3, reward: best ? `${kgText(kg)} kg. Nytt rekord!` : `${kgText(kg)} kg. Ditt rekord är ${kgText(rec)} kg.`, button: 'Till kartan' };
+  } else {
+    const isNew = S.fiskbok[id] === undefined; S.fiskbok[id] = (S.fiskbok[id] || 0) + 1;
+    step = { icon: catchIcon(id), title: fish.namn, text: fish.text, reward: `${kgText(kg)} kg. ${isNew ? 'Ny i fiskboken.' : `${best ? 'Nytt rekord! ' : ''}Du har fått ${S.fiskbok[id]} sådana nu.`}`, button: 'Till kartan' };
+  }
+  renderFishBook(); saveSoon(); stopFishing();
   openModal([step], () => showNode());
+}
+
+/* ---------- kampen ---------- */
+// A fish on a rod fights (fiske.kamp). Each turn of the reel (Veva) brings it a bit closer and tightens the line, and the line
+// slackens by itself. After a rest the fish may pull (or jump, for the trout): then the line tightens by itself and a turn
+// tightens it much more, so he has to wait. Turning faster than five times a second jerks the line too (and says so). A full
+// line snaps. A fish he stops reeling for a long while slips off the hook. A heavier fish of its kind needs more turns.
+// The numbers were tried out in a simulation: waiting when it pulls lands nearly every fish, wild tapping only the calm ones.
+const LINA = { tryck: .16, slapp: .45, drar: .2, hopp: .4, fort: 200, ryck: .1 };
+function startFight(id, kg){
+  const fz = fishing, f = FISKE.fiskar[id], K = FISKE.kamp[f.kamp], [lo, hi] = f.vikt, q = (kg - lo) / (hi - lo);
+  const t = performance.now();
+  fz.kamp = { id, kg, K, need: Math.round(K.tryck[0] + q * (K.tryck[1] - K.tryck[0])), dist: 1, line: .15, state: 'vilar', until: t + 700 + Math.random() * 600, last: t, tapped: t, prev: 0, fast: 0 };
+  fz.phase = 'kamp'; renderFishing();
+  fz.loop = setInterval(fightTick, 50);
+}
+function fightTick(){
+  const fz = fishing, k = fz && fz.kamp; if (!k) return;
+  const t = performance.now(), dt = Math.min(.1, (t - k.last) / 1000); k.last = t;
+  if (t > k.until){
+    if (k.state === 'vilar' && Math.random() < k.K.drar){ k.state = k.K.hopp ? 'hoppar' : 'drar'; k.until = t + (k.K.hopp ? 500 + Math.random() * 300 : 700 + Math.random() * 600); }
+    else { k.state = 'vilar'; k.until = t + 900 + Math.random() * 900; }
+  }
+  if (k.state === 'drar'){ k.line += k.K.kraft * dt; k.dist = Math.min(1.3, k.dist + .05 * dt); }
+  k.line = Math.max(0, k.line - LINA.slapp * dt);
+  if (k.line >= 1) return miss(FISKE.texter.brast);
+  if (t - k.tapped > 6000) return miss(FISKE.texter.loss);
+  drawFight();
+}
+function veva(){
+  const fz = fishing, k = fz && fz.kamp; if (!k) return;
+  const t = performance.now(), fast = t - k.prev < LINA.fort;
+  k.tapped = k.prev = t; if (fast) k.fast = t;
+  k.line += LINA.tryck + (k.state === 'drar' ? LINA.drar : k.state === 'hoppar' ? LINA.hopp : 0) + (fast ? LINA.ryck : 0);
+  k.dist -= (k.state === 'vilar' ? 1 : .5) / k.need;
+  if (k.line >= 1) return miss(FISKE.texter.brast);
+  if (k.dist <= 0){ clearInterval(fz.loop); fz.loop = 0; fz.kamp = null; return land(k.id, k.kg); }
+  drawFight();
+}
+function drawFight(){
+  const k = fishing && fishing.kamp, pond = panel.querySelector('.pond.kamp'); if (!k || !pond) return;
+  const T = FISKE.texter, fish = pond.querySelector('.fisk'), x = 6 + Math.min(1.3, k.dist) / 1.3 * (pond.clientWidth - fish.offsetWidth - 12);
+  const y = (pond.clientHeight - fish.offsetHeight) / 2;
+  fish.style.left = x + 'px'; fish.style.top = y + 'px';
+  Object.assign(pond.querySelector('.lina').style, { width: x + 'px', top: Math.round(y + fish.offsetHeight * .45) + 'px' });
+  pond.className = 'pond kamp ' + k.state;
+  const bar = panel.querySelector('.kamp-mat .bar');
+  bar.querySelector('i').style.width = `calc(${Math.min(1, k.line) * 100}% - 4px)`;
+  bar.className = 'bar' + (k.line > .8 ? ' rod' : k.line > .55 ? ' gul' : ' gron');
+  const text = k.state === 'drar' ? T.drar : k.state === 'hoppar' ? T.hoppar : performance.now() - k.fast < 900 ? T.forFort : T.vevaNu, p = panel.querySelector('.kamp-text');
+  if (p.textContent !== text) p.textContent = text;
 }
 // Each fish in the book has its own picture (CATCH), at its own size so the long pike is not squeezed
 const FISH_ICON = {};
@@ -1742,7 +1826,7 @@ function renderFishBook(){
   const all = Object.keys(FISKE.fiskar), done = all.filter(id => (S.fiskbok[id] || 0) >= MAXFISK).length;
   const head = S.brevFiske ? `<li><span><b>Fiskesällskapet</b> vill ha tre av varje sort.</span><span class="st">${done} av ${all.length} sorter</span></li>` : '';
   $('#fishbook').innerHTML = head + (ids.length
-    ? ids.map(id => `<li><span class="fishico"><img class="pix" src="${fishIcon(id)}" alt=""></span><span><b>${esc(FISKE.fiskar[id].namn)}</b> ${esc(FISKE.fiskar[id].text)}</span><span class="st">${S.fiskbok[id] || 0} / ${MAXFISK}</span></li>`).join('')
+    ? ids.map(id => `<li><span class="fishico"><img class="pix" src="${fishIcon(id)}" alt=""></span><span><b>${esc(FISKE.fiskar[id].namn)}</b> ${esc(FISKE.fiskar[id].text)}${S.rekord[id] !== undefined ? ` <span class="rek">Rekord ${kgText(S.rekord[id])} kg</span>` : ''}</span><span class="st">${S.fiskbok[id] || 0} / ${MAXFISK}</span></li>`).join('')
     : '<li><span>Inga fiskar ännu.</span></li>');
 }
 
@@ -1849,7 +1933,7 @@ $('#btnGeRykten').addEventListener('click', () => {
   for (const k of keys) if (!S.rykten.includes(k)) S.rykten.push(k);
   renderRumors(); toast('Alla rykten lades i listan.');
 });
-$('#btnGeFisk').addEventListener('click', () => { for (const id in FISKE.fiskar) S.fiskbok[id] = (S.fiskbok[id] || 0) + 1; renderFishBook(); toast('En av varje fisk lades i fiskboken.'); });
+$('#btnGeFisk').addEventListener('click', () => { for (const id in FISKE.fiskar){ S.fiskbok[id] = Math.min(MAXFISK, (S.fiskbok[id] || 0) + 1); S.rekord[id] = Math.max(S.rekord[id] || 0, weigh(id)); } renderFishBook(); toast('En av varje fisk lades i fiskboken.'); });
 $('#btnGe').addEventListener('click', showGive);
 $('#btnGeAlla').addEventListener('click', () => { for (const id in SAKER) if (SAKER[id].typ !== 'djur') debugGive(id); renderPack(); toast('Alla saker lades i väskan.'); });
 $('#btnGeDjur').addEventListener('click', () => { for (const id in SAKER) if (SAKER[id].typ === 'djur') debugGive(id); for (const id in berattelse.djur) if (!S.djur.includes(id)) S.djur.push(id); renderBook(); toast('Alla djur skrevs in i djurboken.'); });
