@@ -829,11 +829,12 @@ function musicButton(){
 }
 function musicSync(){ if (window.Musik) Musik.natt(!!S.natt); }
 function firstGesture(ev){
-  removeEventListener('pointerdown', firstGesture); removeEventListener('keydown', firstGesture);
+  for (const t of ['pointerdown', 'touchend', 'click', 'keydown']) removeEventListener(t, firstGesture);
   if ((ev.target.closest && ev.target.closest('#btnMusik')) || !window.Musik || !musicWanted()) return;
   musicSync(); Musik.start(); musicButton();
 }
-addEventListener('pointerdown', firstGesture); addEventListener('keydown', firstGesture);
+// on phones Safari only counts touchend and click as a tap that may start sound
+for (const t of ['touchend', 'click', 'keydown']) addEventListener(t, firstGesture);
 $('#btnMusik').addEventListener('click', () => {
   if (!window.Musik) return;
   if (Musik.spelar){ Musik.stop(); try { localStorage.setItem(MUSIC_KEY, 'av'); } catch (e) { /* only this time */ } }

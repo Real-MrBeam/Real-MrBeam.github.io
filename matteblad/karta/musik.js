@@ -211,7 +211,11 @@ const P = { ctx: null, master: null, bus: null, next: { dag: 0, natt: 0 }, end: 
 function start() {
   if (P.on) return;
   const AC = root.AudioContext || root.webkitAudioContext; if (!AC) return;
+  // Phones: play as media so the music is heard even with the ringer switched off (iPhone), and wake the sound at once
+  // inside the tap with a tiny silent buffer, which Safari needs before it lets an AudioContext make sound
+  try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) { /* older browsers */ }
   if (!P.ctx) { P.ctx = new AC(); P.master = P.ctx.createGain(); P.master.gain.value = 0; P.master.connect(P.ctx.destination); }
+  try { const s = P.ctx.createBufferSource(); s.buffer = P.ctx.createBuffer(1, 1, 22050); s.connect(P.ctx.destination); s.start(0); } catch (e) { /* not needed */ }
   P.on = true;
   P.ctx.resume().then(() => {
     const t = P.ctx.currentTime;
