@@ -1687,7 +1687,8 @@ function pull(){
     const finds = fishedOut(fz) ? [] : (FISKE.fynd || []).filter(id => !S.saker.includes(id) && !S.salt['fynd:' + id]);
     if (effekt !== 'ny' && finds.length && Math.random() < .2){
       const id = finds[Math.floor(Math.random() * finds.length)]; S.saker.push(id); renderPack(); saveSoon(); stopFishing();
-      return openModal([{ icon: FISH_BIG, title: SAKER[id].namn, text: `${FISKE.texter.fynd} ${SAKER[id].text}`, reward: SAKER[id].typ === 'klader' ? 'Lades i väskan. Du kan ta på den där.' : 'Lades i väskan.', button: 'Till kartan' }], () => showNode());
+      // the picture of what it is: the find gem, or the hat for clothes
+      return openModal([{ icon: iconURL(KAT[katOf(id)].ico, 8), title: SAKER[id].namn, text: `${FISKE.texter.fynd} ${SAKER[id].text}`, reward: SAKER[id].typ === 'klader' ? 'Lades i väskan. Du kan ta på den där.' : 'Lades i väskan.', button: 'Till kartan' }], () => showNode());
     }
     // the list of a place repeats a fish as many times as it is common there; a kind he has not caught is a little more likely
     const fresh = list.filter(id => S.fiskbok[id] === undefined);
