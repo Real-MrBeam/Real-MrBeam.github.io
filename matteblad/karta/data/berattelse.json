@@ -23,7 +23,9 @@
     },
     "host": {
       "namn": "Höstskogen",
-      "text": "Löven är orange här året runt. Ingen vet varför, och träden tänker inte berätta."
+      "text": "Löven är orange här året runt. Ingen vet varför, och träden tänker inte berätta.",
+      "natt": "Löven är orange även i mörkret. Mellan träden lyser ett litet ljus.",
+      "rykteNatt": "Vira säger att Gråskuggan går mot Norra bron när månen är full."
     },
     "sjo": {
       "namn": "Sjöviken",
@@ -326,6 +328,10 @@
     "nattfiskaren": {
       "namn": "Nattfiskaren",
       "yrke": "Fiskare"
+    },
+    "vira": {
+      "namn": "Vira",
+      "yrke": "Örtkvinna"
     }
   },
   "saker": {
@@ -646,6 +652,12 @@
       "text": "En droppe dagg som har stelnat till en liten pärla i månljuset.",
       "typ": "fynd",
       "varde": 2
+    },
+    "manort": {
+      "namn": "Torkad månört",
+      "text": "En knippa grå örter som Vira har torkat i månljus. De luktar regn.",
+      "typ": "fynd",
+      "varde": 3
     }
   },
   "bygg": {
@@ -855,7 +867,7 @@
           "gava": [
             "katten"
           ],
-          "gavaHej": "Välkommen in. Den här katten har bestämt sig för att flytta med dig.",
+          "gavaHej": "Den här katten har bestämt sig för att flytta med dig.",
           "extra": "trollkarlshatt"
         },
         {
@@ -995,7 +1007,7 @@
           "gava": [
             "seglarmossa"
           ],
-          "gavaHej": "Tack. Ta min gamla seglarmössa, den har varit med på fler resor än jag kan räkna."
+          "gavaHej": "Ta min gamla seglarmössa, den har varit med på fler resor än jag kan räkna."
         }
       ]
     },
@@ -1111,7 +1123,7 @@
       },
       {
         "p": "drottningen",
-        "t": "Mitt i allt detta har det börjat visa sig djur som ingen har sett på hundratals år: geleväsen i skogen, drakar i ihåliga träd och något stort som rör sig i sjön."
+        "t": "Mitt i allt detta har det börjat visa sig djur som ingen har sett på hundratals år: får med ull av mossa på ängarna, drakar i ihåliga träd och något stort som rör sig i sjön."
       },
       {
         "p": "drottningen",
@@ -1291,6 +1303,12 @@
       "art": "Fladdermus",
       "text": "En liten fladdermus som hänger upp och ner och piper när den är glad.",
       "hur": "Hängde i kronan på Ihåliga eken en natt."
+    },
+    "rav": {
+      "namn": "Ruffe",
+      "art": "Höstrav",
+      "text": "En rävunge med päls lika orange som löven i Höstskogen. Han syns knappt när han ligger stilla bland löven.",
+      "hur": "Bodde hos Vira vid elden i Höstskogen en natt."
     }
   },
   "stopp": {
@@ -2472,6 +2490,131 @@
                 "kostnad": 0,
                 "text": "Du lämnar kolen och klättrar upp i kronan.",
                 "till": "b"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "host": {
+      "rubrik": "Ett ljus mellan de orange träden",
+      "knapp": "Gå mot ljuset",
+      "aventyr": {
+        "start": "a",
+        "steg": {
+          "a": {
+            "t": "Mellan de orange träden lyser ett litet ljus. Det rör sig inte, och det luktar rök och örter.",
+            "val": [
+              {
+                "label": "Gå mot ljuset",
+                "kostnad": 0,
+                "text": "Du går mellan träden. Löven prasslar under fötterna, och ljuset blir större.",
+                "till": "b"
+              },
+              {
+                "label": "Smyg runt och titta först",
+                "kostnad": 0,
+                "text": "Du smyger i en båge runt ljuset och kikar fram bakom en stam.",
+                "till": "c"
+              }
+            ]
+          },
+          "b": {
+            "t": "Vid en liten eld sitter en gammal kvinna och rör i en kittel. Hon tittar upp utan att bli förvånad. \"Sent ute, du med\", säger hon. \"Jag heter Vira.\"",
+            "val": [
+              {
+                "label": "Fråga vad hon kokar",
+                "kostnad": 0,
+                "text": "\"Nattdryck\", säger Vira. \"Den gör att man ser det som gömmer sig i mörkret. Men den är inte klar än.\"",
+                "till": "d"
+              },
+              {
+                "label": "Fråga om den grå skuggan",
+                "kostnad": 0,
+                "text": "Vira slutar röra i kitteln.",
+                "till": "e"
+              }
+            ],
+            "fyndVal": {
+              "fynd": "glodkol",
+              "label": "Ge henne det glödande kolet",
+              "text": "Vira lägger kolet i elden, och lågorna slår upp blå och höga. \"Ett kol från Ihåliga eken\", säger hon. \"Då känner du draken. Då kan jag lita på dig.\"",
+              "till": "e",
+              "tar": true
+            }
+          },
+          "c": {
+            "t": "Bakom ett träd ser du en rävunge med päls lika orange som löven. Han tittar mot elden och nosar i luften.",
+            "val": [
+              {
+                "label": "Gå fram till elden",
+                "kostnad": 0,
+                "text": "Rävungen springer före dig fram till elden, som om han visar vägen.",
+                "till": "b"
+              },
+              {
+                "label": "Locka på rävungen",
+                "kostnad": 0,
+                "text": "Du sätter dig på huk och räcker fram handen. Rävungen tvekar, sedan kommer han fram och nosar.",
+                "till": "f"
+              }
+            ]
+          },
+          "d": {
+            "t": "Bakom Vira sitter en rävunge och värmer sig vid elden. Han tittar nyfiket på dig.",
+            "val": [
+              {
+                "label": "Fråga om rävungen",
+                "kostnad": 0,
+                "text": "\"Han kom hit när stjärnorna föll\", säger Vira. \"Men han är inte min. Han väntar på någon.\"",
+                "till": "f"
+              },
+              {
+                "label": "Fråga om den grå skuggan",
+                "kostnad": 0,
+                "text": "Vira slutar röra i kitteln.",
+                "till": "e"
+              }
+            ]
+          },
+          "e": {
+            "t": "\"Jag har sett den\", säger Vira tyst. \"Den går genom skogen när månen är full, alltid mot Norra bron. Den bär något som lyser under kappan.\"",
+            "val": [
+              {
+                "label": "Fråga vad den bär",
+                "kostnad": 0,
+                "text": "\"Stjärnor, tror jag\", säger Vira. \"Små och instängda. Vill du veta mer, lyssna på den som spelar fiol i älven.\" Hon ger dig en knippa örter. \"Ta dem. De luktar som regnet natten då stjärnorna föll.\"",
+                "till": {
+                  "fynd": "manort"
+                }
+              },
+              {
+                "label": "Fråga om rävungen",
+                "kostnad": 0,
+                "text": "\"Han väntar på någon\", säger Vira och ser på dig. \"Kanske på dig.\"",
+                "till": "f"
+              }
+            ]
+          },
+          "f": {
+            "t": "Rävungen kryper fram och lägger sig vid dina fötter. \"Han har valt dig\", säger Vira. Han är orange och ruffsig, så han får heta Ruffe.",
+            "val": [
+              {
+                "label": "Låt Ruffe följa med",
+                "kostnad": 0,
+                "text": "Ruffe skuttar efter dig genom löven. Bakom er sprakar elden, och Vira vinkar.",
+                "till": {
+                  "djur": "rav"
+                }
+              },
+              {
+                "label": "Fråga Vira om lov först",
+                "kostnad": 0,
+                "text": "\"Klart han får\", säger Vira och skrattar. \"Ta de här också.\" Hon ger dig en knippa örter som luktar regn.",
+                "till": {
+                  "djur": "rav",
+                  "extra": "manort"
+                }
               }
             ]
           }

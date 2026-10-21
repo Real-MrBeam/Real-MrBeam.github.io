@@ -797,6 +797,48 @@
       ]
     ]
   },
+  "rav": {
+    "lyft": 0,
+    "farger": {"o":"#3f2631","r":"#e4703a","R":"#b84a26","w":"#fff4e0","d":"#3f2631","k":"#181425"},
+    "bilder": [
+      [
+        "................",
+        "................",
+        "................",
+        "..........d..d..",
+        ".........orooro.",
+        ".........orrrro.",
+        ".........orrrro.",
+        "ooooooooorrrrkro",
+        "wwrrrrrrrrrrrrwk",
+        "wwrrrrrrrrrwwwww",
+        "orrrrrrrrrrroooo",
+        ".ooorrrrrwwo....",
+        "....oRRRRwo.....",
+        "....odoooodo....",
+        "....odo..odo....",
+        ".....o....o....."
+      ],
+      [
+        "................",
+        "................",
+        "..........d..d..",
+        ".........orooro.",
+        ".........orrrro.",
+        ".........orrrro.",
+        "oooooo..orrrrkro",
+        "wwrrrrooorrrrrwk",
+        "wwrrrrrrrrrwwwww",
+        "orrrrrrrrrrooooo",
+        ".ooorrrrrrrro...",
+        "...orrrrrwwo....",
+        "....oRRRRwoo....",
+        "...odoooooodo...",
+        "...odo....odo...",
+        "....o......o...."
+      ]
+    ]
+  },
   "brumma": {
     "lyft": 0,
     "farger": {"o":"#3f2631","b":"#8b5a3c","B":"#5d3a26","a":"#d77643","m":"#d9b38c","k":"#181425"},

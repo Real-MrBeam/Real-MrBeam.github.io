@@ -1191,6 +1191,8 @@ function runStep(ad, id, pre){
       const label = o.kostnad ? `${esc(o.label)} ${price(o.kostnad)}${missing(o.kostnad) ? `<small>${missing(o.kostnad)}</small>` : ''}` : `${esc(o.label)}${need}`;
       return { label, poor: S.coins < o.kostnad || lacks, run: () => lacks ? toast(berattelse.dialog.kraverLjus) : takeStep(ad, o) };
     }),
+    // a step can have a third choice that only shows when he carries a certain find (fyndVal)
+    ...(st.fyndVal && S.saker.includes(st.fyndVal.fynd) ? [{ label: `${esc(st.fyndVal.label)}<small>${esc(SAKER[st.fyndVal.fynd].namn)}</small>`, run: () => takeStep(ad, { kostnad: 0, ...st.fyndVal }) }] : []),
     { label: berattelse.dialog.tankLiteTill, alt: true, run: toNode },
   ]);
 }
@@ -1203,6 +1205,8 @@ function takeStep(ad, o){
   const out = [{ p: o.p ?? null, t: o.text }];
   // a choice can give a thing on the way (ge) and go on with the adventure
   if (o.ge && !S.saker.includes(o.ge)){ S.saker.push(o.ge); renderPack(); toast(itemFound(o.ge)); }
+  // or take the find that opened the choice (fyndVal with tar)
+  if (o.tar && S.saker.includes(o.fynd)){ S.saker.splice(S.saker.indexOf(o.fynd), 1); renderPack(); }
   saveSoon();
   if (typeof o.till === 'string'){ S.steg[ad.key] = o.till; runStep(ad, o.till, out); }
   else ad.end(o.till, out);
