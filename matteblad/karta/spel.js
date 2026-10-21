@@ -775,7 +775,6 @@ function drawNight(now, lv){
 }
 // Sleeping in Hemmet turns day into night and night into day. The choice is saved.
 function sleepBlock(){
-  if (!TEST) return '';   // the night is not ready yet: sleeping only works in debug mode (Peter 2026-10-20)
   const here = S.node === 'hem' && !boy.route;
   return `<div class="plot"><div><b>${S.natt ? 'Det är natt i Glimmerdal' : 'Stugan'}</b><span>${S.natt ? 'Sov tills det blir morgon.' : 'Sov tills det blir natt.'}</span></div>${here ? '<button class="btn" type="button" data-sov="1">Sov</button>' : ''}</div>`;
 }
@@ -1484,7 +1483,6 @@ function applySaved(data){
   for (const k of SAVED_FIELDS) if (data[k] !== undefined) S[k] = data[k];
   if (!S.pa) S.pa = {};
   if (!S.rykten) S.rykten = [];
-  if (!TEST) S.natt = false;
   if (data.lyktaTand){ S.tant = { ...(S.tant || {}), lykta: true }; }   // the lantern was saved on its own before
   buildBoy(S.pa); musicSync(); renderLetters(); renderRumors();
   S.lasta = [...new Set([...(S.lasta || []), ...shownHere])];   // stories shown before the saved game had loaded stay seen
