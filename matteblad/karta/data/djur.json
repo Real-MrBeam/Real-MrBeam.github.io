@@ -713,6 +713,90 @@
       ]
     ]
   },
+  "mana": {
+    "lyft": 4,
+    "farger": {"o":"#3f2631","b":"#8fb8ff","B":"#5a6fd1","s":"#e6f0ff","d":"#3a3060","k":"#262b44"},
+    "bilder": [
+      [
+        "................",
+        ".....d....d.....",
+        "..ooood..doooo..",
+        ".obbbbboobbbbbo.",
+        ".obbbbbddbbbbbo.",
+        "obbbbbbkkbbbbbbo",
+        "obbbsbbddbbsbbbo",
+        "obbbbbbddbbbbbbo",
+        "obbbbbbddbbbbbbo",
+        ".obbBBbddbBBbbo.",
+        ".obBBBBddBBBBbo.",
+        "..oBBBBddBBBBo..",
+        "..oBBBBddBBBBo..",
+        "...oBBooooBBo...",
+        "....oo....oo....",
+        "................"
+      ],
+      [
+        "................",
+        ".....d....d.....",
+        "....ood..doo....",
+        "...obboooobbo...",
+        "..obbbbddbbbbo..",
+        ".obbbbbkkbbbbbo.",
+        ".obbsbbddbbsbbo.",
+        ".obbbbbddbbbbbo.",
+        ".obbbbbddbbbbbo.",
+        "..obBBBddBBBbo..",
+        "...oBBBddBBBo...",
+        "...oBBBddBBBo...",
+        "...oBBBddBBBo...",
+        "....oooooooo....",
+        "................",
+        "................"
+      ]
+    ]
+  },
+  "fladder": {
+    "lyft": 4,
+    "farger": {"o":"#3f2631","b":"#5d4a6e","B":"#3a2d48","p":"#c98fa8","w":"#ffffff","k":"#262b44"},
+    "bilder": [
+      [
+        "................",
+        "................",
+        "................",
+        "......o..o......",
+        ".....oboobo.....",
+        ".....oboobo.....",
+        ".ooooobbbbooooo.",
+        "oBBBBBBbbBBBBBBo",
+        "oBBBBBBwbwBBBBBo",
+        "oBBBBBBkbkBBBBBo",
+        "oBBBBBBbbBBBBBBo",
+        ".ooooobbpbooooo.",
+        "......oooo......",
+        "................",
+        "................",
+        "................"
+      ],
+      [
+        "................",
+        "................",
+        "................",
+        "......o..o......",
+        "....oobooboo....",
+        "..ooBobooboBoo..",
+        ".oBBBBBbbBBBBBo.",
+        "oBBBBBBBBBBBBBBo",
+        ".oBBBBBwbwBBBBo.",
+        "..ooBbbkbkbBoo..",
+        "....oobbbboo....",
+        ".....obbpbo.....",
+        "......oooo......",
+        "................",
+        "................",
+        "................"
+      ]
+    ]
+  },
   "brumma": {
     "lyft": 0,
     "farger": {"o":"#3f2631","b":"#8b5a3c","B":"#5d3a26","a":"#d77643","m":"#d9b38c","k":"#181425"},

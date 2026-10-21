@@ -134,6 +134,8 @@ const CATCH = {
   regnbage: markFish({ b:'#c0cbdc', B:'#8b9bb4', p:'#f6757a' }, (x, y) => y === 4 && x > 1 && x < 9 ? 'p' : ''),
   gadda: sprite(["..oooooooooo..o.", ".owkggdgggdggoBo", "ooygggggggggggBo", ".oGGGGGGGGGGGoBo", "..oooooooooo..o."], { o:'#3f2631', k:'#262b44', g:'#6e8f3a', G:'#46602a', d:'#d8e08a', y:'#c9b27d', B:'#46602a' }),
   harr: sprite(["...oooo.....", "..oPPPPo....", "..oooo....o.", ".obbbbo..obo", "obwbbbbooBbo", "obkbbbbbbBo.", "obbbbbbbbBo.", "obbbbbbooBbo", ".oBBBBo..oBo", "..oooo....o."], { o:'#3f2631', w:'#ffffff', k:'#262b44', b:'#9a8fb5', B:'#68386c', P:'#b55088' }),
+  mansik: markFish({ b:'#e6ecf5', B:'#9fb0c8', m:'#ffffff' }, (x, y) => y === 3 && x > 2 && x < 8 ? 'm' : ''),
+  lysal: sprite(["................", ".ooooooooooo..o.", "owkgggGggggGooGo", "oggggggggggggggo", ".oooooooooooooo."], { o:'#3f2631', w:'#ffffff', k:'#262b44', g:'#7ad97a', G:'#c6f0a0' }),
   groda: sprite(["..oo....oo..", ".owko..owko.", ".oggooooggo.", "oggggggggggo", "oggllllllggo", "oggllllllggo", ".oggggggggo.", "ogo.oggo.ogo", "oo..oooo..oo"], { o:'#3f2631', w:'#ffffff', k:'#262b44', g:'#63c74d', l:'#c6e07a' }),
   krafta: sprite([".oo......oo.", "orro....orro", "orrro..orrro", ".oorroorroo.", "..orkrrkro..", "..oRrrrrRo..", ".ooRrrrrRoo.", "..oRrrrrRo..", ".ooRrrrrRoo.", "...oRrrRo...", "..oRRRRRRo..", "..oooooooo.."], { o:'#3f2631', k:'#262b44', r:'#e43b44', R:'#a22633' }),
 };
@@ -701,7 +703,7 @@ function frame(now){
 let nightLevel = 0, STATIC_LIGHTS = null, WATER_STARS = null;
 // The burning torch and campfire, and the same put out (own tiles in openrpg.png, verktyg/gor-egna-rutor.py)
 const FIRE_OUT = { 'o:18,10': 'o:8,16', 'o:21,12': 'o:9,16' };
-const LIGHT_TILES = { 84: [8, 8, 'win'], 88: [8, 8, 'win'], 'o:27,2': [8, 8, 'win'], 125: [8, 8, 'slit'], 51: [8, 10, 'small'], 55: [8, 10, 'small'], 'o:18,10': [8, 4, 'fire'], 'o:21,12': [8, 9, 'fire'], 'o:28,15': [8, 8, 'tent'] };
+const LIGHT_TILES = { 84: [8, 8, 'win'], 88: [8, 8, 'win'], 'o:27,2': [8, 8, 'win'], 125: [8, 8, 'slit'], 51: [8, 10, 'small'], 55: [8, 10, 'small'], 'o:18,10': [8, 4, 'fire'], 'o:21,12': [8, 9, 'fire'], 'o:28,15': [8, 8, 'tent'], 'o:15,16': [6, 10, 'small'] };
 const lightIn = i => { for (const j of Array.isArray(i) ? i : [i]) if (LIGHT_TILES[j]) return LIGHT_TILES[j]; return null; };
 function nightLights(){
   if (!STATIC_LIGHTS){
@@ -751,7 +753,7 @@ function drawNight(now, lv){
     g.addColorStop(0, `rgba(${c},${.5 * lv})`); g.addColorStop(1, `rgba(${c},0)`);
     ctx.fillStyle = g; ctx.fillRect(L.x - rad, L.y - rad, rad * 2, rad * 2);
   }
-  for (const [id, col] of [['lykta', '255,210,120'], ['flaskat', '90,170,255']]){
+  for (const [id, col] of [['lykta', '255,210,120'], ['flaskat', '90,170,255'], ['eldflugor', '150,230,90']]){
     if (!S.tant || !S.tant[id] || !S.saker.includes(id)) continue;
     const bx = boy.x + 8, by = boy.y + 4, rad = 22 + (reduceMotion ? 0 : Math.sin(now / 300 + (id === 'flaskat' ? 2 : 0)) * 1.5);
     const g = ctx.createRadialGradient(bx, by, 0, bx, by, rad);
@@ -763,6 +765,17 @@ function drawNight(now, lv){
     if (L.k === 'fire' || L.k === 'tent' || L.k === 'lamp' || L.k === 'plate') continue;
     const [w, h] = L.k === 'win' ? [6, 6] : [2, 4];
     ctx.fillStyle = `rgba(254,231,97,${.85 * lv})`; ctx.fillRect(Math.round(L.x - w / 2), Math.round(L.y - h / 2), w, h);
+  }
+  // fireflies over Ängen: small green lights that blink on and off
+  if (NODES.angen){
+    const ax = NODES.angen.x*TS, ay = NODES.angen.y*TS, r = rng(17);
+    for (let i = 0; i < 22; i++){
+      const fx = ax - 40 + r()*96 + Math.sin(now / (900 + i*37) + i) * 6, fy = ay - 30 + r()*70 + Math.cos(now / (1100 + i*29) + i) * 4;
+      const a = reduceMotion ? .6 : Math.sin(now / (380 + i*23) + i*2);
+      if (a < .3 || !seen(fx, fy)) continue;
+      ctx.fillStyle = `rgba(190,255,120,${Math.min(1, a) * lv})`; ctx.fillRect(Math.round(fx), Math.round(fy), 1, 1);
+      if (a > .85){ ctx.fillStyle = `rgba(190,255,120,${.35 * lv})`; ctx.fillRect(Math.round(fx) - 1, Math.round(fy), 3, 1); ctx.fillRect(Math.round(fx), Math.round(fy) - 1, 1, 3); }
+    }
   }
   for (const st of WATER_STARS){
     if (!seen(st.x, st.y)) continue;
@@ -801,9 +814,9 @@ function playFlute(){
 function useItem(id){
   const it = SAKER[id]; if (!it) return;
   if (id === 'flojt') return playFlute();
-  if (id === 'lykta' || id === 'flaskat'){
+  if (id === 'lykta' || id === 'flaskat' || id === 'eldflugor'){
     S.tant = S.tant || {}; S.tant[id] = !S.tant[id];
-    toast(id === 'lykta' ? (S.tant[id] ? 'Du tände lyktan.' : 'Du släckte lyktan.') : (S.tant[id] ? 'Irrblosset vaknar och lyser blått.' : 'Irrblosset somnar i burken.'));
+    toast(id === 'lykta' ? (S.tant[id] ? 'Du tände lyktan.' : 'Du släckte lyktan.') : id === 'eldflugor' ? (S.tant[id] ? 'Du öppnar locket lite, och eldflugorna börjar blinka.' : 'Du skruvar på locket, och eldflugorna somnar.') : (S.tant[id] ? 'Irrblosset vaknar och lyser blått.' : 'Irrblosset somnar i burken.'));
     renderPack(); saveSoon(); return;
   }
   if (it.typ !== 'klader') return;
@@ -847,6 +860,7 @@ document.addEventListener('visibilitychange', () => { if (window.Musik) Musik.pa
 function nodeActive(id){
   if (FS && id === FS.plats && !S.brevFiske) return true;
   if (S.natt){   // at night the tent is open, and the fishing places if he has something to fish with, and the letter
+    if (NATTSTOPP[id] && !S.stopp['natt:' + id]) return true;
     if (berattelse.handel && id === berattelse.handel.plats) return true;
     if (FISKE.platser[id] && myTools().length) return true;
     return id === 'hem' && letterWaiting();
@@ -990,6 +1004,7 @@ function renderPanel(view){
     const day = !S.natt, before = h.length;
     if (day) for (const p of plots) h += plotBlock(p);
     if (day && stop) h += stopBlock(n.id);
+    if (!day && NATTSTOPP[n.id]) h += stopBlock('natt:' + n.id);
     if (n.id === 'hem') h += sleepBlock();
     if (n.id === 'hem' && letterWaiting()) h += letterBlock();
     if (FS && n.id === FS.plats && !S.brevFiske) h += fishLetterBlock();
@@ -1169,7 +1184,13 @@ function startAdventure(p){
 function runStep(ad, id, pre){
   const st = ad.def.steg[id];
   startDialog([...pre, { p: st.p ?? null, t: st.t }], () => [
-    ...st.val.map(o => ({ label: o.kostnad ? `${esc(o.label)} ${price(o.kostnad)}${missing(o.kostnad) ? `<small>${missing(o.kostnad)}</small>` : ''}` : esc(o.label), poor: S.coins < o.kostnad, run: () => takeStep(ad, o) })),
+    ...st.val.map(o => {
+      // a choice can need one of some things (kraver): without them it is greyed out and says what is missing
+      const lacks = o.kraver && !o.kraver.some(x => S.saker.includes(x));
+      const need = lacks ? `<small>${esc(berattelse.dialog.kraverLjus && o.kraver.includes('lykta') ? berattelse.dialog.kraverLjus : 'Du har inget som passar än.')}</small>` : '';
+      const label = o.kostnad ? `${esc(o.label)} ${price(o.kostnad)}${missing(o.kostnad) ? `<small>${missing(o.kostnad)}</small>` : ''}` : `${esc(o.label)}${need}`;
+      return { label, poor: S.coins < o.kostnad || lacks, run: () => lacks ? toast(berattelse.dialog.kraverLjus) : takeStep(ad, o) };
+    }),
     { label: berattelse.dialog.tankLiteTill, alt: true, run: toNode },
   ]);
 }
@@ -1180,6 +1201,8 @@ function takeStep(ad, o){
     sparkle(boy.x + 8, boy.y + 2, 18, '#2ce8f5'); sparkle(boy.x + 8, boy.y + 2, 12, '#ffffff');
   }
   const out = [{ p: o.p ?? null, t: o.text }];
+  // a choice can give a thing on the way (ge) and go on with the adventure
+  if (o.ge && !S.saker.includes(o.ge)){ S.saker.push(o.ge); renderPack(); toast(itemFound(o.ge)); }
   saveSoon();
   if (typeof o.till === 'string'){ S.steg[ad.key] = o.till; runStep(ad, o.till, out); }
   else ad.end(o.till, out);
@@ -1188,15 +1211,17 @@ function takeStep(ad, o){
 /* ---------- stoppen med äventyr ---------- */
 // The new stops are only adventures, no people and no building. Each can be played once: the ending he reaches is what he
 // gets (an animal, a bait, stardust or a secret fishing place), the other endings are lost.
-const STOPP = berattelse.stopp;
+const STOPP = berattelse.stopp, NATTSTOPP = berattelse.nattstopp || {};
+// A place can have a second adventure that only happens at night (berattelse.json nattstopp), saved as 'natt:<place>'
+const stopDef = key => key.startsWith('natt:') ? NATTSTOPP[key.slice(5)] : STOPP[key];
 function stopBlock(id){
-  const s = STOPP[id], done = S.stopp[id], going = S.steg['stopp:' + id], here = S.node === id && !boy.route;
+  const s = stopDef(id), done = S.stopp[id], going = S.steg['stopp:' + id], here = S.node === id.replace('natt:', '') && !boy.route;
   const btn = done || !here ? '' : `<button class="btn" type="button" data-stopp="${id}">${esc(going ? berattelse.dialog.stoppFortsatt : s.knapp)}</button>`;
   return `<div class="plot"><div><b>${esc(s.rubrik)}</b>${done ? `<span>${esc(berattelse.dialog.stoppKlar)} ${esc(rewardText(done))}</span>` : ''}</div>${btn}</div>`;
 }
 function startStop(id){
   if (S.stopp[id]) return;
-  const s = STOPP[id], key = 'stopp:' + id;
+  const s = stopDef(id), key = 'stopp:' + id;
   runStep({ def: s.aventyr, key, end: (till, out) => finishStop(id, till, out) }, S.steg[key] || s.aventyr.start, []);
 }
 const itemFound = id => `Du hittade ${SAKER[id].namn.toLowerCase()}.${SAKER[id].typ === 'klader' ? ' Du kan ta på den i väskan.' : ''}`;
@@ -1345,7 +1370,7 @@ function startCount(){
 }
 
 // Categories of things in the bag, each with its own small pixel icon (Peter 2026-10-20). Special things have a secret or a task.
-const SPECIAL = ['lykta', 'flaskat', 'flojt'];
+const SPECIAL = ['lykta', 'flaskat', 'eldflugor', 'flojt'];
 const KAT = {
   sarskilt: { namn: 'Särskilt', ico: sprite(["........", ".yy.....", "y..y....", "y..yyyyy", ".yy..y.y", "........", "........", "........"], { y:'#fee761' }) },
   redskap: { namn: 'Redskap', ico: sprite(["....ss..", "....ss..", "....ss..", "....ss..", "s...ss..", "ss..ss..", ".ssss...", "..ss...."], { s:'#c0cbdc' }) },
@@ -1390,7 +1415,7 @@ function renderPack(){
   $('#pack').innerHTML = own.length
     ? own.map(id => { const it = SAKER[id], on = it.typ === 'klader' && S.pa[it.plats] === id;
         // Things that can be used are tapped like the runes in the list: clothes go on and off, the lantern is lit, the flute plays
-        const light = id === 'lykta' || id === 'flaskat';
+        const light = id === 'lykta' || id === 'flaskat' || id === 'eldflugor';
         const usable = it.typ === 'klader' || light || id === 'flojt';
         const lit = light && S.tant && S.tant[id];
         const title = it.typ === 'klader' ? (on ? 'Ta av' : 'Ta på') : light ? (lit ? 'Släck' : 'Tänd') : id === 'flojt' ? 'Spela' : '';
@@ -1641,7 +1666,9 @@ function renderFishing(){
 }
 // The ordinary fish this tool can take at this place (fiske.fangar), and whether all of them are already full (fiske.max of each)
 const MAXFISK = FISKE.max || 99;
-const catchable = fz => { const can = FISKE.fangar && FISKE.fangar[fz.redskap]; return FISKE.platser[fz.plats].fiskar.filter(id => !can || can.includes(id)); };
+// at night some places have fish that only swim in the dark (fiske.platser fiskarNatt)
+const placeFish = plats => { const p = FISKE.platser[plats]; return S.natt && p.fiskarNatt ? [...p.fiskar, ...p.fiskarNatt] : p.fiskar; };
+const catchable = fz => { const can = FISKE.fangar && FISKE.fangar[fz.redskap]; return placeFish(fz.plats).filter(id => !can || can.includes(id)); };
 const fishedOut = fz => { const l = catchable(fz); return l.length > 0 && l.every(id => (S.fiskbok[id] || 0) >= MAXFISK); };
 function cast(){
   const fz = fishing;
@@ -1675,7 +1702,7 @@ function pull(){
   if (fz.agn && !rule && !effekt) return miss(missText(fz));
   // what this tool can take in this water (fiske.fangar): kräftor only in the kräftbur, grodor only in the håv
   const can = FISKE.fangar && FISKE.fangar[fz.redskap];
-  const list = FISKE.platser[fz.plats].fiskar.filter(id => !can || can.includes(id));
+  const list = placeFish(fz.plats).filter(id => !can || can.includes(id));
   if (!rule && !list.length) return miss(FISKE.texter.ingetHar);
   if (fz.agn && (rule || effekt === 'ny')){ S.agnAnvant.push(fz.agn); renderPack(); }
   sparkle(boy.x + 8, boy.y + 2, 20, '#2ce8f5');

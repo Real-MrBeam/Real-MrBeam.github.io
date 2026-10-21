@@ -4,7 +4,8 @@
   "platser": {
     "hem": {
       "namn": "Hemmet",
-      "text": "Här började resan. Stugan är byggd av stjärnstoft från dina matteblad, och om kvällarna glimmar timret svagt."
+      "text": "Här började resan. Stugan är byggd av stjärnstoft från dina matteblad, och om kvällarna glimmar timret svagt.",
+      "rykteNatt": "Från stugan syns ett ljus i Höstskogen om nätterna, där ingen borde bo."
     },
     "skola": {
       "namn": "Skolan",
@@ -13,7 +14,8 @@
     "glanta": {
       "namn": "Skogsgläntan",
       "text": "En solig glänta mitt i granskogen, där stigarna möts.",
-      "natt": "En glänta mitt i granskogen. I mörkret syns bara stammarna runt omkring."
+      "natt": "En glänta mitt i granskogen. I mörkret syns bara stammarna runt omkring.",
+      "rykteNatt": "Murkel säger att svampringen minns natten då stjärnorna föll."
     },
     "hemlig": {
       "namn": "Hemliga gläntan",
@@ -43,7 +45,8 @@
     "angen": {
       "namn": "Ängen",
       "text": "En äng där gräset når till midjan och blommorna står täta.",
-      "natt": "En äng där gräset når till midjan. I mörkret prasslar det svagt när vinden drar förbi."
+      "natt": "En äng där gräset når till midjan. Över stråna dansar små ljus.",
+      "rykteNatt": "Över Ängen dansar ljus om nätterna, och ett av dem är större än de andra."
     },
     "barsnaret": {
       "namn": "Bärsnåret",
@@ -51,7 +54,9 @@
     },
     "eken": {
       "namn": "Ihåliga eken",
-      "text": "En ek så gammal att ingen minns när den var ung. Stammen är ihålig, och kronan breder ut sig över stigen."
+      "text": "En ek så gammal att ingen minns när den var ung. Stammen är ihålig, och kronan breder ut sig över stigen.",
+      "natt": "Eken står svart mot himlen. Ur stammen glöder det svagt rött, och högt uppe hörs pip.",
+      "rykteNatt": "Från Ihåliga eken hörs pip om nätterna."
     },
     "dimmossen": {
       "namn": "Dimmossen",
@@ -81,12 +86,15 @@
     "vassen": {
       "namn": "Vassen",
       "text": "En gömd brygga i vassen. Ingen annan vet att den finns, och så får det gärna förbli.",
-      "rykte": "Det kväker i vassen hela tiden."
+      "rykte": "Det kväker i vassen hela tiden.",
+      "natt": "Vassen prasslar i mörkret, och vattnet blänker i månljuset.",
+      "rykteNatt": "I Vassen nappar fiskar som aldrig syns på dagen."
     },
     "talt": {
       "namn": "Tältet",
       "text": "Ett tält av ljus duk bakom lägerelden. Någon bor här, men på dagen är duken knuten.",
-      "natt": "Ett tält av ljus duk bakom lägerelden. Det lyser inifrån."
+      "natt": "Ett tält av ljus duk bakom lägerelden. Det lyser inifrån.",
+      "rykteNatt": "Nattfiskaren har sett en grå skugga gå över bron mot Höstskogen."
     }
   },
   "portar": {
@@ -620,6 +628,24 @@
       "text": "En liten mässingsbjällra som plingar när man skakar den.",
       "typ": "fynd",
       "varde": 3
+    },
+    "eldflugor": {
+      "namn": "Eldflugor i en burk",
+      "text": "En glasburk med små gröna ljus som blinkar.",
+      "typ": "verktyg",
+      "rykte": "Det största ljuset över ängen flyger bara fram till den som själv bär ljus."
+    },
+    "glodkol": {
+      "namn": "Glödande kol",
+      "text": "Ett kol från Ihåliga eken som aldrig slocknar helt.",
+      "typ": "fynd",
+      "varde": 3
+    },
+    "daggparla": {
+      "namn": "Daggpärla",
+      "text": "En droppe dagg som har stelnat till en liten pärla i månljuset.",
+      "typ": "fynd",
+      "varde": 2
     }
   },
   "bygg": {
@@ -1139,7 +1165,8 @@
     "rykten": {
       "rubrik": "Rykten",
       "tom": "Inga rykten än."
-    }
+    },
+    "kraverLjus": "Du behöver något som lyser."
   },
   "djur": {
     "gele": {
@@ -1252,6 +1279,18 @@
       "art": "Stjärnuggla",
       "text": "En liten uggla med violetta fjädrar och en stjärna i pannan. Den sitter helst uppe i kupolen och tittar på himlen.",
       "hur": "Flög in genom observatoriets kupol och ville inte flytta."
+    },
+    "mana": {
+      "namn": "Måna",
+      "art": "Nattfjäril",
+      "text": "En nattfjäril stor som en hand, med vingar som lyser svagt i blått och silver.",
+      "hur": "Flög fram till ditt ljus över Ängen en natt."
+    },
+    "fladder": {
+      "namn": "Fladder",
+      "art": "Fladdermus",
+      "text": "En liten fladdermus som hänger upp och ner och piper när den är glad.",
+      "hur": "Hängde i kronan på Ihåliga eken en natt."
     }
   },
   "stopp": {
@@ -2054,6 +2093,11 @@
         "vanta": [
           3500,
           7500
+        ],
+        "fiskarNatt": [
+          "mansik",
+          "mansik",
+          "lysal"
         ]
       },
       "stenblocket": {
@@ -2145,6 +2189,14 @@
       "groda": {
         "namn": "Groda",
         "text": "Ingen fisk, men den hoppade upp på kroken ändå."
+      },
+      "mansik": {
+        "namn": "Månsik",
+        "text": "Silvervit och blank som månen. Den simmar bara när det är mörkt."
+      },
+      "lysal": {
+        "namn": "Lysål",
+        "text": "En lång ål som glöder svagt grönt. Den kryper gärna in i burar om natten."
       }
     },
     "texter": {
@@ -2183,7 +2235,8 @@
         "gadda",
         "oring",
         "harr",
-        "regnbage"
+        "regnbage",
+        "mansik"
       ],
       "flugspo": [
         "oring",
@@ -2194,7 +2247,8 @@
         "groda"
       ],
       "kraftbur": [
-        "krafta"
+        "krafta",
+        "lysal"
       ],
       "flotte": [],
       "snorkel": []
@@ -2259,5 +2313,170 @@
       "Fånga tre av varje sort som finns och skriv in dem i din fiskbok. Fler än tre av samma behöver du inte, släpp tillbaka resten.",
       "Vi räknar med dig.\n\nNattfiskaren, för Fiskesällskapet"
     ]
+  },
+  "nattstopp": {
+    "angen": {
+      "rubrik": "Ljus dansar över ängen",
+      "knapp": "Gå ut i mörkret",
+      "aventyr": {
+        "start": "a",
+        "steg": {
+          "a": {
+            "t": "Över gräset dansar små gröna ljus. Ett av dem är mycket större än de andra och lyser blått.",
+            "val": [
+              {
+                "label": "Följ det stora ljuset",
+                "kostnad": 0,
+                "text": "Du smyger efter det stora ljuset genom det blöta gräset.",
+                "till": "b"
+              },
+              {
+                "label": "Fånga några små ljus",
+                "kostnad": 0,
+                "text": "Du kupar händerna och fångar några av de små ljusen. Det är eldflugor. Du lägger dem i en tom burk.",
+                "till": "c",
+                "ge": "eldflugor"
+              }
+            ]
+          },
+          "b": {
+            "t": "Det stora ljuset är en nattfjäril, stor som din hand. Den fladdrar runt dig, som om den letar efter något som lyser.",
+            "val": [
+              {
+                "label": "Håll upp något som lyser",
+                "kostnad": 0,
+                "text": "Fjärilen dyker mot ljuset och landar på din hand. Vingarna lyser i blått och silver. Hon ser ut som en Måna, så det får hon heta.",
+                "till": {
+                  "djur": "mana"
+                },
+                "kraver": [
+                  "lykta",
+                  "flaskat",
+                  "eldflugor"
+                ]
+              },
+              {
+                "label": "Sitt stilla i gräset",
+                "kostnad": 0,
+                "text": "Fjärilen landar på en blomma bredvid dig men flyger iväg så fort du rör dig.",
+                "till": "c"
+              }
+            ]
+          },
+          "c": {
+            "t": "De små ljusen blinkar runt dig. Det stora ljuset fladdrar en bit bort, nära marken.",
+            "val": [
+              {
+                "label": "Försök igen med det stora ljuset",
+                "kostnad": 0,
+                "text": "Du reser dig sakta och går mot det stora ljuset igen.",
+                "till": "d"
+              },
+              {
+                "label": "Gå hem och sov",
+                "kostnad": 0,
+                "text": "Du lämnar ängen. Bakom dig blinkar ljusen vidare, som om de skrattar lite.",
+                "till": {
+                  "fynd": "daggparla"
+                }
+              }
+            ]
+          },
+          "d": {
+            "t": "Nattfjärilen svävar framför dig. Den verkar vänta på något.",
+            "val": [
+              {
+                "label": "Håll upp något som lyser",
+                "kostnad": 0,
+                "text": "Fjärilen dyker mot ljuset och landar på din hand. Vingarna lyser i blått och silver. Hon ser ut som en Måna, så det får hon heta.",
+                "till": {
+                  "djur": "mana"
+                },
+                "kraver": [
+                  "lykta",
+                  "flaskat",
+                  "eldflugor"
+                ]
+              },
+              {
+                "label": "Räck fram handen utan ljus",
+                "kostnad": 0,
+                "text": "Fjärilen tvekar, men landar till sist på ditt finger. Hon ser ut som en Måna, så det får hon heta.",
+                "till": {
+                  "djur": "mana",
+                  "extra": "eldflugor"
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    "eken": {
+      "rubrik": "Det piper i ekens krona",
+      "knapp": "Gå fram till eken",
+      "aventyr": {
+        "start": "a",
+        "steg": {
+          "a": {
+            "t": "Eken står svart mot himlen. Ur stammen glöder det svagt rött, och högt uppe i kronan hörs pip och fladder.",
+            "val": [
+              {
+                "label": "Klättra upp mot pipet",
+                "kostnad": 0,
+                "text": "Du klättrar gren för gren. Pipet blir starkare.",
+                "till": "b"
+              },
+              {
+                "label": "Titta in i stammen",
+                "kostnad": 0,
+                "text": "Längst in i stammen glöder några kol, varma som en spis. Någon har bott här.",
+                "till": "c"
+              }
+            ]
+          },
+          "b": {
+            "t": "I kronan hänger en liten fladdermus upp och ner. Den blinkar mot dig och piper.",
+            "val": [
+              {
+                "label": "Räck fram en hand",
+                "kostnad": 0,
+                "text": "Fladdermusen klättrar upp på din arm och kryper in under tröjan, där det är varmt. Den piper som en Fladder, så det får den heta.",
+                "till": {
+                  "djur": "fladder"
+                }
+              },
+              {
+                "label": "Vänta tyst",
+                "kostnad": 0,
+                "text": "Efter en stund släpper fladdermusen grenen och landar på din axel. Den piper som en Fladder, så det får den heta.",
+                "till": {
+                  "djur": "fladder",
+                  "extra": "glodkol"
+                }
+              }
+            ]
+          },
+          "c": {
+            "t": "Kolen glöder i mörkret. Ovanför dig, i kronan, piper något.",
+            "val": [
+              {
+                "label": "Ta ett glödande kol i en burk",
+                "kostnad": 0,
+                "text": "Kolet är varmt men bränns inte. Du lägger det i en burk och klättrar sedan upp mot pipet.",
+                "till": "b",
+                "ge": "glodkol"
+              },
+              {
+                "label": "Klättra upp mot pipet",
+                "kostnad": 0,
+                "text": "Du lämnar kolen och klättrar upp i kronan.",
+                "till": "b"
+              }
+            ]
+          }
+        }
+      }
+    }
   }
 }
