@@ -1770,15 +1770,17 @@ function land(id, kg){
 
 /* ---------- kampen ---------- */
 // A fish on a rod fights (fiske.kamp). Each turn of the reel (Veva) brings it a bit closer and tightens the line, and the line
-// slackens by itself. After a rest the fish may pull (or jump, for the trout): then the line tightens by itself and a turn
-// tightens it much more, so he has to wait. Turning faster than five times a second jerks the line too (and says so). A full
-// line snaps. A fish he stops reeling for a long while slips off the hook. A heavier fish of its kind needs more turns.
-// The numbers were tried out in a simulation: waiting when it pulls lands nearly every fish, wild tapping only the calm ones.
-const LINA = { tryck: .16, slapp: .45, drar: .2, hopp: .4, fort: 200, ryck: .1 };
+// slackens by itself. After a rest the fish may pull (or jump, for the trout): first it gets ready for a short while (Akta!),
+// then the line tightens by itself and a turn tightens it much more, so he has to wait. Turning faster than five times a
+// second jerks the line too (and says so). A full line snaps. A fish he stops reeling for a long while slips off the hook.
+// The turns needed are a base for the way it fights plus a number per kg, so a big fish takes long (Peter 2026-10-22): a small
+// roach is up in a second or two, a pike of 6 kg takes about 17 seconds. The numbers were tried out in a simulation with a
+// child's reaction time: waiting when it gets ready lands every fish, wild tapping only the smallest.
+const LINA = { tryck: .16, slapp: .45, drar: .2, hopp: .4, fort: 200, ryck: .1, akta: 450 };
 function startFight(id, kg){
   const fz = fishing, f = FISKE.fiskar[id], K = FISKE.kamp[f.kamp], [lo, hi] = f.vikt, q = (kg - lo) / (hi - lo);
   const t = performance.now();
-  fz.kamp = { id, kg, K, need: Math.round(K.tryck[0] + q * (K.tryck[1] - K.tryck[0])), dist: 1, line: .15, state: 'vilar', until: t + 700 + Math.random() * 600, last: t, tapped: t, prev: 0, fast: 0 };
+  fz.kamp = { id, kg, q, K, need: Math.round(K.tryck + kg * K.perKg), dist: 1, line: .15, start: t, state: 'vilar', until: t + 700 + Math.random() * 600, last: t, tapped: t, prev: 0, fast: 0 };
   fz.phase = 'kamp'; renderFishing();
   fz.loop = setInterval(fightTick, 50);
 }
@@ -1786,7 +1788,8 @@ function fightTick(){
   const fz = fishing, k = fz && fz.kamp; if (!k) return;
   const t = performance.now(), dt = Math.min(.1, (t - k.last) / 1000); k.last = t;
   if (t > k.until){
-    if (k.state === 'vilar' && Math.random() < k.K.drar){ k.state = k.K.hopp ? 'hoppar' : 'drar'; k.until = t + (k.K.hopp ? 500 + Math.random() * 300 : 700 + Math.random() * 600); }
+    if (k.state === 'vilar' && Math.random() < k.K.drar){ k.state = 'akta'; k.until = t + LINA.akta; }
+    else if (k.state === 'akta'){ k.state = k.K.hopp ? 'hoppar' : 'drar'; k.until = t + (k.K.hopp ? 500 + Math.random() * 300 : 700 + Math.random() * 600); }
     else { k.state = 'vilar'; k.until = t + 900 + Math.random() * 900; }
   }
   if (k.state === 'drar'){ k.line += k.K.kraft * dt; k.dist = Math.min(1.3, k.dist + .05 * dt); }
@@ -1800,7 +1803,7 @@ function veva(){
   const t = performance.now(), fast = t - k.prev < LINA.fort;
   k.tapped = k.prev = t; if (fast) k.fast = t;
   k.line += LINA.tryck + (k.state === 'drar' ? LINA.drar : k.state === 'hoppar' ? LINA.hopp : 0) + (fast ? LINA.ryck : 0);
-  k.dist -= (k.state === 'vilar' ? 1 : .5) / k.need;
+  k.dist -= (k.state === 'vilar' || k.state === 'akta' ? 1 : .5) / k.need;
   if (k.line >= 1) return miss(FISKE.texter.brast);
   if (k.dist <= 0){ clearInterval(fz.loop); fz.loop = 0; fz.kamp = null; return land(k.id, k.kg); }
   drawFight();
@@ -1808,6 +1811,7 @@ function veva(){
 function drawFight(){
   const k = fishing && fishing.kamp, pond = panel.querySelector('.pond.kamp'); if (!k || !pond) return;
   const T = FISKE.texter, fish = pond.querySelector('.fisk'), x = 6 + Math.min(1.3, k.dist) / 1.3 * (pond.clientWidth - fish.offsetWidth - 12);
+  if (!fish.style.width && fish.naturalWidth) fish.style.width = Math.round(fish.naturalWidth * (.8 + .6 * k.q)) + 'px';
   const y = (pond.clientHeight - fish.offsetHeight) / 2;
   fish.style.left = x + 'px'; fish.style.top = y + 'px';
   Object.assign(pond.querySelector('.lina').style, { width: x + 'px', top: Math.round(y + fish.offsetHeight * .45) + 'px' });
@@ -1815,7 +1819,8 @@ function drawFight(){
   const bar = panel.querySelector('.kamp-mat .bar');
   bar.querySelector('i').style.width = `calc(${Math.min(1, k.line) * 100}% - 4px)`;
   bar.className = 'bar' + (k.line > .8 ? ' rod' : k.line > .55 ? ' gul' : ' gron');
-  const text = k.state === 'drar' ? T.drar : k.state === 'hoppar' ? T.hoppar : performance.now() - k.fast < 900 ? T.forFort : T.vevaNu, p = panel.querySelector('.kamp-text');
+  const now = performance.now(), first = now - k.start < 1800 ? (k.q > .6 ? T.kampStor : T.kamp) : '';
+  const text = k.state === 'akta' ? T.akta : k.state === 'drar' ? T.drar : k.state === 'hoppar' ? T.hoppar : now - k.fast < 900 ? T.forFort : first || T.vevaNu, p = panel.querySelector('.kamp-text');
   if (p.textContent !== text) p.textContent = text;
 }
 // Each fish in the book has its own picture (CATCH), at its own size so the long pike is not squeezed

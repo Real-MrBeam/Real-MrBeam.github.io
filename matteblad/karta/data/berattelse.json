@@ -2416,7 +2416,9 @@
       "ingetHar": "Det här redskapet fångar inget i det här vattnet.",
       "tillbaka3": "Du har redan tre sådana, så du släpper tillbaka den i vattnet.",
       "kamp": "Fisken sitter på kroken! Veva in den, men vänta när den drar.",
+      "kampStor": "En stor en! Det här tar tid. Vänta när den drar.",
       "vevaNu": "Veva!",
+      "akta": "Akta, den gör sig redo!",
       "drar": "Den drar! Vänta.",
       "hoppar": "Den hoppar! Vänta.",
       "forFort": "Lugnt, veva inte så fort!",
@@ -2469,35 +2471,27 @@
     "max": 3,
     "kamp": {
       "lugn": {
-        "tryck": [
-          3,
-          5
-        ],
+        "tryck": 3,
+        "perKg": 4,
         "drar": 0.25,
         "kraft": 0.35
       },
       "ryck": {
-        "tryck": [
-          6,
-          10
-        ],
+        "tryck": 5,
+        "perKg": 3.5,
         "drar": 0.8,
         "kraft": 0.55
       },
       "hopp": {
-        "tryck": [
-          5,
-          8
-        ],
+        "tryck": 4,
+        "perKg": 4,
         "drar": 0.7,
         "kraft": 0.3,
         "hopp": true
       },
       "tung": {
-        "tryck": [
-          7,
-          11
-        ],
+        "tryck": 6,
+        "perKg": 4,
         "drar": 0.6,
         "kraft": 0.4
       }
