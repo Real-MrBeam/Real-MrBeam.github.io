@@ -960,16 +960,23 @@ function startTrade(seen){
   // about the strange fish since the ship came (Peter 2026-10-22)
   const talk = [H.hej, ...(H.prat || [])], V = H.visar, hidden = V && !S.hittat.includes(V.plats);
   const hello = !wares.length && !packs.length ? H.inget : seen ? H.hej : talk[Math.floor(Math.random() * talk.length)];
-  // while his own place (Udden) is hidden he tells about it: three kinds of fish, or his lost hat (Peter 2026-10-22)
-  const lines = hidden && !seen ? V.stalle.map(t => ({ p: H.person, t })) : [{ p: H.person, t: hello }];
-  startDialog(lines, () => [
+  // while his own place (Udden) is hidden he tells about it: three kinds of fish, or his lost hat. The first time it goes to the
+  // rumours, after that he only reminds (Peter 2026-10-22)
+  const told = hidden && V.rykten.every(k => S.rykten.includes(k));
+  const lines = hidden && !seen ? (told ? [{ p: H.person, t: V.paminn }] : V.stalle.map(t => ({ p: H.person, t }))) : [{ p: H.person, t: hello }];
+  const hearAll = () => {
+    const fresh = V.rykten.filter(k => !S.rykten.includes(k));
+    fresh.forEach(k => hearRumor(k, true));
+    if (fresh.length) toast(fresh.length === 1 ? `Nytt rykte: ${rumorText(fresh[0])}` : 'Två nya rykten finns i listan Rykten.');
+  };
+  startDialog(lines, () => (hidden && hearAll(), [
     ...(hidden ? [{ label: esc(V.knappFisk), run: showFishBook }] : []),
     ...(hidden && S.saker.includes(V.hatt) ? [{ label: esc(V.knappHatt), run: () => showPlace(V.hattTack) }] : []),
     ...wares.map(([id, n]) => ({ label: `Köp ${esc(nameIn(id))} ${price(n)}<small>${esc(SAKER[id].text)}</small>`, poor: S.coins < n, run: () => buyFrom(id, n) })),
     ...packs.map(([id, o]) => ({ label: `Köp ${esc(nameIn(id))}, ${o.antal} st ${price(o.pris)}<small>${esc(SAKER[id].text)}</small>`, poor: S.coins < o.pris, run: () => buyPack(id, o, H.person, H.kopt[id], () => startTrade(true)) })),
     ...offers.map(o => ({ label: `Sälj ${esc(o.namn.toLowerCase())} ${price(o.n)}<small>${esc(o.text)}</small>`, run: () => sellTo(o) })),
     { label: 'Tillbaka till kartan', alt: true, run: toNode },
-  ], seen);
+  ]), seen);
 }
 function buyFrom(id, n){
   if (S.saker.includes(id)) return;
@@ -1481,11 +1488,12 @@ const RUMOR_ICO = sprite([".oooooo.", "owwwwwwo", "owkwkwko", "owwwwwwo", ".oooo
 function rumorText(key){
   const [kind, id, when] = key.split(':');
   if (kind === 'sak') return SAKER[id] && SAKER[id].rykte;
+  if (kind === 'rykte') return berattelse.rykten && berattelse.rykten[id];   // something a person tells (berattelse rykten)
   const p = berattelse.platser[id]; return p && (when === 'natt' ? p.rykteNatt : p.rykte);
 }
-function hearRumor(key){
+function hearRumor(key, quiet){
   if (!rumorText(key) || S.rykten.includes(key)) return;
-  S.rykten.push(key); saveSoon(); toast(`Nytt rykte: ${rumorText(key)}`); renderRumors();
+  S.rykten.push(key); saveSoon(); if (!quiet) toast(`Nytt rykte: ${rumorText(key)}`); renderRumors();
 }
 // A rumour can be ticked off like a checklist: tap it and it is struck through and green (S.ryktenKlara), tap again to undo
 function renderRumors(){
@@ -2046,7 +2054,8 @@ function showGive(){
 panel.addEventListener('click', ev => { const b = ev.target.closest('button[data-ge]'); if (!b) return; debugGive(b.dataset.ge); renderPack(); renderBook(); toast(`${SAKER[b.dataset.ge].namn} lades till.`); giveList(); });
 $('#btnGeRykten').addEventListener('click', () => {
   const keys = [...Object.keys(SAKER).filter(id => SAKER[id].rykte).map(id => 'sak:' + id),
-    ...Object.entries(berattelse.platser).flatMap(([id, p]) => [p.rykte && `plats:${id}:dag`, p.rykteNatt && `plats:${id}:natt`].filter(Boolean))];
+    ...Object.entries(berattelse.platser).flatMap(([id, p]) => [p.rykte && `plats:${id}:dag`, p.rykteNatt && `plats:${id}:natt`].filter(Boolean)),
+    ...Object.keys(berattelse.rykten || {}).map(id => 'rykte:' + id)];
   for (const k of keys) if (!S.rykten.includes(k)) S.rykten.push(k);
   renderRumors(); toast('Alla rykten lades i listan.');
 });

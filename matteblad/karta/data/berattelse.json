@@ -2718,7 +2718,12 @@
         "Två sorter! En till, så tar jag dig till mitt ställe."
       ],
       "nog": "Tre olika sorter! Du kan fiska, det syns. Följ stigen ner mot sjön, så får du se mitt ställe. Där nappar fiskar man inte ser någon annanstans.",
-      "hattTack": "Min hatt! Den blåste av mig natten då skeppet seglade förbi. Behåll den du, den klär dig bättre än mig. Men följ stigen ner mot sjön, så får du se mitt ställe."
+      "hattTack": "Min hatt! Den blåste av mig natten då skeppet seglade förbi. Behåll den du, den klär dig bättre än mig. Men följ stigen ner mot sjön, så får du se mitt ställe.",
+      "rykten": [
+        "rykte:stalle",
+        "rykte:hatt"
+      ],
+      "paminn": "Tre olika sorters fisk, eller min gamla hatt med den röda flugan. Då tar jag dig till mitt ställe."
     }
   },
   "stjarnvaktarna": {
@@ -3070,5 +3075,9 @@
         "igen": "Titta på dammen. Ibland lyser det därnere, som om någon har tappat en stjärna."
       }
     }
+  },
+  "rykten": {
+    "stalle": "Nattfiskaren har ett eget ställe vid sjön. Han visar det för den som har fångat tre olika sorters fisk.",
+    "hatt": "Nattfiskaren tappade sin gamla fiskehatt med en röd fluga i sjön natten då skeppet kom. Den som hittar den får se hans ställe."
   }
 }
