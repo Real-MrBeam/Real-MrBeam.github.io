@@ -206,7 +206,8 @@ function spela(ctx, dest, index, t0) {
 }
 
 // ---------- the player on the page: the songs take turns with a short pause between them
-const P = { ctx: null, master: null, bus: null, next: { dag: 0, natt: 0 }, end: 0, timer: 0, on: false, vol: .35, natt: false };
+// Each time the game starts, the first song of the day and of the night is picked at random (Peter 2026-10-22), then they take turns
+const P = { ctx: null, master: null, bus: null, next: { dag: Math.floor(Math.random() * 60), natt: Math.floor(Math.random() * 60) }, end: 0, timer: 0, on: false, vol: .35, natt: false };
 // Off and on again carries on in the same song where it stopped (the sound is only paused). Day and night switch the song at once.
 function start() {
   if (P.on) return;

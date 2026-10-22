@@ -30,7 +30,7 @@
     "sjo": {
       "namn": "Sjöviken",
       "text": "En vik där vattnet ligger blankt och stilla. Vassen vajar längs stranden.",
-      "rykte": "Folk säger att något stort simmar runt i sjön."
+      "rykte": "Folk säger att något stort simmar runt i sjön och gömmer sig i Vassen."
     },
     "fiske": {
       "namn": "Fiskeläget",
@@ -102,7 +102,7 @@
       "namn": "Udden",
       "text": "En smal udde av gräs sticker ut i sjön. Någon har lagt en platt sten vid vattnet att sitta på.",
       "natt": "Månen speglar sig i sjön. Bakom dig lyser tältet mellan träden.",
-      "rykteNatt": "Nattfiskaren säger att laken och gösen bara nappar vid Udden när det är mörkt."
+      "rykteNatt": "Nattfiskaren säger att konstiga nya fiskar har dykt upp i sjön sedan det lysande skeppet började segla där om nätterna."
     }
   },
   "portar": {
@@ -350,8 +350,8 @@
     "honungsburk": {
       "namn": "Honungsburk",
       "text": "Honung från Bosses bin, söt och tjock.",
-      "typ": "lockbete",
-      "rykte": "Björnarna i skogen sägs inte kunna motstå honung."
+      "typ": "lock",
+      "rykte": "Björnarna i Höstskogen sägs inte kunna motstå honung."
     },
     "humleagg": {
       "namn": "Humleägg",
@@ -374,8 +374,8 @@
     "glodsvamp": {
       "namn": "Glödsvamp",
       "text": "En svamp som lyser som en liten lykta.",
-      "typ": "agn",
-      "rykte": "Något i mörkt vatten sägs gilla ljus."
+      "typ": "lock",
+      "rykte": "Något i det mörka vattnet under Södra bron sägs gilla ljus."
     },
     "sporpase": {
       "namn": "Sporpåse",
@@ -398,14 +398,14 @@
     "appelpaj": {
       "namn": "Äppelpaj",
       "text": "Nybakad och fortfarande ljummen.",
-      "typ": "lockbete",
-      "rykte": "Björnarna i skogen följer doften av äppelpaj långa vägar."
+      "typ": "lock",
+      "rykte": "Björnarna i Höstskogen följer doften av äppelpaj långa vägar."
     },
     "flotte": {
       "namn": "Flotte",
       "text": "En flotte av timmer, stadig nog för en.",
       "typ": "verktyg",
-      "rykte": "Om nätterna hörs något som liknar fiol från älven."
+      "rykte": "Om nätterna hörs något som liknar fiol från älven vid Norra bron."
     },
     "snorkel": {
       "namn": "Snorkel",
@@ -422,7 +422,8 @@
     "flugask": {
       "namn": "Flugask",
       "text": "Ovanliga flugor i en liten ask.",
-      "typ": "agn"
+      "typ": "lock",
+      "rykte": "Fia säger att forsen vid Norra bron gömmer något som vill ha flugor."
     },
     "hav": {
       "namn": "Håv",
@@ -445,35 +446,38 @@
     "blabar": {
       "namn": "Lysande blåbär",
       "text": "Blåbär som lyser svagt i mörkret.",
-      "typ": "agn",
-      "rykte": "Det stora som simmar i sjön sägs älska lysande bär."
+      "typ": "lock",
+      "rykte": "Det stora som simmar i sjön kommer bara in i Vassen för lysande bär."
     },
     "lysmask": {
       "namn": "Lysmaskar",
       "text": "Små maskar som lyser grönt i mörkret.",
-      "typ": "agn"
+      "typ": "lock",
+      "rykte": "Lysmaskar sägs locka fram det som glittrar under Södra bron."
     },
     "silverfluga": {
       "namn": "Silverflugor",
       "text": "Flugor som glänser som silver.",
-      "typ": "agn"
+      "typ": "lock",
+      "rykte": "Den som spelar fiol vid Norra bron sägs inte kunna låta bli silverflugor."
     },
     "snackor": {
       "namn": "Blanka snäckor",
       "text": "Mörka, blanka snäckor från bäcken.",
-      "typ": "agn",
-      "rykte": "Djuren i djupet sägs älska blanka snäckor."
+      "typ": "lock",
+      "rykte": "Det stora som gömmer sig i Vassen sägs älska blanka snäckor."
     },
     "ostbitar": {
       "namn": "Ostbitar",
       "text": "Osttärningar från idrottsfikat. De luktar starkt.",
-      "typ": "agn",
-      "rykte": "Något under bron lär gilla stark lukt."
+      "typ": "lock",
+      "rykte": "Något under Södra bron lär gilla stark lukt."
     },
     "trolldryck": {
       "namn": "Trolldryck",
       "text": "En liten flaska som bubblar av sig själv. Fråga inte vad som är i den.",
-      "typ": "agn"
+      "typ": "lock",
+      "rykte": "Hulda säger att trolldrycken får det stora i Vassen att titta upp."
     },
     "stjarnuggla": {
       "namn": "Stjärnuggla",
@@ -664,6 +668,70 @@
       "text": "En knippa grå örter som Vira har torkat i månljus. De luktar regn.",
       "typ": "fynd",
       "varde": 3
+    },
+    "mask": {
+      "namn": "Mask",
+      "text": "Daggmask som du gräver upp var du vill. Nästan alla fiskar nappar på mask.",
+      "typ": "agn",
+      "alltid": true
+    },
+    "majs": {
+      "namn": "Majs",
+      "text": "Gula majskorn. Rudor, sutare, braxen och mört älskar majs, men gäddor, gösar, abborrar och lakar bryr sig inte.",
+      "typ": "agn",
+      "antal": 5,
+      "gillar": {
+        "ruda": 3,
+        "stjarnruda": 3,
+        "sutare": 3,
+        "braxen": 3,
+        "mort": 2
+      },
+      "nej": [
+        "gadda",
+        "gos",
+        "abborre",
+        "lake"
+      ]
+    },
+    "glimmerskeden": {
+      "namn": "Glimmerskeden",
+      "text": "Ett drag: en blank sked som glittrar när den dras genom vattnet. Gädda, gös, abborre och öring hugger på den, och de stora oftare. Vitfisk bryr sig inte. Den tar inte slut, men går linan av följer den med fisken.",
+      "typ": "agn",
+      "sort": "drag",
+      "stor": true,
+      "tappas": true,
+      "gillar": {
+        "gadda": 3,
+        "gos": 3,
+        "abborre": 2,
+        "oring": 2,
+        "regnbage": 2
+      },
+      "nej": [
+        "ruda",
+        "stjarnruda",
+        "sutare",
+        "braxen",
+        "mort",
+        "sik",
+        "mansik"
+      ],
+      "egennamn": true
+    },
+    "manbete": {
+      "namn": "Viras månbete",
+      "text": "Små kulor av månört och mjöl som Vira har rullat. De lyser svagt. Månsik, lake, gös och stjärnruda nappar gärna på dem, och de stora oftare.",
+      "typ": "agn",
+      "antal": 5,
+      "stor": true,
+      "gillar": {
+        "mansik": 3,
+        "lake": 3,
+        "gos": 2,
+        "stjarnruda": 2
+      },
+      "egennamn": true
     }
   },
   "bygg": {
@@ -2202,7 +2270,14 @@
           "silverfluga",
           "flugask"
         ],
-        "text": "Vattnet i forsen blir alldeles stilla. Någon spelar fiol under ytan, och upp ur skummet stiger en gestalt med långt mörkt hår och en fiol under armen."
+        "text": "Vattnet i forsen blir alldeles stilla. Någon spelar fiol under ytan, och upp ur skummet stiger en gestalt med långt mörkt hår och en fiol under armen.",
+        "rykten": [
+          "plats:norrabron:natt",
+          "sak:flugspo",
+          "sak:flotte",
+          "sak:silverfluga",
+          "sak:flugask"
+        ]
       },
       {
         "djur": "sigge",
@@ -2217,7 +2292,14 @@
           "trolldryck",
           "blabar"
         ],
-        "text": "Vassen böjer sig. En puckel, och sedan en till, glider fram genom vattnet. Ett vänligt huvud på en lång hals tittar upp och nosar på agnet."
+        "text": "Vassen böjer sig. En puckel, och sedan en till, glider fram genom vattnet. Ett vänligt huvud på en lång hals tittar upp och nosar nyfiket på det du har med dig.",
+        "rykten": [
+          "plats:sjo:dag",
+          "sak:kraftbur",
+          "sak:blabar",
+          "sak:snackor",
+          "sak:trolldryck"
+        ]
       },
       {
         "djur": "linnea",
@@ -2231,7 +2313,14 @@
           "lysmask",
           "ostbitar"
         ],
-        "text": "Ljuset sjunker ner i det mörka vattnet under bron. Där nere glittrar fjäll, och en smal ormdrake ringlar upp mot ljuset och lägger sig i din hand."
+        "text": "Ljuset sjunker ner i det mörka vattnet under bron. Där nere glittrar fjäll, och en smal ormdrake ringlar upp mot ljuset och lägger sig i din hand.",
+        "rykten": [
+          "sak:hav",
+          "sak:snorkel",
+          "sak:glodsvamp",
+          "sak:ostbitar",
+          "sak:lysmask"
+        ]
       }
     ],
     "fiskar": {
@@ -2290,7 +2379,7 @@
       },
       "groda": {
         "namn": "Groda",
-        "text": "Ingen fisk, men den hoppade upp på kroken ändå.",
+        "text": "Ingen fisk, men den hoppade in i håven ändå.",
         "vikt": [
           0.02,
           0.1
@@ -2397,21 +2486,9 @@
     "texter": {
       "rubrik": "Här går det att fiska",
       "knapp": "Fiska",
-      "valj": "Välj redskap och agn och kasta ut.",
-      "utanAgn": "Inget agn",
-      "kasta": "Kasta ut",
-      "vanta": "Du väntar och tittar på flötet.",
-      "nu": "Det nappar.",
-      "dra": "Dra upp",
-      "tidigt": "Du drog för tidigt, och fisken simmade iväg. Agnet sitter kvar.",
-      "sent": "Flötet hann komma upp igen innan du drog. Fisken slapp, men agnet sitter kvar.",
+      "valj": "Välj vad du vill fiska med.",
       "igen": "Försök igen",
       "tillbaka": "Tillbaka",
-      "ingetNapp": "Något nosade på agnet men släppte det igen. Agnet sitter kvar, kanske passar det bättre någon annanstans.",
-      "agnFelPlats": "Agnet lockar något, men inte här. Det finns nog ett annat vatten där det passar bättre.",
-      "agnFelRedskap": "Något nere i vattnet är sugen på agnet, men det går inte att få upp det med det här redskapet.",
-      "platsFelAgn": "Något rör sig nere i vattnet här, men det vill ha något annat än det du erbjuder.",
-      "fynd": "Något tungt hänger på kroken. Det är ingen fisk.",
       "ingetSpo": "Du har inget att fiska med. Någon i skogen sägs sälja spön, men bara på natten.",
       "ingetHar": "Det här redskapet fångar inget i det här vattnet.",
       "tillbaka3": "Du har redan tre sådana, så du släpper tillbaka den i vattnet.",
@@ -2426,7 +2503,11 @@
       "linan": "Linan",
       "brast": "Linan gick av, och fisken simmade iväg. Vänta när den drar, så håller linan.",
       "loss": "Du vevade inte på en stund, och fisken slet sig loss.",
-      "tillbakaRekord": "Den är tyngre än alla du har fått förut! Du skriver in vikten i fiskboken och släpper tillbaka den, du har ju redan tre."
+      "tillbakaRekord": "Den är tyngre än alla du har fått förut! Du skriver in vikten i fiskboken och släpper tillbaka den, du har ju redan tre.",
+      "agn": "Agn",
+      "sarskilt": "Särskilt",
+      "ingetPaAgn": "Ingen fisk här vill ha {agn}. Prova ett annat agn.",
+      "brastDrag": "Linan gick av, och {agn} följde med fisken ner i djupet."
     },
     "fynd": [
       "stovel",
@@ -2496,10 +2577,61 @@
         "kraft": 0.4
       }
     },
-    "spon": [
-      "metspo",
-      "flugspo"
-    ]
+    "verktyg": {
+      "metspo": "spo",
+      "flugspo": "spo",
+      "kraftbur": "bur",
+      "hav": "hav",
+      "flotte": "flotte",
+      "snorkel": "snorkel"
+    },
+    "satt": {
+      "spo": {
+        "kasta": "Kasta ut",
+        "vanta": "Du väntar och tittar på flötet.",
+        "nu": "Det nappar!",
+        "dra": "Dra upp",
+        "tidigt": "Du drog för tidigt, och fisken simmade iväg. Agnet sitter kvar.",
+        "sent": "Flötet hann komma upp igen innan du drog. Fisken slapp, men agnet sitter kvar.",
+        "fynd": "Något tungt hänger på kroken. Det är ingen fisk."
+      },
+      "bur": {
+        "kasta": "Sänk ner buren",
+        "vanta": "Buren ligger på botten. Du väntar och håller i repet.",
+        "nu": "Det rycker i repet!",
+        "dra": "Dra upp buren",
+        "tidigt": "Du drog upp buren för tidigt. Den var tom.",
+        "sent": "Du väntade för länge, och det som var i buren hann krypa ut igen.",
+        "fynd": "Något tungt ligger i buren. Det är ingen fisk."
+      },
+      "hav": {
+        "kasta": "Sänk ner håven",
+        "vanta": "Du håller håven stilla i vattnet och väntar.",
+        "nu": "Något simmar in i håven!",
+        "dra": "Lyft håven",
+        "tidigt": "Du lyfte håven för tidigt, och det hann simma undan.",
+        "sent": "Du väntade för länge, och det hoppade ur håven igen.",
+        "fynd": "Något tungt fastnade i håven. Det är ingen fisk."
+      },
+      "flotte": {
+        "kasta": "Flyt ut på flotten",
+        "vanta": "Du flyter stilla på flotten och väntar.",
+        "nu": "Vattnet rör sig under flotten!",
+        "dra": "Titta ner",
+        "tidigt": "Du tittade ner för tidigt, och det försvann i djupet.",
+        "sent": "Du väntade för länge, och det försvann i djupet.",
+        "fynd": "Något flöt upp bredvid flotten. Det är ingen fisk."
+      },
+      "snorkel": {
+        "kasta": "Dyk ner",
+        "vanta": "Du flyter med ansiktet i vattnet och tittar.",
+        "nu": "Något glittrar där nere!",
+        "dra": "Simma närmare",
+        "tidigt": "Du simmade fram för tidigt, och det gömde sig.",
+        "sent": "Du väntade för länge, och det gömde sig.",
+        "fynd": "Du hittade något på botten. Det är ingen fisk."
+      }
+    }
   },
   "locka": [
     {
@@ -2512,7 +2644,11 @@
       "rubrik": "Något stort rör sig mellan de orange träden",
       "knapp": "Bjud på något sött",
       "saknas": "Det nosar och väntar, som om det vill ha något sött.",
-      "text": "Grenarna knakar, och en stor björn kliver fram ur löven. Den nosar försiktigt, äter upp allt du har bjudit på och lägger sig sedan bredvid dig som om ni alltid har känt varandra."
+      "text": "Grenarna knakar, och en stor björn kliver fram ur löven. Den nosar försiktigt, äter upp allt du har bjudit på och lägger sig sedan bredvid dig som om ni alltid har känt varandra.",
+      "rykten": [
+        "sak:honungsburk",
+        "sak:appelpaj"
+      ]
     }
   ],
   "handel": {
@@ -2527,14 +2663,28 @@
     "saljer": {
       "metspo": 5,
       "lykta": 6,
-      "flojt": 4
+      "flojt": 4,
+      "glimmerskeden": 4
     },
     "kopt": {
       "metspo": "Ett bra spö. Fisken nappar bäst när man har tålamod.",
       "lykta": "Den lyser inte av sig själv, du måste tända den. Men det vet du nog.",
-      "flojt": "Jag har aldrig fått en riktig ton ur den. Kanske har du bättre tur. Eller så är det platsen som är fel."
+      "flojt": "Jag har aldrig fått en riktig ton ur den. Kanske har du bättre tur. Eller så är det platsen som är fel.",
+      "glimmerskeden": "Glimmerskeden. Gäddorna kan inte låta bli den. Men vänta när de drar, annars följer den med ner.",
+      "majs": "Majs. Rudorna älskar det, gäddorna fnyser åt det."
     },
-    "baraSaljer": "God natt, eller god kväll, beroende på hur man ser det. Jag har lite att sälja, om du vill titta."
+    "baraSaljer": "God natt, eller god kväll, beroende på hur man ser det. Jag har lite att sälja, om du vill titta.",
+    "agn": {
+      "majs": {
+        "pris": 2,
+        "antal": 5
+      }
+    },
+    "prat": [
+      "Ända sedan jag såg det där lysande skeppet på sjön har det nappat fiskar som jag aldrig har sett förut. Stjärnrudor och månsikar. Konstiga saker.",
+      "Skeppet seglar bara när det är mörkt. Jag har ropat på det, men ingen svarar.",
+      "Majs till rudorna, Glimmerskeden till gäddorna och mask till allt annat. Det är hela hemligheten."
+    ]
   },
   "stjarnvaktarna": {
     "rubrik": "Ett brev ligger på trappan",
@@ -2847,6 +2997,23 @@
             ]
           }
         }
+      }
+    }
+  },
+  "vira": {
+    "person": "vira",
+    "plats": "host",
+    "efter": "natt:host",
+    "rubrik": "Vira sitter vid elden",
+    "knapp": "Prata med Vira",
+    "hej": "Kommer du för månbetet? Jag rullar det av månört och mjöl. Fiskarna som simmar i mörkret kan inte låta bli det.",
+    "tack": "Här. Lägg det på kroken när månen är uppe.",
+    "tackByt": "Månört! Då rullar jag nya kulor åt dig med en gång.",
+    "agn": {
+      "manbete": {
+        "pris": 3,
+        "antal": 5,
+        "byt": "manort"
       }
     }
   }

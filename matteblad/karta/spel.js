@@ -123,6 +123,7 @@ const FISH = sprite([
   ".oBBBBo..oBo", "..oooo....o."], { o:'#3f2631', b:'#8b9bb4', B:'#5a6988', w:'#ffffff', k:'#262b44' });
 // The float on the line, and the splash when it is pulled under
 const FLOAT = sprite(["...oo...", "...oo...", "..orro..", ".orrrro.", ".orrrro.", ".owwwwo.", ".owwwwo.", "..owwo..", "...oo..."], { o:'#3f2631', r:'#e43b44', w:'#ffffff' });
+const BUBBLES = sprite(["...oo.......", "..o..o...o..", "...oo...o.o.", ".........o..", "....o.......", "...o.o......", "....o......."], { o:'#ffffff' });
 const SPLASH = sprite(["..w....w....", "w..w..w..w.w", ".w.wwwww.w..", "..wwbbbbww..", ".wwbbbbbbww."], { w:'#ffffff', b:'#c0eaff' });
 // A picture for each kind of catch: the plain fish with other colours and markings, and own shapes for the pike, the grayling,
 // the frog and the crayfish (own drawings)
@@ -341,7 +342,7 @@ let REAL = null; // { stars, stoft, handelser } once the locked events have been
 const START = () => ({
   stars: REAL ? REAL.stars : startData.stjarnor, coins: REAL ? REAL.stoft : startData.stjarnstoft, node: startData.plats,
   built: Object.fromEntries(startData.byggt.map(id => [id, true])),
-  valda: {}, saker: [], steg: {}, handlat: {}, djur: [], fram: [], stopp: {}, hittat: [], spent: 0, kistor: [], agnAnvant: [], fiskbok: {}, rekord: {}, namn: {}, bytt: {}, salt: {}, pa: {}, rykten: [],
+  valda: {}, saker: [], steg: {}, handlat: {}, djur: [], fram: [], stopp: {}, hittat: [], spent: 0, kistor: [], agnAnvant: [], agnLager: {}, fiskbok: {}, rekord: {}, namn: {}, bytt: {}, salt: {}, pa: {}, rykten: [],
   sett: new Uint8Array(MW*MH),
   log: REAL ? REAL.handelser.slice() : startData.logg.map(r => ({ typ: 'runa', amne: r.amne, procent: Math.round(r.poang / r.max * 100), stjarnor: r.stjarnor, bonus: r.bonus })),
   testIdx: 0,
@@ -952,11 +953,14 @@ function tradeOffers(){
 }
 function startTrade(seen){
   const H = berattelse.handel, offers = tradeOffers();
-  const wares = Object.entries(H.saljer || {}).filter(([id]) => !S.saker.includes(id));
-  // what he says depends on whether he has something to sell and whether there is fish to buy
-  const hello = wares.length ? H.hej : H.inget;   // he only sells now, he buys no fish (Peter 2026-10-20)
+  const wares = Object.entries(H.saljer || {}).filter(([id]) => !S.saker.includes(id)), packs = Object.entries(H.agn || {});
+  // he only sells, he buys no fish (Peter 2026-10-20). When he first greets he says one of several things (prat), one of them
+  // about the strange fish since the ship came (Peter 2026-10-22)
+  const talk = [H.hej, ...(H.prat || [])];
+  const hello = !wares.length && !packs.length ? H.inget : seen ? H.hej : talk[Math.floor(Math.random() * talk.length)];
   startDialog([{ p: H.person, t: hello }], () => [
-    ...wares.map(([id, n]) => ({ label: `Köp ${esc(SAKER[id].namn.toLowerCase())} ${price(n)}<small>${esc(SAKER[id].text)}</small>`, poor: S.coins < n, run: () => buyFrom(id, n) })),
+    ...wares.map(([id, n]) => ({ label: `Köp ${esc(nameIn(id))} ${price(n)}<small>${esc(SAKER[id].text)}</small>`, poor: S.coins < n, run: () => buyFrom(id, n) })),
+    ...packs.map(([id, o]) => ({ label: `Köp ${esc(nameIn(id))}, ${o.antal} st ${price(o.pris)}<small>${esc(SAKER[id].text)}</small>`, poor: S.coins < o.pris, run: () => buyPack(id, o, H.person, H.kopt[id], () => startTrade(true)) })),
     ...offers.map(o => ({ label: `Sälj ${esc(o.namn.toLowerCase())} ${price(o.n)}<small>${esc(o.text)}</small>`, run: () => sellTo(o) })),
     { label: 'Tillbaka till kartan', alt: true, run: toNode },
   ], seen);
@@ -966,12 +970,42 @@ function buyFrom(id, n){
   if (S.coins < n){ toast(berattelse.dialog.ingaStoft.replace('{n}', n - S.coins)); return; }
   spend(n); updateHud('coins'); S.saker.push(id); renderPack(); saveSoon();
   sparkle(boy.x + 8, boy.y + 2, 18);
-  toast(`Du köpte ${SAKER[id].namn.toLowerCase()}!`);
+  toast(`Du köpte ${nameIn(id)}!`);
   const K = berattelse.handel.kopt;
   startDialog([{ p: berattelse.handel.person, t: typeof K === 'string' ? K : K[id] }], () => [
     { label: 'Något mer', run: () => startTrade(true) },
     { label: 'Tillbaka till kartan', alt: true, run: toNode },
   ]);
+}
+// A pack of bait can be bought again and again (handel agn, vira agn)
+const addBait = (id, n) => { S.agnLager[id] = (S.agnLager[id] || 0) + n; renderPack(); saveSoon(); };
+function buyPack(id, o, who, line, back){
+  if (S.coins < o.pris){ toast(berattelse.dialog.ingaStoft.replace('{n}', o.pris - S.coins)); return; }
+  spend(o.pris); updateHud('coins'); addBait(id, o.antal);
+  sparkle(boy.x + 8, boy.y + 2, 18);
+  toast(`${SAKER[id].namn}, ${o.antal} st, lades i väskan.`);
+  startDialog([{ p: who, t: line }], () => [{ label: 'Något mer', run: back }, { label: 'Tillbaka till kartan', alt: true, run: toNode }]);
+}
+// After her adventure Vira sits by her fire in Höstskogen every night and rolls moon bait (berattelse vira): for stardust, or
+// for the dried moonwort she once gave him
+const VIRA = berattelse.vira;
+const viraHere = () => VIRA && S.natt && S.stopp[VIRA.efter];
+function viraBlock(){
+  const here = S.node === VIRA.plats && !boy.route;
+  return `<div class="plot"><div><b>${esc(VIRA.rubrik)}</b></div>${here ? `<button class="btn" type="button" data-vira="1">${esc(VIRA.knapp)}</button>` : ''}</div>`;
+}
+function startVira(seen){
+  const back = () => startVira(true);
+  startDialog([{ p: VIRA.person, t: VIRA.hej }], () => [
+    ...Object.entries(VIRA.agn).flatMap(([id, o]) => [
+      { label: `Köp ${esc(nameIn(id))}, ${o.antal} st ${price(o.pris)}<small>${esc(SAKER[id].text)}</small>`, poor: S.coins < o.pris, run: () => buyPack(id, o, VIRA.person, VIRA.tack, back) },
+      ...(o.byt && S.saker.includes(o.byt) ? [{ label: `Byt ${esc(SAKER[o.byt].namn.toLowerCase())} mot ${o.antal} st<small>${esc(SAKER[o.byt].text)}</small>`, run: () => {
+        S.saker = S.saker.filter(x => x !== o.byt); addBait(id, o.antal); toast(`${SAKER[id].namn}, ${o.antal} st, lades i väskan.`);
+        startDialog([{ p: VIRA.person, t: VIRA.tackByt }], () => [{ label: 'Något mer', run: back }, { label: 'Tillbaka till kartan', alt: true, run: toNode }]);
+      } }] : []),
+    ]),
+    { label: 'Tillbaka till kartan', alt: true, run: toNode },
+  ], seen);
 }
 function sellTo(o){
   if (S.salt[o.key]) return;
@@ -1016,6 +1050,7 @@ function renderPanel(view){
     if (day) for (const p of plots) h += plotBlock(p);
     if (day && stop) h += stopBlock(n.id);
     if (!day && NATTSTOPP[n.id]) h += stopBlock('natt:' + n.id);
+    if (viraHere() && n.id === VIRA.plats) h += viraBlock();
     if (n.id === 'hem') h += sleepBlock();
     if (n.id === 'hem' && letterWaiting()) h += letterBlock();
     if (FS && n.id === FS.plats && !S.brevFiske) h += fishLetterBlock();
@@ -1081,10 +1116,11 @@ panel.addEventListener('click', ev => {
   else if (b.dataset.brev) readLetter2();
   else if (b.dataset.fbrev) readFishLetter();
   else if (b.dataset.handel) startTrade();
+  else if (b.dataset.vira) startVira();
   else if (b.dataset.lan) talkFisher(b.dataset.lan);
   else if (b.dataset.locka) lure(b.dataset.locka);
   else if (b.dataset.redskap !== undefined){ fishing.redskap = b.dataset.redskap; renderFishing(); }
-  else if (b.dataset.agn !== undefined){ fishing.agn = b.dataset.agn; renderFishing(); }
+  else if (b.dataset.agn !== undefined){ const id = b.dataset.agn; fishing.agn = fishing.agn === id && SAKER[id].typ === 'lock' ? '' : id; renderFishing(); }
   else if (b.dataset.kasta) cast();
   else if (b.dataset.dra) pull();
   else if (b.dataset.veva) veva();
@@ -1385,18 +1421,18 @@ function startCount(){
   ]);
 }
 
-// Categories of things in the bag, each with its own small pixel icon (Peter 2026-10-20). Special things have a secret or a task.
+// Categories of things in the bag, each with its own small pixel icon (Peter 2026-10-20). Special things have a secret or a task,
+// and the things that call forth an animal (typ lock) are special too (Peter 2026-10-22).
 const SPECIAL = ['lykta', 'flaskat', 'eldflugor', 'flojt'];
 const KAT = {
   sarskilt: { namn: 'Särskilt', ico: sprite(["........", ".yy.....", "y..y....", "y..yyyyy", ".yy..y.y", "........", "........", "........"], { y:'#fee761' }) },
   redskap: { namn: 'Redskap', ico: sprite(["....ss..", "....ss..", "....ss..", "....ss..", "s...ss..", "ss..ss..", ".ssss...", "..ss...."], { s:'#c0cbdc' }) },
   agn: { namn: 'Agn', ico: sprite(["........", "pp......", "ppp...pp", ".ppp.ppp", "..ppppp.", "...ppp..", "........", "........"], { p:'#f6757a' }) },
-  lockbete: { namn: 'Lockbeten', ico: sprite(["........", "..oooo..", ".owwwwo.", ".oyyyyo.", ".oyYyyo.", ".oyyyyo.", "..oooo..", "........"], { o:'#8b5a3c', w:'#ead4aa', y:'#feae34', Y:'#fee761' }) },
   klader: { namn: 'Kläder', ico: sprite(["........", "...yy...", "..yyyy..", "..yyyy..", "..RRRR..", "yyyyyyyy", ".yyyyyy.", "........"], { y:'#f4d27a', R:'#e43b44' }) },
   fynd: { namn: 'Fynd', ico: sprite(["........", ".cccccc.", "cwCccCcc", "cCccccCc", ".cCccCc.", "..cCCc..", "...cc...", "........"], { c:'#2ce8f5', C:'#0e5cae', w:'#ffffff' }) },
 };
-const KAT_ORDER = ['sarskilt', 'redskap', 'agn', 'lockbete', 'klader', 'fynd'];
-const katOf = id => SPECIAL.includes(id) ? 'sarskilt' : SAKER[id].typ === 'verktyg' ? 'redskap' : SAKER[id].typ;
+const KAT_ORDER = ['sarskilt', 'redskap', 'agn', 'klader', 'fynd'];
+const katOf = id => SPECIAL.includes(id) || SAKER[id].typ === 'lock' ? 'sarskilt' : SAKER[id].typ === 'verktyg' ? 'redskap' : SAKER[id].typ;
 let KAT_URL = null;
 const katIcon = k => { if (!KAT_URL) KAT_URL = Object.fromEntries(Object.entries(KAT).map(([key, v]) => [key, iconURL(v.ico, 3)])); return KAT_URL[k]; };
 // Rumours: the hints that used to be in the texts of things. A thing's rumour (saker rykte) is heard when he gets it, a place's
@@ -1426,8 +1462,10 @@ $('#rykten').addEventListener('click', ev => toggleRumor(ev.target.closest('li[d
 $('#rykten').addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key === ' '){ const li = ev.target.closest('li[data-rykte]'); if (li){ ev.preventDefault(); toggleRumor(li); } } });
 function renderPack(){
   if (S.rykten) for (const id of S.saker) if (SAKER[id] && SAKER[id].rykte && !S.rykten.includes('sak:' + id)) hearRumor('sak:' + id);
-  const own = S.saker.filter(id => SAKER[id] && SAKER[id].typ !== 'djur' && !S.agnAnvant.includes(id)) // used baits are gone
-    .sort((a, b) => KAT_ORDER.indexOf(katOf(a)) - KAT_ORDER.indexOf(katOf(b)));
+  // used things that call forth an animal are gone; mask is there as soon as he has a rod, a pack while some is left
+  const packs = myBaits().filter(id => !S.saker.includes(id) && (SAKER[id].antal || myTools().some(isRod)));
+  const own = [...S.saker.filter(id => SAKER[id] && SAKER[id].typ !== 'djur' && !S.agnAnvant.includes(id)), ...packs]
+    .sort((a, b) => KAT_ORDER.indexOf(katOf(a)) - KAT_ORDER.indexOf(katOf(b)) || (SAKER[b].alltid ? 1 : 0) - (SAKER[a].alltid ? 1 : 0));
   $('#pack').innerHTML = own.length
     ? own.map(id => { const it = SAKER[id], on = it.typ === 'klader' && S.pa[it.plats] === id;
         // Things that can be used are tapped like the runes in the list: clothes go on and off, the lantern is lit, the flute plays
@@ -1435,7 +1473,7 @@ function renderPack(){
         const usable = it.typ === 'klader' || light || id === 'flojt';
         const lit = light && S.tant && S.tant[id];
         const title = it.typ === 'klader' ? (on ? 'Ta av' : 'Ta på') : light ? (lit ? 'Släck' : 'Tänd') : id === 'flojt' ? 'Spela' : '';
-        const state = on ? 'på' : lit ? 'tänd' : '';
+        const state = on ? 'på' : lit ? 'tänd' : it.antal ? `${S.agnLager[id]} st` : '';
         const k = katOf(id);
         return `<li${usable ? ` class="readable" data-use="${id}" role="button" tabindex="0" title="${title}"` : ''}><img class="pix" src="${katIcon(k)}" alt="${KAT[k].namn}" title="${KAT[k].namn}"><span><b>${esc(it.namn)}</b> ${esc(it.text)}</span>${state ? `<span class="st">${state}</span>` : ''}</li>`; }).join('')
     : '<li><span>Inget ännu. Bygg något och få en gåva!</span></li>';
@@ -1487,7 +1525,7 @@ function applyReal(events){
 // encrypted in the page (#lasNyckel) and opens with the password, like the portraits. Without the key nothing is saved.
 // Stars and stardust are never saved: they are counted from the runes and scrolls. Only what he has spent is saved.
 const SAVE = { repo: '', file: '', key: '', sha: null, timer: 0, off: false, loaded: false };
-const SAVED_FIELDS = ['node', 'built', 'valda', 'saker', 'steg', 'handlat', 'djur', 'fram', 'stopp', 'hittat', 'spent', 'kistor', 'agnAnvant', 'fiskbok', 'namn', 'bytt', 'intro', 'natt', 'salt', 'lasta', 'pa', 'tant', 'brev2', 'rykten', 'brevFiske', 'ryktenKlara', 'rekord'];
+const SAVED_FIELDS = ['node', 'built', 'valda', 'saker', 'steg', 'handlat', 'djur', 'fram', 'stopp', 'hittat', 'spent', 'kistor', 'agnAnvant', 'fiskbok', 'namn', 'bytt', 'intro', 'natt', 'salt', 'lasta', 'pa', 'tant', 'brev2', 'rykten', 'brevFiske', 'ryktenKlara', 'rekord', 'agnLager'];
 const b64 = text => { const bytes = new TextEncoder().encode(text); let s = ''; for (const b of bytes) s += String.fromCharCode(b); return btoa(s); };
 const unb64 = data => new TextDecoder().decode(Uint8Array.from(atob(data.replace(/\s/g, '')), c => c.charCodeAt(0)));
 function spend(n){ S.coins -= n; S.spent += n; }
@@ -1614,14 +1652,31 @@ function openModal(steps, done){
 }
 
 /* ---------- fiske ---------- */
-// At a fishing place he picks a tool (the rod he always has, or a tool he has bought) and a bait he has not used yet,
-// casts, and pulls when the float dips. Too early or too late: the fish gets away but the bait stays. A catch uses up the
-// bait (each kind of bait only once). A water animal bites at its own place with one of its tools and one of its baits,
-// otherwise it is an ordinary fish for the fish book.
+// At a fishing place he picks a tool and, for a rod, a bait, casts and pulls when it bites. Too early or too late: the fish
+// gets away but the bait stays. Mask is always there; other baits come in packs (S.agnLager) or once, like the spoon, and
+// change which kinds bite (saker gillar, nej) and how big they are (stor). A thing that calls forth a water animal (typ lock,
+// Särskilt in the bag) is only offered at the animal's own place, with one of its tools, once he has heard a rumour that points
+// there (fiske.djur rykten, Peter 2026-10-22). Each tool has its own words (fiske.satt): only a rod has a hook and a float.
 const FISKE = berattelse.fiske;
 let fishing = null; // { plats, redskap, agn, phase: 'val' | 'vanta' | 'nu' | 'kamp' | 'miss', timers, loop, kamp }
 const myTools = () => ['metspo', ...FISKE.redskap].filter(id => S.saker.includes(id));
-const myBaits = () => S.saker.filter(id => SAKER[id] && SAKER[id].typ === 'agn' && !S.agnAnvant.includes(id));
+const isRod = tool => FISKE.verktyg[tool] === 'spo';
+const SATT = fz => FISKE.satt[FISKE.verktyg[fz.redskap]];
+const hasBait = id => { const it = SAKER[id]; return it.alltid || (it.antal ? (S.agnLager[id] || 0) > 0 : S.saker.includes(id)); };
+const myBaits = () => Object.keys(SAKER).filter(id => SAKER[id].typ === 'agn' && hasBait(id));
+const myLocks = () => S.saker.filter(id => SAKER[id] && SAKER[id].typ === 'lock' && !S.agnAnvant.includes(id));
+const heard = keys => (keys || []).some(k => S.rykten.includes(k));
+const nameIn = id => SAKER[id].egennamn ? SAKER[id].namn : SAKER[id].namn.toLowerCase();
+// the things he can put out here with this tool: for an animal of this place that he has not found and has heard about
+const locksHere = fz => FISKE.djur.filter(r => r.plats === fz.plats && !S.djur.includes(r.djur) && r.redskap.includes(fz.redskap) && heard(r.rykten))
+  .flatMap(r => r.agn.filter(id => myLocks().includes(id)));
+const animalRule = fz => FISKE.djur.find(r => r.plats === fz.plats && r.redskap.includes(fz.redskap) && r.agn.includes(fz.agn) && !S.djur.includes(r.djur) && heard(r.rykten));
+// a rod always has a bait on the hook (mask if nothing else), the other tools never; a choice that no longer fits is reset
+function fixBait(fz){
+  const it = SAKER[fz.agn];
+  const ok = it ? (it.typ === 'lock' ? locksHere(fz).includes(fz.agn) : isRod(fz.redskap) && hasBait(fz.agn)) : !isRod(fz.redskap);
+  if (!ok) fz.agn = isRod(fz.redskap) ? 'mask' : '';
+}
 function fishBlock(id){
   const T = FISKE.texter, here = S.node === id && !boy.route;
   if (!myTools().length) return `<div class="plot"><div><b>${esc(T.rubrik)}</b><span>${esc(T.ingetSpo)}</span></div></div>`;
@@ -1656,7 +1711,7 @@ function sellOrSwap(o){
 }
 function startFishing(id){
   fishing = { plats: id, redskap: myTools()[0], agn: '', phase: 'val', timers: [] };
-  renderFishing();
+  fixBait(fishing); renderFishing();
 }
 function stopFishing(){ if (fishing){ fishing.timers.forEach(clearTimeout); clearInterval(fishing.loop); } fishing = null; }
 function renderFishing(){
@@ -1665,16 +1720,21 @@ function renderFishing(){
   clearInterval(typeTimer); clearInterval(blinkTimer);
   let h = `<span class="tag">Fiske</span><h2>${esc(n.name)}</h2>`;
   if (fz.phase === 'val'){
+    fixBait(fz);
     const tool = (id, name) => `<button class="btn${fz.redskap === id ? '' : ' alt'}" type="button" data-redskap="${id}">${esc(name)}</button>`;
-    const bait = (id, name) => `<button class="btn${fz.agn === id ? '' : ' alt'}" type="button" data-agn="${id}">${esc(name)}</button>`;
+    const pick = id => `<button class="btn${fz.agn === id ? '' : ' alt'}" type="button" data-agn="${id}">${esc(SAKER[id].namn)}${SAKER[id].antal ? ` (${S.agnLager[id]})` : ''}</button>`;
+    // the baits only for a rod (Peter 2026-10-22), the special things only where they can be used
+    const baits = isRod(fz.redskap) ? myBaits() : [], locks = locksHere(fz);
     h += `<p>${esc(T.valj)}</p><div class="panel-body">
       <div><p class="sub">Redskap</p><div class="roads">${myTools().map(id => tool(id, SAKER[id].namn)).join('')}</div></div>
-      <div><p class="sub">Agn</p><div class="roads">${bait('', T.utanAgn)}${myBaits().map(id => bait(id, SAKER[id].namn)).join('')}</div></div>
-      <div class="roads"><button class="btn" type="button" data-kasta="1">${esc(T.kasta)}</button><button class="btn alt" type="button" data-back="1">${esc(T.tillbaka)}</button></div></div>`;
+      ${baits.length ? `<div><p class="sub">${esc(T.agn)}</p><div class="roads">${baits.map(pick).join('')}</div></div>` : ''}
+      ${locks.length ? `<div><p class="sub">${esc(T.sarskilt)}</p><div class="roads">${locks.map(pick).join('')}</div></div>` : ''}
+      <div class="roads"><button class="btn" type="button" data-kasta="1">${esc(SATT(fz).kasta)}</button><button class="btn alt" type="button" data-back="1">${esc(T.tillbaka)}</button></div></div>`;
   } else if (fz.phase === 'vanta' || fz.phase === 'nu'){
-    h += `<p aria-live="polite">${esc(fz.phase === 'nu' ? T.nu : T.vanta)}</p><div class="panel-body">
-      <div class="pond${fz.phase === 'nu' ? ' dip' : ''}">${fz.phase === 'nu' ? `<img class="splash pix" src="${iconURL(SPLASH, 3)}" alt="">` : `<img class="float pix" src="${iconURL(FLOAT, 3)}" alt="">`}</div>
-      <div class="roads"><button class="btn" type="button" data-dra="1">${esc(T.dra)}</button></div></div>`;
+    const s = SATT(fz), still = isRod(fz.redskap) ? `<img class="float pix" src="${iconURL(FLOAT, 3)}" alt="">` : `<img class="float pix" src="${iconURL(BUBBLES, 3)}" alt="">`;
+    h += `<p aria-live="polite">${esc(fz.phase === 'nu' ? s.nu : s.vanta)}</p><div class="panel-body">
+      <div class="pond${fz.phase === 'nu' ? ' dip' : ''}">${fz.phase === 'nu' ? `<img class="splash pix" src="${iconURL(SPLASH, 3)}" alt="">` : still}</div>
+      <div class="roads"><button class="btn" type="button" data-dra="1">${esc(s.dra)}</button></div></div>`;
   } else if (fz.phase === 'kamp'){
     // the fish is a shadow under the water until it is landed; the line runs from the shore (left) to its mouth
     h += `<p aria-live="polite" class="kamp-text">${esc(T.kamp)}</p><div class="panel-body">
@@ -1687,73 +1747,79 @@ function renderFishing(){
   panel.innerHTML = h;
   if (fz.phase === 'kamp') drawFight();
 }
-// The ordinary fish this tool can take at this place (fiske.fangar), and whether all of them are already full (fiske.max of each)
+// The ordinary fish this tool can take at this place (fiske.fangar). fiske.max of each go in the book.
 const MAXFISK = FISKE.max || 99;
 // at night some places have fish that only swim in the dark (fiske.platser fiskarNatt)
 const placeFish = plats => { const p = FISKE.platser[plats]; return S.natt && p.fiskarNatt ? [...p.fiskar, ...p.fiskarNatt] : p.fiskar; };
-const catchable = fz => { const can = FISKE.fangar && FISKE.fangar[fz.redskap]; return placeFish(fz.plats).filter(id => !can || can.includes(id)); };
-const fishedOut = fz => { const l = catchable(fz); return l.length > 0 && l.every(id => (S.fiskbok[id] || 0) >= MAXFISK); };
+const catchList = fz => { const can = FISKE.fangar && FISKE.fangar[fz.redskap]; return placeFish(fz.plats).filter(id => !can || can.includes(id)); };
+// what bites with this bait: the list of a place repeats a fish as many times as it is common there, and the bait makes a kind
+// some times more common (gillar) or keeps it away (nej). A thing for an animal takes no ordinary fish.
+const bites = fz => {
+  const b = SAKER[fz.agn];
+  if (b && b.typ === 'lock') return [];
+  return catchList(fz).map(id => ({ id, w: !b ? 1 : (b.nej || []).includes(id) ? 0 : (b.gillar || {})[id] || 1 })).filter(e => e.w > 0);
+};
+const pickW = l => { let x = Math.random() * l.reduce((a, e) => a + e.w, 0); for (const e of l){ x -= e.w; if (x < 0) return e.id; } return l[l.length - 1].id; };
 function cast(){
-  const fz = fishing;
+  const fz = fishing, s = SATT(fz), T = FISKE.texter;
   // a place is never fished out: with three of a kind there is still a heavier one to catch (rekord)
   fz.phase = 'vanta'; renderFishing();
   // each place has its own wait (fiske.platser vanta: shortest and longest, ms): quick in the rapids, slow in the reeds
   const [lo, hi] = FISKE.platser[fz.plats].vanta || [1500, 4000];
-  const wait = (lo + Math.random() * (hi - lo)) * (fz.agn && SAKER[fz.agn].effekt === 'snabb' ? .5 : 1);   // with worms it bites sooner
+  const wait = lo + Math.random() * (hi - lo);
+  // nothing here takes this bait, or this tool takes nothing here: it never bites, and he is told why
+  if (!animalRule(fz) && !bites(fz).length){
+    fz.timers.push(setTimeout(() => miss(catchList(fz).length && fz.agn ? T.ingetPaAgn.replace('{agn}', nameIn(fz.agn)) : T.ingetHar), wait));
+    return;
+  }
   fz.timers.push(setTimeout(() => { fz.phase = 'nu'; renderFishing(); }, wait));
-  fz.timers.push(setTimeout(() => { if (fz.phase === 'nu') miss(FISKE.texter.sent); }, wait + 1100));
+  fz.timers.push(setTimeout(() => { if (fz.phase === 'nu') miss(s.sent); }, wait + 1100));
 }
 function miss(text){ const fz = fishing; fz.timers.forEach(clearTimeout); fz.timers = []; clearInterval(fz.loop); fz.loop = 0; fz.kamp = null; fz.phase = 'miss'; fz.miss = text; renderFishing(); }
-// What the water says when a bait is offered at a wrong place or with a wrong tool (only for animals he has not found yet)
-function missText(fz){
-  const T = FISKE.texter, open = FISKE.djur.filter(r => !S.djur.includes(r.djur));
-  const baitOk = open.filter(r => r.agn.includes(fz.agn));
-  if (baitOk.some(r => r.plats === fz.plats && !r.redskap.includes(fz.redskap))) return T.agnFelRedskap;
-  if (baitOk.length) return T.agnFelPlats;
-  if (open.some(r => r.plats === fz.plats)) return T.platsFelAgn;
-  return T.ingetNapp;
+// the line snaps: the fish is gone, and a lure (tappas) goes with it
+function snap(){
+  const fz = fishing, b = SAKER[fz.agn];
+  if (!b || !b.tappas) return miss(FISKE.texter.brast);
+  const name = nameIn(fz.agn);
+  S.saker = S.saker.filter(x => x !== fz.agn); fz.agn = 'mask'; renderPack(); saveSoon();
+  miss(FISKE.texter.brastDrag.replace('{agn}', name));
 }
 function pull(){
-  const fz = fishing;
-  if (fz.phase !== 'nu') return miss(FISKE.texter.tidigt);
+  const fz = fishing, s = SATT(fz);
+  if (fz.phase !== 'nu') return miss(s.tidigt);
   fz.timers.forEach(clearTimeout); fz.timers = [];
-  const rule = FISKE.djur.find(r => r.plats === fz.plats && r.redskap.includes(fz.redskap) && r.agn.includes(fz.agn) && !S.djur.includes(r.djur));
-  // A bait for an animal is only used up when the animal bites. With the wrong place or tool nothing takes it, and he keeps it.
-  // A bait with an effect (berattelse saker effekt) works on ordinary fish: worms bite sooner, the dough brings a new kind.
-  const effekt = fz.agn && SAKER[fz.agn].effekt;
-  if (fz.agn && !rule && !effekt) return miss(missText(fz));
-  // what this tool can take in this water (fiske.fangar): kräftor only in the kräftbur, grodor only in the håv
-  const can = FISKE.fangar && FISKE.fangar[fz.redskap];
-  const list = placeFish(fz.plats).filter(id => !can || can.includes(id));
-  if (!rule && !list.length) return miss(FISKE.texter.ingetHar);
+  // the thing for an animal is used up when the animal comes
+  const rule = animalRule(fz);
   if (rule){
     S.agnAnvant.push(fz.agn); renderPack();
     sparkle(boy.x + 8, boy.y + 2, 20, '#2ce8f5');
     stopFishing(); giveAnimal(rule.djur, rule.text, () => showNode());
     return saveSoon();
   }
-  const finds = fishedOut(fz) ? [] : (FISKE.fynd || []).filter(id => !S.saker.includes(id) && !S.salt['fynd:' + id]);
-  if (effekt !== 'ny' && finds.length && Math.random() < .2){
+  const finds = (FISKE.fynd || []).filter(id => !S.saker.includes(id) && !S.salt['fynd:' + id]);
+  if (finds.length && Math.random() < .2){
     const id = finds[Math.floor(Math.random() * finds.length)]; S.saker.push(id); renderPack(); saveSoon(); stopFishing();
     sparkle(boy.x + 8, boy.y + 2, 20, '#2ce8f5');
     // the picture of what it is: the find gem, or the hat for clothes
-    return openModal([{ icon: iconURL(KAT[katOf(id)].ico, 8), title: SAKER[id].namn, text: `${FISKE.texter.fynd} ${SAKER[id].text}`, reward: SAKER[id].typ === 'klader' ? 'Lades i väskan. Du kan ta på den där.' : 'Lades i väskan.', button: 'Till kartan' }], () => showNode());
+    return openModal([{ icon: iconURL(KAT[katOf(id)].ico, 8), title: SAKER[id].namn, text: `${s.fynd} ${SAKER[id].text}`, reward: SAKER[id].typ === 'klader' ? 'Lades i väskan. Du kan ta på den där.' : 'Lades i väskan.', button: 'Till kartan' }], () => showNode());
   }
-  // the list of a place repeats a fish as many times as it is common there; a kind he has not caught is a little more likely
-  const fresh = list.filter(id => S.fiskbok[id] === undefined);
-  const pool = fresh.length && (effekt === 'ny' || Math.random() < .35) ? fresh : list, id = pool[Math.floor(Math.random() * pool.length)];
-  const kg = weigh(id);
-  if (FISKE.spon.includes(fz.redskap) && FISKE.fiskar[id].kamp) return startFight(id, kg);
+  // a kind he has not caught is a little more likely
+  const list = bites(fz), fresh = list.filter(e => S.fiskbok[e.id] === undefined);
+  const id = pickW(fresh.length && Math.random() < .35 ? fresh : list), b = SAKER[fz.agn];
+  const kg = weigh(id, b && b.stor);
+  if (isRod(fz.redskap) && FISKE.fiskar[id].kamp) return startFight(id, kg);
   land(id, kg);
 }
-// Every fish gets a weight within its kind (fiske.fiskar vikt, kg). Most are small, a big one is rare.
-const weigh = id => { const [lo, hi] = FISKE.fiskar[id].vikt; return Math.round((lo + (hi - lo) * Math.random() ** 2) * 100) / 100; };
+// Every fish gets a weight within its kind (fiske.fiskar vikt, kg). Most are small, a big one is rare; with a bait for big fish
+// (saker stor) a big one is more common.
+const weigh = (id, big) => { const [lo, hi] = FISKE.fiskar[id].vikt; return Math.round((lo + (hi - lo) * Math.random() ** (big ? 1.2 : 2)) * 100) / 100; };
 const kgText = kg => kg.toFixed(2).replace('.', ',');
 // The fish is up: into the fish book (three of a kind), and the heaviest of each kind is his record (S.rekord). A fourth
 // of a kind goes back into the water, but if it is heavier its weight is still written in.
 function land(id, kg){
   const fz = fishing, fish = FISKE.fiskar[id], T = FISKE.texter;
-  if (fz.agn && SAKER[fz.agn].effekt === 'ny'){ S.agnAnvant.push(fz.agn); renderPack(); }
+  // a bait from a pack is used up when the fish is landed, not when it gets away
+  if (SAKER[fz.agn] && SAKER[fz.agn].antal){ S.agnLager[fz.agn]--; renderPack(); }
   sparkle(boy.x + 8, boy.y + 2, 20, '#2ce8f5');
   const rec = S.rekord[id], best = rec === undefined || kg > rec;
   if (best) S.rekord[id] = kg;
@@ -1794,7 +1860,7 @@ function fightTick(){
   }
   if (k.state === 'drar'){ k.line += k.K.kraft * dt; k.dist = Math.min(1.3, k.dist + .05 * dt); }
   k.line = Math.max(0, k.line - LINA.slapp * dt);
-  if (k.line >= 1) return miss(FISKE.texter.brast);
+  if (k.line >= 1) return snap();
   if (t - k.tapped > 6000) return miss(FISKE.texter.loss);
   drawFight();
 }
@@ -1804,7 +1870,7 @@ function veva(){
   k.tapped = k.prev = t; if (fast) k.fast = t;
   k.line += LINA.tryck + (k.state === 'drar' ? LINA.drar : k.state === 'hoppar' ? LINA.hopp : 0) + (fast ? LINA.ryck : 0);
   k.dist -= (k.state === 'vilar' || k.state === 'akta' ? 1 : .5) / k.need;
-  if (k.line >= 1) return miss(FISKE.texter.brast);
+  if (k.line >= 1) return snap();
   if (k.dist <= 0){ clearInterval(fz.loop); fz.loop = 0; fz.kamp = null; return land(k.id, k.kg); }
   drawFight();
 }
@@ -1840,11 +1906,11 @@ function renderFishBook(){
 const LOCKA = berattelse.locka || [];
 function lureBlock(r){
   if (S.djur.includes(r.djur)) return '';
-  const here = S.node === r.plats && !boy.route, has = r.agn.some(id => myBaits().includes(id));
+  const here = S.node === r.plats && !boy.route, has = r.agn.some(id => myLocks().includes(id)) && heard(r.rykten);
   return `<div class="plot"><div><b>${esc(r.rubrik)}</b>${has ? '' : `<span>${esc(r.saknas)}</span>`}</div>${here && has ? `<button class="btn" type="button" data-locka="${r.djur}">${esc(r.knapp)}</button>` : ''}</div>`;
 }
 function lure(djurId){
-  const r = LOCKA.find(x => x.djur === djurId), bait = r && r.agn.find(id => myBaits().includes(id));
+  const r = LOCKA.find(x => x.djur === djurId), bait = r && heard(r.rykten) && r.agn.find(id => myLocks().includes(id));
   if (!bait || S.djur.includes(djurId)) return;
   S.agnAnvant.push(bait); renderPack();
   giveAnimal(djurId, r.text, () => showNode());
@@ -1914,14 +1980,15 @@ $('#debugToggle').hidden = !new URLSearchParams(location.search).has('debug');
 function debugGive(id){
   const it = SAKER[id]; if (!it) return;
   if (it.typ === 'djur'){ if (!S.djur.includes(it.djur)){ S.djur.push(it.djur); if (S.fram.length < MAX_FRAM) S.fram.push(it.djur); } }
-  else if (!S.saker.includes(id)) S.saker.push(id);
+  else if (it.antal) S.agnLager[id] = (S.agnLager[id] || 0) + it.antal;
+  else if (!it.alltid && !S.saker.includes(id)) S.saker.push(id);
   if (S.agnAnvant.includes(id)) S.agnAnvant = S.agnAnvant.filter(x => x !== id);
 }
 // The list is grouped by category (as in the bag, then the animals) and can be searched by name
 let giveSearch = '';
 function giveList(){
   const q = giveSearch.trim().toLowerCase();
-  const left = Object.keys(SAKER).filter(id => (SAKER[id].typ === 'djur' ? !S.djur.includes(SAKER[id].djur) : !S.saker.includes(id) || S.agnAnvant.includes(id)) && (!q || SAKER[id].namn.toLowerCase().includes(q)));
+  const left = Object.keys(SAKER).filter(id => (SAKER[id].typ === 'djur' ? !S.djur.includes(SAKER[id].djur) : SAKER[id].alltid ? false : SAKER[id].antal || !S.saker.includes(id) || S.agnAnvant.includes(id)) && (!q || SAKER[id].namn.toLowerCase().includes(q)));
   const groups = [...KAT_ORDER, 'djur'].map(k => [k, left.filter(id => (SAKER[id].typ === 'djur' ? 'djur' : katOf(id)) === k)]).filter(([, ids]) => ids.length);
   $('#giveList').innerHTML = groups.map(([k, ids]) => `<p class="sub">${k === 'djur' ? 'Djur' : KAT[k].namn}</p><div class="roads">${ids.map(id => `<button class="btn alt" type="button" data-ge="${id}">${esc(SAKER[id].namn)}</button>`).join('')}</div>`).join('') || '<p>Inget att ge.</p>';
 }
