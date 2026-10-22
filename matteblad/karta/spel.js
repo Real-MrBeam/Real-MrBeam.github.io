@@ -964,12 +964,7 @@ function startTrade(seen){
   // rumours, after that he only reminds (Peter 2026-10-22)
   const told = hidden && V.rykten.every(k => S.rykten.includes(k));
   const lines = hidden && !seen ? (told ? [{ p: H.person, t: V.paminn }] : V.stalle.map(t => ({ p: H.person, t }))) : [{ p: H.person, t: hello }];
-  const hearAll = () => {
-    const fresh = V.rykten.filter(k => !S.rykten.includes(k));
-    fresh.forEach(k => hearRumor(k, true));
-    if (fresh.length) toast(fresh.length === 1 ? `Nytt rykte: ${rumorText(fresh[0])}` : 'Två nya rykten finns i listan Rykten.');
-  };
-  startDialog(lines, () => (hidden && hearAll(), [
+  startDialog(lines, () => (hearMany(hidden ? V.rykten : (H.rykten || [])), [
     ...(hidden ? [{ label: esc(V.knappFisk), run: showFishBook }] : []),
     ...(hidden && S.saker.includes(V.hatt) ? [{ label: esc(V.knappHatt), run: () => showPlace(V.hattTack) }] : []),
     ...wares.map(([id, n]) => ({ label: `Köp ${esc(nameIn(id))} ${price(n)}<small>${esc(SAKER[id].text)}</small>`, poor: S.coins < n, run: () => buyFrom(id, n) })),
@@ -1000,7 +995,7 @@ function showFishBook(){
 // The night fisherman shows his own place: the path from the tent to Udden comes out on the map. He keeps no hat.
 function showPlace(text){
   const H = berattelse.handel, id = H.visar.plats;
-  if (!S.hittat.includes(id)){ S.hittat.push(id); buildTerrain(); sparkle(NODES[id].x*TS + 8, NODES[id].y*TS + 8, 26); saveSoon(); }
+  if (!S.hittat.includes(id)){ S.hittat.push(id); buildTerrain(); sparkle(NODES[id].x*TS + 8, NODES[id].y*TS + 8, 26); saveSoon(); renderRumors(); }
   toast(`En ny plats syns på kartan: ${NODES[id].name}.`);
   startDialog([{ p: H.person, t: text }], () => [{ label: 'Något mer', run: () => startTrade(true) }, { label: 'Tillbaka till kartan', alt: true, run: toNode }]);
 }
@@ -1232,6 +1227,7 @@ function startDialog(lines, end, seen){
 function dialogButtons(){
   if (dlg.i < dlg.lines.length - 1) return '<button class="btn" type="button" data-dlgnext="1">Fortsätt</button>';
   dlg.choices = dlg.end();
+  hearMany(dlg.lines.flatMap(l => (berattelse.personRykten || {})[l.p] || []));   // what this person tells goes to the rumours
   return dlg.choices.map((c, i) => `<button class="btn${c.alt ? ' alt' : ''}${c.poor ? ' locked' : ''}" type="button" data-dlgchoice="${i}"${c.disabled ? ' disabled' : ''}>${c.label}</button>`).join('');
 }
 function startTyping(){
@@ -1335,7 +1331,7 @@ function rewardMain(till){
   return `En hemlig fiskeplats syns nu på kartan: ${NODES[till.fiskeplats].name}.`;
 }
 function finishStop(id, till, out){
-  S.stopp[id] = till; delete S.steg['stopp:' + id]; saveSoon();
+  S.stopp[id] = till; renderRumors(); delete S.steg['stopp:' + id]; saveSoon();
   if (till.djur) giveAnimal(till.djur, out[out.length - 1].t);
   if (till.agn && !S.saker.includes(till.agn)){ S.saker.push(till.agn); renderPack(); toast(rewardText(till)); }
   if (till.fynd && !S.saker.includes(till.fynd)){ S.saker.push(till.fynd); renderPack(); sparkle(boy.x + 8, boy.y + 2, 18); toast(rewardText(till)); }
@@ -1428,6 +1424,7 @@ function nameModal(id, story, done, reward){
 const bookIcons = {};
 const bookIcon = id => bookIcons[id] || (bookIcons[id] = iconURL(PETS[id].right[0], 3));
 function renderBook(){
+  renderRumors();
   const D = berattelse.dialog.djurbok;
   $('#bookCount').textContent = S.djur.length ? `Du har hittat ${S.djur.length} djur. ${S.fram.length} av ${MAX_FRAM} är framme.` : D.tom;
   $('#book').innerHTML = S.djur.map(id => {
@@ -1491,14 +1488,44 @@ function rumorText(key){
   if (kind === 'rykte') return berattelse.rykten && berattelse.rykten[id];   // something a person tells (berattelse rykten)
   const p = berattelse.platser[id]; return p && (when === 'natt' ? p.rykteNatt : p.rykte);
 }
+// Several rumours at once give one message, not one that hides the other
+function hearMany(keys){
+  const fresh = [...new Set(keys)].filter(k => rumorText(k) && !S.rykten.includes(k));
+  fresh.forEach(k => hearRumor(k, true));
+  if (fresh.length) toast(fresh.length === 1 ? `Nytt rykte: ${rumorText(fresh[0])}` : `${['', '', 'Två', 'Tre', 'Fyra'][fresh.length] || fresh.length} nya rykten finns i listan Rykten.`);
+}
 function hearRumor(key, quiet){
   if (!rumorText(key) || S.rykten.includes(key)) return;
   S.rykten.push(key); saveSoon(); if (!quiet) toast(`Nytt rykte: ${rumorText(key)}`); renderRumors();
 }
-// A rumour can be ticked off like a checklist: tap it and it is struck through and green (S.ryktenKlara), tap again to undo
+// The list of rumours is a list of things left to do (Peter 2026-10-22). Each rumour shows the place it points to, and a moon
+// when it is about the night (berattelse ryktesInfo). A rumour is solved by itself when what it tells about is done (klar:
+// an animal found, a fish caught, a thing got, a place found, a night adventure played), and he can also tap one to tick it
+// off (S.ryktenKlara). The ones left are on top, the done ones are folded away at the bottom.
+const MOON = sprite(["...yyy..", "..yy....", ".yy.....", ".yy.....", ".yy.....", "..yy....", "...yyy.."], { y:'#fee761' });
+let MOON_URL = '', showDoneRumors = false;
+function condOk(c){
+  return c.split('|').some(x => {
+    const i = x.indexOf(':'), k = x.slice(0, i), v = x.slice(i + 1);
+    return k === 'djur' ? S.djur.includes(v) : k === 'fisk' ? S.fiskbok[v] !== undefined : k === 'sak' ? S.saker.includes(v) : k === 'hittat' ? S.hittat.includes(v) : k === 'stopp' ? !!S.stopp[v] : false;
+  });
+}
+const rumorInfo = k => (berattelse.ryktesInfo || {})[k] || {};
+const rumorSolved = k => { const c = rumorInfo(k).klar; return !!(c && c.length && c.every(condOk)); };
+const rumorDone = k => rumorSolved(k) || (S.ryktenKlara || []).includes(k);
+function rumorItem(k){
+  const info = rumorInfo(k), done = rumorDone(k), auto = rumorSolved(k);
+  if (!MOON_URL) MOON_URL = iconURL(MOON, 2);
+  const tag = info.pekar && NODES[info.pekar] ? `<span class="rtag">${info.natt ? `<img class="pix" src="${MOON_URL}" alt="På natten" title="På natten">` : ''}${esc(NODES[info.pekar].name)}</span>` : '';
+  const tap = auto ? '' : ` data-rykte="${esc(k)}" role="button" tabindex="0" aria-pressed="${done}" title="${done ? 'Markera som inte klar' : 'Markera som klar'}"`;
+  return `<li class="rumor${auto ? '' : ' readable'}${done ? ' klar' : ''}"${tap}><span>${esc(rumorText(k))}</span>${tag}</li>`;
+}
 function renderRumors(){
-  const keys = S.rykten.filter(rumorText).reverse(), done = S.ryktenKlara || [];
-  $('#rykten').innerHTML = keys.length ? keys.map(k => `<li class="readable rumor${done.includes(k) ? ' klar' : ''}" data-rykte="${esc(k)}" role="button" tabindex="0" aria-pressed="${done.includes(k)}" title="${done.includes(k) ? 'Markera som inte klar' : 'Markera som klar'}"><span>${esc(rumorText(k))}</span>${done.includes(k) ? '<span class="st">klar</span>' : ''}</li>`).join('') : `<li><span>${esc(berattelse.dialog.rykten.tom)}</span></li>`;
+  const keys = S.rykten.filter(rumorText).reverse(), D = berattelse.dialog.rykten;
+  if (!keys.length){ $('#rykten').innerHTML = `<li><span>${esc(D.tom)}</span></li>`; return; }
+  const open = keys.filter(k => !rumorDone(k)), done = keys.filter(rumorDone);
+  $('#rykten').innerHTML = (open.length ? open.map(rumorItem).join('') : `<li><span>${esc(D.allaKlara)}</span></li>`)
+    + (done.length ? `<li class="kat-rubrik"><button type="button" class="klara-knapp" data-visaklara="1" aria-expanded="${showDoneRumors}">${showDoneRumors ? 'Dölj' : 'Visa'} klara (${done.length})</button></li>${showDoneRumors ? done.map(rumorItem).join('') : ''}` : '');
 }
 function toggleRumor(li){
   if (!li) return;
@@ -1506,7 +1533,7 @@ function toggleRumor(li){
   S.ryktenKlara = S.ryktenKlara.includes(k) ? S.ryktenKlara.filter(x => x !== k) : [...S.ryktenKlara, k];
   renderRumors(); saveSoon();
 }
-$('#rykten').addEventListener('click', ev => toggleRumor(ev.target.closest('li[data-rykte]')));
+$('#rykten').addEventListener('click', ev => { if (ev.target.closest('[data-visaklara]')){ showDoneRumors = !showDoneRumors; renderRumors(); return; } toggleRumor(ev.target.closest('li[data-rykte]')); });
 $('#rykten').addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key === ' '){ const li = ev.target.closest('li[data-rykte]'); if (li){ ev.preventDefault(); toggleRumor(li); } } });
 function renderPack(){
   if (S.rykten) for (const id of S.saker) if (SAKER[id] && SAKER[id].rykte && !S.rykten.includes('sak:' + id)) hearRumor('sak:' + id);
@@ -1514,6 +1541,7 @@ function renderPack(){
   const packs = myBaits().filter(id => !S.saker.includes(id) && (SAKER[id].antal || myTools().some(isRod)));
   const own = [...S.saker.filter(id => SAKER[id] && SAKER[id].typ !== 'djur' && !S.agnAnvant.includes(id)), ...packs]
     .sort((a, b) => KAT_ORDER.indexOf(katOf(a)) - KAT_ORDER.indexOf(katOf(b)) || (SAKER[b].alltid ? 1 : 0) - (SAKER[a].alltid ? 1 : 0));
+  renderRumors();
   $('#pack').innerHTML = own.length
     ? own.map((id, i) => { const it = SAKER[id], on = it.typ === 'klader' && S.pa[it.plats] === id;
         // Things that can be used are tapped like the runes in the list: clothes go on and off, the lantern is lit, the flute plays
@@ -1617,6 +1645,9 @@ function applySaved(data){
   // Udden was open for everyone before the night fisherman began to show it (2026-10-22): whoever has been there keeps it
   const V = berattelse.handel && berattelse.handel.visar, onlyThere = (f, at) => Object.entries(FISKE.platser).every(([pid, p]) => pid === at || ![...p.fiskar, ...(p.fiskarNatt || [])].includes(f));
   if (V && !S.hittat.includes(V.plats) && (S.node === V.plats || S.rykten.includes(`plats:${V.plats}:natt`) || Object.keys(S.fiskbok).some(f => onlyThere(f, V.plats)))) S.hittat.push(V.plats);
+  const MOVED = { 'plats:glanta:natt': 'rykte:svampring', 'plats:host:natt': 'rykte:graskuggan', 'plats:talt:natt': 'rykte:skugga', 'plats:udden:natt': 'rykte:skeppet' };
+  S.rykten = [...new Set(S.rykten.map(k => MOVED[k] || k))];
+  if (S.ryktenKlara) S.ryktenKlara = [...new Set(S.ryktenKlara.map(k => MOVED[k] || k))];
   buildBoy(S.pa); musicSync(); renderLetters(); renderRumors();
   S.lasta = [...new Set([...(S.lasta || []), ...shownHere])];   // stories shown before the saved game had loaded stay seen
   if (typeof data.sett === 'string') S.sett = Uint8Array.from(atob(data.sett), c => c.charCodeAt(0));
@@ -1946,6 +1977,7 @@ function drawFight(){
 const FISH_ICON = {};
 const fishIcon = id => FISH_ICON[id] || (FISH_ICON[id] = iconURL(CATCH[id] || FISH, 3));
 function renderFishBook(){
+  renderRumors();
   const ids = Object.keys(FISKE.fiskar).filter(id => S.fiskbok[id] !== undefined);
   const all = Object.keys(FISKE.fiskar), done = all.filter(id => (S.fiskbok[id] || 0) >= MAXFISK).length;
   const head = S.brevFiske ? `<li><span><b>Fiskesällskapet</b> vill ha tre av varje sort.</span><span class="st">${done} av ${all.length} sorter</span></li>` : '';

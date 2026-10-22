@@ -14,8 +14,7 @@
     "glanta": {
       "namn": "Skogsgläntan",
       "text": "En solig glänta mitt i granskogen, där stigarna möts.",
-      "natt": "En glänta mitt i granskogen. I mörkret syns bara stammarna runt omkring.",
-      "rykteNatt": "Murkel säger att svampringen minns natten då stjärnorna föll."
+      "natt": "En glänta mitt i granskogen. I mörkret syns bara stammarna runt omkring."
     },
     "hemlig": {
       "namn": "Hemliga gläntan",
@@ -24,8 +23,7 @@
     "host": {
       "namn": "Höstskogen",
       "text": "Löven är orange här året runt. Ingen vet varför, och träden tänker inte berätta.",
-      "natt": "Löven är orange även i mörkret. Mellan träden lyser ett litet ljus.",
-      "rykteNatt": "Vira säger att Gråskuggan går mot Norra bron när månen är full."
+      "natt": "Löven är orange även i mörkret. Mellan träden lyser ett litet ljus."
     },
     "sjo": {
       "namn": "Sjöviken",
@@ -95,14 +93,12 @@
     "talt": {
       "namn": "Tältet",
       "text": "Ett tält av ljus duk bakom lägerelden. Någon bor här, men på dagen är duken knuten.",
-      "natt": "Ett tält av ljus duk bakom lägerelden. Det lyser inifrån.",
-      "rykteNatt": "Nattfiskaren har sett en grå skugga gå över bron mot Höstskogen."
+      "natt": "Ett tält av ljus duk bakom lägerelden. Det lyser inifrån."
     },
     "udden": {
       "namn": "Udden",
       "text": "En smal udde av gräs sticker ut i sjön. Någon har lagt en platt sten vid vattnet att sitta på.",
-      "natt": "Månen speglar sig i sjön. Bakom dig lyser tältet mellan träden.",
-      "rykteNatt": "Nattfiskaren säger att konstiga nya fiskar har dykt upp i sjön sedan det lysande skeppet började segla där om nätterna."
+      "natt": "Månen speglar sig i sjön. Bakom dig lyser tältet mellan träden."
     }
   },
   "portar": {
@@ -1258,7 +1254,8 @@
     "gavaTa": "Ta emot {namn}",
     "rykten": {
       "rubrik": "Rykten",
-      "tom": "Inga rykten än."
+      "tom": "Inga rykten än.",
+      "allaKlara": "Alla rykten du har hört är klara."
     },
     "kraverLjus": "Du behöver något som lyser."
   },
@@ -2724,7 +2721,11 @@
         "rykte:hatt"
       ],
       "paminn": "Tre olika sorters fisk, eller min gamla hatt med den röda flugan. Då tar jag dig till mitt ställe."
-    }
+    },
+    "rykten": [
+      "rykte:skugga",
+      "rykte:skeppet"
+    ]
   },
   "stjarnvaktarna": {
     "rubrik": "Ett brev ligger på trappan",
@@ -3012,7 +3013,8 @@
                 "text": "\"Han väntar på någon\", säger Vira och ser på dig. \"Kanske på dig.\"",
                 "till": "f"
               }
-            ]
+            ],
+            "p": "vira"
           },
           "f": {
             "t": "Rävungen kryper fram och lägger sig vid dina fötter. \"Han har valt dig\", säger Vira. Han är orange och ruffsig, så han får heta Ruffe.",
@@ -3078,6 +3080,224 @@
   },
   "rykten": {
     "stalle": "Nattfiskaren har ett eget ställe vid sjön. Han visar det för den som har fångat tre olika sorters fisk.",
-    "hatt": "Nattfiskaren tappade sin gamla fiskehatt med en röd fluga i sjön natten då skeppet kom. Den som hittar den får se hans ställe."
+    "hatt": "Nattfiskaren tappade sin gamla fiskehatt med en röd fluga i sjön natten då skeppet kom. Den som hittar den får se hans ställe.",
+    "svampring": "Murkel säger att svampringen minns natten då stjärnorna föll.",
+    "graskuggan": "Vira säger att Gråskuggan går mot Norra bron när månen är full.",
+    "skugga": "Nattfiskaren har sett en grå skugga gå över bron mot Höstskogen.",
+    "skeppet": "Nattfiskaren säger att konstiga nya fiskar har dykt upp i sjön sedan det lysande skeppet började segla där om nätterna."
+  },
+  "personRykten": {
+    "murkel": [
+      "rykte:svampring"
+    ],
+    "vira": [
+      "rykte:graskuggan"
+    ]
+  },
+  "ryktesInfo": {
+    "sak:honungsburk": {
+      "pekar": "host",
+      "klar": [
+        "djur:brumma"
+      ]
+    },
+    "sak:appelpaj": {
+      "pekar": "host",
+      "klar": [
+        "djur:brumma"
+      ]
+    },
+    "sak:glodsvamp": {
+      "pekar": "sodrabron",
+      "klar": [
+        "djur:linnea"
+      ]
+    },
+    "sak:ostbitar": {
+      "pekar": "sodrabron",
+      "klar": [
+        "djur:linnea"
+      ]
+    },
+    "sak:lysmask": {
+      "pekar": "sodrabron",
+      "klar": [
+        "djur:linnea"
+      ]
+    },
+    "sak:hav": {
+      "pekar": "sodrabron",
+      "klar": [
+        "djur:linnea"
+      ]
+    },
+    "sak:snorkel": {
+      "pekar": "sodrabron",
+      "klar": [
+        "djur:linnea"
+      ]
+    },
+    "sak:blabar": {
+      "pekar": "vassen",
+      "klar": [
+        "djur:sigge"
+      ]
+    },
+    "sak:snackor": {
+      "pekar": "vassen",
+      "klar": [
+        "djur:sigge"
+      ]
+    },
+    "sak:trolldryck": {
+      "pekar": "vassen",
+      "klar": [
+        "djur:sigge"
+      ]
+    },
+    "sak:kraftbur": {
+      "pekar": "vassen",
+      "klar": [
+        "djur:sigge"
+      ]
+    },
+    "sak:flotte": {
+      "pekar": "norrabron",
+      "natt": true,
+      "klar": [
+        "djur:nacken"
+      ]
+    },
+    "sak:flugspo": {
+      "pekar": "norrabron",
+      "klar": [
+        "djur:nacken"
+      ]
+    },
+    "sak:silverfluga": {
+      "pekar": "norrabron",
+      "klar": [
+        "djur:nacken"
+      ]
+    },
+    "sak:flugask": {
+      "pekar": "norrabron",
+      "klar": [
+        "djur:nacken"
+      ]
+    },
+    "sak:eldflugor": {
+      "pekar": "angen",
+      "natt": true,
+      "klar": [
+        "djur:mana"
+      ]
+    },
+    "sak:nattmossa": {
+      "pekar": "angen",
+      "natt": true,
+      "klar": [
+        "fisk:stjarnruda"
+      ]
+    },
+    "plats:hem:natt": {
+      "pekar": "host",
+      "natt": true,
+      "klar": [
+        "stopp:natt:host"
+      ]
+    },
+    "plats:sjo:dag": {
+      "pekar": "vassen",
+      "klar": [
+        "djur:sigge"
+      ]
+    },
+    "plats:angen:natt": {
+      "pekar": "angen",
+      "natt": true,
+      "klar": [
+        "stopp:natt:angen"
+      ]
+    },
+    "plats:eken:natt": {
+      "pekar": "eken",
+      "natt": true,
+      "klar": [
+        "stopp:natt:eken"
+      ]
+    },
+    "plats:stenblocket:dag": {
+      "pekar": "stenblocket",
+      "klar": [
+        "fisk:krafta"
+      ]
+    },
+    "plats:sodrabron:dag": {
+      "pekar": "sodrabron",
+      "klar": [
+        "fisk:abborre",
+        "fisk:gadda"
+      ]
+    },
+    "plats:norrabron:dag": {
+      "pekar": "norrabron",
+      "klar": [
+        "fisk:oring",
+        "fisk:harr"
+      ]
+    },
+    "plats:norrabron:natt": {
+      "pekar": "norrabron",
+      "natt": true,
+      "klar": [
+        "djur:nacken"
+      ]
+    },
+    "plats:vassen:dag": {
+      "pekar": "vassen",
+      "klar": [
+        "fisk:groda"
+      ]
+    },
+    "plats:vassen:natt": {
+      "pekar": "vassen",
+      "natt": true,
+      "klar": [
+        "fisk:mansik"
+      ]
+    },
+    "rykte:stalle": {
+      "pekar": "talt",
+      "natt": true,
+      "klar": [
+        "hittat:udden"
+      ]
+    },
+    "rykte:hatt": {
+      "pekar": "talt",
+      "natt": true,
+      "klar": [
+        "sak:fiskehatt|hittat:udden"
+      ]
+    },
+    "rykte:svampring": {
+      "pekar": "glanta"
+    },
+    "rykte:graskuggan": {
+      "pekar": "norrabron",
+      "natt": true
+    },
+    "rykte:skugga": {
+      "pekar": "host",
+      "natt": true,
+      "klar": [
+        "stopp:natt:host"
+      ]
+    },
+    "rykte:skeppet": {
+      "pekar": "udden",
+      "natt": true
+    }
   }
 }
