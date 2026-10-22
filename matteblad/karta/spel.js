@@ -1500,8 +1500,8 @@ function hearRumor(key, quiet){
 }
 // The list of rumours is a list of things left to do (Peter 2026-10-22). Each rumour shows the place it points to, and a moon
 // when it is about the night (berattelse ryktesInfo). A rumour is solved by itself when what it tells about is done (klar:
-// an animal found, a fish caught, a thing got, a place found, a night adventure played), and he can also tap one to tick it
-// off (S.ryktenKlara). The ones left are on top, the done ones are folded away at the bottom.
+// an animal found, a fish caught, a thing got, a place found, a night adventure played). He cannot tick them off himself any
+// more, they solve themselves (Peter 2026-10-22). The ones left are on top, the done ones are folded away at the bottom.
 const MOON = sprite(["...yyy..", "..yy....", ".yy.....", ".yy.....", ".yy.....", "..yy....", "...yyy.."], { y:'#fee761' });
 let MOON_URL = '', showDoneRumors = false;
 function condOk(c){
@@ -1512,29 +1512,20 @@ function condOk(c){
 }
 const rumorInfo = k => (berattelse.ryktesInfo || {})[k] || {};
 const rumorSolved = k => { const c = rumorInfo(k).klar; return !!(c && c.length && c.every(condOk)); };
-const rumorDone = k => rumorSolved(k) || (S.ryktenKlara || []).includes(k);
 function rumorItem(k){
-  const info = rumorInfo(k), done = rumorDone(k), auto = rumorSolved(k);
+  const info = rumorInfo(k), done = rumorSolved(k);
   if (!MOON_URL) MOON_URL = iconURL(MOON, 2);
   const tag = info.pekar && NODES[info.pekar] ? `<span class="rtag">${info.natt ? `<img class="pix" src="${MOON_URL}" alt="På natten" title="På natten">` : ''}${esc(NODES[info.pekar].name)}</span>` : '';
-  const tap = auto ? '' : ` data-rykte="${esc(k)}" role="button" tabindex="0" aria-pressed="${done}" title="${done ? 'Markera som inte klar' : 'Markera som klar'}"`;
-  return `<li class="rumor${auto ? '' : ' readable'}${done ? ' klar' : ''}"${tap}><span>${esc(rumorText(k))}</span>${tag}</li>`;
+  return `<li class="rumor${done ? ' klar' : ''}"><span>${esc(rumorText(k))}</span>${tag}</li>`;
 }
 function renderRumors(){
   const keys = S.rykten.filter(rumorText).reverse(), D = berattelse.dialog.rykten;
   if (!keys.length){ $('#rykten').innerHTML = `<li><span>${esc(D.tom)}</span></li>`; return; }
-  const open = keys.filter(k => !rumorDone(k)), done = keys.filter(rumorDone);
+  const open = keys.filter(k => !rumorSolved(k)), done = keys.filter(rumorSolved);
   $('#rykten').innerHTML = (open.length ? open.map(rumorItem).join('') : `<li><span>${esc(D.allaKlara)}</span></li>`)
     + (done.length ? `<li class="kat-rubrik"><button type="button" class="klara-knapp" data-visaklara="1" aria-expanded="${showDoneRumors}">${showDoneRumors ? 'Dölj' : 'Visa'} klara (${done.length})</button></li>${showDoneRumors ? done.map(rumorItem).join('') : ''}` : '');
 }
-function toggleRumor(li){
-  if (!li) return;
-  const k = li.dataset.rykte; S.ryktenKlara = S.ryktenKlara || [];
-  S.ryktenKlara = S.ryktenKlara.includes(k) ? S.ryktenKlara.filter(x => x !== k) : [...S.ryktenKlara, k];
-  renderRumors(); saveSoon();
-}
-$('#rykten').addEventListener('click', ev => { if (ev.target.closest('[data-visaklara]')){ showDoneRumors = !showDoneRumors; renderRumors(); return; } toggleRumor(ev.target.closest('li[data-rykte]')); });
-$('#rykten').addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key === ' '){ const li = ev.target.closest('li[data-rykte]'); if (li){ ev.preventDefault(); toggleRumor(li); } } });
+$('#rykten').addEventListener('click', ev => { if (ev.target.closest('[data-visaklara]')){ showDoneRumors = !showDoneRumors; renderRumors(); } });
 function renderPack(){
   if (S.rykten) for (const id of S.saker) if (SAKER[id] && SAKER[id].rykte && !S.rykten.includes('sak:' + id)) hearRumor('sak:' + id);
   // used things that call forth an animal are gone; mask is there as soon as he has a rod, a pack while some is left
@@ -1603,7 +1594,7 @@ function applyReal(events){
 // encrypted in the page (#lasNyckel) and opens with the password, like the portraits. Without the key nothing is saved.
 // Stars and stardust are never saved: they are counted from the runes and scrolls. Only what he has spent is saved.
 const SAVE = { repo: '', file: '', key: '', sha: null, timer: 0, off: false, loaded: false };
-const SAVED_FIELDS = ['node', 'built', 'valda', 'saker', 'steg', 'handlat', 'djur', 'fram', 'stopp', 'hittat', 'spent', 'kistor', 'agnAnvant', 'fiskbok', 'namn', 'bytt', 'intro', 'natt', 'salt', 'lasta', 'pa', 'tant', 'brev2', 'rykten', 'brevFiske', 'ryktenKlara', 'rekord', 'agnLager'];
+const SAVED_FIELDS = ['node', 'built', 'valda', 'saker', 'steg', 'handlat', 'djur', 'fram', 'stopp', 'hittat', 'spent', 'kistor', 'agnAnvant', 'fiskbok', 'namn', 'bytt', 'intro', 'natt', 'salt', 'lasta', 'pa', 'tant', 'brev2', 'rykten', 'brevFiske', 'rekord', 'agnLager'];
 const b64 = text => { const bytes = new TextEncoder().encode(text); let s = ''; for (const b of bytes) s += String.fromCharCode(b); return btoa(s); };
 const unb64 = data => new TextDecoder().decode(Uint8Array.from(atob(data.replace(/\s/g, '')), c => c.charCodeAt(0)));
 function spend(n){ S.coins -= n; S.spent += n; }
@@ -1647,7 +1638,6 @@ function applySaved(data){
   if (V && !S.hittat.includes(V.plats) && (S.node === V.plats || S.rykten.includes(`plats:${V.plats}:natt`) || Object.keys(S.fiskbok).some(f => onlyThere(f, V.plats)))) S.hittat.push(V.plats);
   const MOVED = { 'plats:glanta:natt': 'rykte:svampring', 'plats:host:natt': 'rykte:graskuggan', 'plats:talt:natt': 'rykte:skugga', 'plats:udden:natt': 'rykte:skeppet' };
   S.rykten = [...new Set(S.rykten.map(k => MOVED[k] || k))];
-  if (S.ryktenKlara) S.ryktenKlara = [...new Set(S.ryktenKlara.map(k => MOVED[k] || k))];
   buildBoy(S.pa); musicSync(); renderLetters(); renderRumors();
   S.lasta = [...new Set([...(S.lasta || []), ...shownHere])];   // stories shown before the saved game had loaded stay seen
   if (typeof data.sett === 'string') S.sett = Uint8Array.from(atob(data.sett), c => c.charCodeAt(0));
