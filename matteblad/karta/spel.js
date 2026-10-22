@@ -1573,6 +1573,7 @@ function renderLog(fresh){
 const starsFor = pct => berattelse.regler.stjarnor.find(r => pct >= r.minProcent).antal;
 // The real events: stars from the runes (with a bonus when a subject goes better than last time) and stardust from the scrolls
 function applyReal(events){
+  initIcons();
   let stars = 0, stoft = 0;
   const handelser = events.map((e, i) => {
     if (e.typ === 'rulle'){ stoft += e.stoft; return e; }
@@ -2163,15 +2164,21 @@ cv.addEventListener('keydown', e => {
 });
 
 /* ---------- start ---------- */
-function start(data){
-  if (data && data.S) S = data.S;
-  placeBoy(S.node); lastRevealKey = ''; revealAround(boy.x + 8, boy.y + 8);
+// The pictures of the icons. Made once, as soon as something needs them: on a device that remembers the password the runes and
+// scrolls open before the map has started, and their story must not show an empty picture (Peter 2026-10-22).
+function initIcons(){
+  if (STAR_URL) return;
   STAR_URL = iconURL(STAR, 4); DUST_URL = iconURL(DUST, 4); LOCK_URL = iconURL(LOCK, 4); RUNE_URL = iconURL(RUNE, 4); SCROLL_URL = iconURL(SCROLL, 4);
   FISH_BIG = iconURL(FISH, 8); $('#icoFish').src = iconURL(FISH, 4); $('#icoLetter').src = iconURL(ENVELOPE, 3); $('#icoRykten').src = iconURL(RUMOR_ICO, 3);
   TICKET_URL = iconURL(TICKET, 4); RUNE_BIG = iconURL(RUNE, 8); SCROLL_BIG = iconURL(SCROLL, 8); TICKET_BIG = iconURL(TICKET, 8); $('#icoTicket').src = TICKET_URL;
   $('#icoRunes').src = RUNE_URL; $('#icoBag').src = iconURL(BAG, 4); $('#icoBook').src = iconURL(BOOK, 4);
   $('#logoStar').src = STAR_URL; $('#icoStar').src = STAR_URL; $('#icoCoin').src = DUST_URL;
   document.querySelectorAll('img[data-ico]').forEach(im => { im.src = im.dataset.ico === 'star' ? STAR_URL : DUST_URL; });
+}
+function start(data){
+  if (data && data.S) S = data.S;
+  placeBoy(S.node); lastRevealKey = ''; revealAround(boy.x + 8, boy.y + 8);
+  initIcons();
   buildTerrain();
   resize(); centerOn(boy.x + 8, boy.y + 8, true);
   updateHud(); renderLog(); renderPack(); renderBook(); renderTickets(); renderFishBook(); showNode();
