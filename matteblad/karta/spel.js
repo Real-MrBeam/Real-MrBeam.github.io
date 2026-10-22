@@ -49,6 +49,7 @@ const HATS = {
   trollkarlshatt: { rows: ["......oo........", ".....oTTo.......", "....oTTYTo......", "...oTTTTTTo.....", "..oQQQQQQQQQQo.."], pal: { T: '#3b5dc9', Q: '#29366f', Y: '#fee761' } },
   blomsterkrans: { rows: ["................", ".....oooooo.....", "....ohhhhhho....", "...orhyhrhyho...", "...ohhhhhhhho..."], pal: { r: '#e43b44', y: '#fee761' } },
   seglarmossa: { rows: ["................", ".....oooooo.....", "....onnnnnno....", "...ovvvvvvvvo...", "...oNNNNNNNNNo.."], pal: { n: '#2a4a8a', N: '#1b2f5a', v: '#ffffff' } },
+  nattmossa: { rows: ["...........uu...", "......ooooJJo...", ".....ojjjjjjjo..", "....oJJJJJJJJo..", "...oUUUUUUUUUo.."], pal: { J: '#3b5dc9', j: '#c0cbdc', u: '#ffffff', U: '#f4f4f4' } },
   mjolnarmossa: { rows: ["................", "....ooooooo.....", "...ommmmmmmo....", "...ommmmmmmmo...", "...oMMMMMMMMo..."], pal: { m: '#f4f4f4', M: '#c0cbdc' } },
 };
 const BOOTS = { stovel: { k: '#6b3a20' } };
@@ -872,6 +873,7 @@ function nodeActive(id){
   if (FS && id === FS.plats && !S.brevFiske) return true;
   if (S.natt){   // at night the tent is open, and the fishing places if he has something to fish with, and the letter
     if (NATTSTOPP[id] && !S.stopp['natt:' + id]) return true;
+    if (GRANNE && id === GRANNE.plats && neighbour() && !S.saker.includes(GRANNE.ger)) return true;
     if (berattelse.handel && id === berattelse.handel.plats) return true;
     if (FISKE.platser[id] && myTools().length) return true;
     return id === 'hem' && letterWaiting();
@@ -1007,6 +1009,23 @@ function startVira(seen){
     { label: 'Tillbaka till kartan', alt: true, run: toNode },
   ], seen);
 }
+// The neighbour in Hemmet (Bosse or Mira, whoever built there) cannot sleep since the night the stars fell, when the ground
+// shook and the pond came up on Ängen. At night he or she stands by the pond and gives him a nightcap (berattelse granne,
+// Peter 2026-10-22). Later the neighbour only looks at the pond, where something glows now and then (the star crucian).
+const GRANNE = berattelse.granne;
+const neighbour = () => { if (!GRANNE || !S.natt || !S.built[GRANNE.tomt]) return null; const p = PLOTS.find(q => q.id === GRANNE.tomt), v = p && valOf(p); return v && GRANNE.val[v.id] ? { ...GRANNE.val[v.id], person: v.person, namn: PERS[v.person].namn } : null; };
+function neighbourBlock(){
+  const n = neighbour(), here = S.node === GRANNE.plats && !boy.route;
+  return `<div class="plot"><div><b>${esc(GRANNE.rubrik.replace('{namn}', n.namn))}</b></div>${here ? `<button class="btn" type="button" data-granne="1">${esc(GRANNE.knapp.replace('{namn}', n.namn))}</button>` : ''}</div>`;
+}
+function talkNeighbour(){
+  const n = neighbour(); if (!n) return;
+  if (S.saker.includes(GRANNE.ger)) return startDialog([{ p: n.person, t: n.igen }], () => [{ label: 'Tillbaka till kartan', alt: true, run: toNode }]);
+  startDialog([{ p: n.person, t: n.hej }, { p: n.person, t: n.ger }], () => {
+    if (!S.saker.includes(GRANNE.ger)){ S.saker.push(GRANNE.ger); renderPack(); saveSoon(); toast(itemFound(GRANNE.ger)); }
+    return [{ label: 'Tillbaka till kartan', alt: true, run: toNode }];
+  });
+}
 function sellTo(o){
   if (S.salt[o.key]) return;
   o.sell(); S.salt[o.key] = true; earn(o.n); saveSoon();
@@ -1051,6 +1070,7 @@ function renderPanel(view){
     if (day && stop) h += stopBlock(n.id);
     if (!day && NATTSTOPP[n.id]) h += stopBlock('natt:' + n.id);
     if (viraHere() && n.id === VIRA.plats) h += viraBlock();
+    if (neighbour() && n.id === GRANNE.plats) h += neighbourBlock();
     if (n.id === 'hem') h += sleepBlock();
     if (n.id === 'hem' && letterWaiting()) h += letterBlock();
     if (FS && n.id === FS.plats && !S.brevFiske) h += fishLetterBlock();
@@ -1117,6 +1137,7 @@ panel.addEventListener('click', ev => {
   else if (b.dataset.fbrev) readFishLetter();
   else if (b.dataset.handel) startTrade();
   else if (b.dataset.vira) startVira();
+  else if (b.dataset.granne) talkNeighbour();
   else if (b.dataset.lan) talkFisher(b.dataset.lan);
   else if (b.dataset.locka) lure(b.dataset.locka);
   else if (b.dataset.redskap !== undefined){ fishing.redskap = b.dataset.redskap; renderFishing(); }

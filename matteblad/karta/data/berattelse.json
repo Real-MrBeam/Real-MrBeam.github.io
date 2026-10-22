@@ -732,6 +732,14 @@
         "stjarnruda": 2
       },
       "egennamn": true
+    },
+    "nattmossa": {
+      "namn": "Nattmössa",
+      "text": "En lång randig nattmössa med en vit tofs i toppen.",
+      "typ": "klader",
+      "plats": "huvud",
+      "varde": 2,
+      "rykte": "Det sägs att det lyser i dammen på Ängen om nätterna."
     }
   },
   "bygg": {
@@ -3014,6 +3022,25 @@
         "pris": 3,
         "antal": 5,
         "byt": "manort"
+      }
+    }
+  },
+  "granne": {
+    "plats": "angen",
+    "tomt": "hem",
+    "ger": "nattmossa",
+    "rubrik": "{namn} är vaken vid dammen",
+    "knapp": "Prata med {namn}",
+    "val": {
+      "bikupor": {
+        "hej": "Du är också vaken? Ända sedan natten då stjärnorna föll, när marken skakade till och vattnet bubblade upp ur gropen på ängen, kan jag inte sova. Bina surrar oroligt i kuporna.",
+        "ger": "Ta min nattmössa, du. Jag har ändå ingen nytta av den längre.",
+        "igen": "Jag står här och tittar på dammen. Ibland lyser det därnere, som om någon har tappat en stjärna."
+      },
+      "cirkel": {
+        "hej": "Kan inte du heller sova? Ända sedan natten då stjärnorna föll, när marken skakade till och vattnet bubblade upp ur gropen på ängen, glöder stenarna i min cirkel hela nätterna. Jag får inte en blund.",
+        "ger": "Här, ta min nattmössa. Den hjälper ändå inte mig.",
+        "igen": "Titta på dammen. Ibland lyser det därnere, som om någon har tappat en stjärna."
       }
     }
   }
