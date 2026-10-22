@@ -2356,7 +2356,8 @@
         "vikt": [
           0.03,
           0.15
-        ]
+        ],
+        "ingenFisk": true
       },
       "oring": {
         "namn": "Öring",
@@ -2391,7 +2392,8 @@
         "vikt": [
           0.02,
           0.1
-        ]
+        ],
+        "ingenFisk": true
       },
       "mansik": {
         "namn": "Månsik",
@@ -2639,6 +2641,13 @@
         "sent": "Du väntade för länge, och det gömde sig.",
         "fynd": "Du hittade något på botten. Det är ingen fisk."
       }
+    },
+    "fyndPlatser": {
+      "fiskehatt": [
+        "vassen",
+        "udden",
+        "sjo"
+      ]
     }
   },
   "locka": [
@@ -2692,7 +2701,25 @@
       "Ända sedan jag såg det där lysande skeppet på sjön har det nappat fiskar som jag aldrig har sett förut. Stjärnrudor och månsikar. Konstiga saker.",
       "Skeppet seglar bara när det är mörkt. Jag har ropat på det, men ingen svarar.",
       "Majs till rudorna, Glimmerskeden till gäddorna och mask till allt annat. Det är hela hemligheten."
-    ]
+    ],
+    "visar": {
+      "plats": "udden",
+      "antal": 3,
+      "hatt": "fiskehatt",
+      "stalle": [
+        "Jag har ett eget ställe vid sjön som ingen annan vet om. Fånga tre olika sorters fisk och visa mig, så tar jag dig dit.",
+        "Eller hitta min gamla fiskehatt, den med en röd fluga på brättet. Den blåste ner i sjön natten då skeppet kom."
+      ],
+      "knappFisk": "Visa fiskboken",
+      "knappHatt": "Visa fiskehatten",
+      "farre": [
+        "Du har inte fått någon fisk än. Fånga tre olika sorter, så tar jag dig till mitt ställe.",
+        "En sort har du fått. Fånga två till, så tar jag dig till mitt ställe.",
+        "Två sorter! En till, så tar jag dig till mitt ställe."
+      ],
+      "nog": "Tre olika sorter! Du kan fiska, det syns. Följ stigen ner mot sjön, så får du se mitt ställe. Där nappar fiskar man inte ser någon annanstans.",
+      "hattTack": "Min hatt! Den blåste av mig natten då skeppet seglade förbi. Behåll den du, den klär dig bättre än mig. Men följ stigen ner mot sjön, så får du se mitt ställe."
+    }
   },
   "stjarnvaktarna": {
     "rubrik": "Ett brev ligger på trappan",

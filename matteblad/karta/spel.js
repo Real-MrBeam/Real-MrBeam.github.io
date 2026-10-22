@@ -958,9 +958,13 @@ function startTrade(seen){
   const wares = Object.entries(H.saljer || {}).filter(([id]) => !S.saker.includes(id)), packs = Object.entries(H.agn || {});
   // he only sells, he buys no fish (Peter 2026-10-20). When he first greets he says one of several things (prat), one of them
   // about the strange fish since the ship came (Peter 2026-10-22)
-  const talk = [H.hej, ...(H.prat || [])];
+  const talk = [H.hej, ...(H.prat || [])], V = H.visar, hidden = V && !S.hittat.includes(V.plats);
   const hello = !wares.length && !packs.length ? H.inget : seen ? H.hej : talk[Math.floor(Math.random() * talk.length)];
-  startDialog([{ p: H.person, t: hello }], () => [
+  // while his own place (Udden) is hidden he tells about it: three kinds of fish, or his lost hat (Peter 2026-10-22)
+  const lines = hidden && !seen ? V.stalle.map(t => ({ p: H.person, t })) : [{ p: H.person, t: hello }];
+  startDialog(lines, () => [
+    ...(hidden ? [{ label: esc(V.knappFisk), run: showFishBook }] : []),
+    ...(hidden && S.saker.includes(V.hatt) ? [{ label: esc(V.knappHatt), run: () => showPlace(V.hattTack) }] : []),
     ...wares.map(([id, n]) => ({ label: `Köp ${esc(nameIn(id))} ${price(n)}<small>${esc(SAKER[id].text)}</small>`, poor: S.coins < n, run: () => buyFrom(id, n) })),
     ...packs.map(([id, o]) => ({ label: `Köp ${esc(nameIn(id))}, ${o.antal} st ${price(o.pris)}<small>${esc(SAKER[id].text)}</small>`, poor: S.coins < o.pris, run: () => buyPack(id, o, H.person, H.kopt[id], () => startTrade(true)) })),
     ...offers.map(o => ({ label: `Sälj ${esc(o.namn.toLowerCase())} ${price(o.n)}<small>${esc(o.text)}</small>`, run: () => sellTo(o) })),
@@ -978,6 +982,20 @@ function buyFrom(id, n){
     { label: 'Något mer', run: () => startTrade(true) },
     { label: 'Tillbaka till kartan', alt: true, run: toNode },
   ]);
+}
+// The kinds he has caught that are fish (a frog or a crayfish is no fish, fiske.fiskar ingenFisk)
+const fishKinds = () => Object.keys(S.fiskbok).filter(id => FISKE.fiskar[id] && !FISKE.fiskar[id].ingenFisk);
+function showFishBook(){
+  const H = berattelse.handel, V = H.visar, n = fishKinds().length;
+  if (n >= V.antal) return showPlace(V.nog);
+  startDialog([{ p: H.person, t: V.farre[n] }], () => [{ label: 'Något mer', run: () => startTrade(true) }, { label: 'Tillbaka till kartan', alt: true, run: toNode }]);
+}
+// The night fisherman shows his own place: the path from the tent to Udden comes out on the map. He keeps no hat.
+function showPlace(text){
+  const H = berattelse.handel, id = H.visar.plats;
+  if (!S.hittat.includes(id)){ S.hittat.push(id); buildTerrain(); sparkle(NODES[id].x*TS + 8, NODES[id].y*TS + 8, 26); saveSoon(); }
+  toast(`En ny plats syns på kartan: ${NODES[id].name}.`);
+  startDialog([{ p: H.person, t: text }], () => [{ label: 'Något mer', run: () => startTrade(true) }, { label: 'Tillbaka till kartan', alt: true, run: toNode }]);
 }
 // A pack of bait can be bought again and again (handel agn, vira agn)
 const addBait = (id, n) => { S.agnLager[id] = (S.agnLager[id] || 0) + n; renderPack(); saveSoon(); };
@@ -1588,6 +1606,9 @@ function applySaved(data){
   if (!S.pa) S.pa = {};
   if (!S.rykten) S.rykten = [];
   if (data.lyktaTand){ S.tant = { ...(S.tant || {}), lykta: true }; }   // the lantern was saved on its own before
+  // Udden was open for everyone before the night fisherman began to show it (2026-10-22): whoever has been there keeps it
+  const V = berattelse.handel && berattelse.handel.visar, onlyThere = (f, at) => Object.entries(FISKE.platser).every(([pid, p]) => pid === at || ![...p.fiskar, ...(p.fiskarNatt || [])].includes(f));
+  if (V && !S.hittat.includes(V.plats) && (S.node === V.plats || S.rykten.includes(`plats:${V.plats}:natt`) || Object.keys(S.fiskbok).some(f => onlyThere(f, V.plats)))) S.hittat.push(V.plats);
   buildBoy(S.pa); musicSync(); renderLetters(); renderRumors();
   S.lasta = [...new Set([...(S.lasta || []), ...shownHere])];   // stories shown before the saved game had loaded stay seen
   if (typeof data.sett === 'string') S.sett = Uint8Array.from(atob(data.sett), c => c.charCodeAt(0));
@@ -1820,7 +1841,7 @@ function pull(){
     stopFishing(); giveAnimal(rule.djur, rule.text, () => showNode());
     return saveSoon();
   }
-  const finds = (FISKE.fynd || []).filter(id => !S.saker.includes(id) && !S.salt['fynd:' + id]);
+  const finds = (FISKE.fynd || []).filter(id => !S.saker.includes(id) && !S.salt['fynd:' + id] && (!FISKE.fyndPlatser || !FISKE.fyndPlatser[id] || FISKE.fyndPlatser[id].includes(fz.plats)));
   if (finds.length && Math.random() < .2){
     const id = finds[Math.floor(Math.random() * finds.length)]; S.saker.push(id); renderPack(); saveSoon(); stopFishing();
     sparkle(boy.x + 8, boy.y + 2, 20, '#2ce8f5');
