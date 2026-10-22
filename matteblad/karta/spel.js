@@ -1468,7 +1468,7 @@ function renderPack(){
   const own = [...S.saker.filter(id => SAKER[id] && SAKER[id].typ !== 'djur' && !S.agnAnvant.includes(id)), ...packs]
     .sort((a, b) => KAT_ORDER.indexOf(katOf(a)) - KAT_ORDER.indexOf(katOf(b)) || (SAKER[b].alltid ? 1 : 0) - (SAKER[a].alltid ? 1 : 0));
   $('#pack').innerHTML = own.length
-    ? own.map(id => { const it = SAKER[id], on = it.typ === 'klader' && S.pa[it.plats] === id;
+    ? own.map((id, i) => { const it = SAKER[id], on = it.typ === 'klader' && S.pa[it.plats] === id;
         // Things that can be used are tapped like the runes in the list: clothes go on and off, the lantern is lit, the flute plays
         const light = id === 'lykta' || id === 'flaskat' || id === 'eldflugor';
         const usable = it.typ === 'klader' || light || id === 'flojt';
@@ -1476,7 +1476,9 @@ function renderPack(){
         const title = it.typ === 'klader' ? (on ? 'Ta av' : 'Ta på') : light ? (lit ? 'Släck' : 'Tänd') : id === 'flojt' ? 'Spela' : '';
         const state = on ? 'på' : lit ? 'tänd' : it.antal ? `${S.agnLager[id]} st` : '';
         const k = katOf(id);
-        return `<li${usable ? ` class="readable" data-use="${id}" role="button" tabindex="0" title="${title}"` : ''}><img class="pix" src="${katIcon(k)}" alt="${KAT[k].namn}" title="${KAT[k].namn}"><span><b>${esc(it.namn)}</b> ${esc(it.text)}</span>${state ? `<span class="st">${state}</span>` : ''}</li>`; }).join('')
+        // a small heading with a thin line where a new category starts (Peter 2026-10-22)
+        const head = i === 0 || katOf(own[i - 1]) !== k ? `<li class="kat-rubrik"><span>${KAT[k].namn}</span></li>` : '';
+        return head + `<li${usable ? ` class="readable" data-use="${id}" role="button" tabindex="0" title="${title}"` : ''}><img class="pix" src="${katIcon(k)}" alt="${KAT[k].namn}" title="${KAT[k].namn}"><span><b>${esc(it.namn)}</b> ${esc(it.text)}</span>${state ? `<span class="st">${state}</span>` : ''}</li>`; }).join('')
     : '<li><span>Inget ännu. Bygg något och få en gåva!</span></li>';
 }
 
