@@ -884,7 +884,7 @@
           "byggs": "En ring av lysande svampar",
           "kostnad": 12,
           "byggnad": "svampring",
-          "tack": "Ringen har inte lyst så här på hundra år. Den kommer att minnas dig.",
+          "tack": "Ringen har inte lyst så här på hundra år. Den minns natten då stjärnorna föll, och nu kommer den att minnas dig.",
           "gava": [
             "glodsvamp",
             "sporpase"
@@ -3081,15 +3081,11 @@
   "rykten": {
     "stalle": "Nattfiskaren har ett eget ställe vid sjön. Han visar det för den som har fångat tre olika sorters fisk.",
     "hatt": "Nattfiskaren tappade sin gamla fiskehatt med en röd fluga i sjön natten då skeppet kom. Den som hittar den får se hans ställe.",
-    "svampring": "Murkel säger att svampringen minns natten då stjärnorna föll.",
     "graskuggan": "Vira säger att Gråskuggan går mot Norra bron när månen är full.",
     "skugga": "Nattfiskaren har sett en grå skugga gå över bron mot Höstskogen.",
     "skeppet": "Nattfiskaren säger att konstiga nya fiskar har dykt upp i sjön sedan det lysande skeppet började segla där om nätterna."
   },
   "personRykten": {
-    "murkel": [
-      "rykte:svampring"
-    ],
     "vira": [
       "rykte:graskuggan"
     ]
@@ -3280,9 +3276,6 @@
       "klar": [
         "sak:fiskehatt|hittat:udden"
       ]
-    },
-    "rykte:svampring": {
-      "pekar": "glanta"
     },
     "rykte:graskuggan": {
       "pekar": "norrabron",

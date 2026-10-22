@@ -1636,7 +1636,7 @@ function applySaved(data){
   // Udden was open for everyone before the night fisherman began to show it (2026-10-22): whoever has been there keeps it
   const V = berattelse.handel && berattelse.handel.visar, onlyThere = (f, at) => Object.entries(FISKE.platser).every(([pid, p]) => pid === at || ![...p.fiskar, ...(p.fiskarNatt || [])].includes(f));
   if (V && !S.hittat.includes(V.plats) && (S.node === V.plats || S.rykten.includes(`plats:${V.plats}:natt`) || Object.keys(S.fiskbok).some(f => onlyThere(f, V.plats)))) S.hittat.push(V.plats);
-  const MOVED = { 'plats:glanta:natt': 'rykte:svampring', 'plats:host:natt': 'rykte:graskuggan', 'plats:talt:natt': 'rykte:skugga', 'plats:udden:natt': 'rykte:skeppet' };
+  const MOVED = { 'plats:host:natt': 'rykte:graskuggan', 'plats:talt:natt': 'rykte:skugga', 'plats:udden:natt': 'rykte:skeppet' };
   S.rykten = [...new Set(S.rykten.map(k => MOVED[k] || k))];
   buildBoy(S.pa); musicSync(); renderLetters(); renderRumors();
   S.lasta = [...new Set([...(S.lasta || []), ...shownHere])];   // stories shown before the saved game had loaded stay seen
