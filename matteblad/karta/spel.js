@@ -1421,18 +1421,19 @@ function startCount(){
   ]);
 }
 
-// Categories of things in the bag, each with its own small pixel icon (Peter 2026-10-20). Special things have a secret or a task,
-// and the things that call forth an animal (typ lock) are special too (Peter 2026-10-22).
+// Categories of things in the bag, each with its own small pixel icon (Peter 2026-10-20). Special things have a secret or a task.
+// The things that call forth an animal (typ lock) are Lockbeten, the baits for a rod are Agn (Peter 2026-10-22).
 const SPECIAL = ['lykta', 'flaskat', 'eldflugor', 'flojt'];
 const KAT = {
   sarskilt: { namn: 'Särskilt', ico: sprite(["........", ".yy.....", "y..y....", "y..yyyyy", ".yy..y.y", "........", "........", "........"], { y:'#fee761' }) },
   redskap: { namn: 'Redskap', ico: sprite(["....ss..", "....ss..", "....ss..", "....ss..", "s...ss..", "ss..ss..", ".ssss...", "..ss...."], { s:'#c0cbdc' }) },
   agn: { namn: 'Agn', ico: sprite(["........", "pp......", "ppp...pp", ".ppp.ppp", "..ppppp.", "...ppp..", "........", "........"], { p:'#f6757a' }) },
+  lockbete: { namn: 'Lockbeten', ico: sprite(["........", "..oooo..", ".owwwwo.", ".oyyyyo.", ".oyYyyo.", ".oyyyyo.", "..oooo..", "........"], { o:'#8b5a3c', w:'#ead4aa', y:'#feae34', Y:'#fee761' }) },
   klader: { namn: 'Kläder', ico: sprite(["........", "...yy...", "..yyyy..", "..yyyy..", "..RRRR..", "yyyyyyyy", ".yyyyyy.", "........"], { y:'#f4d27a', R:'#e43b44' }) },
   fynd: { namn: 'Fynd', ico: sprite(["........", ".cccccc.", "cwCccCcc", "cCccccCc", ".cCccCc.", "..cCCc..", "...cc...", "........"], { c:'#2ce8f5', C:'#0e5cae', w:'#ffffff' }) },
 };
-const KAT_ORDER = ['sarskilt', 'redskap', 'agn', 'klader', 'fynd'];
-const katOf = id => SPECIAL.includes(id) || SAKER[id].typ === 'lock' ? 'sarskilt' : SAKER[id].typ === 'verktyg' ? 'redskap' : SAKER[id].typ;
+const KAT_ORDER = ['sarskilt', 'redskap', 'agn', 'lockbete', 'klader', 'fynd'];
+const katOf = id => SPECIAL.includes(id) ? 'sarskilt' : SAKER[id].typ === 'lock' ? 'lockbete' : SAKER[id].typ === 'verktyg' ? 'redskap' : SAKER[id].typ;
 let KAT_URL = null;
 const katIcon = k => { if (!KAT_URL) KAT_URL = Object.fromEntries(Object.entries(KAT).map(([key, v]) => [key, iconURL(v.ico, 3)])); return KAT_URL[k]; };
 // Rumours: the hints that used to be in the texts of things. A thing's rumour (saker rykte) is heard when he gets it, a place's
@@ -1655,7 +1656,7 @@ function openModal(steps, done){
 // At a fishing place he picks a tool and, for a rod, a bait, casts and pulls when it bites. Too early or too late: the fish
 // gets away but the bait stays. Mask is always there; other baits come in packs (S.agnLager) or once, like the spoon, and
 // change which kinds bite (saker gillar, nej) and how big they are (stor). A thing that calls forth a water animal (typ lock,
-// Särskilt in the bag) is only offered at the animal's own place, with one of its tools, once he has heard a rumour that points
+// Lockbeten in the bag) is only offered at the animal's own place, with one of its tools, once he has heard a rumour that points
 // there (fiske.djur rykten, Peter 2026-10-22). Each tool has its own words (fiske.satt): only a rod has a hook and a float.
 const FISKE = berattelse.fiske;
 let fishing = null; // { plats, redskap, agn, phase: 'val' | 'vanta' | 'nu' | 'kamp' | 'miss', timers, loop, kamp }
@@ -1728,7 +1729,7 @@ function renderFishing(){
     h += `<p>${esc(T.valj)}</p><div class="panel-body">
       <div><p class="sub">Redskap</p><div class="roads">${myTools().map(id => tool(id, SAKER[id].namn)).join('')}</div></div>
       ${baits.length ? `<div><p class="sub">${esc(T.agn)}</p><div class="roads">${baits.map(pick).join('')}</div></div>` : ''}
-      ${locks.length ? `<div><p class="sub">${esc(T.sarskilt)}</p><div class="roads">${locks.map(pick).join('')}</div></div>` : ''}
+      ${locks.length ? `<div><p class="sub">${esc(T.lockbete)}</p><div class="roads">${locks.map(pick).join('')}</div></div>` : ''}
       <div class="roads"><button class="btn" type="button" data-kasta="1">${esc(SATT(fz).kasta)}</button><button class="btn alt" type="button" data-back="1">${esc(T.tillbaka)}</button></div></div>`;
   } else if (fz.phase === 'vanta' || fz.phase === 'nu'){
     const s = SATT(fz), still = isRod(fz.redskap) ? `<img class="float pix" src="${iconURL(FLOAT, 3)}" alt="">` : `<img class="float pix" src="${iconURL(BUBBLES, 3)}" alt="">`;

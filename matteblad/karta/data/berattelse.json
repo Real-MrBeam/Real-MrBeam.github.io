@@ -2505,7 +2505,7 @@
       "loss": "Du vevade inte på en stund, och fisken slet sig loss.",
       "tillbakaRekord": "Den är tyngre än alla du har fått förut! Du skriver in vikten i fiskboken och släpper tillbaka den, du har ju redan tre.",
       "agn": "Agn",
-      "sarskilt": "Särskilt",
+      "lockbete": "Lockbete",
       "ingetPaAgn": "Ingen fisk här vill ha {agn}. Prova ett annat agn.",
       "brastDrag": "Linan gick av, och {agn} följde med fisken ner i djupet."
     },
