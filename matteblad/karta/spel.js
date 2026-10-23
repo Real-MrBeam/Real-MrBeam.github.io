@@ -739,7 +739,7 @@ const FIRE_OUT = { 'o:18,10': 'o:8,16', 'o:21,12': 'o:9,16' };
 // The burning ones flicker between three pictures (own drawings in row 16, Peter 2026-10-23), each fire in its own time
 const FIRE_FRAMES = { 'o:18,10': ['o:18,10', 'o:19,16', 'o:20,16'], 'o:21,12': ['o:21,12', 'o:21,16', 'o:22,16'] };
 const fireFrame = (i, now, px) => { const f = FIRE_FRAMES[i]; return !f || reduceMotion ? i : f[Math.floor(now / 160 + px * .013) % f.length]; };
-const LIGHT_TILES = { 84: [8, 8, 'win'], 88: [8, 8, 'win'], 'o:27,2': [8, 8, 'win'], 125: [8, 8, 'slit'], 51: [8, 10, 'small'], 55: [8, 10, 'small'], 'o:18,10': [8, 4, 'fire'], 'o:21,12': [8, 9, 'fire'], 'o:28,15': [8, 8, 'tent'], 'o:15,16': [6, 10, 'small'] };
+const LIGHT_TILES = { 84: [8, 8, 'win'], 88: [8, 8, 'win'], 'o:27,2': [8, 8, 'win'], 125: [8, 8, 'slit'], 51: [8, 10, 'small'], 55: [8, 10, 'small'], 'o:18,10': [8, 4, 'fire'], 'o:21,12': [8, 9, 'fire'], 'o:28,15': [8, 8, 'tent'], 'o:15,16': [6, 10, 'small'], 'o:1,17': [8, 13, 'small'] };   // the last one is the round window of Siri's boathouse
 const lightIn = i => { for (const j of Array.isArray(i) ? i : [i]) if (LIGHT_TILES[j]) return LIGHT_TILES[j]; return null; };
 function nightLights(){
   if (!STATIC_LIGHTS){
