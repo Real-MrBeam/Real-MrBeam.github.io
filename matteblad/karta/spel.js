@@ -967,8 +967,10 @@ function startTrade(seen){
   // while his own place (Udden) is hidden he tells about it: three kinds of fish, or his lost hat. The first time it goes to the
   // rumours, after that he only reminds (Peter 2026-10-22)
   const told = hidden && V.rykten.every(k => S.rykten.includes(k));
-  const lines = hidden && !seen ? (told ? [{ p: H.person, t: V.paminn }] : V.stalle.map(t => ({ p: H.person, t }))) : [{ p: H.person, t: hello }];
-  startDialog(lines, () => (hearMany(hidden ? V.rykten : (H.rykten || [])), [
+  // something he tells once, the first time he talks after a thing is bought (efterKop): where the reed for the flute is from
+  const after = !seen && (hidden ? told : true) ? (H.efterKop || []).find(e => S.saker.includes(e.sak) && !S.rykten.includes(e.rykte)) : null;
+  const lines = seen ? [{ p: H.person, t: hello }] : hidden && !told ? V.stalle.map(t => ({ p: H.person, t })) : after ? [{ p: H.person, t: after.t }] : hidden ? [{ p: H.person, t: V.paminn }] : [{ p: H.person, t: hello }];
+  startDialog(lines, () => (hearMany([...(hidden ? V.rykten : (H.rykten || [])), ...(after ? [after.rykte] : [])]), [
     ...(hidden ? [{ label: esc(V.knappFisk), run: showFishBook }] : []),
     ...(hidden && S.saker.includes(V.hatt) ? [{ label: esc(V.knappHatt), run: () => showPlace(V.hattTack) }] : []),
     ...(wares.length || packs.length ? [{ rubrik: 'Köp' }] : []),
@@ -1188,7 +1190,9 @@ function loadPortraitImages(){
   try { locked = JSON.parse(el.textContent); } catch (e) { return; }
   el.dataset.read = '1';
   if (locked.handelser) applyReal(locked.handelser);
-  loadSave();
+  // the news (runes and scrolls he has not read) wait for the saved game, which knows what he has read (S.lasta). Before, they
+  // were told before it had loaded, so a new device, or looking mode that remembers nothing, showed them again (Peter 2026-10-23)
+  loadSave().finally(tellNews);
   for (const [id, url] of Object.entries(locked.portratt ?? {})){
     if (PORTRAIT_IMG[id]) continue;
     const im = new Image();
@@ -1578,9 +1582,13 @@ function applyReal(events){
   });
   REAL = { stars, stoft, handelser };
   restart();
+}
+// What he has not read yet, once the saved game has loaded. restart() closed any dialog, so the letter (first time) or the news
+// is shown from the start.
+function tellNews(){
+  if (!REAL) return;
   const seen = seenEvents();
-  newsQueue = handelser.filter(e => !seen.includes(e.id));
-  // restart() closes any dialog, so the letter (first time) or the news is shown again from the start
+  newsQueue = REAL.handelser.filter(e => !seen.includes(e.id));
   if (!introSeen()) showIntro(); else if (newsQueue.length) showNews();
 }
 /* ---------- sparning ---------- */

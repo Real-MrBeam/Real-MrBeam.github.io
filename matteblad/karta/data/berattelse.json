@@ -2726,6 +2726,13 @@
     "rykten": [
       "rykte:skugga",
       "rykte:skeppet"
+    ],
+    "efterKop": [
+      {
+        "sak": "flojt",
+        "t": "Vassen till flöjten skar jag vid Norra bron. Där spelar någon fiol om nätterna, samma melodi varje gång.",
+        "rykte": "rykte:flojt"
+      }
     ]
   },
   "stjarnvaktarna": {
@@ -3084,7 +3091,8 @@
     "hatt": "Nattfiskaren tappade sin gamla fiskehatt med en röd fluga i sjön natten då skeppet kom. Den som hittar den får se hans ställe.",
     "graskuggan": "Vira säger att Gråskuggan går mot Norra bron när månen är full.",
     "skugga": "Nattfiskaren har sett en grå skugga gå över bron mot Höstskogen.",
-    "skeppet": "Nattfiskaren säger att konstiga nya fiskar har dykt upp i sjön sedan det lysande skeppet började segla där om nätterna."
+    "skeppet": "Nattfiskaren säger att konstiga nya fiskar har dykt upp i sjön sedan det lysande skeppet började segla där om nätterna.",
+    "flojt": "Nattfiskaren skar vassen till flöjten vid Norra bron. Där spelar någon fiol om nätterna, samma melodi varje gång."
   },
   "personRykten": {
     "vira": [
@@ -3295,6 +3303,10 @@
     },
     "plats:eken:dag": {
       "pekar": "eken"
+    },
+    "rykte:flojt": {
+      "pekar": "norrabron",
+      "natt": true
     }
   }
 }
