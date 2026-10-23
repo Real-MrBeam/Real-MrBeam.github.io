@@ -1602,15 +1602,24 @@ function spend(n){ S.coins -= n; S.spent += n; }
 // Stardust he earns (selling to the night fisherman) is saved as negative spending, since the rest is counted from the scrolls
 function earn(n){ spend(-n); updateHud('coins'); }
 function gh(method, body){
+  if (VIEW && method !== 'GET') return Promise.reject(new Error('Tittläge: inget sparas'));   // looking at his game never writes
   return fetch(`https://api.github.com/repos/${SAVE.repo}/contents/${SAVE.file}`, { method, cache: 'no-store', keepalive: method === 'PUT',
     headers: { Authorization: `Bearer ${SAVE.key}`, Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' },
     body: body && JSON.stringify(body) });
 }
 // Debug mode (?debug in the address): the debug buttons show, and nothing is loaded from or saved to his game, so Peter can
 // try things out without touching the saved game. The browser's own memory (news, letter) is not touched either.
-const TEST = new URLSearchParams(location.search).has('debug');
+// Looking mode (?titta, with or without debug, Peter 2026-10-23): his real saved game is loaded so Peter sees exactly what he
+// sees, but nothing is ever saved: not to GitHub (gh refuses anything but reading) and not to the browser's memory.
+const VIEW = new URLSearchParams(location.search).has('titta');
+const TEST = new URLSearchParams(location.search).has('debug') || VIEW;
+if (VIEW){
+  const sign = document.createElement('div'); sign.className = 'tittar'; sign.setAttribute('role', 'status');
+  sign.textContent = 'Tittar på hans spel. Inget sparas.';
+  document.querySelector('header.top').after(sign);
+}
 async function loadSave(){
-  if (TEST){ SAVE.off = true; return; }
+  if (TEST && !VIEW){ SAVE.off = true; return; }
   const el = document.getElementById('lasNyckel');
   if (!el || !el.classList.contains('unlocked') || SAVE.key) return;
   SAVE.repo = el.dataset.repo; SAVE.file = el.dataset.fil; SAVE.key = el.textContent.trim();
@@ -1659,13 +1668,13 @@ function snapshot(){
 }
 // Saves a moment after a change. If the file was changed elsewhere (another device), the newest version is overwritten.
 function saveSoon(){
-  if (!SAVE.key || !SAVE.loaded || SAVE.off) return;
+  if (VIEW || !SAVE.key || !SAVE.loaded || SAVE.off) return;
   clearTimeout(SAVE.timer);
   SAVE.timer = setTimeout(saveNow, 1500);
 }
 async function saveNow(retry){
   clearTimeout(SAVE.timer); SAVE.timer = 0;
-  if (!SAVE.key || !SAVE.loaded || SAVE.off) return;
+  if (VIEW || !SAVE.key || !SAVE.loaded || SAVE.off) return;
   try {
     const res = await gh('PUT', { message: 'Sparat spel', content: b64(JSON.stringify(snapshot())), ...(SAVE.sha ? { sha: SAVE.sha } : {}) });
     if ((res.status === 409 || res.status === 422) && !retry){
