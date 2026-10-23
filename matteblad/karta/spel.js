@@ -884,7 +884,7 @@ const PLACE_PARTS = [
   { on: id => !isDay() && !!NATTSTOPP[id], block: id => stopBlock('natt:' + id), active: id => !S.stopp['natt:' + id] },
   { on: id => !!viraHere() && id === VIRA.plats, block: () => viraBlock(), active: () => true },                       // a shop
   { on: id => !!neighbour() && id === GRANNE.plats, block: () => neighbourBlock(), active: () => !S.saker.includes(GRANNE.ger) },
-  { on: id => id === 'hem', block: () => sleepBlock(), active: () => false },
+  { on: id => id === 'hem', block: () => sleepBlock(), active: () => true },   // he can always sleep at home (Peter 2026-10-23)
   { on: id => id === 'hem' && letterWaiting(), block: () => letterBlock(), active: () => true },
   { on: id => !!FS && id === FS.plats && !S.brevFiske, block: () => fishLetterBlock(), active: () => true },
   { on: id => !!berattelse.handel && id === berattelse.handel.plats, block: () => tentBlock(), active: () => !!S.natt },   // a shop at night
@@ -1030,8 +1030,9 @@ function startVira(seen){
     ...Object.entries(VIRA.agn).map(([id, o]) => buyChoice(id, o.pris, o.antal, () => buyPack(id, o, VIRA.person, VIRA.tack, back))),
     ...Object.entries(VIRA.agn).flatMap(([id, o]) => [
       ...(o.byt && S.saker.includes(o.byt) ? [{ rubrik: 'Byt' }, swapChoice(id, o.byt, o.antal, () => {
-        S.saker = S.saker.filter(x => x !== o.byt); addBait(id, o.antal); toast(`${SAKER[id].namn}, ${o.antal} st, lades i väskan.`);
+        S.saker = S.saker.filter(x => x !== o.byt); addBait(id, o.antal);
         startDialog([{ p: VIRA.person, t: VIRA.tackByt }], () => [{ label: 'Något mer', run: back }, { label: 'Tillbaka till kartan', alt: true, run: toNode }]);
+        itemModal(id, null, `${o.antal} st lades i väskan.`);
       })] : []),
     ]),
     { label: 'Tillbaka till kartan', alt: true, run: toNode },
@@ -1050,7 +1051,7 @@ function talkNeighbour(){
   const n = neighbour(); if (!n) return;
   if (S.saker.includes(GRANNE.ger)) return startDialog([{ p: n.person, t: n.igen }], () => [{ label: 'Tillbaka till kartan', alt: true, run: toNode }]);
   startDialog([{ p: n.person, t: n.hej }, { p: n.person, t: n.ger }], () => {
-    if (!S.saker.includes(GRANNE.ger)){ S.saker.push(GRANNE.ger); renderPack(); saveSoon(); toast(itemFound(GRANNE.ger)); }
+    if (!S.saker.includes(GRANNE.ger)){ S.saker.push(GRANNE.ger); renderPack(); saveSoon(); itemModal(GRANNE.ger); }
     return [{ label: 'Tillbaka till kartan', alt: true, run: toNode }];
   });
 }
@@ -1291,12 +1292,14 @@ function takeStep(ad, o){
   }
   const out = [{ p: o.p ?? null, t: o.text }];
   // a choice can give a thing on the way (ge) and go on with the adventure
-  if (o.ge && !S.saker.includes(o.ge)){ S.saker.push(o.ge); renderPack(); toast(itemFound(o.ge)); }
+  const gotOnWay = o.ge && !S.saker.includes(o.ge);
+  if (gotOnWay){ S.saker.push(o.ge); renderPack(); }
   // or take the find that opened the choice (fyndVal with tar)
   if (o.tar && S.saker.includes(o.fynd)){ S.saker.splice(S.saker.indexOf(o.fynd), 1); renderPack(); }
   saveSoon();
   if (typeof o.till === 'string'){ S.steg[ad.key] = o.till; runStep(ad, o.till, out); }
   else ad.end(o.till, out);
+  if (gotOnWay) itemModal(o.ge);
 }
 
 /* ---------- stoppen med äventyr ---------- */
@@ -1329,13 +1332,14 @@ function rewardMain(till){
 }
 function finishStop(id, till, out){
   S.stopp[id] = till; renderRumors(); delete S.steg['stopp:' + id]; saveSoon();
-  if (till.djur) giveAnimal(till.djur, out[out.length - 1].t);
-  if (till.agn && !S.saker.includes(till.agn)){ S.saker.push(till.agn); renderPack(); toast(rewardText(till)); }
-  if (till.fynd && !S.saker.includes(till.fynd)){ S.saker.push(till.fynd); renderPack(); sparkle(boy.x + 8, boy.y + 2, 18); toast(rewardText(till)); }
-  if (till.extra && !S.saker.includes(till.extra)){ S.saker.push(till.extra); renderPack(); }
+  const things = [till.agn, till.fynd, till.extra].filter(x => x && !S.saker.includes(x));
+  for (const x of things) S.saker.push(x);
+  if (things.length){ renderPack(); sparkle(boy.x + 8, boy.y + 2, 18); }
+  if (till.djur) giveAnimal(till.djur, out[out.length - 1].t, () => itemModal(things));
   if (till.stoft){ S.coins += till.stoft; updateHud('coins'); sparkle(boy.x + 8, boy.y + 2, 24); toast(rewardText(till)); }
   if (till.fiskeplats){ S.hittat.push(till.fiskeplats); buildTerrain(); sparkle(NODES[till.fiskeplats].x*TS + 8, NODES[till.fiskeplats].y*TS + 8, 26); toast(rewardText(till)); }
   startDialog([...out, { p: null, t: rewardText(till) }], () => [{ label: 'Tillbaka till kartan', alt: true, run: toNode }]);
+  if (!till.djur) itemModal(things);
 }
 function confirmBuild(p, v, pre){
   const adventure = !!BYGG[p.bygg].aventyr, short = () => toast(berattelse.dialog.ingaStoft.replace('{n}', v.kostnad - S.coins));
@@ -1384,19 +1388,19 @@ function tradeFish(p, v){
   S.fiskbok[T.vill]--; S.bytt[p.id] = true;
   if (!S.saker.includes(T.ger)) S.saker.push(T.ger);
   renderFishBook(); renderPack(); saveSoon();
-  toast(`${SAKER[T.ger].namn} lades i väskan.`);
   startDialog([{ p: v.person, t: T.tack }], () => back);
+  itemModal(T.ger);
 }
 function takeGift(p, id){
   const v = valOf(p), it = SAKER[id];
   if (S.handlat[p.id] || !v.gava.includes(id)) return;
   S.handlat[p.id] = id; if (!S.saker.includes(id)) S.saker.push(id);
-  if (v.extra && !S.saker.includes(v.extra)){ S.saker.push(v.extra); toast(`${PERS[v.person].namn} gav dig också ${SAKER[v.extra].namn.toLowerCase()}!`); }
+  const extra = v.extra && !S.saker.includes(v.extra) ? v.extra : null;
+  if (extra) S.saker.push(extra);
   saveSoon(); renderPack();
   const after = () => v.byte ? startShop(p, true) : toNode();
-  if (it.djur){ if (S.djur.includes(it.djur)) return after(); giveAnimal(it.djur, it.text, after); return; }
-  toast(`Du fick ${it.namn.toLowerCase()}!`);
-  after();
+  if (it.djur){ if (S.djur.includes(it.djur)) return itemModal(extra, after); giveAnimal(it.djur, it.text, () => itemModal(extra, after)); return; }
+  itemModal([id, extra], after);
 }
 
 /* ---------- djurboken ---------- */
@@ -1718,6 +1722,15 @@ function showNews(){
   const steps = list.flatMap((e, i) => eventSteps(e, i === list.length - 1));
   openModal(steps, () => { markSeen(list.map(e => e.id)); updateHud('stars'); renderTickets(); });
 }
+// Something he gets (a gift, a find, a thing from an adventure, a swap) is shown in a box like the runes (Peter 2026-10-23):
+// a big picture (its category's), the name, the text and that it went into the bag. Things he buys are not shown like this: he chose them himself, and the seller answers.
+const itemPicture = id => iconURL(KAT[katOf(id)].ico, 8);   // the picture of its category, as for finds when fishing
+function itemModal(ids, done, reward){
+  const list = [].concat(ids).filter(Boolean);
+  if (!list.length) return done && done();
+  openModal(list.map((id, i) => ({ icon: itemPicture(id), title: SAKER[id].namn, text: SAKER[id].text,
+    reward: reward || (SAKER[id].typ === 'klader' ? 'Lades i väskan. Du kan ta på den där.' : 'Lades i väskan.'), button: i === list.length - 1 ? 'Fortsätt' : 'Nästa' })), done);
+}
 // A box over the map with a picture, a title, a text and one button, step by step
 // If the field is left empty the name stays as it was
 const berattelseNamn = s => s.input;
@@ -1790,8 +1803,9 @@ function sellOrSwap(o){
     if (how === 'pris'){ if (S.coins < o.pris){ toast(berattelse.dialog.ingaStoft.replace('{n}', o.pris - S.coins)); return; } spend(o.pris); updateHud('coins'); }
     else S.saker = S.saker.filter(x => x !== how);
     S.saker.push(o.ger); o.done(); renderPack(); saveSoon();
-    toast(`${SAKER[o.ger].namn} lades i väskan.`);
+    if (how === 'pris') toast(`${SAKER[o.ger].namn} lades i väskan.`);
     startDialog([{ p: o.who, t: o.tack }], () => [{ label: 'Tillbaka', alt: true, run: o.back }]);
+    if (how !== 'pris') itemModal(o.ger);
   };
   startDialog([{ p: o.who, t: o.hej }], () => [
     { rubrik: 'Köp' }, buyChoice(o.ger, o.pris, 0, () => give('pris')),
@@ -1891,7 +1905,7 @@ function pull(){
     const id = finds[Math.floor(Math.random() * finds.length)]; S.saker.push(id); renderPack(); saveSoon(); stopFishing();
     sparkle(boy.x + 8, boy.y + 2, 20, '#2ce8f5');
     // the picture of what it is: the find gem, or the hat for clothes
-    return openModal([{ icon: iconURL(KAT[katOf(id)].ico, 8), title: SAKER[id].namn, text: `${s.fynd} ${SAKER[id].text}`, reward: SAKER[id].typ === 'klader' ? 'Lades i väskan. Du kan ta på den där.' : 'Lades i väskan.', button: 'Till kartan' }], () => showNode());
+    return openModal([{ icon: itemPicture(id), title: SAKER[id].namn, text: `${s.fynd} ${SAKER[id].text}`, reward: SAKER[id].typ === 'klader' ? 'Lades i väskan. Du kan ta på den där.' : 'Lades i väskan.', button: 'Till kartan' }], () => showNode());
   }
   // a kind he has not caught is a little more likely
   const list = bites(fz), fresh = list.filter(e => S.fiskbok[e.id] === undefined);
