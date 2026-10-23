@@ -715,6 +715,9 @@ function frame(now){
 let nightLevel = 0, STATIC_LIGHTS = null, WATER_STARS = null;
 // The burning torch and campfire, and the same put out (own tiles in openrpg.png, verktyg/gor-egna-rutor.py)
 const FIRE_OUT = { 'o:18,10': 'o:8,16', 'o:21,12': 'o:9,16' };
+// The burning ones flicker between three pictures (own drawings in row 16, Peter 2026-10-23), each fire in its own time
+const FIRE_FRAMES = { 'o:18,10': ['o:18,10', 'o:19,16', 'o:20,16'], 'o:21,12': ['o:21,12', 'o:21,16', 'o:22,16'] };
+const fireFrame = (i, now, px) => { const f = FIRE_FRAMES[i]; return !f || reduceMotion ? i : f[Math.floor(now / 160 + px * .013) % f.length]; };
 const LIGHT_TILES = { 84: [8, 8, 'win'], 88: [8, 8, 'win'], 'o:27,2': [8, 8, 'win'], 125: [8, 8, 'slit'], 51: [8, 10, 'small'], 55: [8, 10, 'small'], 'o:18,10': [8, 4, 'fire'], 'o:21,12': [8, 9, 'fire'], 'o:28,15': [8, 8, 'tent'], 'o:15,16': [6, 10, 'small'] };
 const lightIn = i => { for (const j of Array.isArray(i) ? i : [i]) if (LIGHT_TILES[j]) return LIGHT_TILES[j]; return null; };
 function nightLights(){
@@ -754,7 +757,7 @@ function drawNight(now, lv){
   // the burning fires on top of the put-out ones, fading in with the night. They are drawn before the light, so the glow
   // lies over the flames and not under them.
   ctx.globalCompositeOperation = 'source-over';
-  for (const L of lights) if (L.k === 'fire' && L.i) tile(ctx, L.i, L.px, L.py);
+  for (const L of lights) if (L.k === 'fire' && L.i) tile(ctx, fireFrame(L.i, now, L.px), L.px, L.py);
 
   ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'lighter';
   for (const L of lights){
@@ -868,32 +871,33 @@ $('#btnMusik').addEventListener('click', () => {
 });
 document.addEventListener('visibilitychange', () => { if (window.Musik) Musik.paus(document.hidden); });
 
-// Is there still something to do at a place? Used at night to keep the plate light.
-function nodeActive(id){
-  if (FS && id === FS.plats && !S.brevFiske) return true;
-  if (S.natt){   // at night the tent is open, and the fishing places if he has something to fish with, and the letter
-    if (NATTSTOPP[id] && !S.stopp['natt:' + id]) return true;
-    if (GRANNE && id === GRANNE.plats && neighbour() && !S.saker.includes(GRANNE.ger)) return true;
-    if (berattelse.handel && id === berattelse.handel.plats) return true;
-    if (FISKE.platser[id] && myTools().length) return true;
-    return id === 'hem' && letterWaiting();
-  }
-  for (const p of PLOTS) if (p.node === id && !p.prebuilt){
-    if (!S.built[p.id]) return true;
-    const v = valOf(p);
-    if (v && (!S.handlat[p.id] || (v.byte && !S.bytt[p.id]))) return true;
-  }
-  if (STOPP[id] && !S.stopp[id]) return true;
-  const fp = FISKE.platser[id];
-  if (fp && FISKE.djur.some(r => r.plats === id && !S.djur.includes(r.djur))) return true;
-  if (fp && fp.lan && !S.saker.includes(fp.lan.ger)) return true;
-  if (fp && myTools().some(t => (FISKE.fangar[t] || []).some(f => fp.fiskar.includes(f) && S.fiskbok[f] === undefined))) return true;
-  if (LOCKA.some(r => r.plats === id && !S.djur.includes(r.djur))) return true;
-  if (berattelse.handel && id === berattelse.handel.plats && S.natt && (Object.keys(berattelse.handel.saljer || {}).some(x => !S.saker.includes(x)) || tradeOffers().length)) return true;
-  if (id === 'hem' && letterWaiting()) return true;
-  if (id === CHEST_AT.node && pendingTickets().length) return true;
-  return false;
-}
+// What a place offers, in the order it is shown in the panel. Each part says when it is there (on), what it shows (block) and
+// whether it makes the centre of the plate yellow (active): something left to do, someone to talk to or a shop where he can
+// buy something (Peter 2026-10-23). Everything new at a place goes in here, so the panel and the plate can never disagree.
+const isDay = () => !S.natt;
+const plotsAt = id => PLOTS.filter(p => p.node === id);
+const plotLeft = p => { if (p.prebuilt) return false; if (!S.built[p.id]) return true; const v = valOf(p); return !!(v && (!S.handlat[p.id] || (v.byte && !S.bytt[p.id]))); };
+const newFishAt = id => { const fp = FISKE.platser[id]; return myTools().some(t => (FISKE.fangar[t] || []).some(f => fp.fiskar.includes(f) && S.fiskbok[f] === undefined)); };
+const PLACE_PARTS = [
+  { on: id => isDay() && plotsAt(id).length > 0, block: id => plotsAt(id).map(plotBlock).join(''), active: id => plotsAt(id).some(plotLeft) },
+  { on: id => isDay() && !!STOPP[id], block: id => stopBlock(id), active: id => !S.stopp[id] },
+  { on: id => !isDay() && !!NATTSTOPP[id], block: id => stopBlock('natt:' + id), active: id => !S.stopp['natt:' + id] },
+  { on: id => !!viraHere() && id === VIRA.plats, block: () => viraBlock(), active: () => true },                       // a shop
+  { on: id => !!neighbour() && id === GRANNE.plats, block: () => neighbourBlock(), active: () => !S.saker.includes(GRANNE.ger) },
+  { on: id => id === 'hem', block: () => sleepBlock(), active: () => false },
+  { on: id => id === 'hem' && letterWaiting(), block: () => letterBlock(), active: () => true },
+  { on: id => !!FS && id === FS.plats && !S.brevFiske, block: () => fishLetterBlock(), active: () => true },
+  { on: id => !!berattelse.handel && id === berattelse.handel.plats, block: () => tentBlock(), active: () => !!S.natt },   // a shop at night
+  // fishing: at night a fishing place is light as long as he has something to fish with; by day while a water animal or a kind
+  // he has not caught is left there
+  { on: id => !!FISKE.platser[id], block: id => fishBlock(id), active: id => S.natt ? myTools().length > 0 : FISKE.djur.some(r => r.plats === id && !S.djur.includes(r.djur)) || newFishAt(id) },
+  { on: id => isDay() && !!(FISKE.platser[id] && FISKE.platser[id].lan), block: id => lanBlock(id), active: id => !S.saker.includes(FISKE.platser[id].lan.ger) },   // a shop
+  { on: id => isDay() && LOCKA.some(r => r.plats === id), block: id => LOCKA.filter(r => r.plats === id).map(lureBlock).join(''), active: id => LOCKA.some(r => r.plats === id && !S.djur.includes(r.djur)) },
+  { on: id => isDay() && id === CHEST_AT.node && pendingTickets().length > 0, block: () => `<div class="plot"><div><b>En guldkista står vid skolan</b></div><button class="btn" type="button" data-kista="1">Öppna kistan</button></div>`, active: () => true },
+  { on: id => isDay() && id === 'slott', block: () => `<div><button class="btn" type="button" data-slott="1">${esc(berattelse.dialog.slottKnapp)}</button></div>`, active: () => false },
+];
+// Is there still something to do at a place? Colours the centre of the plate (yellow, or grey when all is done).
+const nodeActive = id => PLACE_PARTS.some(part => part.on(id) && part.active(id));
 
 /* ---------- Stjärnväktarnas brev ---------- */
 // A secret society, Stjärnväktarna, leaves a letter on the step of Hemmet at night, once he has opened his first rune or scroll.
@@ -967,8 +971,9 @@ function startTrade(seen){
   startDialog(lines, () => (hearMany(hidden ? V.rykten : (H.rykten || [])), [
     ...(hidden ? [{ label: esc(V.knappFisk), run: showFishBook }] : []),
     ...(hidden && S.saker.includes(V.hatt) ? [{ label: esc(V.knappHatt), run: () => showPlace(V.hattTack) }] : []),
-    ...wares.map(([id, n]) => ({ label: `Köp ${esc(nameIn(id))} ${price(n)}<small>${esc(SAKER[id].text)}</small>`, poor: S.coins < n, run: () => buyFrom(id, n) })),
-    ...packs.map(([id, o]) => ({ label: `Köp ${esc(nameIn(id))}, ${o.antal} st ${price(o.pris)}<small>${esc(SAKER[id].text)}</small>`, poor: S.coins < o.pris, run: () => buyPack(id, o, H.person, H.kopt[id], () => startTrade(true)) })),
+    ...(wares.length || packs.length ? [{ rubrik: 'Köp' }] : []),
+    ...wares.map(([id, n]) => buyChoice(id, n, 0, () => buyFrom(id, n))),
+    ...packs.map(([id, o]) => buyChoice(id, o.pris, o.antal, () => buyPack(id, o, H.person, H.kopt[id], () => startTrade(true)))),
     ...offers.map(o => ({ label: `Sälj ${esc(o.namn.toLowerCase())} ${price(o.n)}<small>${esc(o.text)}</small>`, run: () => sellTo(o) })),
     { label: 'Tillbaka till kartan', alt: true, run: toNode },
   ]), seen);
@@ -1019,12 +1024,13 @@ function viraBlock(){
 function startVira(seen){
   const back = () => startVira(true);
   startDialog([{ p: VIRA.person, t: VIRA.hej }], () => [
+    { rubrik: 'Köp' },
+    ...Object.entries(VIRA.agn).map(([id, o]) => buyChoice(id, o.pris, o.antal, () => buyPack(id, o, VIRA.person, VIRA.tack, back))),
     ...Object.entries(VIRA.agn).flatMap(([id, o]) => [
-      { label: `Köp ${esc(nameIn(id))}, ${o.antal} st ${price(o.pris)}<small>${esc(SAKER[id].text)}</small>`, poor: S.coins < o.pris, run: () => buyPack(id, o, VIRA.person, VIRA.tack, back) },
-      ...(o.byt && S.saker.includes(o.byt) ? [{ label: `Byt ${esc(SAKER[o.byt].namn.toLowerCase())} mot ${o.antal} st<small>${esc(SAKER[o.byt].text)}</small>`, run: () => {
+      ...(o.byt && S.saker.includes(o.byt) ? [{ rubrik: 'Byt' }, swapChoice(id, o.byt, o.antal, () => {
         S.saker = S.saker.filter(x => x !== o.byt); addBait(id, o.antal); toast(`${SAKER[id].namn}, ${o.antal} st, lades i väskan.`);
         startDialog([{ p: VIRA.person, t: VIRA.tackByt }], () => [{ label: 'Något mer', run: back }, { label: 'Tillbaka till kartan', alt: true, run: toNode }]);
-      } }] : []),
+      })] : []),
     ]),
     { label: 'Tillbaka till kartan', alt: true, run: toNode },
   ], seen);
@@ -1078,29 +1084,15 @@ function renderPanel(view){
   } else if (view.type === 'node'){
     const n = NODES[view.id];
     // No road buttons (Peter 2026-10-18): he walks by tapping the dots on the map, or with the arrow keys
-    const plots = PLOTS.filter(p => p.node === n.id);
-    const stop = STOPP[n.id];
     // a place can have its own text for the night (berattelse.json platser natt)
     const ptext = S.natt && berattelse.platser[n.id] && berattelse.platser[n.id].natt || n.text;
     if (!boy.route) setTimeout(() => hearRumor(`plats:${n.id}:${S.natt ? 'natt' : 'dag'}`), 600);
     h = `<span class="tag">Du är här</span><h2>${esc(n.name)}</h2><p>${esc(ptext)}</p><div class="panel-body">`;
-    // At night everything is closed except the tent, the fishing, and sleeping (and the letter) in Hemmet (Peter 2026-10-20)
-    const day = !S.natt, before = h.length;
-    if (day) for (const p of plots) h += plotBlock(p);
-    if (day && stop) h += stopBlock(n.id);
-    if (!day && NATTSTOPP[n.id]) h += stopBlock('natt:' + n.id);
-    if (viraHere() && n.id === VIRA.plats) h += viraBlock();
-    if (neighbour() && n.id === GRANNE.plats) h += neighbourBlock();
-    if (n.id === 'hem') h += sleepBlock();
-    if (n.id === 'hem' && letterWaiting()) h += letterBlock();
-    if (FS && n.id === FS.plats && !S.brevFiske) h += fishLetterBlock();
-    if (berattelse.handel && n.id === berattelse.handel.plats) h += tentBlock();
-    if (FISKE.platser[n.id]) h += fishBlock(n.id);
-    if (day && FISKE.platser[n.id] && FISKE.platser[n.id].lan) h += lanBlock(n.id);
-    if (day) for (const r of LOCKA) if (r.plats === n.id) h += lureBlock(r);
-    if (day && n.id === CHEST_AT.node && pendingTickets().length) h += `<div class="plot"><div><b>En guldkista står vid skolan</b></div><button class="btn" type="button" data-kista="1">Öppna kistan</button></div>`;
-    if (day && n.id === 'slott') h += `<div><button class="btn" type="button" data-slott="1">${esc(berattelse.dialog.slottKnapp)}</button></div>`;
-    if (!day && h.length === before) h += `<p class="sub" style="text-transform:none;letter-spacing:0">Det är natt. Här sover alla.</p>`;
+    // Everything the place offers comes from PLACE_PARTS (the same list that colours the plate). At night everything is closed
+    // except what is open at night (Peter 2026-10-20).
+    const before = h.length;
+    for (const part of PLACE_PARTS) if (part.on(n.id)) h += part.block(n.id);
+    if (S.natt && h.length === before) h += `<p class="sub" style="text-transform:none;letter-spacing:0">Det är natt. Här sover alla.</p>`;
     h += `</div>`;
   } else if (view.type === 'gate'){
     const g = view.gate, e = g.edge, open = S.stars >= g.req;
@@ -1228,7 +1220,8 @@ function dialogButtons(){
   if (dlg.i < dlg.lines.length - 1) return '<button class="btn" type="button" data-dlgnext="1">Fortsätt</button>';
   dlg.choices = dlg.end();
   hearMany(dlg.lines.flatMap(l => (berattelse.personRykten || {})[l.p] || []));   // what this person tells goes to the rumours
-  return dlg.choices.map((c, i) => `<button class="btn${c.alt ? ' alt' : ''}${c.poor ? ' locked' : ''}" type="button" data-dlgchoice="${i}"${c.disabled ? ' disabled' : ''}>${c.label}</button>`).join('');
+  // a choice can also be a small heading over the buttons that follow (rubrik), like "Köp" in a shop
+  return dlg.choices.map((c, i) => c.rubrik ? `<p class="sub dlg-rubrik">${esc(c.rubrik)}</p>` : `<button class="btn${c.alt ? ' alt' : ''}${c.poor ? ' locked' : ''}${c.cls ? ' ' + c.cls : ''}" type="button" data-dlgchoice="${i}"${c.disabled ? ' disabled' : ''}>${c.label}</button>`).join('');
 }
 function startTyping(){
   const L = dlg.lines[dlg.i];
@@ -1776,6 +1769,11 @@ function talkFisher(id){
   if (S.saker.includes(L.ger)) return;
   sellOrSwap({ who: null, hej: L.hej, tack: L.tack, ger: L.ger, pris: L.pris, fynd: L.fynd, back: toNode, done: () => {} });
 }
+// A thing in a shop (Peter 2026-10-23): the price first (or the find he gives for it), then the name and how many as the title,
+// and a short text under it. The headings "Köp" and "Byt" stand over the buttons. Shop texts are kept short (the test checks).
+const wareLabel = (id, left, antal, under) => `${left}<span class="vara"><b>${esc(SAKER[id].namn)}${antal ? `, ${antal} st` : ''}</b><small>${esc(under ?? SAKER[id].text)}</small></span>`;
+const buyChoice = (id, pris, antal, run) => ({ label: wareLabel(id, price(pris), antal), poor: S.coins < pris, cls: 'vara-btn', run });
+const swapChoice = (id, fynd, antal, run) => ({ label: wareLabel(id, `<span class="price"><img class="pix" src="${katIcon('fynd')}" alt="Byt"></span>`, antal, `Du ger ${SAKER[fynd].namn.toLowerCase()}`), cls: 'vara-btn', run });
 // Someone sells a thing for stardust, or swaps it for the one find he or she wants (the fishermen on the bridges, Hulda). Peter 2026-10-21.
 function sellOrSwap(o){
   const finds = o.fynd && S.saker.includes(o.fynd) ? [o.fynd] : [];
@@ -1788,8 +1786,8 @@ function sellOrSwap(o){
     startDialog([{ p: o.who, t: o.tack }], () => [{ label: 'Tillbaka', alt: true, run: o.back }]);
   };
   startDialog([{ p: o.who, t: o.hej }], () => [
-    { label: `Köp ${esc(SAKER[o.ger].namn.toLowerCase())} ${price(o.pris)}`, poor: S.coins < o.pris, run: () => give('pris') },
-    ...finds.map(id => ({ label: `Byt mot ${esc(SAKER[id].namn.toLowerCase())}<small>${esc(SAKER[id].text)}</small>`, run: () => give(id) })),
+    { rubrik: 'Köp' }, buyChoice(o.ger, o.pris, 0, () => give('pris')),
+    ...(finds.length ? [{ rubrik: 'Byt' }, ...finds.map(id => swapChoice(o.ger, id, 0, () => give(id)))] : []),
     { label: 'Tillbaka', alt: true, run: o.back },
   ]);
 }

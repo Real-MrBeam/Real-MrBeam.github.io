@@ -472,7 +472,7 @@
     },
     "trolldryck": {
       "namn": "Trolldryck",
-      "text": "En liten flaska som bubblar av sig själv. Fråga inte vad som är i den.",
+      "text": "En flaska som bubblar av sig själv. Fråga inte vad som är i den.",
       "typ": "lock",
       "rykte": "Hulda säger att trolldrycken får det stora i Vassen att titta upp."
     },
@@ -939,7 +939,7 @@
             "ger": "trolldryck",
             "pris": 4,
             "knapp": "Köp en trolldryck",
-            "hej": "Jag har en trolldryck över. Du får den för fyra stjärnstoft. Eller om du har ett drakfjäll till grytan, då byter vi.",
+            "hej": "Jag har en trolldryck över. Eller har du ett drakfjäll till grytan? Då byter vi.",
             "tack": "Här. Fråga inte vad som är i den.",
             "fynd": "drakfjall"
           },
@@ -2151,7 +2151,7 @@
           "tack": "\"Där ser man. Håven är din. Jag fiskar bättre utan.\"",
           "klar": "Du har redan en håv.",
           "pris": 5,
-          "hej": "Den gamla fiskaren fnyser vänligt. \"Min håv kan du få för fem stjärnstoft. Eller om du hittar en gammal glasflaska. Jag samlar på sådana.\"",
+          "hej": "Den gamla fiskaren fnyser vänligt. \"Min håv kan du få. Eller byt mot en glasflaska, jag samlar på sådana.\"",
           "fynd": "glasflaska"
         },
         "vanta": [
@@ -2174,7 +2174,7 @@
           "tack": "Fiskaren ler. \"Ta väl hand om det. Forsen är snällare mot den som har tålamod.\"",
           "klar": "Du har redan ett flugspö.",
           "pris": 6,
-          "hej": "Fiskaren nickar mot forsen. \"Mitt gamla flugspö kan du få för sex stjärnstoft. Men jag tappade en stor nyckel i älven för länge sedan. Hittar du den byter jag gärna.\"",
+          "hej": "Fiskaren nickar mot forsen. \"Mitt gamla flugspö kan du få. Eller byt mot nyckeln jag tappade i älven.\"",
           "fynd": "nyckel"
         },
         "vanta": [
@@ -2673,7 +2673,7 @@
     "knapp": "Prata med nattfiskaren",
     "rubrikDag": "Tältet är stängt",
     "rubrikNatt": "Det lyser i tältet",
-    "hej": "God natt, eller god kväll, beroende på hur man ser det. Jag har lite att sälja, om du vill titta.",
+    "hej": "God natt, eller god kväll. Jag har lite att sälja.",
     "inget": "Jag har inget mer att sälja. Lycka till med fisket.",
     "saljer": {
       "metspo": 5,
@@ -2683,12 +2683,12 @@
     },
     "kopt": {
       "metspo": "Ett bra spö. Fisken nappar bäst när man har tålamod.",
-      "lykta": "Den lyser inte av sig själv, du måste tända den. Men det vet du nog.",
-      "flojt": "Jag har aldrig fått en riktig ton ur den. Kanske har du bättre tur. Eller så är det platsen som är fel.",
-      "glimmerskeden": "Glimmerskeden. Gäddorna kan inte låta bli den. Men vänta när de drar, annars följer den med ner.",
+      "lykta": "Den lyser inte av sig själv. Tänd den i väskan.",
+      "flojt": "Jag har aldrig fått en ton ur den. Kanske är det platsen som är fel.",
+      "glimmerskeden": "Vänta när gäddan drar, annars följer skeden med ner.",
       "majs": "Majs. Rudorna älskar det, gäddorna fnyser åt det."
     },
-    "baraSaljer": "God natt, eller god kväll, beroende på hur man ser det. Jag har lite att sälja, om du vill titta.",
+    "baraSaljer": "God natt, eller god kväll. Jag har lite att sälja.",
     "agn": {
       "majs": {
         "pris": 2,
@@ -2696,9 +2696,9 @@
       }
     },
     "prat": [
-      "Ända sedan jag såg det där lysande skeppet på sjön har det nappat fiskar som jag aldrig har sett förut. Stjärnrudor och månsikar. Konstiga saker.",
+      "Sedan det lysande skeppet kom har det nappat fiskar jag aldrig har sett förut.",
       "Skeppet seglar bara när det är mörkt. Jag har ropat på det, men ingen svarar.",
-      "Majs till rudorna, Glimmerskeden till gäddorna och mask till allt annat. Det är hela hemligheten."
+      "Majs till rudorna, skeden till gäddorna och mask till resten."
     ],
     "visar": {
       "plats": "udden",
@@ -3049,7 +3049,7 @@
     "efter": "natt:host",
     "rubrik": "Vira sitter vid elden",
     "knapp": "Prata med Vira",
-    "hej": "Kommer du för månbetet? Jag rullar det av månört och mjöl. Fiskarna som simmar i mörkret kan inte låta bli det.",
+    "hej": "Kommer du för månbetet? Jag rullar det av månört och mjöl.",
     "tack": "Här. Lägg det på kroken när månen är uppe.",
     "tackByt": "Månört! Då rullar jag nya kulor åt dig med en gång.",
     "agn": {
