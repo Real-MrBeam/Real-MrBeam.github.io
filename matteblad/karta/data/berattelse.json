@@ -3051,12 +3051,12 @@
     "knapp": "Prata med Vira",
     "hej": "Kommer du för månbetet? Jag rullar det av månört och mjöl.",
     "tack": "Här. Lägg det på kroken när månen är uppe.",
-    "tackByt": "Månört! Då rullar jag nya kulor åt dig med en gång.",
+    "tackByt": "En daggpärla! Den gör kulorna blankare än någonsin.",
     "agn": {
       "manbete": {
         "pris": 3,
         "antal": 5,
-        "byt": "manort"
+        "byt": "daggparla"
       }
     }
   },
