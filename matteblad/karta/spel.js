@@ -689,6 +689,7 @@ function frame(now){
     else { p.vx *= .92; p.vy *= .92; const r = Math.max(1, Math.round(p.r * (1 - p.t / p.life))); ctx.fillStyle = p.t < p.life*.5 ? '#ffffff' : '#c0cbdc'; ctx.fillRect(Math.round(p.x) - r, Math.round(p.y) - r, r*2, r*2); }
   }
 
+  drawMist(now);
   // natt: fades in and out when he sleeps in Hemmet
   nightLevel += ((S.natt ? 1 : 0) - nightLevel) * Math.min(1, dt * 1.6);
   if (Math.abs(nightLevel - (S.natt ? 1 : 0)) < .005) nightLevel = S.natt ? 1 : 0;
@@ -707,6 +708,23 @@ function frame(now){
     pill(sx(n.x*TS + 8), sy(n.y*TS + (n.labelAbove ? -1 : 31)), [n.name], { color: here ? '#fee761' : '#ffffff', edge: here ? '#feae34' : '#3a4466' });
   }
   requestAnimationFrame(frame);
+}
+
+/* ---------- dimman ---------- */
+// A thin veil of mist drifts over Dimmossen (Peter 2026-10-23): a few soft white bands that move slowly back and forth. It is
+// only drawn once the place has been seen, so it never lies on top of the black of the unexplored map.
+function drawMist(now){
+  const n = NODES.dimmossen; if (!n || (!DEBUG.mode && !seenAt(n.x, n.y))) return;
+  const t = reduceMotion ? 0 : now / 1000;
+  for (let i = 0; i < 9; i++){
+    const cx = (n.x + .5) * TS + (i - 4) * 14 + Math.sin(t * .13 + i * 1.7) * 16, cy = (n.y - 1.4 + (i % 3) * .7) * TS + Math.sin(t * .21 + i) * 3;
+    const rx = 34 + (i % 3) * 9, ry = 7 + (i % 2) * 3;
+    ctx.save(); ctx.translate(cx, cy); ctx.scale(1, ry / rx);
+    const g = ctx.createRadialGradient(0, 0, 0, 0, 0, rx);
+    g.addColorStop(0, 'rgba(232,238,246,.5)'); g.addColorStop(1, 'rgba(232,238,246,0)');
+    ctx.fillStyle = g; ctx.fillRect(-rx, -rx, rx * 2, rx * 2);
+    ctx.restore();
+  }
 }
 
 /* ---------- natten ---------- */
