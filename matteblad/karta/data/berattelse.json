@@ -612,7 +612,7 @@
     },
     "flojt": {
       "namn": "Flöjt",
-      "text": "En liten flöjt av vass. Nattfiskaren vet inte vad den är till, men han ler lite när han säljer den.",
+      "text": "En liten flöjt av vass. Ingen vet vad den är till.",
       "typ": "verktyg"
     },
     "rodcape": {
@@ -667,13 +667,13 @@
     },
     "mask": {
       "namn": "Mask",
-      "text": "Daggmask som du gräver upp var du vill. Nästan alla fiskar nappar på mask.",
+      "text": "Daggmask. Nästan alla fiskar nappar på den.",
       "typ": "agn",
       "alltid": true
     },
     "majs": {
       "namn": "Majs",
-      "text": "Gula majskorn. Rudor, sutare, braxen och mört älskar majs, men gäddor, gösar, abborrar och lakar bryr sig inte.",
+      "text": "Gula majskorn. Rudorna älskar dem.",
       "typ": "agn",
       "antal": 5,
       "gillar": {
@@ -692,7 +692,7 @@
     },
     "glimmerskeden": {
       "namn": "Glimmerskeden",
-      "text": "Ett drag: en blank sked som glittrar när den dras genom vattnet. Gädda, gös, abborre och öring hugger på den, och de stora oftare. Vitfisk bryr sig inte. Den tar inte slut, men går linan av följer den med fisken.",
+      "text": "En blank sked som glittrar i vattnet. Rovfiskar hugger på den.",
       "typ": "agn",
       "sort": "drag",
       "stor": true,
@@ -717,7 +717,7 @@
     },
     "manbete": {
       "namn": "Viras månbete",
-      "text": "Små kulor av månört och mjöl som Vira har rullat. De lyser svagt. Månsik, lake, gös och stjärnruda nappar gärna på dem, och de stora oftare.",
+      "text": "Lysande kulor av månört. Nattens fiskar älskar dem.",
       "typ": "agn",
       "antal": 5,
       "stor": true,
