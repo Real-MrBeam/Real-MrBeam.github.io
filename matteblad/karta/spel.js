@@ -715,15 +715,18 @@ function frame(now){
 // only drawn once the place has been seen, so it never lies on top of the black of the unexplored map.
 function drawMist(now){
   const n = NODES.dimmossen; if (!n || (!DEBUG.mode && !seenAt(n.x, n.y))) return;
-  const t = reduceMotion ? 0 : now / 1000;
-  for (let i = 0; i < 9; i++){
-    const cx = (n.x + .5) * TS + (i - 4) * 14 + Math.sin(t * .13 + i * 1.7) * 16, cy = (n.y - 1.4 + (i % 3) * .7) * TS + Math.sin(t * .21 + i) * 3;
-    const rx = 34 + (i % 3) * 9, ry = 7 + (i % 2) * 3;
+  const t = reduceMotion ? 0 : now / 1000, mx = (n.x + .5) * TS, my = (n.y + .3) * TS;
+  const blob = (cx, cy, rx, ry, a) => {
     ctx.save(); ctx.translate(cx, cy); ctx.scale(1, ry / rx);
     const g = ctx.createRadialGradient(0, 0, 0, 0, 0, rx);
-    g.addColorStop(0, 'rgba(232,238,246,.5)'); g.addColorStop(1, 'rgba(232,238,246,0)');
-    ctx.fillStyle = g; ctx.fillRect(-rx, -rx, rx * 2, rx * 2);
-    ctx.restore();
+    g.addColorStop(0, `rgba(232,238,246,${a})`); g.addColorStop(1, 'rgba(232,238,246,0)');
+    ctx.fillStyle = g; ctx.fillRect(-rx, -rx, rx * 2, rx * 2); ctx.restore();
+  };
+  // a soft haze over the whole bog (Peter 2026-10-23: denser, about four tiles to each side of Dimmossen), and bands that drift in it
+  blob(mx + 8, my - 4, 80, 30, .35);
+  for (let i = 0; i < 14; i++){
+    const cx = mx + (i % 7 - 3) * 18 + 8 + Math.sin(t * .13 + i * 1.7) * 12, cy = my + (Math.floor(i / 7) * 2 - 1) * 9 + Math.sin(t * .21 + i) * 3;
+    blob(cx, cy, 28 + (i % 3) * 8, 7 + (i % 2) * 3, .45);
   }
 }
 
