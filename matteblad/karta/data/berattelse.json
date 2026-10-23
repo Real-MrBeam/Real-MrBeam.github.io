@@ -54,7 +54,8 @@
     },
     "eken": {
       "namn": "Ihåliga eken",
-      "text": "En ek så gammal att ingen minns när den var ung. Stammen är ihålig, och kronan breder ut sig över stigen.",
+      "text": "En ek så gammal att ingen minns när den var ung. Stammen är ihålig, och när det blåser visslar det i den.",
+      "rykte": "Vinden visslar i Ihåliga eken, som om den väntar på att någon ska spela färdigt en melodi.",
       "natt": "Eken står svart mot himlen. Ur stammen glöder det svagt rött, och högt uppe hörs pip.",
       "rykteNatt": "Från Ihåliga eken hörs pip om nätterna."
     },
@@ -673,7 +674,7 @@
     },
     "majs": {
       "namn": "Majs",
-      "text": "Gula majskorn. Rudorna älskar dem.",
+      "text": "Gula majskorn. Rudor och flera andra fiskar älskar dem.",
       "typ": "agn",
       "antal": 5,
       "gillar": {
@@ -3291,6 +3292,9 @@
     "rykte:skeppet": {
       "pekar": "udden",
       "natt": true
+    },
+    "plats:eken:dag": {
+      "pekar": "eken"
     }
   }
 }
