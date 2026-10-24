@@ -207,11 +207,13 @@ function auto(ctx, set, same, x, y){
 const DIRT = [12,13,14,24,25,26,36,37,38];
 const FOREST = { F: [6,7,8,18,19,20,30,31,32], A: [9,10,11,21,22,23,33,34,35] };
 const isWater = (x, y) => { const v = at(x, y); return v === null || v === 'w' || v === 'b'; };
+// Sand: the beach behind the mountain (karta.json strand, rectangles, Peter 2026-10-24)
+const SAND = new Set((karta.strand || []).flatMap(([x0, y0, x1, y1]) => { const l = []; for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) l.push(key(x, y)); return l; }));
 const isPath = (x, y) => { const v = at(x, y); return v === 'p' || v === 'b'; };
 
 let WFIELD = null;
 function hex(c){ return [parseInt(c.slice(1,3),16), parseInt(c.slice(3,5),16), parseInt(c.slice(5,7),16)]; }
-const WC = { lip: hex('#3e8948'), foam: hex('#2ce8f5'), mid: hex('#0099db'), deep: hex('#0e86c8'), glint: hex('#ffffff') };
+const WC = { wetSand: hex('#c9a46c'), lip: hex('#3e8948'), foam: hex('#2ce8f5'), mid: hex('#0099db'), deep: hex('#0e86c8'), glint: hex('#ffffff') };
 function waterLayer(frame){
   const w = MW*TS, h = MH*TS;
   if (!WFIELD){ WFIELD = new Float32Array(w*h); for (let Y = 0; Y < h; Y++) for (let X = 0; X < w; X++) WFIELD[Y*w + X] = waterD(X + .5, Y + .5); }
@@ -221,7 +223,7 @@ function waterLayer(frame){
     const d = WFIELD[Y*w + X]; if (d < -1.2) continue;
     if (M[Y >> 4][X >> 4] === 'p') continue;
     let col;
-    if (d < 0) col = WC.lip;
+    if (d < 0) col = SAND.has(key(X >> 4, Y >> 4)) ? WC.wetSand : WC.lip;   // wet sand on a beach, a dark green lip elsewhere
     else if (d < 1.3) col = WC.foam;
     else {
       col = d > 9 ? WC.deep : WC.mid;
@@ -274,6 +276,21 @@ function buildTerrain(){
   const gr = rng(7);
   for (let y = 0; y < MH; y++) for (let x = 0; x < MW; x++){
     const v = gr(); tile(b, v < 0.13 ? 1 : v < 0.17 ? 2 : 0, x*TS, y*TS);
+  }
+  // Sand: light grains, and a ragged edge where it meets the grass so it is not a straight line
+  const sr = rng(13);
+  for (const k of SAND){
+    const [x, y] = k.split(',').map(Number), X = x*TS, Y = y*TS;
+    b.fillStyle = '#e8cf9a'; b.fillRect(X, Y, TS, TS);
+    for (let i = 0; i < 7; i++){ b.fillStyle = sr() < .5 ? '#d4b47c' : '#f6e6bf'; b.fillRect(X + Math.floor(sr() * TS), Y + Math.floor(sr() * TS), 1, 1); }
+    for (const [dx, dy] of [[0, -1], [0, 1], [-1, 0], [1, 0]]){
+      if (SAND.has(key(x + dx, y + dy)) || isWater(x + dx, y + dy)) continue;
+      b.fillStyle = '#84c669';
+      for (let i = 0; i < TS; i++){
+        const deep = Math.floor(sr() * 3);
+        if (dy) b.fillRect(X + i, dy < 0 ? Y : Y + TS - deep, 1, deep); else b.fillRect(dx < 0 ? X : X + TS - deep, Y + i, deep, 1);
+      }
+    }
   }
   // The road to a hidden stop is drawn as grass until the stop has been found
   const shownRoad = new Set(EDGES.filter(edgeShown).flatMap(e => e.tiles.map(([x, y]) => key(x, y))));
@@ -690,6 +707,7 @@ function frame(now){
     if (a){ const t = (now - a) / 1000; if (t < .6){ img = GATE_CLOSED; shake = (Math.floor(t * 30) % 2) ? 1 : -1; } else if (t > 2) gateAnim.delete(g); }
     ctx.drawImage(img, g.x*TS + shake, g.y*TS - 4);
   }
+  if (SCENE && !S.natt) SCENE = null;
   if (pendingTickets().length || chestOpening){
     const t = chestOpening ? (now - chestOpening) / 1000 : 0, shake = chestOpening && t < .6 ? (Math.floor(t * 30) % 2 ? 1 : -1) : 0;
     const glow = Math.floor(now / 400) % 2;
@@ -703,6 +721,7 @@ function frame(now){
     ctx.drawImage(chestOpening && t >= .6 ? CHEST_OPEN : CHEST, CHEST_AT.x*TS + shake, CHEST_AT.y*TS);
   }
   drawActors(now);
+  drawScene(now);
   drawFX(dt);
 
   drawMist(now);
@@ -1026,6 +1045,51 @@ addEventListener('keydown', e => {
 });
 addEventListener('keyup', e => { if (LEVEL && LEVEL.held === KEYDIR[e.key]) LEVEL.held = null; });
 addEventListener('blur', () => { if (LEVEL) LEVEL.held = null; });
+
+/* ---------- Gråskuggans roddbåt ---------- */
+// On the beach behind the mountain a rowboat lies at night, with a grey figure beside it, until the night adventure there is
+// played. In the adventure he sees Gråskuggan row out to the glowing ship and climb aboard (Peter 2026-10-24): the first choice
+// starts the scene (scen: "roddbat"), the boat rows from the beach to where the ship is and is gone when it gets there.
+const ROWBOAT = sprite(["oooooooooooooooo", "obbbbbbbbbbbbbbo", ".obbbbbbbbbbbbo.", "..oBBBBBBBBBBo..", "...oooooooooo..."], { o:'#3f2631', b:'#b86f50', B:'#733e39' });
+const GREY = sprite(["..ooo..", ".oGGGo.", ".oGkGo.", ".oGGGo.", "oGGGGGo", "oGgGgGo", "oGGGGGo", "oGgGgGo", ".ooooo."], { o:'#3f2631', G:'#8b9bb4', g:'#5a6988', k:'#181425' });
+const ROW_FROM = NODES.bakom ? { x: NODES.bakom.x*TS - 10, y: (NODES.bakom.y - 1)*TS - 1 } : null;
+let SCENE = null;
+function playScene(id){
+  if (id !== 'roddbat' || !ROW_FROM) return;
+  const t0 = performance.now(), dur = 9000, bt = boatAt(t0 + dur);
+  SCENE = { t0, dur };
+  // the ship must be seen, and the camera looks between the beach and the ship while the boat rows
+  lastRevealKey = ''; revealAround(bt.x + 16, bt.y + 16, 3); lastRevealKey = '';
+  cam.follow = false; cam.focus = { x: (ROW_FROM.x + bt.x + 24) / 2, y: (ROW_FROM.y + bt.y + 20) / 2, until: t0 + dur + 600 };
+}
+function drawRowboat(x, y, f, rowing){
+  x = Math.round(x); y = Math.round(y);
+  if (rowing){
+    ctx.drawImage(GREY, x + 5, y - 6);
+    ctx.fillStyle = '#733e39';   // the oars, forward and back
+    for (let i = 0; i < 5; i++){ const s = f ? i : -i; ctx.fillRect(x + 8 + s, y + 1 + i, 1, 1); ctx.fillRect(x + 7 - s, y + 1 + i, 1, 1); }
+    ctx.drawImage(ROWBOAT, x, y);
+    ctx.fillStyle = 'rgba(255,255,255,.7)';   // ripples behind it
+    ctx.fillRect(x + 17 + f * 2, y + 4, 2, 1); ctx.fillRect(x + 22 - f, y + 3, 1, 1);
+  } else {
+    ctx.drawImage(ROWBOAT, x, y);
+    ctx.drawImage(GREY, x + 15, y - 5);   // standing beside it on the sand
+  }
+}
+function drawScene(now){
+  if (!S.natt || !ROW_FROM) return;
+  const f = reduceMotion ? 0 : Math.floor(now / 320) % 2;
+  if (SCENE){
+    const p = Math.min(1, (now - SCENE.t0) / SCENE.dur), bt = boatAt(now);
+    if (p >= 1){ SCENE = null; return; }
+    ctx.save(); ctx.globalAlpha = p > .85 ? (1 - p) / .15 : 1;
+    drawRowboat(ROW_FROM.x + (bt.x + 18 - ROW_FROM.x) * p, ROW_FROM.y + (bt.y + 20 - ROW_FROM.y) * p, f, true);
+    ctx.restore();
+    return;
+  }
+  // the boat lies on the beach until he has seen it row away (the adventure has begun) or played it
+  if (!S.stopp['natt:bakom'] && !S.steg['stopp:natt:bakom'] && seenAt(NODES.bakom.x, NODES.bakom.y)) drawRowboat(ROW_FROM.x, ROW_FROM.y, 0, false);
+}
 
 /* ---------- natten ---------- */
 // At night the map turns blue (multiply), windows glow yellow, the torches flicker and stars twinkle in the water.
@@ -1631,6 +1695,7 @@ function takeStep(ad, o){
     sparkle(boy.x + 8, boy.y + 2, 18, '#2ce8f5'); sparkle(boy.x + 8, boy.y + 2, 12, '#ffffff');
   }
   const out = [{ p: o.p ?? null, t: o.text }];
+  if (o.scen) playScene(o.scen);   // something happens on the map (Gråskuggan's rowboat)
   // a choice can give a thing on the way (ge) and go on with the adventure
   const gotOnWay = o.ge && !S.saker.includes(o.ge);
   if (gotOnWay){ S.saker.push(o.ge); renderPack(); }

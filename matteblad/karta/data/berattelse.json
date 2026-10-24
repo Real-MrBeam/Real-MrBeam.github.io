@@ -107,13 +107,14 @@
       "namn": "Bergsgrottan",
       "text": "Under bergen öppnar sig en grotta. Därinne är det becksvart.",
       "natt": "Bergen står svarta mot himlen, och grottan är ännu svartare.",
-      "rykte": "Folk säger att det finns en äng bakom berget som ingen har sett. Men grottan är för mörk att gå igenom."
+      "rykte": "Folk säger att det finns en strand bakom berget som ingen har sett. Men grottan är för mörk att gå igenom."
     },
     "bakom": {
       "namn": "Bakom berget",
-      "text": "En liten äng mellan berget och kanalen. Här har ingen gått på länge.",
-      "natt": "Ängen bakom berget ligger tyst, och vattnet i kanalen blänker.",
-      "rykte": "Folk säger att det klingar uppe i berget bakom grottan, som en liten bjällra."
+      "text": "En liten sandstrand mellan berget och vattnet. I sanden syns bara fåglarnas spår.",
+      "natt": "Stranden bakom berget ligger tyst, och vattnet blänker.",
+      "rykte": "Folk säger att det klingar uppe i berget bakom grottan, som en liten bjällra.",
+      "rykteNatt": "Folk säger att någon i en grå kappa går på stranden bakom berget om nätterna."
     }
   },
   "portar": {
@@ -770,6 +771,13 @@
       "text": "Nålen pekar inte mot norr. Den pekar alltid mot Stjärnsvalan, var hon än seglar.",
       "typ": "fynd",
       "varde": 3
+    },
+    "brantrep": {
+      "namn": "Bränd repbit",
+      "text": "En bit av Stjärnsvalans förtöjningsrep. Ena änden är svart och bränd.",
+      "typ": "fynd",
+      "varde": 1,
+      "rykte": "Stjärnsvalan slet sig aldrig. Gråskuggan brände av repet och rodde ut till skeppet."
     }
   },
   "bygg": {
@@ -2271,11 +2279,11 @@
               {
                 "label": "Plocka en näve klöver",
                 "kostnad": 0,
-                "text": "Klövern växer tät i gräset och doftar sött.",
+                "text": "Vid foten av berget växer klöver, tät och söt.",
                 "till": "d"
               },
               {
-                "label": "Sätt dig i gräset och vänta",
+                "label": "Sätt dig i sanden och vänta",
                 "kostnad": 0,
                 "text": "Du sätter dig och väntar. Det blir tyst.",
                 "till": "e"
@@ -2319,7 +2327,7 @@
             ]
           },
           "e": {
-            "t": "Det är tyst. Bara vinden i gräset hörs. Sedan klingar det alldeles bakom dig.",
+            "t": "Det är tyst. Bara vågorna hörs. Sedan klingar det alldeles bakom dig.",
             "val": [
               {
                 "label": "Vänd dig om långsamt",
@@ -3498,6 +3506,108 @@
           }
         }
       }
+    },
+    "bakom": {
+      "rubrik": "En roddbåt på stranden",
+      "knapp": "Smyg närmare",
+      "aventyr": {
+        "start": "a",
+        "steg": {
+          "a": {
+            "t": "På stranden ligger en roddbåt som inte låg där på dagen. Någon i en lång kappa med huva skjuter ut den i vattnet.",
+            "val": [
+              {
+                "label": "Göm dig bakom en sten",
+                "kostnad": 0,
+                "text": "Du kryper ihop bakom en sten och håller andan.",
+                "till": "b",
+                "scen": "roddbat"
+              },
+              {
+                "label": "Ropa hej",
+                "kostnad": 0,
+                "text": "Hej! ropar du. Rösten ekar mot berget.",
+                "till": "c",
+                "scen": "roddbat"
+              }
+            ]
+          },
+          "b": {
+            "t": "Gestalten kliver i båten och ror ut, tyst och snabbt, rakt mot det lysande skeppet. I skenet från skeppet syns kappan. Den är grå som regn. Det är Gråskuggan.",
+            "val": [
+              {
+                "label": "Smyg ner till vattnet",
+                "kostnad": 0,
+                "text": "Du smyger ner till platsen där båten låg.",
+                "till": "d"
+              },
+              {
+                "label": "Titta efter båten",
+                "kostnad": 0,
+                "text": "Du följer båten med blicken.",
+                "till": "e"
+              }
+            ]
+          },
+          "c": {
+            "t": "Gestalten stelnar till och drar huvan över ansiktet. Kappan är grå som regn. Det är Gråskuggan! Den hoppar i båten och ror ut mot det lysande skeppet så fort den kan.",
+            "val": [
+              {
+                "label": "Spring ner till vattnet",
+                "kostnad": 0,
+                "text": "Du springer ner till platsen där båten låg.",
+                "till": "d"
+              },
+              {
+                "label": "Titta efter båten",
+                "kostnad": 0,
+                "text": "Du följer båten med blicken.",
+                "till": "e"
+              }
+            ]
+          },
+          "d": {
+            "t": "I sanden syns spår efter stövlar, och där ligger en bit rep. Ena änden är svart och bränd, precis som repet vid Siris förtöjning.",
+            "val": [
+              {
+                "label": "Ta repbiten",
+                "kostnad": 0,
+                "text": "Nu förstår du. Stjärnsvalan slet sig aldrig. Gråskuggan brände av repet och tog henne.",
+                "till": {
+                  "fynd": "brantrep"
+                }
+              },
+              {
+                "label": "Följ stövelspåren",
+                "kostnad": 0,
+                "text": "Spåren går upp mot grottan och tar slut vid berget. I sanden glittrar stjärnstoft som har fallit ur den grå kappan. Stjärnsvalan slet sig aldrig. Gråskuggan tog henne.",
+                "till": {
+                  "stoft": 5
+                }
+              }
+            ]
+          },
+          "e": {
+            "t": "Långt ute når roddbåten skeppet. Den grå gestalten klättrar ombord, och skeppets ljus blir starkare. Sedan glider Stjärnsvalan bort i mörkret.",
+            "val": [
+              {
+                "label": "Gå ner till stranden",
+                "kostnad": 0,
+                "text": "Du går ner till platsen där båten låg.",
+                "till": "d"
+              },
+              {
+                "label": "Ropa efter skeppet",
+                "kostnad": 0,
+                "text": "Ropet ekar över vattnet, men ingen svarar. När du vänder dig om ligger en repbit i sanden, bränd i ena änden. Stjärnsvalan slet sig aldrig. Gråskuggan tog henne.",
+                "till": {
+                  "fynd": "brantrep"
+                }
+              }
+            ]
+          }
+        }
+      }
     }
   },
   "vira": {
@@ -3797,6 +3907,16 @@
       "klar": [
         "djur:get"
       ]
+    },
+    "plats:bakom:natt": {
+      "pekar": "bakom",
+      "natt": true,
+      "klar": [
+        "stopp:natt:bakom"
+      ]
+    },
+    "sak:brantrep": {
+      "pekar": "sjo"
     }
   }
 }
