@@ -7,6 +7,7 @@
     "ingang": "berget",
     "utgang": "bakom",
     "fiske": "grotta",
+    "utanLjus": 3,
     "rutor": [
       "#########################X####",
       "########################...###",
@@ -163,10 +164,9 @@
       "rubrikTillbaka": "Grottan tillbaka",
       "gaIn": "Gå in i grottan",
       "gaTillbaka": "Gå in i grottan",
-      "ingetLjus": "Det är becksvart där inne. Du behöver något som lyser.",
-      "tand": "Det är becksvart där inne. Tänd något som lyser i Mina saker.",
+      "ingetLjus": "Längre in är det becksvart. Du behöver något som lyser för att gå vidare.",
       "bara": "Härifrån kommer du bara tillbaka genom grottan.",
-      "ljusAv": "Det är nästan helt mörkt. Tänd ditt ljus i Mina saker.",
+      "ljusAv": "Längre in är det becksvart. Tänd ditt ljus i Mina saker för att gå vidare.",
       "O": "Vid vattenbrynet rör sig något blekt.",
       "OKlar": "Vattnet ligger stilla. Här bodde Olle.",
       "E": "Bakom dig syns dagsljuset från vägen.",
@@ -175,7 +175,10 @@
       "tillbaka": "Gå tillbaka ut",
       "styr": "Gå med piltangenterna eller pilarna på kartan, eller tryck där du vill gå.",
       "dit": "Till ängen bakom berget kommer du bara genom grottan.",
-      "hittade": "Du hittade en äng bakom berget som ingen har sett på länge!"
+      "hittade": "Du hittade en äng bakom berget som ingen har sett på länge!",
+      "inMorkt": "Du går in i grottan. Efter några steg är det becksvart.",
+      "morktTand": "Det är för mörkt för att gå längre in. Tänd ditt ljus i Mina saker.",
+      "morktInget": "Det är för mörkt för att gå längre in. Du behöver något som lyser."
     },
     "hinder": "kqsrt"
   }

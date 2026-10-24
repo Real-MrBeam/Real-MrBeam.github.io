@@ -750,7 +750,8 @@ function drawMist(now){
 // A level (bana, data/banor.json) is its own small map that he enters from a place on the big map (Peter 2026-10-24: the cave
 // under the mountains between Sjöviken and Södra bron). In a level he walks freely, one tile at a time: with the arrow keys,
 // the arrows on the map, or by tapping where he wants to go. It is dark there. Only what his light reaches shows, and what he
-// has seen stays dimly visible. He needs a lit light to go in. The letters in rutor: # rock, . floor, ~ water, E the way in
+// has seen stays dimly visible. He can always go in, but without a lit light he only gets as far as the daylight reaches
+// (utanLjus steps from an opening) or where he has already been with a light (Peter 2026-10-24). The letters in rutor: # rock, . floor, ~ water, E the way in
 // and X the way out (he leaves when he steps on them), and the letters in bild (decoration, the ones in hinder are in the
 // way), ljus (something that shines by itself), saker (a thing he picks up) and aventyr (an adventure next to that letter).
 // Along the water he can fish (fiske, a place in berattelse.json fiske.platser). He is still at his place on the big map
@@ -766,19 +767,31 @@ const DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
 const lvCell = (x, y) => LEVEL && y >= 0 && y < LEVEL.h && x >= 0 && x < LEVEL.w ? LEVEL.def.rutor[y][x] : '#';
 const lvFree = (x, y) => { const c = lvCell(x, y); return c !== '#' && c !== '~' && !(LEVEL.def.hinder || '').includes(c); };
 const lvTile = () => [Math.round(boy.x / TS), Math.round(boy.y / TS)];
+const hasLight = () => Object.keys(LIGHTS).some(x => S.saker.includes(x));
+// without a lit light: only near an opening (L.near) or where he has seen with his light
+const lvCanGo = (x, y) => !!litLight() || !!LEVEL.near[y * LEVEL.w + x] || !!LEVEL.seen[y * LEVEL.w + x];
 const levelBusy = () => !$('#modal').hidden || !current || current.type !== 'bana';
 function levelEntryBlock(id){
-  const [lid, d] = levelAt(id), T = d.texter, side = d.ingang === id ? 'in' : 'ut', here = S.node === id && !boy.route, lit = litLight();
-  const why = lit ? '' : Object.keys(LIGHTS).some(x => S.saker.includes(x)) ? T.tand : T.ingetLjus;
-  return `<div class="plot"><div><b>${esc(side === 'in' ? T.rubrik : T.rubrikTillbaka)}</b>${why ? `<span>${esc(why)}</span>` : ''}</div>${here && lit ? `<button class="btn" type="button" data-bana="${lid}:${side}">${esc(side === 'in' ? T.gaIn : T.gaTillbaka)}</button>` : ''}</div>`;
+  const [lid, d] = levelAt(id), T = d.texter, side = d.ingang === id ? 'in' : 'ut', here = S.node === id && !boy.route;
+  return `<div class="plot"><div><b>${esc(side === 'in' ? T.rubrik : T.rubrikTillbaka)}</b></div>${here ? `<button class="btn" type="button" data-bana="${lid}:${side}">${esc(side === 'in' ? T.gaIn : T.gaTillbaka)}</button>` : ''}</div>`;
 }
 function enterLevel(lid, side){
   const d = BANOR[lid], door = side === 'ut' ? 'X' : 'E';
-  if (!litLight()) return toast(d.texter.ingetLjus);
   stopFishing(); hideHint();
   const w = d.rutor[0].length, h = d.rutor.length, pos = {};
   d.rutor.forEach((r, y) => [...r].forEach((ch, x) => { if (ch !== '#' && ch !== '.' && ch !== '~' && !pos[ch]) pos[ch] = [x, y]; }));
-  LEVEL = { id: lid, def: d, w, h, door, pos, seen: new Uint8Array(w * h), seenDirty: true, held: null, path: null, move: null, spot: null, drip: 0 };
+  LEVEL = { id: lid, def: d, w, h, door, pos, seen: new Uint8Array(w * h), seenDirty: true, held: null, path: null, move: null, spot: null, drip: 0, darkToast: 0 };
+  // how far the daylight reaches: utanLjus steps from each opening
+  LEVEL.near = new Uint8Array(w * h);
+  for (const ch of ['E', 'X']){
+    const dist = new Map([[pos[ch].join(','), 0]]), q = [pos[ch]];
+    while (q.length){
+      const [x, y] = q.shift(), n = dist.get(x + ',' + y);
+      LEVEL.near[y * w + x] = 1;
+      if (n >= (d.utanLjus || 0)) continue;
+      for (const [dx, dy] of Object.values(DIRS)){ const k = (x + dx) + ',' + (y + dy); if (!dist.has(k) && lvFree(x + dx, y + dy)){ dist.set(k, n + 1); q.push([x + dx, y + dy]); } }
+    }
+  }
   // he starts one step inside the opening, facing into the cave, and the animals come in after him
   const [ox, oy] = pos[door];
   const [sx, sy] = Object.values(DIRS).map(([dx, dy]) => [ox + dx, oy + dy]).find(([x, y]) => lvFree(x, y) && lvCell(x, y) !== 'E' && lvCell(x, y) !== 'X');
@@ -795,7 +808,7 @@ function enterLevel(lid, side){
   }));
   markLevelSeen();
   cam.follow = true; cam.focus = null; centerOn(boy.x + 8, boy.y + 8, true);
-  $('#dpad').hidden = false; musicSync(); toast(d.in);
+  $('#dpad').hidden = false; musicSync(); toast(litLight() ? d.in : d.texter.inMorkt);
   showNode();
 }
 function leaveLevel(door){
@@ -841,7 +854,8 @@ function levelPicture(){
   return c;
 }
 function markLevelSeen(){
-  const L = LEVEL, [x0, y0] = lvTile(), r = litLight() ? 3 : 1;
+  if (!litLight()) return;
+  const L = LEVEL, [x0, y0] = lvTile(), r = 3;
   for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++){
     const x = x0 + dx, y = y0 + dy;
     if (x < 0 || y < 0 || x >= L.w || y >= L.h || dx * dx + dy * dy > (r + .5) ** 2 || L.seen[y * L.w + x]) continue;
@@ -867,6 +881,11 @@ function nextLevelStep(){
   else if (L.path && L.path.length) n = L.path.shift();
   if (!n) return false;
   boy.dir = n.x > tx ? 'right' : n.x < tx ? 'left' : n.y > ty ? 'down' : 'up';
+  if (!lvCanGo(n.x, n.y)){
+    L.held = null; L.path = null;
+    if (performance.now() - L.darkToast > 2500){ L.darkToast = performance.now(); toast(hasLight() ? L.def.texter.morktTand : L.def.texter.morktInget); }
+    return false;
+  }
   L.move = n; cam.follow = true;
   return true;
 }
@@ -1412,7 +1431,7 @@ function renderPanel(view){
     // In a level: what is around him (levelSpot), a way back out, and how to walk
     const L = LEVEL, d = L.def, T = d.texter, sp = L.spot || levelSpot();
     const advs = Object.keys(d.aventyr || {}).filter(ch => sp.includes(ch)), done = ch => S.stopp[`bana:${L.id}:${ch}`];
-    const text = sp.includes('!') ? T.ljusAv : advs.length ? T[advs[0] + (done(advs[0]) ? 'Klar' : '')] : sp.includes('~') ? T.vatten : sp.includes('E') ? T.E : sp.includes('X') ? T.X : d.text;
+    const text = sp.includes('!') ? (hasLight() ? T.ljusAv : T.ingetLjus) : advs.length ? T[advs[0] + (done(advs[0]) ? 'Klar' : '')] : sp.includes('~') ? T.vatten : sp.includes('E') ? T.E : sp.includes('X') ? T.X : d.text;
     h = `<span class="tag">Du är här</span><h2>${esc(d.namn)}</h2><p>${esc(text)}</p><div class="panel-body">`;
     for (const ch of advs) h += stopBlock(`bana:${L.id}:${ch}`);
     if (sp.includes('~')) h += fishBlock(d.fiske);
