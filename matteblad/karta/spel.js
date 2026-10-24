@@ -1060,11 +1060,11 @@ addEventListener('keyup', e => { if (LEVEL && LEVEL.held === KEYDIR[e.key]) LEVE
 addEventListener('blur', () => { if (LEVEL) LEVEL.held = null; });
 
 /* ---------- Gråskuggans roddbåt ---------- */
-// On the beach behind the mountain a rowboat lies at night, with a grey figure beside it, until the night adventure there is
-// played. In the adventure he sees Gråskuggan row out to the glowing ship and climb aboard (Peter 2026-10-24): the first choice
-// starts the scene (scen: "roddbat"), the boat rows from the beach to where the ship is and is gone when it gets there.
+// On the beach behind the mountain a rowboat lies at night until the night adventure there is played. In the adventure he sees
+// Gråskuggan row out to the glowing ship and climb aboard (Peter 2026-10-24): the first choice starts the scene (scen: "roddbat"),
+// the boat goes from the beach to where the ship is and is gone when it gets there. Only the boat is drawn, no figure (no
+// characters on the world map); the text tells what he sees.
 const ROWBOAT = sprite(["oooooooooooooooo", "obbbbbbbbbbbbbbo", ".obbbbbbbbbbbbo.", "..oBBBBBBBBBBo..", "...oooooooooo..."], { o:'#3f2631', b:'#b86f50', B:'#733e39' });
-const GREY = sprite(["..ooo..", ".oGGGo.", ".oGkGo.", ".oGGGo.", "oGGGGGo", "oGgGgGo", "oGGGGGo", "oGgGgGo", ".ooooo."], { o:'#3f2631', G:'#8b9bb4', g:'#5a6988', k:'#181425' });
 const ROW_FROM = NODES.bakom ? { x: NODES.bakom.x*TS - 10, y: (NODES.bakom.y - 1)*TS - 1 } : null;
 let SCENE = null;
 function playScene(id){
@@ -1077,16 +1077,10 @@ function playScene(id){
 }
 function drawRowboat(x, y, f, rowing){
   x = Math.round(x); y = Math.round(y);
+  ctx.drawImage(ROWBOAT, x, y);
   if (rowing){
-    ctx.drawImage(GREY, x + 5, y - 6);
-    ctx.fillStyle = '#733e39';   // the oars, forward and back
-    for (let i = 0; i < 5; i++){ const s = f ? i : -i; ctx.fillRect(x + 8 + s, y + 1 + i, 1, 1); ctx.fillRect(x + 7 - s, y + 1 + i, 1, 1); }
-    ctx.drawImage(ROWBOAT, x, y);
     ctx.fillStyle = 'rgba(255,255,255,.7)';   // ripples behind it
     ctx.fillRect(x + 17 + f * 2, y + 4, 2, 1); ctx.fillRect(x + 22 - f, y + 3, 1, 1);
-  } else {
-    ctx.drawImage(ROWBOAT, x, y);
-    ctx.drawImage(GREY, x + 15, y - 5);   // standing beside it on the sand
   }
 }
 function drawScene(now){
