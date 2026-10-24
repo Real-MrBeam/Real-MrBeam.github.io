@@ -797,6 +797,90 @@
       ]
     ]
   },
+  "lom": {
+    "lyft": 0,
+    "farger": {"o":"#3f2631","d":"#262b44","g":"#5a6988","w":"#ffffff","r":"#e43b44","b":"#181425"},
+    "bilder": [
+      [
+        "................",
+        "................",
+        "................",
+        "...........ooo..",
+        "..........ogggo.",
+        ".........ogggrgo",
+        ".........oggggbb",
+        "..........ogggoo",
+        "...oooooooowdo..",
+        ".oodddddddddwo..",
+        "odddwdwdwddddo..",
+        "oddddwdwddddo...",
+        ".ooddddddddo....",
+        "...oooooooo.....",
+        "................",
+        "................"
+      ],
+      [
+        "................",
+        "................",
+        "...........ooo..",
+        "..........ogggo.",
+        ".........ogggrgo",
+        ".........oggggbb",
+        "..........ogggob",
+        "...oooooooowdo..",
+        ".oodddddddddwo..",
+        "odddwdwdwddddo..",
+        "oddddwdwddddo...",
+        ".ooddddddddo....",
+        "...oooooooo.....",
+        "................",
+        "................",
+        "................"
+      ]
+    ]
+  },
+  "get": {
+    "lyft": 0,
+    "farger": {"o":"#3f2631","w":"#f4f4f4","W":"#c0cbdc","h":"#8b6a4a","y":"#feae34","k":"#262b44","p":"#f6757a"},
+    "bilder": [
+      [
+        "................",
+        "................",
+        "..........hh....",
+        ".........h..h...",
+        "..........oohh..",
+        ".........owwwwo.",
+        "..o..oooooWwwkwo",
+        ".owoowwwwowwwwww",
+        ".owwwwwwwwwwwwwp",
+        ".owwwwwwwwwyooWo",
+        ".owwwwwwwwwwo.W.",
+        "..owwwwwwwwo....",
+        "...ooWWWWooWo...",
+        "...oWoWooWoWo...",
+        "...oWoWooWoWo...",
+        "....o.o..o.o...."
+      ],
+      [
+        "................",
+        "..........hh....",
+        ".........h..h...",
+        "..........oohh..",
+        ".........owwwwo.",
+        ".........oWwwkwo",
+        "..o..ooooowwwwww",
+        ".owoowwwwoowwwwp",
+        ".owwwwwwwwwyooWo",
+        ".owwwwwwwwwwo.W.",
+        ".owwwwwwwwwwo...",
+        "..owwwwwwwwoo...",
+        "...ooWWWWoooWo..",
+        "..oWooWooWooWo..",
+        "..oWooWooWooWo..",
+        "...o..o..o..o..."
+      ]
+    ]
+  },
   "olm": {
     "lyft": 0,
     "farger": {"o":"#3f2631","w":"#f6e7e2","s":"#d9b3aa","g":"#f6757a","G":"#c84a5a"},

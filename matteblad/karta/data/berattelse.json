@@ -28,7 +28,8 @@
     "sjo": {
       "namn": "Sjöviken",
       "text": "En vik där vattnet ligger blankt och stilla. Vassen vajar längs stranden.",
-      "rykte": "Folk säger att något stort simmar runt i sjön och gömmer sig i Vassen."
+      "rykte": "Folk säger att något stort simmar runt i sjön och gömmer sig i Vassen.",
+      "rykteNatt": "Folk säger att det lysande skeppet kommer närmast land vid Sjöviken, och att något ropar från det om nätterna."
     },
     "fiske": {
       "namn": "Fiskeläget",
@@ -75,7 +76,8 @@
     "sodrabron": {
       "namn": "Södra bron",
       "text": "En bro över älven där strömmen går lugn. Ett bra ställe att fiska på.",
-      "rykte": "Under Södra bron står abborrarna i stim, och längre ner lurar gäddan."
+      "rykte": "Under Södra bron står abborrarna i stim, och längre ner lurar gäddan.",
+      "rykteNatt": "Folk säger att det lyser grönt i leran under Södra bron om nätterna."
     },
     "norrabron": {
       "namn": "Norra bron",
@@ -110,7 +112,8 @@
     "bakom": {
       "namn": "Bakom berget",
       "text": "En liten äng mellan berget och kanalen. Här har ingen gått på länge.",
-      "natt": "Ängen bakom berget ligger tyst, och vattnet i kanalen blänker."
+      "natt": "Ängen bakom berget ligger tyst, och vattnet i kanalen blänker.",
+      "rykte": "Folk säger att det klingar uppe i berget bakom grottan, som en liten bjällra."
     }
   },
   "portar": {
@@ -761,6 +764,12 @@
       "text": "En vit, rund sten som har vuxit droppe för droppe i grottans vatten.",
       "typ": "fynd",
       "varde": 4
+    },
+    "kompass": {
+      "namn": "Kompass",
+      "text": "Nålen pekar inte mot norr. Den pekar alltid mot Stjärnsvalan, var hon än seglar.",
+      "typ": "fynd",
+      "varde": 3
     }
   },
   "bygg": {
@@ -1057,28 +1066,85 @@
       ]
     },
     "sjo": {
-      "rubrik": "Någon ropar från sjön",
+      "rubrik": "En seglare spanar ut över sjön",
       "knapp": "Gå ner till stranden",
       "aventyr": {
         "start": "a",
         "steg": {
           "a": {
-            "t": "Någon ropar från andra sidan viken. Det är för djupt för att vada och för långt för att simma.",
+            "t": "På en sten vid vattnet sitter en kvinna med en kikare. Bredvid henne hänger ett avslitet rep från en tom förtöjning.",
+            "val": [
+              {
+                "label": "Fråga vad hon tittar efter",
+                "kostnad": 0,
+                "p": "siri",
+                "text": "Efter mitt skepp, Stjärnsvalan. Natten då stjärnorna föll slet hon sig och seglade ut av sig själv. Nu syns hon bara när det är mörkt.",
+                "till": "b"
+              },
+              {
+                "label": "Titta på det avslitna repet",
+                "kostnad": 0,
+                "text": "Repet är inte avslitet. Änden är svart och bränd, som om något mycket varmt hade dragit i det.",
+                "till": "c"
+              }
+            ]
+          },
+          "b": {
+            "p": "siri",
+            "t": "Varje natt seglar hon förbi, men hon hittar inte in i viken. Hon behöver ett ljus att styra mot. Men badvakten där borta vill bygga en brygga på samma plats.",
+            "val": [
+              {
+                "label": "Kasta stjärnstoft mot himlen",
+                "kostnad": 3,
+                "text": "Stjärnstoftet stiger högt över stranden och blir till ett ljus som sveper runt, runt. Siri sänker kikaren. ”Precis så. En fyr.”",
+                "till": {
+                  "bygg": "fyr"
+                }
+              },
+              {
+                "label": "Gå bort till badvakten",
+                "kostnad": 0,
+                "text": "Du går längs stranden mot mannen med visselpipan.",
+                "till": "d"
+              }
+            ]
+          },
+          "c": {
+            "t": "En bit bort längs stranden står en man med en visselpipa runt halsen och vinkar åt dig.",
+            "val": [
+              {
+                "label": "Gå till mannen med visselpipan",
+                "kostnad": 0,
+                "text": "Du går längs stranden mot honom.",
+                "till": "d"
+              },
+              {
+                "label": "Fråga kvinnan med kikaren om repet",
+                "kostnad": 0,
+                "p": "siri",
+                "text": "Det var mitt skepp som slet sig. Hon heter Stjärnsvalan, och hon har seglat själv ända sedan stjärnorna föll.",
+                "till": "b"
+              }
+            ]
+          },
+          "d": {
+            "p": "bertil",
+            "t": "Jag heter Bertil och är badvakt. Barnen badar här varje dag, men det finns ingen brygga att hoppa från. En riktig badbrygga, det är vad Sjöviken behöver.",
             "val": [
               {
                 "label": "Kasta stjärnstoft på vattnet",
                 "kostnad": 3,
-                "text": "Planka efter planka stiger upp ur vattnet och lägger sig i rad, ända ut i sjön. Längst ut står Bertil, badvakten, med en visselpipa runt halsen: ”Det var jag som ropade. Här behövs en riktig brygga, och någon som håller uppsikt.”",
+                "text": "Planka efter planka stiger upp ur vattnet och lägger sig i rad ut i sjön. Bertil blåser glatt i visselpipan.",
                 "till": {
                   "bygg": "badbrygga"
                 }
               },
               {
-                "label": "Kasta stjärnstoft på stranden",
+                "label": "Kasta stjärnstoft mot himlen för skeppet",
                 "kostnad": 3,
-                "text": "Stjärnstoftet samlas till en liten båt vid strandkanten. Du ror över viken, och där sitter Siri, seglaren, på en sten: ”Min båt slet sig i natt. Nästa båt ska få ett riktigt båthus.”",
+                "text": "Bertil kliar sig i nacken. ”Ett skepp som seglar själv? Då behövs nog ett ljus mer än en brygga.” Stoftet stiger och blir till ett ljus som sveper runt över viken.",
                 "till": {
-                  "bygg": "bathus"
+                  "bygg": "fyr"
                 }
               }
             ]
@@ -1100,17 +1166,18 @@
           "gavaHej": "Ta snorkeln som tack. Den kan visa dig saker under ytan."
         },
         {
-          "id": "bathus",
+          "id": "fyr",
           "person": "siri",
-          "namn": "Båthus",
-          "byggs": "Ett rött båthus",
+          "namn": "Fyren",
+          "byggs": "En vit fyr med röda ränder",
           "kostnad": 20,
-          "byggnad": "bathus",
-          "tack": "Tack. Nu har båten tak över sig, och det har jag också när det regnar. Nästa sommar seglar vi längre än någon har seglat.",
+          "byggnad": "fyr",
+          "tack": "Tack. I natt lyser det över Sjöviken för första gången. Nu hittar Stjärnsvalan hem, det känner jag på mig.",
           "gava": [
-            "seglarmossa"
+            "seglarmossa",
+            "kompass"
           ],
-          "gavaHej": "Ta min gamla seglarmössa, den har varit med på fler resor än jag kan räkna."
+          "gavaHej": "Ta något som tack. Min gamla seglarmössa, eller kompassen som alltid pekar mot Stjärnsvalan."
         }
       ]
     },
@@ -1419,6 +1486,18 @@
       "art": "Grottolm",
       "text": "En liten vit salamander utan ögon, med rosa fjädrar vid huvudet. Den hittar fram i mörkret med känseln.",
       "hur": "Bodde i den svarta sjön i grottan under berget."
+    },
+    "lom": {
+      "namn": "Lova",
+      "art": "Storlom",
+      "text": "En svart och vit fågel med röda ögon och vita rutor på ryggen. Den ropar långt och ensamt om nätterna, men inte när du är med.",
+      "hur": "Simmade bredvid det lysande skeppet i Sjöviken en natt."
+    },
+    "get": {
+      "namn": "Bjällra",
+      "art": "Bergsget",
+      "text": "En vit get med skägg och en liten bjällra runt halsen. Den klättrar där ingen annan kommer upp.",
+      "hur": "Bodde på berget bakom grottan."
     }
   },
   "stopp": {
@@ -2162,6 +2241,129 @@
           }
         }
       }
+    },
+    "bakom": {
+      "rubrik": "Det klingar uppe i berget",
+      "knapp": "Gå mot klingandet",
+      "aventyr": {
+        "start": "a",
+        "steg": {
+          "a": {
+            "t": "Från berget hörs en liten bjällra, kling, kling. Högt uppe på en klippavsats står en vit get med skägg och tittar ner på dig.",
+            "val": [
+              {
+                "label": "Vinka till geten",
+                "kostnad": 0,
+                "text": "Geten tittar på dig en lång stund.",
+                "till": "b"
+              },
+              {
+                "label": "Klättra upp mot avsatsen",
+                "kostnad": 0,
+                "text": "Du tar tag i berget och börjar klättra.",
+                "till": "c"
+              }
+            ]
+          },
+          "b": {
+            "t": "Geten hoppar ner en avsats, och en till. Sedan stannar den, fortfarande högt ovanför dig, och bjällran klingar.",
+            "val": [
+              {
+                "label": "Plocka en näve klöver",
+                "kostnad": 0,
+                "text": "Klövern växer tät i gräset och doftar sött.",
+                "till": "d"
+              },
+              {
+                "label": "Sätt dig i gräset och vänta",
+                "kostnad": 0,
+                "text": "Du sätter dig och väntar. Det blir tyst.",
+                "till": "e"
+              }
+            ]
+          },
+          "c": {
+            "t": "Berget är brant och halt. Halvvägs upp tar fästena slut.",
+            "val": [
+              {
+                "label": "Kasta stjärnstoft på berget",
+                "kostnad": 2,
+                "text": "Stoftet lägger sig som små trappsteg i berget, och du klättrar ända upp till avsatsen.",
+                "till": "f"
+              },
+              {
+                "label": "Klättra ner igen",
+                "kostnad": 0,
+                "text": "Du klättrar försiktigt ner i gräset igen.",
+                "till": "b"
+              }
+            ]
+          },
+          "d": {
+            "t": "Geten sträcker på halsen mot klövern. Bjällran klingar och klingar.",
+            "val": [
+              {
+                "label": "Håll fram klövern",
+                "kostnad": 0,
+                "text": "Geten hoppar ner de sista avsatserna och mumsar klöver ur din hand. Bjällran klingar vid varje tugga, så den får heta Bjällra.",
+                "till": {
+                  "djur": "get"
+                }
+              },
+              {
+                "label": "Lägg klövern på en sten och gå undan",
+                "kostnad": 0,
+                "text": "Du lägger klövern på en sten och sätter dig en bit bort.",
+                "till": "e"
+              }
+            ]
+          },
+          "e": {
+            "t": "Det är tyst. Bara vinden i gräset hörs. Sedan klingar det alldeles bakom dig.",
+            "val": [
+              {
+                "label": "Vänd dig om långsamt",
+                "kostnad": 0,
+                "text": "Geten står bakom dig och nosar på din tröja. Den låter dig klia den på halsen, och bjällran klingar. Den får heta Bjällra.",
+                "till": {
+                  "djur": "get"
+                }
+              },
+              {
+                "label": "Sitt kvar och låtsas inte märka den",
+                "kostnad": 0,
+                "text": "Geten lägger huvudet på din axel. I munnen har den ett gammalt silvermynt som den har hittat uppe i berget. Den får heta Bjällra.",
+                "till": {
+                  "djur": "get",
+                  "extra": "silvermynt"
+                }
+              }
+            ]
+          },
+          "f": {
+            "t": "På avsatsen står geten alldeles stilla. Härifrån ser du ut över hela Glimmerdal, ända bort till slottet.",
+            "val": [
+              {
+                "label": "Klia geten bakom örat",
+                "kostnad": 0,
+                "text": "Geten blundar och trycker huvudet mot din hand. När du klättrar ner följer den med, och bjällran klingar. Den får heta Bjällra.",
+                "till": {
+                  "djur": "get"
+                }
+              },
+              {
+                "label": "Titta ut över dalen tillsammans",
+                "kostnad": 0,
+                "text": "Ni sitter länge och tittar. I en skreva bredvid geten blänker en stjärnkristall. När du klättrar ner följer geten med. Den får heta Bjällra.",
+                "till": {
+                  "djur": "get",
+                  "extra": "stjarnkristall"
+                }
+              }
+            ]
+          }
+        }
+      }
     }
   },
   "fiske": {
@@ -2293,6 +2495,17 @@
         "vanta": [
           3000,
           6500
+        ]
+      },
+      "bakom": {
+        "fiskar": [
+          "roding",
+          "roding",
+          "oring"
+        ],
+        "vanta": [
+          3000,
+          6000
         ]
       }
     },
@@ -2537,6 +2750,15 @@
           0.4
         ],
         "kamp": "lugn"
+      },
+      "roding": {
+        "namn": "Röding",
+        "text": "En fisk med röd buk och vita kanter på fenorna. Den trivs i det kalla vattnet nära berget.",
+        "vikt": [
+          0.2,
+          1.8
+        ],
+        "kamp": "hopp"
       }
     },
     "texter": {
@@ -2588,12 +2810,14 @@
         "gos",
         "braxen",
         "sik",
-        "grottfisk"
+        "grottfisk",
+        "roding"
       ],
       "flugspo": [
         "oring",
         "harr",
-        "regnbage"
+        "regnbage",
+        "roding"
       ],
       "hav": [
         "groda"
@@ -3097,6 +3321,183 @@
           }
         }
       }
+    },
+    "sjo": {
+      "rubrik": "Ett blått ljus närmar sig över vattnet",
+      "knapp": "Gå ner till vattnet",
+      "aventyr": {
+        "start": "a",
+        "steg": {
+          "a": {
+            "t": "Ute på sjön glider skeppet som lyser blått. I natt kommer det närmare land än det brukar. Från fören hörs ett långt, sorgset rop.",
+            "val": [
+              {
+                "label": "Ropa tillbaka",
+                "kostnad": 0,
+                "text": "Du ropar så högt du kan. Ropet ute på sjön svarar.",
+                "till": "b"
+              },
+              {
+                "label": "Vänta vid strandkanten",
+                "kostnad": 0,
+                "text": "Du står alldeles stilla. Skeppet glider närmare.",
+                "till": "c"
+              }
+            ]
+          },
+          "b": {
+            "t": "Bredvid skeppet dyker en svart och vit fågel upp ur vattnet. Den har röda ögon och vita rutor på ryggen, och den simmar rakt mot dig.",
+            "val": [
+              {
+                "label": "Sätt dig på huk vid vattnet",
+                "kostnad": 0,
+                "text": "Fågeln kliver upp på stranden och lägger sig vid dina fötter. Den ropar igen, men nu låter det glatt. Den får heta Lova.",
+                "till": {
+                  "djur": "lom"
+                }
+              },
+              {
+                "label": "Vada ut och möt den",
+                "kostnad": 0,
+                "text": "Vattnet är kallt. Fågeln simmar ett varv runt dig och sedan ut mot skeppet, som om den vill visa dig något.",
+                "till": "d"
+              }
+            ]
+          },
+          "c": {
+            "t": "Skeppet glider förbi så nära att du ser däcket. Där finns ingen. Repet som hänger från fören är bränt i änden.",
+            "val": [
+              {
+                "label": "Ta tag i repet",
+                "kostnad": 0,
+                "text": "Repet är varmt, men det bränns inte. Skeppet stannar.",
+                "till": "d"
+              },
+              {
+                "label": "Titta efter vad det var som ropade",
+                "kostnad": 0,
+                "text": "Ropet kommer från vattnet bredvid skeppet.",
+                "till": "b"
+              }
+            ]
+          },
+          "d": {
+            "t": "Skeppet ligger stilla en armlängd bort. På relingen sitter den svart och vita fågeln och tittar på dig. Ombord lyser en lanterna som ingen har tänt.",
+            "val": [
+              {
+                "label": "Räck upp handen mot fågeln",
+                "kostnad": 0,
+                "text": "Fågeln hoppar ner i dina händer. Den är blöt och varm och ropar lågt. Den får heta Lova.",
+                "till": {
+                  "djur": "lom"
+                }
+              },
+              {
+                "label": "Kliv upp på relingen och titta in",
+                "kostnad": 0,
+                "text": "På däcket ligger en guldring och blänker i lanternans sken. Fågeln flyger ner och sätter sig på din axel. Den får heta Lova.",
+                "till": {
+                  "djur": "lom",
+                  "extra": "guldring"
+                }
+              }
+            ],
+            "fyndVal": {
+              "fynd": "kompass",
+              "label": "Håll fram kompassen",
+              "text": "Nålen snurrar och pekar rakt på skeppet. På fören står namnet, nästan bortnött: Stjärnsvalan. Det är Siris skepp. I vattnet under det ligger en sjöpärla, och fågeln flyger ner och sätter sig på din axel. Den får heta Lova.",
+              "till": {
+                "djur": "lom",
+                "extra": "sjoparla"
+              }
+            }
+          }
+        }
+      }
+    },
+    "sodrabron": {
+      "rubrik": "Det lyser grönt under bron",
+      "knapp": "Klättra ner under bron",
+      "aventyr": {
+        "start": "a",
+        "steg": {
+          "a": {
+            "t": "Under bron är det mörkt och blött. I leran längs kanten lyser små gröna prickar som rör sig.",
+            "val": [
+              {
+                "label": "Titta närmare på prickarna",
+                "kostnad": 0,
+                "text": "Du sätter dig på huk i leran.",
+                "till": "b"
+              },
+              {
+                "label": "Lyssna på vattnet",
+                "kostnad": 0,
+                "text": "Strömmen porlar runt brostöden.",
+                "till": "c"
+              }
+            ]
+          },
+          "b": {
+            "t": "Det är lysmaskar! De kryper långsamt i leran och lyser som små stjärnor.",
+            "val": [
+              {
+                "label": "Samla några i en näve mossa",
+                "kostnad": 0,
+                "text": "Lysmaskarna kryper in i mossan och lyser grönt mellan dina fingrar.",
+                "till": {
+                  "agn": "lysmask"
+                }
+              },
+              {
+                "label": "Gräv där de är flest",
+                "kostnad": 0,
+                "text": "Ju djupare du gräver, desto fler lysmaskar.",
+                "till": "d"
+              }
+            ]
+          },
+          "c": {
+            "t": "Långt nere i det svarta vattnet glittrar något, som fjäll som fångar ljus. Det försvinner när du lutar dig fram.",
+            "val": [
+              {
+                "label": "Leta efter något som lyser",
+                "kostnad": 0,
+                "text": "Bakom dig, i leran, lyser det grönt.",
+                "till": "b"
+              },
+              {
+                "label": "Gräv i leran vid brostödet",
+                "kostnad": 0,
+                "text": "Leran är kall och mjuk.",
+                "till": "d"
+              }
+            ]
+          },
+          "d": {
+            "t": "Under leran ligger något hårt och blankt. Runt det kryper fler lysmaskar än du kan räkna.",
+            "val": [
+              {
+                "label": "Gräv fram det",
+                "kostnad": 0,
+                "text": "Det är en gammal glasflaska. Lysmaskarna kryper in i den, och nu lyser hela flaskan grönt.",
+                "till": {
+                  "agn": "lysmask",
+                  "extra": "glasflaska"
+                }
+              },
+              {
+                "label": "Låt det ligga och ta bara maskarna",
+                "kostnad": 0,
+                "text": "Du fyller fickan med lysmaskar. De lyser grönt genom tyget.",
+                "till": {
+                  "agn": "lysmask"
+                }
+              }
+            ]
+          }
+        }
+      }
     }
   },
   "vira": {
@@ -3141,11 +3542,15 @@
     "graskuggan": "Vira säger att Gråskuggan går mot Norra bron när månen är full.",
     "skugga": "Nattfiskaren har sett en grå skugga gå över bron mot Höstskogen.",
     "skeppet": "Nattfiskaren säger att konstiga nya fiskar har dykt upp i sjön sedan det lysande skeppet började segla där om nätterna.",
-    "flojt": "Nattfiskaren skar vassen till flöjten vid Norra bron. Där spelar någon fiol om nätterna, samma melodi varje gång."
+    "flojt": "Nattfiskaren skar vassen till flöjten vid Norra bron. Där spelar någon fiol om nätterna, samma melodi varje gång.",
+    "stjarnsvalan": "Siri säger att det lysande skeppet är hennes Stjärnsvalan. Om nätterna kommer det närmast land vid Sjöviken."
   },
   "personRykten": {
     "vira": [
       "rykte:graskuggan"
+    ],
+    "siri": [
+      "rykte:stjarnsvalan"
     ]
   },
   "ryktesInfo": {
@@ -3365,6 +3770,33 @@
     },
     "sak:gratyg": {
       "pekar": "berget"
+    },
+    "rykte:stjarnsvalan": {
+      "pekar": "sjo",
+      "natt": true,
+      "klar": [
+        "stopp:natt:sjo"
+      ]
+    },
+    "plats:sjo:natt": {
+      "pekar": "sjo",
+      "natt": true,
+      "klar": [
+        "stopp:natt:sjo"
+      ]
+    },
+    "plats:sodrabron:natt": {
+      "pekar": "sodrabron",
+      "natt": true,
+      "klar": [
+        "stopp:natt:sodrabron"
+      ]
+    },
+    "plats:bakom:dag": {
+      "pekar": "bakom",
+      "klar": [
+        "djur:get"
+      ]
     }
   }
 }

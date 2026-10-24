@@ -149,6 +149,7 @@ const CATCH = {
   lake: sprite(["................", ".ooooooooooo..o.", "owkbbBbbbBbbooBo", "obbbbbbBbbbBbbbo", ".ooooooooooooooo", "..oo............"], { o:'#3f2631', w:'#ffffff', k:'#262b44', b:'#8a7a4a', B:'#5a4a2a' }),
   gos: sprite(["....o.o.o.......", "..oooooooooo..o.", ".owkgsggsggsgoBo", "ooggggggggggggBo", ".oGGGGGGGGGGGoBo", "..oooooooooo..o."], { o:'#3f2631', w:'#fee761', k:'#262b44', g:'#9aa58a', s:'#4a5a3a', G:'#6a755a', B:'#4a5a3a' }),
   simpa: sprite(["..ooo.......", ".obbbooo.o..", "owkbbsbbooBo", "obbbbbbbbbBo", "obsbbbsbooBo", ".oFFoooo..o.", "..oo........"], { o:'#3f2631', w:'#ffffff', k:'#262b44', b:'#8b7a5a', s:'#4a3a2a', B:'#5a4a3a', F:'#a08a5a' }),
+  roding: markFish({ b:'#6e7a52', B:'#e4703a', s:'#e8dcb0', r:'#e4703a' }, (x, y) => y >= 5 && y <= 6 ? 'r' : (x + y) % 3 === 0 && y <= 4 ? 's' : ''),   // red belly, pale spots (2026-10-24)
   grottfisk: markFish({ b:'#efe0dc', B:'#c9a3a8', w:'#efe0dc', k:'#d8b4b8', r:'#f6757a' }, (x, y) => x === 4 && y > 2 && y < 7 ? 'r' : ''),   // no eyes (2026-10-24)
   krafta: sprite([".oo......oo.", "orro....orro", "orrro..orrro", ".oorroorroo.", "..orkrrkro..", "..oRrrrrRo..", ".ooRrrrrRoo.", "..oRrrrrRo..", ".ooRrrrrRoo.", "...oRrrRo...", "..oRRRRRRo..", "..oooooooo.."], { o:'#3f2631', k:'#262b44', r:'#e43b44', R:'#a22633' }),
 };
@@ -1017,7 +1018,7 @@ const FIRE_OUT = { 'o:18,10': 'o:8,16', 'o:21,12': 'o:9,16' };
 // The burning ones flicker between three pictures (own drawings in row 16, Peter 2026-10-23), each fire in its own time
 const FIRE_FRAMES = { 'o:18,10': ['o:18,10', 'o:19,16', 'o:20,16'], 'o:21,12': ['o:21,12', 'o:21,16', 'o:22,16'] };
 const fireFrame = (i, now, px) => { const f = FIRE_FRAMES[i]; return !f || reduceMotion ? i : f[Math.floor(now / 160 + px * .013) % f.length]; };
-const LIGHT_TILES = { 84: [8, 8, 'win'], 88: [8, 8, 'win'], 'o:27,2': [8, 8, 'win'], 125: [8, 8, 'slit'], 51: [8, 10, 'small'], 55: [8, 10, 'small'], 'o:18,10': [8, 4, 'fire'], 'o:21,12': [8, 9, 'fire'], 'o:28,15': [8, 8, 'tent'], 'o:15,16': [6, 10, 'small'], 'o:1,17': [8, 13, 'small'] };   // the last one is the round window of Siri's boathouse
+const LIGHT_TILES = { 84: [8, 8, 'win'], 88: [8, 8, 'win'], 'o:27,2': [8, 8, 'win'], 125: [8, 8, 'slit'], 51: [8, 10, 'small'], 55: [8, 10, 'small'], 'o:18,10': [8, 4, 'fire'], 'o:21,12': [8, 9, 'fire'], 'o:28,15': [8, 8, 'tent'], 'o:15,16': [6, 10, 'small'], 'o:1,17': [8, 7, 'fyr'] };   // the last one is the lamp of Siri's lighthouse
 const lightIn = i => { for (const j of Array.isArray(i) ? i : [i]) if (LIGHT_TILES[j]) return LIGHT_TILES[j]; return null; };
 function nightLights(){
   if (!STATIC_LIGHTS){
@@ -1059,10 +1060,19 @@ function drawNight(now, lv){
   for (const L of lights) if (L.k === 'fire' && L.i) tile(ctx, fireFrame(L.i, now, L.px), L.px, L.py);
 
   ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'lighter';
+  // Siri's lighthouse sweeps two beams slowly round over Sjöviken (2026-10-24)
+  for (const L of lights) if (L.k === 'fyr'){
+    const a0 = reduceMotion ? .6 : now / 1600, len = 150, w = .14;
+    for (const side of [0, Math.PI]){
+      const g = ctx.createRadialGradient(L.x, L.y, 0, L.x, L.y, len);
+      g.addColorStop(0, `rgba(255,240,190,${.34 * lv})`); g.addColorStop(1, 'rgba(255,240,190,0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(L.x, L.y); ctx.arc(L.x, L.y, len, a0 + side - w, a0 + side + w); ctx.closePath(); ctx.fill();
+    }
+  }
   for (const L of lights){
     const fire = L.k === 'fire', flick = fire && !reduceMotion ? .85 + .15 * Math.sin(now / 90 + L.x) * Math.sin(now / 53 + L.y) : 1;
     // the ship on the lake glows a mysterious blue, everything else warm
-    const rad = (fire ? 30 : L.k === 'lamp' ? 26 : L.k === 'win' || L.k === 'tent' ? 20 : L.k === 'plate' ? 13 : 12) * flick, c = fire ? '255,140,50' : L.k === 'lamp' ? '90,170,255' : L.k === 'plate' ? '255,235,180' : '255,200,100';
+    const rad = (fire ? 30 : L.k === 'lamp' ? 26 : L.k === 'fyr' ? 24 : L.k === 'win' || L.k === 'tent' ? 20 : L.k === 'plate' ? 13 : 12) * flick, c = fire ? '255,140,50' : L.k === 'lamp' ? '90,170,255' : L.k === 'fyr' ? '255,240,190' : L.k === 'plate' ? '255,235,180' : '255,200,100';
     const g = ctx.createRadialGradient(L.x, L.y, 0, L.x, L.y, rad);
     g.addColorStop(0, `rgba(${c},${.5 * lv})`); g.addColorStop(1, `rgba(${c},0)`);
     ctx.fillStyle = g; ctx.fillRect(L.x - rad, L.y - rad, rad * 2, rad * 2);
@@ -1076,7 +1086,7 @@ function drawNight(now, lv){
   }
   ctx.globalCompositeOperation = 'source-over';
   for (const L of lights){
-    if (L.k === 'fire' || L.k === 'tent' || L.k === 'lamp' || L.k === 'plate') continue;
+    if (L.k === 'fire' || L.k === 'tent' || L.k === 'lamp' || L.k === 'plate' || L.k === 'fyr') continue;
     const [w, h] = L.k === 'win' ? [6, 6] : [2, 4];
     ctx.fillStyle = `rgba(254,231,97,${.85 * lv})`; ctx.fillRect(Math.round(L.x - w / 2), Math.round(L.y - h / 2), w, h);
   }
@@ -2313,7 +2323,8 @@ function renderFishBook(){
   renderRumors();
   const ids = Object.keys(FISKE.fiskar).filter(id => S.fiskbok[id] !== undefined);
   const all = Object.keys(FISKE.fiskar), done = all.filter(id => (S.fiskbok[id] || 0) >= MAXFISK).length;
-  const head = S.brevFiske ? `<li><span><b>Fiskesällskapet</b> vill ha tre av varje sort.</span><span class="st">${done} av ${all.length} sorter</span></li>` : '';
+  // the society's line wraps on its own: the name and what they want, and under it how far he has come (Peter 2026-10-24)
+  const head = S.brevFiske ? `<li class="fs-head"><span><b>Fiskesällskapet</b> vill ha tre av varje sort.</span><span class="st">${done} av ${all.length} sorter klara</span></li>` : '';
   $('#fishbook').innerHTML = head + (ids.length
     ? ids.map(id => `<li><span class="fishico"><img class="pix" src="${fishIcon(id)}" alt=""></span><span><b>${esc(FISKE.fiskar[id].namn)}</b> ${esc(FISKE.fiskar[id].text)}${S.rekord[id] !== undefined ? ` <span class="rek">Rekord ${kgText(S.rekord[id])} kg</span>` : ''}</span><span class="st">${S.fiskbok[id] || 0} / ${MAXFISK}</span></li>`).join('')
     : '<li><span>Inga fiskar ännu.</span></li>');
