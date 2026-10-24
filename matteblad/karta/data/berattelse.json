@@ -104,16 +104,16 @@
       "natt": "Månen speglar sig i sjön. Bakom dig lyser tältet mellan träden."
     },
     "berget": {
-      "namn": "Bergsgrottan",
-      "text": "Under bergen öppnar sig en grotta. Därinne är det becksvart.",
-      "natt": "Bergen står svarta mot himlen, och grottan är ännu svartare.",
-      "rykte": "Folk säger att vakten vid Bergsgrottan inte släpper in någon. Vad är det han vaktar?"
+      "namn": "Gamla gruvan",
+      "text": "Under bergen går en gammal gruva in. Därinne är det becksvart.",
+      "natt": "Bergen står svarta mot himlen, och gruvan är ännu svartare.",
+      "rykte": "Folk säger att det rasar sten i den gamla gruvan, och att en vakt står vid öppningen så att ingen går in."
     },
     "bakom": {
       "namn": "Bakom berget",
       "text": "En liten sandstrand mellan berget och vattnet. I sanden syns bara fåglarnas spår.",
       "natt": "Stranden bakom berget ligger tyst, och vattnet blänker.",
-      "rykte": "Folk säger att det klingar uppe i berget bakom grottan, som en liten bjällra.",
+      "rykte": "Folk säger att det klingar uppe i berget bakom gruvan, som en liten bjällra.",
       "rykteNatt": "Folk säger att någon i en grå kappa går på stranden bakom berget om nätterna."
     }
   },
@@ -762,11 +762,11 @@
       "text": "En bit av en grå kappa som har fastnat på en sten. Den luktar regn.",
       "typ": "fynd",
       "varde": 2,
-      "rykte": "En bit av Gråskuggans kappa satt fast i grottgången under berget."
+      "rykte": "En bit av Gråskuggans kappa satt fast i den gamla gruvan under berget."
     },
     "grottparla": {
       "namn": "Grottpärla",
-      "text": "En vit, rund sten som har vuxit droppe för droppe i grottans vatten.",
+      "text": "En vit, rund sten som har vuxit droppe för droppe i gruvans vatten.",
       "typ": "fynd",
       "varde": 4
     },
@@ -1497,7 +1497,7 @@
       "namn": "Olle",
       "art": "Grottolm",
       "text": "En liten vit salamander utan ögon, med rosa fjädrar vid huvudet. Den hittar fram i mörkret med känseln.",
-      "hur": "Bodde i den svarta sjön i grottan under berget."
+      "hur": "Bodde i den svarta sjön i den gamla gruvan."
     },
     "lom": {
       "namn": "Lova",
@@ -1509,7 +1509,7 @@
       "namn": "Bjällra",
       "art": "Bergsget",
       "text": "En vit get med skägg och en liten bjällra runt halsen. Den klättrar där ingen annan kommer upp.",
-      "hur": "Bodde på berget bakom grottan."
+      "hur": "Bodde på berget bakom gruvan."
     }
   },
   "stopp": {
@@ -3584,7 +3584,7 @@
               {
                 "label": "Följ stövelspåren",
                 "kostnad": 0,
-                "text": "Spåren går upp mot grottan och tar slut vid berget. Där ligger repbiten, och bredvid den en blå glaskula som har fallit ur den grå kappan. Stjärnsvalan slet sig aldrig. Gråskuggan tog henne.",
+                "text": "Spåren går upp mot gruvan och tar slut vid berget. Där ligger repbiten, och bredvid den en blå glaskula som har fallit ur den grå kappan. Stjärnsvalan slet sig aldrig. Gråskuggan tog henne.",
                 "till": {
                   "fynd": "brantrep",
                   "extra": "glaskula"
@@ -3928,20 +3928,20 @@
     "person": "holger",
     "plats": "berget",
     "borta": "natt:bakom",
-    "rubrik": "En vakt står vid grottan",
+    "rubrik": "En vakt står vid gruvan",
     "knapp": "Prata med vakten",
     "rubrikNatt": "Vakten sover",
-    "textNatt": "Han sitter mot berget och snarkar så att det ekar i grottan.",
-    "smyg": "Smyg förbi in i grottan",
-    "hej": "Stopp där! Här går ingen in i grottan. Det har jag lovat.",
+    "textNatt": "Han sitter mot berget och snarkar så att det ekar i gruvan.",
+    "smyg": "Smyg förbi in i gruvan",
+    "hej": "Stopp där! Här får ingen gå in. Gruvan är gammal, och det kan rasa när som helst.",
     "fragor": [
       {
-        "label": "Fråga vem han har lovat",
-        "svar": "Det säger jag inte. En som går i grått, mer behöver du inte veta."
+        "label": "Fråga vad som har rasat",
+        "svar": "Stenar från taket. Ingen har brutit malm här på hundra år, och stöttorna är ruttna."
       },
       {
-        "label": "Fråga vad som finns i grottan",
-        "svar": "Mörker och droppar. Och en strand på andra sidan som ingen ska se."
+        "label": "Fråga vad som finns i gruvan",
+        "svar": "Mörker och droppar. Och en strand på andra sidan, säger folk. Men dit går ingen så länge jag står här."
       },
       {
         "label": "Fråga om han står här hela tiden",

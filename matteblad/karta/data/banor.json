@@ -1,9 +1,9 @@
 {
   "grotta": {
-    "namn": "Grottgången",
+    "namn": "Gruvgången",
     "text": "Det droppar från taket.",
-    "in": "Du går in i grottan. Det droppar från taket.",
-    "ut": "Du kommer ut ur grottan igen.",
+    "in": "Du går in i gruvan. Det droppar från taket.",
+    "ut": "Du kommer ut ur gruvan igen.",
     "ingang": "berget",
     "utgang": "bakom",
     "fiske": "grotta",
@@ -160,22 +160,22 @@
       }
     },
     "texter": {
-      "rubrik": "En grotta under bergen",
-      "rubrikTillbaka": "Grottan tillbaka",
-      "gaIn": "Gå in i grottan",
-      "gaTillbaka": "Gå in i grottan",
-      "bara": "Härifrån kommer du bara tillbaka genom grottan.",
+      "rubrik": "En gammal gruva",
+      "rubrikTillbaka": "Gruvan tillbaka",
+      "gaIn": "Gå in i gruvan",
+      "gaTillbaka": "Gå in i gruvan",
+      "bara": "Härifrån kommer du bara tillbaka genom gruvan.",
       "ljusAv": "Längre in är det becksvart.",
       "O": "Vid vattenbrynet rör sig något blekt.",
       "OKlar": "Vattnet ligger stilla. Här bodde Olle.",
       "E": "Bakom dig syns dagsljuset från vägen.",
-      "X": "Längre fram syns ljus. Där tar grottan slut.",
+      "X": "Längre fram syns ljus. Där tar gruvan slut.",
       "vatten": "Du står vid stranden av den svarta sjön. Här går det att fiska.",
       "tillbaka": "Gå tillbaka ut",
       "styr": "Gå med pilarna eller tryck där du vill gå.",
-      "dit": "Till stranden bakom berget kommer du bara genom grottan.",
+      "dit": "Till stranden bakom berget kommer du bara genom gruvan.",
       "hittade": "Du hittade en strand bakom berget!",
-      "inMorkt": "Du går in i grottan. Längre in är det becksvart.",
+      "inMorkt": "Du går in i gruvan. Längre in är det becksvart.",
       "morkt": "Det är för mörkt för att gå längre."
     },
     "hinder": "kqsrt"
