@@ -767,7 +767,6 @@ const DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
 const lvCell = (x, y) => LEVEL && y >= 0 && y < LEVEL.h && x >= 0 && x < LEVEL.w ? LEVEL.def.rutor[y][x] : '#';
 const lvFree = (x, y) => { const c = lvCell(x, y); return c !== '#' && c !== '~' && !(LEVEL.def.hinder || '').includes(c); };
 const lvTile = () => [Math.round(boy.x / TS), Math.round(boy.y / TS)];
-const hasLight = () => Object.keys(LIGHTS).some(x => S.saker.includes(x));
 // without a lit light: only near an opening (L.near) or where he has seen with his light
 const lvCanGo = (x, y) => !!litLight() || !!LEVEL.near[y * LEVEL.w + x] || !!LEVEL.seen[y * LEVEL.w + x];
 const levelBusy = () => !$('#modal').hidden || !current || current.type !== 'bana';
@@ -883,7 +882,7 @@ function nextLevelStep(){
   boy.dir = n.x > tx ? 'right' : n.x < tx ? 'left' : n.y > ty ? 'down' : 'up';
   if (!lvCanGo(n.x, n.y)){
     L.held = null; L.path = null;
-    if (performance.now() - L.darkToast > 2500){ L.darkToast = performance.now(); toast(hasLight() ? L.def.texter.morktTand : L.def.texter.morktInget); }
+    if (performance.now() - L.darkToast > 2500){ L.darkToast = performance.now(); toast(L.def.texter.morkt); }
     return false;
   }
   L.move = n; cam.follow = true;
@@ -999,12 +998,12 @@ function drawLevelDark(now){
   const lit = litLight(), bx = boy.x + 8, by = boy.y + 6, flick = reduceMotion ? 1 : 1 + .03 * Math.sin(now / 170) * Math.sin(now / 97);
   const lampA = l => reduceMotion ? 1 : l.k === 'eld' ? .88 + .12 * Math.sin(now / 90 + l.x) * Math.sin(now / 53 + l.y) : l.k === 'kristall' ? .8 + .2 * Math.sin(now / 900 + l.x * .1) : 1;
   hole(bx, by, (lit ? 3.6 : 1.2) * TS * flick, 1);
-  for (const l of L.lamps) hole(l.x, l.y, l.r * lampA(l), l.a);
+  for (const l of L.lamps) hole(l.x, l.y, l.r * (l.k === 'kristall' ? .55 : 1) * lampA(l), l.a);
   ctx.drawImage(L.dark, 0, 0);
   ctx.save(); ctx.globalCompositeOperation = 'lighter';
   const glow = (x, y, r, c, a) => { const g = ctx.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, `rgba(${c},${a})`); g.addColorStop(1, `rgba(${c},0)`); ctx.fillStyle = g; ctx.fillRect(x - r, y - r, r * 2, r * 2); };
   if (lit) glow(bx, by, 3.2 * TS * flick, LIGHTS[lit], .16);
-  for (const l of L.lamps) glow(l.x, l.y, l.r * lampA(l), l.c, .22 * l.a);
+  for (const l of L.lamps) glow(l.x, l.y, l.r * (l.k === 'kristall' ? 1.3 : 1) * lampA(l), l.c, (l.k === 'kristall' ? .5 : .22) * l.a);   // the crystals glow faintly blue
   ctx.restore();
 }
 // The arrows on the map (shown only in a level) and the arrow keys or WASD
@@ -1431,7 +1430,7 @@ function renderPanel(view){
     // In a level: what is around him (levelSpot), a way back out, and how to walk
     const L = LEVEL, d = L.def, T = d.texter, sp = L.spot || levelSpot();
     const advs = Object.keys(d.aventyr || {}).filter(ch => sp.includes(ch)), done = ch => S.stopp[`bana:${L.id}:${ch}`];
-    const text = sp.includes('!') ? (hasLight() ? T.ljusAv : T.ingetLjus) : advs.length ? T[advs[0] + (done(advs[0]) ? 'Klar' : '')] : sp.includes('~') ? T.vatten : sp.includes('E') ? T.E : sp.includes('X') ? T.X : d.text;
+    const text = sp.includes('!') ? T.ljusAv : advs.length ? T[advs[0] + (done(advs[0]) ? 'Klar' : '')] : sp.includes('~') ? T.vatten : sp.includes('E') ? T.E : sp.includes('X') ? T.X : d.text;
     h = `<span class="tag">Du är här</span><h2>${esc(d.namn)}</h2><p>${esc(text)}</p><div class="panel-body">`;
     for (const ch of advs) h += stopBlock(`bana:${L.id}:${ch}`);
     if (sp.includes('~')) h += fishBlock(d.fiske);

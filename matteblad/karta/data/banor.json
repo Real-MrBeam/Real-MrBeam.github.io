@@ -1,8 +1,8 @@
 {
   "grotta": {
     "namn": "Grottgången",
-    "text": "Det droppar från taket. Ljuset når bara några steg framåt.",
-    "in": "Du går in i grottan. Det droppar från taket, och ljuset når bara några steg framåt.",
+    "text": "Det droppar från taket.",
+    "in": "Du går in i grottan. Det droppar från taket.",
     "ut": "Du kommer ut ur grottan igen.",
     "ingang": "berget",
     "utgang": "bakom",
@@ -164,21 +164,19 @@
       "rubrikTillbaka": "Grottan tillbaka",
       "gaIn": "Gå in i grottan",
       "gaTillbaka": "Gå in i grottan",
-      "ingetLjus": "Längre in är det becksvart. Du behöver något som lyser för att gå vidare.",
       "bara": "Härifrån kommer du bara tillbaka genom grottan.",
-      "ljusAv": "Längre in är det becksvart. Tänd ditt ljus i Mina saker för att gå vidare.",
+      "ljusAv": "Längre in är det becksvart.",
       "O": "Vid vattenbrynet rör sig något blekt.",
       "OKlar": "Vattnet ligger stilla. Här bodde Olle.",
       "E": "Bakom dig syns dagsljuset från vägen.",
       "X": "Längre fram syns ljus. Där tar grottan slut.",
       "vatten": "Du står vid stranden av den svarta sjön. Här går det att fiska.",
       "tillbaka": "Gå tillbaka ut",
-      "styr": "Gå med piltangenterna eller pilarna på kartan, eller tryck där du vill gå.",
+      "styr": "Gå med pilarna eller tryck där du vill gå.",
       "dit": "Till ängen bakom berget kommer du bara genom grottan.",
       "hittade": "Du hittade en äng bakom berget som ingen har sett på länge!",
-      "inMorkt": "Du går in i grottan. Efter några steg är det becksvart.",
-      "morktTand": "Det är för mörkt för att gå längre in. Tänd ditt ljus i Mina saker.",
-      "morktInget": "Det är för mörkt för att gå längre in. Du behöver något som lyser."
+      "inMorkt": "Du går in i grottan. Längre in är det becksvart.",
+      "morkt": "Det är för mörkt för att gå längre."
     },
     "hinder": "kqsrt"
   }
