@@ -100,6 +100,17 @@
       "namn": "Udden",
       "text": "En smal udde av gräs sticker ut i sjön. Någon har lagt en platt sten vid vattnet att sitta på.",
       "natt": "Månen speglar sig i sjön. Bakom dig lyser tältet mellan träden."
+    },
+    "berget": {
+      "namn": "Bergsgrottan",
+      "text": "Under bergen öppnar sig en grotta. Därinne är det becksvart.",
+      "natt": "Bergen står svarta mot himlen, och grottan är ännu svartare.",
+      "rykte": "Folk säger att det finns en äng bakom berget som ingen har sett. Men grottan är för mörk att gå in i."
+    },
+    "bakom": {
+      "namn": "Bakom berget",
+      "text": "En liten äng mellan berget och kanalen. Här har ingen gått på länge.",
+      "natt": "Ängen bakom berget ligger tyst, och vattnet i kanalen blänker."
     }
   },
   "portar": {
@@ -737,6 +748,19 @@
       "plats": "huvud",
       "varde": 2,
       "rykte": "Det sägs att det lyser i dammen på Ängen om nätterna."
+    },
+    "gratyg": {
+      "namn": "Grå tygbit",
+      "text": "En bit av en grå kappa som har fastnat på en sten. Den luktar regn.",
+      "typ": "fynd",
+      "varde": 2,
+      "rykte": "En bit av Gråskuggans kappa satt fast i grottgången under berget."
+    },
+    "grottparla": {
+      "namn": "Grottpärla",
+      "text": "En vit, rund sten som har vuxit droppe för droppe i grottans vatten.",
+      "typ": "fynd",
+      "varde": 4
     }
   },
   "bygg": {
@@ -1389,6 +1413,12 @@
       "art": "Höstrav",
       "text": "En rävunge med päls lika orange som löven i Höstskogen. Han syns knappt när han ligger stilla bland löven.",
       "hur": "Bodde hos Vira vid elden i Höstskogen en natt."
+    },
+    "olm": {
+      "namn": "Olle",
+      "art": "Grottolm",
+      "text": "En liten vit salamander utan ögon, med rosa fjädrar vid huvudet. Den hittar fram i mörkret med känseln.",
+      "hur": "Bodde i den svarta sjön i grottan under berget."
     }
   },
   "stopp": {
@@ -2255,6 +2285,15 @@
           3000,
           6500
         ]
+      },
+      "grotta": {
+        "fiskar": [
+          "grottfisk"
+        ],
+        "vanta": [
+          3000,
+          6500
+        ]
       }
     },
     "redskap": [
@@ -2489,6 +2528,15 @@
           0.02,
           0.08
         ]
+      },
+      "grottfisk": {
+        "namn": "Grottfisk",
+        "text": "En blek fisk utan ögon. Den hittar fram med känseln i det svarta vattnet.",
+        "vikt": [
+          0.05,
+          0.4
+        ],
+        "kamp": "lugn"
       }
     },
     "texter": {
@@ -2539,7 +2587,8 @@
         "lake",
         "gos",
         "braxen",
-        "sik"
+        "sik",
+        "grottfisk"
       ],
       "flugspo": [
         "oring",
@@ -3307,6 +3356,15 @@
     "rykte:flojt": {
       "pekar": "norrabron",
       "natt": true
+    },
+    "plats:berget:dag": {
+      "pekar": "berget",
+      "klar": [
+        "hittat:bakom"
+      ]
+    },
+    "sak:gratyg": {
+      "pekar": "berget"
     }
   }
 }

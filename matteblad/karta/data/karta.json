@@ -6,7 +6,9 @@
   "grundmark": "g",
   "bild": "bild/tiles.png",
   "tilesets": {
-    "o": { "namn": "Open RPG Fantasy Tilesets (finalbossblues, CC0)", "bild": "bild/openrpg.png", "kolumner": 30 }
+    "o": { "namn": "Open RPG Fantasy Tilesets (finalbossblues, CC0)", "bild": "bild/openrpg.png", "kolumner": 30 },
+    "w": { "namn": "Open RPG Fantasy Tilesets, world.png (finalbossblues, CC0)", "bild": "bild/openrpg-varld.png", "kolumner": 30 },
+    "d": { "namn": "Open RPG Fantasy Tilesets, dungeon.png (finalbossblues, CC0)", "bild": "bild/openrpg-grotta.png", "kolumner": 30 }
   },
   "figur": {
     "palett": {
@@ -189,6 +191,17 @@
       "x": 20,
       "y": 15,
       "dold": true
+    },
+    {
+      "id": "berget",
+      "x": 28,
+      "y": 24
+    },
+    {
+      "id": "bakom",
+      "x": 29,
+      "y": 20,
+      "dold": true
     }
   ],
   "vagar": [
@@ -255,8 +268,13 @@
     },
     {
       "a": "sjo",
+      "b": "berget",
+      "punkter": [[24, 24], [28, 24]]
+    },
+    {
+      "a": "berget",
       "b": "sodrabron",
-      "punkter": [[24, 24], [32, 24]]
+      "punkter": [[28, 24], [32, 24]]
     },
     {
       "a": "sodrabron",
@@ -492,7 +510,8 @@
     { "put": ["o:24,16", 20, 19], "vatten": true },
     { "put": ["o:23,16", 21, 20], "vatten": true },
     { "put": ["o:24,16", 20, 21] },
-    { "put": ["o:23,16", 22, 21] }
+    { "put": ["o:23,16", 22, 21] },
+    { "block": [[-1, "w:18,12", "w:19,12", "w:18,12", "w:19,12", -1], ["w:18,12", ["w:18,13", "w:19,12"], ["w:19,13", "w:18,12"], ["w:18,13", "w:19,12"], ["w:19,13", "w:18,12"], "w:19,12"], ["w:18,13", "w:19,13", "w:18,13", ["w:19,13", "w:23,13"], "w:18,13", "w:19,13"]], "x": 25, "y": 21 }
   ],
   "reserverat": [[33, 1, 41, 4]],
   "slott": {

@@ -2,7 +2,7 @@
 (async () => {
 'use strict';
 // The game reads two data files: geometry (karta.json) and names, texts and rules (berattelse.json).
-const [karta, berattelse, PORTRAITS, PETDATA] = await Promise.all(['data/karta.json', 'data/berattelse.json', 'data/portratt.json', 'data/djur.json'].map(u =>
+const [karta, berattelse, PORTRAITS, PETDATA, BANOR] = await Promise.all(['data/karta.json', 'data/berattelse.json', 'data/portratt.json', 'data/djur.json', 'data/banor.json'].map(u =>
   fetch(u, { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error(u + ' ' + r.status); return r.json(); })));
 const TS = karta.ruta, MW = karta.bredd, MH = karta.hojd;
 const $ = s => document.querySelector(s);
@@ -149,6 +149,7 @@ const CATCH = {
   lake: sprite(["................", ".ooooooooooo..o.", "owkbbBbbbBbbooBo", "obbbbbbBbbbBbbbo", ".ooooooooooooooo", "..oo............"], { o:'#3f2631', w:'#ffffff', k:'#262b44', b:'#8a7a4a', B:'#5a4a2a' }),
   gos: sprite(["....o.o.o.......", "..oooooooooo..o.", ".owkgsggsggsgoBo", "ooggggggggggggBo", ".oGGGGGGGGGGGoBo", "..oooooooooo..o."], { o:'#3f2631', w:'#fee761', k:'#262b44', g:'#9aa58a', s:'#4a5a3a', G:'#6a755a', B:'#4a5a3a' }),
   simpa: sprite(["..ooo.......", ".obbbooo.o..", "owkbbsbbooBo", "obbbbbbbbbBo", "obsbbbsbooBo", ".oFFoooo..o.", "..oo........"], { o:'#3f2631', w:'#ffffff', k:'#262b44', b:'#8b7a5a', s:'#4a3a2a', B:'#5a4a3a', F:'#a08a5a' }),
+  grottfisk: markFish({ b:'#efe0dc', B:'#c9a3a8', w:'#efe0dc', k:'#d8b4b8', r:'#f6757a' }, (x, y) => x === 4 && y > 2 && y < 7 ? 'r' : ''),   // no eyes (2026-10-24)
   krafta: sprite([".oo......oo.", "orro....orro", "orrro..orrro", ".oorroorroo.", "..orkrrkro..", "..oRrrrrRo..", ".ooRrrrrRoo.", "..oRrrrrRo..", ".ooRrrrrRoo.", "...oRrrRo...", "..oRRRRRRo..", "..oooooooo.."], { o:'#3f2631', k:'#262b44', r:'#e43b44', R:'#a22633' }),
 };
 const catchIcon = id => iconURL(CATCH[id] || FISH, 8);
@@ -388,6 +389,8 @@ function resize(){
 new ResizeObserver(resize).observe(stage);
 
 function clampCam(x, y){
+  // in a level the camera keeps him in the middle, also at the edge (outside is only dark rock), so the arrows never cover him
+  if (LEVEL) return [Math.max(TS - viewW/2, Math.min(LEVEL.w*TS - TS - viewW/2, x)), Math.max(TS - viewH/2, Math.min(LEVEL.h*TS - TS - viewH/2, y))];
   const mw = MW*TS, mh = MH*TS;
   x = viewW >= mw ? (mw - viewW) / 2 : Math.max(0, Math.min(mw - viewW, x));
   y = viewH >= mh ? (mh - viewH) / 2 : Math.max(0, Math.min(mh - viewH, y));
@@ -432,6 +435,8 @@ function walkTo(id){
     const any = findRoute(S.node, id, true);
     const g = any && any.map(h => h.e).find(e => !edgeOpen(e));
     if (g){ showGate(g.gate); focusGate(g.gate); toast(`Porten mot ${NODES[g.b === S.node ? g.a : g.b].name} kräver ${g.gate.req} stjärnor.`); }
+    else if (!edgesOf(S.node).length && levelAt(S.node)) toast(levelAt(S.node)[1].texter.bara);
+    else if (!edgesOf(id).length && levelAt(id)) toast(levelAt(id)[1].texter.dit);
     return;
   }
   const pts = [];
@@ -508,6 +513,21 @@ function sparkle(wx, wy, n, col){
 function dust(wx, wy){
   for (let i = 0; i < 14; i++){ const a = Math.random() * Math.PI * 2, s = 10 + Math.random() * 22; FX.push({ k: 'dust', x: wx + Math.cos(a)*10, y: wy + Math.sin(a)*8, vx: Math.cos(a)*s, vy: Math.sin(a)*s*.6 - 6, t: 0, life: .55 + Math.random()*.35, r: 2 + Math.random()*3 }); }
 }
+// partiklar: sparks, dust, and drops of water that fall from the roof of a cave and splash
+function drawFX(dt){
+  for (let i = FX.length - 1; i >= 0; i--){
+    const p = FX[i]; p.t += dt;
+    if (p.t > p.life){
+      FX.splice(i, 1);
+      if (p.k === 'drop') for (let j = 0; j < 4; j++) FX.push({ k: 'spark', x: p.x, y: p.y, vx: (Math.random() - .5) * 30, vy: -12 - Math.random() * 14, t: 0, life: .3, col: '#c0eaff' });
+      continue;
+    }
+    p.x += p.vx * dt; p.y += p.vy * dt;
+    if (p.k === 'spark'){ p.vy += 60 * dt; ctx.fillStyle = p.col; const s = p.t < p.life * .6 ? 2 : 1; ctx.fillRect(Math.round(p.x), Math.round(p.y), s, s); }
+    else if (p.k === 'drop'){ ctx.fillStyle = '#c0eaff'; ctx.fillRect(Math.round(p.x), Math.round(p.y), 1, 2); }
+    else { p.vx *= .92; p.vy *= .92; const r = Math.max(1, Math.round(p.r * (1 - p.t / p.life))); ctx.fillStyle = p.t < p.life*.5 ? '#ffffff' : '#c0cbdc'; ctx.fillRect(Math.round(p.x) - r, Math.round(p.y) - r, r*2, r*2); }
+  }
+}
 const gateAnim = new Map(), plotAnim = new Map();
 function showMap(){ const r = stage.getBoundingClientRect(); if (r.top < 0 || r.bottom > innerHeight) stage.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' }); }
 function focusGate(g){ cam.follow = false; cam.focus = { x: g.x*TS + 8, y: g.y*TS + 8, until: performance.now() + 2200 }; }
@@ -557,7 +577,7 @@ function drawPlot(p, now){
 function drawBoy(now){
   let frames = BOY[boy.dir];
   let f = 0, bob = 0;
-  if (boy.route){ f = Math.floor(now / 130) % frames.length; }
+  if (boy.route || boy.walking){ f = Math.floor(now / 130) % frames.length; }
   else { bob = (Math.floor(now / 480) % 2) ? 1 : 0; }
   const x = Math.round(boy.x), y = Math.round(boy.y) - 6 + bob;
   ctx.fillStyle = 'rgba(63,38,49,.35)'; ctx.fillRect(x + 4, Math.round(boy.y) + 9, 8, 2); ctx.fillRect(x + 3, Math.round(boy.y) + 10, 10, 1);
@@ -611,6 +631,7 @@ let terrainFrame = 0, lastWater = 0, lastT = performance.now();
 function frame(now){
   const dt = Math.min(.05, (now - lastT) / 1000); lastT = now;
   if (!TERRAIN.length || !viewW){ requestAnimationFrame(frame); return; }
+  if (LEVEL){ levelFrame(now, dt); requestAnimationFrame(frame); return; }
   // gång
   if (boy.route){
     const speed = 72 * dt;
@@ -681,13 +702,7 @@ function frame(now){
     ctx.drawImage(chestOpening && t >= .6 ? CHEST_OPEN : CHEST, CHEST_AT.x*TS + shake, CHEST_AT.y*TS);
   }
   drawActors(now);
-  // partiklar
-  for (let i = FX.length - 1; i >= 0; i--){
-    const p = FX[i]; p.t += dt; if (p.t > p.life){ FX.splice(i, 1); continue; }
-    p.x += p.vx * dt; p.y += p.vy * dt;
-    if (p.k === 'spark'){ p.vy += 60 * dt; ctx.fillStyle = p.col; const s = p.t < p.life * .6 ? 2 : 1; ctx.fillRect(Math.round(p.x), Math.round(p.y), s, s); }
-    else { p.vx *= .92; p.vy *= .92; const r = Math.max(1, Math.round(p.r * (1 - p.t / p.life))); ctx.fillStyle = p.t < p.life*.5 ? '#ffffff' : '#c0cbdc'; ctx.fillRect(Math.round(p.x) - r, Math.round(p.y) - r, r*2, r*2); }
-  }
+  drawFX(dt);
 
   drawMist(now);
   // natt: fades in and out when he sleeps in Hemmet
@@ -729,6 +744,269 @@ function drawMist(now){
     blob(cx, cy, 28 + (i % 3) * 8, 7 + (i % 2) * 3, .45);
   }
 }
+
+/* ---------- banor: små kartor där han går fritt ---------- */
+// A level (bana, data/banor.json) is its own small map that he enters from a place on the big map (Peter 2026-10-24: the cave
+// under the mountains between Sjöviken and Södra bron). In a level he walks freely, one tile at a time: with the arrow keys,
+// the arrows on the map, or by tapping where he wants to go. It is dark there. Only what his light reaches shows, and what he
+// has seen stays dimly visible. He needs a lit light to go in. The letters in rutor: # rock, . floor, ~ water, E the way in
+// and X the way out (he leaves when he steps on them), and the letters in bild (decoration, the ones in hinder are in the
+// way), ljus (something that shines by itself), saker (a thing he picks up) and aventyr (an adventure next to that letter).
+// Along the water he can fish (fiske, a place in berattelse.json fiske.platser). He is still at his place on the big map
+// (S.node) while he is in a level, so a reload puts him back outside.
+const LIGHTS = { lykta: '255,210,120', flaskat: '90,170,255', eldflugor: '150,230,90' };
+const litLight = () => Object.keys(LIGHTS).find(id => S.tant && S.tant[id] && S.saker.includes(id)) || null;
+const levelAt = id => Object.entries(BANOR).find(([, d]) => d.ingang === id || d.utgang === id) || null;
+const levelStops = lid => Object.keys(BANOR[lid].aventyr || {}).map(ch => `bana:${lid}:${ch}`);
+// something is left in a level while a thing lies there, an adventure is not played or a fish there is not in the book
+const levelLeft = lid => { const d = BANOR[lid]; return Object.values(d.saker || {}).some(id => !S.saker.includes(id)) || levelStops(lid).some(k => !S.stopp[k]) || (!!d.fiske && newFishAt(d.fiske)); };
+let LEVEL = null;   // { id, def, w, h, door, seen, held, path, move, spot, img, lamps, glints, pos }
+const DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
+const lvCell = (x, y) => LEVEL && y >= 0 && y < LEVEL.h && x >= 0 && x < LEVEL.w ? LEVEL.def.rutor[y][x] : '#';
+const lvFree = (x, y) => { const c = lvCell(x, y); return c !== '#' && c !== '~' && !(LEVEL.def.hinder || '').includes(c); };
+const lvTile = () => [Math.round(boy.x / TS), Math.round(boy.y / TS)];
+const levelBusy = () => !$('#modal').hidden || !current || current.type !== 'bana';
+function levelEntryBlock(id){
+  const [lid, d] = levelAt(id), T = d.texter, side = d.ingang === id ? 'in' : 'ut', here = S.node === id && !boy.route, lit = litLight();
+  const why = lit ? '' : Object.keys(LIGHTS).some(x => S.saker.includes(x)) ? T.tand : T.ingetLjus;
+  return `<div class="plot"><div><b>${esc(side === 'in' ? T.rubrik : T.rubrikTillbaka)}</b>${why ? `<span>${esc(why)}</span>` : ''}</div>${here && lit ? `<button class="btn" type="button" data-bana="${lid}:${side}">${esc(side === 'in' ? T.gaIn : T.gaTillbaka)}</button>` : ''}</div>`;
+}
+function enterLevel(lid, side){
+  const d = BANOR[lid], door = side === 'ut' ? 'X' : 'E';
+  if (!litLight()) return toast(d.texter.ingetLjus);
+  stopFishing(); hideHint();
+  const w = d.rutor[0].length, h = d.rutor.length, pos = {};
+  d.rutor.forEach((r, y) => [...r].forEach((ch, x) => { if (ch !== '#' && ch !== '.' && ch !== '~' && !pos[ch]) pos[ch] = [x, y]; }));
+  LEVEL = { id: lid, def: d, w, h, door, pos, seen: new Uint8Array(w * h), seenDirty: true, held: null, path: null, move: null, spot: null, drip: 0 };
+  // he starts one step inside the opening, facing into the cave, and the animals come in after him
+  const [ox, oy] = pos[door];
+  const [sx, sy] = Object.values(DIRS).map(([dx, dy]) => [ox + dx, oy + dy]).find(([x, y]) => lvFree(x, y) && lvCell(x, y) !== 'E' && lvCell(x, y) !== 'X');
+  boy.route = null; boy.walking = false; boy.x = sx * TS; boy.y = sy * TS;
+  boy.dir = sy < oy ? 'up' : sy > oy ? 'down' : sx < ox ? 'left' : 'right';
+  trail.length = 0; trail.push({ x: ox * TS, y: oy * TS }, { x: boy.x, y: boy.y }); petState.clear();
+  LEVEL.img = levelPicture();
+  LEVEL.lamps = []; LEVEL.glints = [];
+  const r = rng(31);
+  d.rutor.forEach((row, y) => [...row].forEach((ch, x) => {
+    const l = d.ljus && d.ljus[ch];
+    if (l) LEVEL.lamps.push({ x: x * TS + 8, y: y * TS + 8, r: l[0] * TS, a: l[1], c: l[2], k: l[3] });
+    if (ch === '~' && r() < .5) LEVEL.glints.push({ x: x * TS + 2 + Math.floor(r() * 12), y: y * TS + 4 + Math.floor(r() * 10), ph: r() * 6.3, sp: 400 + r() * 700 });
+  }));
+  markLevelSeen();
+  cam.follow = true; cam.focus = null; centerOn(boy.x + 8, boy.y + 8, true);
+  $('#dpad').hidden = false; musicSync(); toast(d.in);
+  showNode();
+}
+function leaveLevel(door){
+  const d = LEVEL.def, node = door === 'X' ? d.utgang : d.ingang;
+  LEVEL = null; $('#dpad').hidden = true; boy.walking = false;
+  const found = NODES[node].hidden && !S.hittat.includes(node);
+  if (found){ S.hittat.push(node); buildTerrain(); renderRumors(); }
+  S.node = node; saveSoon();
+  placeBoy(node); boy.dir = 'down';
+  lastRevealKey = ''; revealAround(boy.x + 8, boy.y + 8);
+  cam.follow = true; cam.focus = null; centerOn(boy.x + 8, boy.y + 8, true);
+  musicSync(); showNode();
+  if (found){ sparkle(boy.x + 8, boy.y + 2, 26); toast(d.texter.hittade); } else toast(d.ut);
+}
+// The picture of the level is drawn once: rock, floor, water and decoration. Rock far from the floor is plain dark, rock along
+// the floor shows its face where the floor lies below it, and the water gets a dark lip where it meets the shore.
+function levelPicture(){
+  const L = LEVEL, B = L.def.bild, c = document.createElement('canvas'); c.width = L.w * TS; c.height = L.h * TS;
+  const x = c.getContext('2d'); x.imageSmoothingEnabled = false;
+  const wall = (cx, cy) => lvCell(cx, cy) === '#', water = (cx, cy) => lvCell(cx, cy) === '~';
+  const near = (cx, cy) => { for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if (!wall(cx + dx, cy + dy)) return true; return false; };
+  for (let cy = 0; cy < L.h; cy++) for (let cx = 0; cx < L.w; cx++){
+    const ch = lvCell(cx, cy), px = cx * TS, py = cy * TS;
+    if (ch === '#'){
+      if (near(cx, cy)) tile(x, wall(cx, cy + 1) ? B.vagg : B.vaggFram, px, py);
+      else { x.fillStyle = '#140e12'; x.fillRect(px, py, TS, TS); }
+      continue;
+    }
+    if (ch === '~'){
+      const col = !water(cx - 1, cy) ? 0 : !water(cx + 1, cy) ? 2 : 1, row = !water(cx, cy - 1) ? 0 : !water(cx, cy + 1) ? 2 : 1;
+      tile(x, B.vatten[row * 3 + col], px, py);
+      x.fillStyle = 'rgba(20,12,16,.55)';
+      if (!water(cx, cy - 1)) x.fillRect(px, py, TS, 3);
+      if (!water(cx - 1, cy)) x.fillRect(px, py, 2, TS);
+      if (!water(cx + 1, cy)) x.fillRect(px + TS - 2, py, 2, TS);
+      if (!water(cx, cy + 1)) x.fillRect(px, py + TS - 1, TS, 1);
+      continue;
+    }
+    tile(x, B.golv, px, py);
+    if (wall(cx, cy - 1)) tile(x, B.golvSkugga, px, py);
+    if (B[ch]) tile(x, B[ch], px, py);
+  }
+  return c;
+}
+function markLevelSeen(){
+  const L = LEVEL, [x0, y0] = lvTile(), r = litLight() ? 3 : 1;
+  for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++){
+    const x = x0 + dx, y = y0 + dy;
+    if (x < 0 || y < 0 || x >= L.w || y >= L.h || dx * dx + dy * dy > (r + .5) ** 2 || L.seen[y * L.w + x]) continue;
+    L.seen[y * L.w + x] = 1; L.seenDirty = true;
+  }
+}
+// What is around him decides what the panel shows: an adventure next to its letter, fishing by the water, the openings
+function levelSpot(){
+  const [x, y] = lvTile(), near = (ch, r) => { for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) if (lvCell(x + dx, y + dy) === ch) return true; return false; };
+  let sp = Object.keys(LEVEL.def.aventyr || {}).filter(ch => near(ch, 1)).join('');
+  if (LEVEL.def.fiske && Object.values(DIRS).some(([dx, dy]) => lvCell(x + dx, y + dy) === '~')) sp += '~';
+  if (near('E', 2)) sp += 'E';
+  if (near('X', 2)) sp += 'X';
+  return sp + (litLight() ? '' : '!');
+}
+// Walking: one tile at a time. A held arrow goes on as long as it is held, a tap gives a path to walk.
+function nextLevelStep(){
+  const L = LEVEL;
+  if (levelBusy()){ L.path = null; return false; }
+  const [tx, ty] = lvTile();
+  let n = null;
+  if (L.held){ const [dx, dy] = DIRS[L.held]; boy.dir = L.held; n = { x: tx + dx, y: ty + dy }; if (!lvFree(n.x, n.y)) return false; }
+  else if (L.path && L.path.length) n = L.path.shift();
+  if (!n) return false;
+  boy.dir = n.x > tx ? 'right' : n.x < tx ? 'left' : n.y > ty ? 'down' : 'up';
+  L.move = n; cam.follow = true;
+  return true;
+}
+function stepLevel(dt){
+  let left = 70 * dt;
+  while (left > 0 && LEVEL){
+    const L = LEVEL;
+    if (!L.move && !nextLevelStep()) break;
+    const gx = L.move.x * TS, gy = L.move.y * TS, dx = gx - boy.x, dy = gy - boy.y, d = Math.hypot(dx, dy);
+    if (d <= left){ boy.x = gx; boy.y = gy; left -= d; L.move = null; arriveTile(); }
+    else { boy.x += dx / d * left; boy.y += dy / d * left; left = 0; }
+  }
+}
+function arriveTile(){
+  const L = LEVEL, [x, y] = lvTile(), ch = lvCell(x, y);
+  if (ch === 'E' || ch === 'X') return leaveLevel(ch);
+  markLevelSeen();
+  const id = (L.def.saker || {})[ch];
+  if (id && !S.saker.includes(id)){
+    L.held = null; L.path = null;
+    S.saker.push(id); renderPack(); saveSoon(); sparkle(boy.x + 8, boy.y + 2, 18);
+    itemModal(id);
+  }
+}
+// To a tile: the shortest way there, or to the nearest tile next to it (tapping the water walks him to the shore)
+function levelWalkTo(gx, gy){
+  const L = LEVEL;
+  if (levelBusy()) return;
+  const start = L.move ? [L.move.x, L.move.y] : lvTile(), sk = start.join(',');
+  const prev = new Map([[sk, null]]), q = [start];
+  while (q.length){
+    const [x, y] = q.shift();
+    for (const [dx, dy] of Object.values(DIRS)){
+      const n = [x + dx, y + dy], k = n.join(',');
+      if (prev.has(k) || !lvFree(n[0], n[1])) continue;
+      prev.set(k, [x, y]);
+      if (lvCell(n[0], n[1]) !== 'E' && lvCell(n[0], n[1]) !== 'X') q.push(n);   // an opening is an end, not a way through
+    }
+  }
+  let goal = prev.has(`${gx},${gy}`) ? [gx, gy] : null, best = Infinity;
+  if (!goal) for (const [dx, dy] of [[0, 1], [0, -1], [1, 0], [-1, 0], [1, 1], [1, -1], [-1, 1], [-1, -1]]){
+    const c = [gx + dx, gy + dy];
+    if (prev.has(c.join(',')) && lvCell(c[0], c[1]) !== 'E' && lvCell(c[0], c[1]) !== 'X'){ const dd = Math.hypot(c[0] - start[0], c[1] - start[1]); if (dd < best){ best = dd; goal = c; } }
+  }
+  if (!goal) return;
+  const path = [];
+  for (let c = goal; c && c.join(',') !== sk; c = prev.get(c.join(','))) path.unshift({ x: c[0], y: c[1] });
+  L.path = path; L.held = null; cam.follow = true;
+}
+function levelFrame(now, dt){
+  stepLevel(dt);
+  if (!LEVEL) return;   // he walked out
+  const L = LEVEL;
+  boy.walking = !!L.move;
+  { const lp = trail[trail.length - 1]; if (Math.hypot(boy.x - lp.x, boy.y - lp.y) >= 1){ trail.push({ x: boy.x, y: boy.y }); if (trail.length > 700) trail.splice(0, 100); } }
+  const sp = levelSpot();
+  if (sp !== L.spot){ L.spot = sp; if (current && current.type === 'bana') showNode(); }
+  // the camera follows him as on the big map
+  const [tx, ty] = cam.follow ? centerOn(boy.x + 8, boy.y + 8) : clampCam(cam.x, cam.y);
+  const k = reduceMotion ? 1 : 1 - Math.exp(-dt * 7);
+  cam.x += (tx - cam.x) * k; cam.y += (ty - cam.y) * k;
+  if (Math.abs(tx - cam.x) < .05) cam.x = tx; if (Math.abs(ty - cam.y) < .05) cam.y = ty;
+  const ox = Math.round(cam.x * scaleDev), oy = Math.round(cam.y * scaleDev);
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.fillStyle = '#08060e'; ctx.fillRect(0, 0, cv.width, cv.height);
+  ctx.setTransform(scaleDev, 0, 0, scaleDev, -ox, -oy);
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(L.img, 0, 0);
+  for (const g of L.glints){ const a = reduceMotion ? .7 : Math.sin(now / g.sp + g.ph); if (a > .6){ ctx.fillStyle = `rgba(200,235,255,${a})`; ctx.fillRect(g.x, g.y, a > .93 ? 2 : 1, 1); } }
+  // a thing lies where its letter is until he picks it up: the picture of its kind, bobbing, with a glint now and then
+  for (const [ch, id] of Object.entries(L.def.saker || {})){
+    if (S.saker.includes(id) || !L.pos[ch]) continue;
+    const ico = KAT[katOf(id)].ico, [ix, iy] = L.pos[ch], bob = reduceMotion ? 0 : Math.round(Math.sin(now / 300));
+    ctx.drawImage(ico, ix * TS + (TS - ico.width) / 2, iy * TS + (TS - ico.height) / 2 - 1 + bob);
+    if (!reduceMotion && Math.random() < dt * 1.5 && Math.hypot(ix * TS - boy.x, iy * TS - boy.y) < 6 * TS) FX.push({ k: 'spark', x: ix * TS + 4 + Math.random() * 8, y: iy * TS + 4, vx: 0, vy: -10, t: 0, life: .5, col: '#ffffff' });
+  }
+  // the animal of an adventure (syns) swims in the water next to its letter until the adventure is played
+  for (const [ch, a] of Object.entries(L.def.aventyr || {})){
+    if (!a.syns || !PETS[a.syns] || S.stopp[`bana:${L.id}:${ch}`] || !L.pos[ch]) continue;
+    const [ax, ay] = L.pos[ch], wet = Object.values(DIRS).map(([dx, dy]) => [ax + dx, ay + dy]).find(([x, y]) => lvCell(x, y) === '~');
+    if (!wet) continue;
+    const t = reduceMotion ? 0 : now / 1400, P = PETS[a.syns], f = Math.floor(now / 300) % 2;
+    ctx.save(); ctx.globalAlpha = .75;
+    ctx.drawImage((Math.cos(t) > 0 ? P.right : P.left)[f], wet[0] * TS + Math.round(Math.sin(t) * 5), wet[1] * TS - 3);
+    ctx.restore();
+  }
+  drawActors(now);
+  drawLevelDark(now);
+  // drops fall from the roof now and then, close to him
+  if (!reduceMotion && now > L.drip){
+    L.drip = now + 700 + Math.random() * 1400;
+    const x = boy.x + 8 + (Math.random() - .5) * 5 * TS, y = boy.y + 8 + (Math.random() - .5) * 4 * TS;
+    if (lvCell(Math.floor(x / TS), Math.floor(y / TS)) !== '#') FX.push({ k: 'drop', x, y: y - 26, vx: 0, vy: 80, t: 0, life: .32 });
+  }
+  drawFX(dt);
+}
+// The dark: black where he has not been, a little lighter where he has seen, and holes for his light and for what shines
+// by itself (crystals, a torch, the daylight at the openings). The colours of the lights are added on top.
+function drawLevelDark(now){
+  const L = LEVEL, W = L.w * TS, H = L.h * TS;
+  if (!L.dark){ for (const k of ['dark', 'memory']){ L[k] = document.createElement('canvas'); L[k].width = W; L[k].height = H; } }
+  if (L.seenDirty){
+    L.seenDirty = false;
+    const m = L.memory.getContext('2d'); m.clearRect(0, 0, W, H);
+    for (let y = 0; y < L.h; y++) for (let x = 0; x < L.w; x++){ m.fillStyle = DEBUG.mode || L.seen[y * L.w + x] ? 'rgba(8,6,14,.8)' : '#08060e'; m.fillRect(x * TS, y * TS, TS, TS); }
+  }
+  const d = L.dark.getContext('2d');
+  d.globalCompositeOperation = 'source-over'; d.clearRect(0, 0, W, H); d.drawImage(L.memory, 0, 0);
+  d.globalCompositeOperation = 'destination-out';
+  const hole = (x, y, r, a) => { const g = d.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, `rgba(0,0,0,${a})`); g.addColorStop(.5, `rgba(0,0,0,${a})`); g.addColorStop(1, 'rgba(0,0,0,0)'); d.fillStyle = g; d.fillRect(x - r, y - r, r * 2, r * 2); };
+  const lit = litLight(), bx = boy.x + 8, by = boy.y + 6, flick = reduceMotion ? 1 : 1 + .03 * Math.sin(now / 170) * Math.sin(now / 97);
+  const lampA = l => reduceMotion ? 1 : l.k === 'eld' ? .88 + .12 * Math.sin(now / 90 + l.x) * Math.sin(now / 53 + l.y) : l.k === 'kristall' ? .8 + .2 * Math.sin(now / 900 + l.x * .1) : 1;
+  hole(bx, by, (lit ? 3.6 : 1.2) * TS * flick, 1);
+  for (const l of L.lamps) hole(l.x, l.y, l.r * lampA(l), l.a);
+  ctx.drawImage(L.dark, 0, 0);
+  ctx.save(); ctx.globalCompositeOperation = 'lighter';
+  const glow = (x, y, r, c, a) => { const g = ctx.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, `rgba(${c},${a})`); g.addColorStop(1, `rgba(${c},0)`); ctx.fillStyle = g; ctx.fillRect(x - r, y - r, r * 2, r * 2); };
+  if (lit) glow(bx, by, 3.2 * TS * flick, LIGHTS[lit], .16);
+  for (const l of L.lamps) glow(l.x, l.y, l.r * lampA(l), l.c, .22 * l.a);
+  ctx.restore();
+}
+// The arrows on the map (shown only in a level) and the arrow keys or WASD
+const KEYDIR = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right', w: 'up', s: 'down', a: 'left', d: 'right' };
+const dpad = $('#dpad');
+dpad.addEventListener('pointerdown', e => {
+  const b = e.target.closest('button'); if (!b || !LEVEL) return;
+  e.preventDefault(); b.setPointerCapture(e.pointerId); b.classList.add('on');
+  LEVEL.held = b.dataset.dir; LEVEL.path = null;
+});
+for (const t of ['pointerup', 'pointercancel', 'lostpointercapture']) dpad.addEventListener(t, e => {
+  const b = e.target.closest('button'); if (!b) return;
+  b.classList.remove('on'); if (LEVEL && LEVEL.held === b.dataset.dir) LEVEL.held = null;
+});
+// with the keyboard on a button (no pointer): one step
+dpad.addEventListener('click', e => { const b = e.target.closest('button'); if (b && LEVEL && e.detail === 0){ const [x, y] = lvTile(), [dx, dy] = DIRS[b.dataset.dir]; levelWalkTo(x + dx, y + dy); } });
+addEventListener('keydown', e => {
+  if (!LEVEL || !KEYDIR[e.key] || (e.target.closest && e.target.closest('input, textarea, select')) || !$('#modal').hidden) return;
+  e.preventDefault(); LEVEL.held = KEYDIR[e.key]; LEVEL.path = null;
+});
+addEventListener('keyup', e => { if (LEVEL && LEVEL.held === KEYDIR[e.key]) LEVEL.held = null; });
+addEventListener('blur', () => { if (LEVEL) LEVEL.held = null; });
 
 /* ---------- natten ---------- */
 // At night the map turns blue (multiply), windows glow yellow, the torches flicker and stars twinkle in the water.
@@ -853,7 +1131,7 @@ function useItem(id){
   if (id === 'lykta' || id === 'flaskat' || id === 'eldflugor'){
     S.tant = S.tant || {}; S.tant[id] = !S.tant[id];
     toast(id === 'lykta' ? (S.tant[id] ? 'Du tände lyktan.' : 'Du släckte lyktan.') : id === 'eldflugor' ? (S.tant[id] ? 'Du öppnar locket lite, och eldflugorna börjar blinka.' : 'Du skruvar på locket, och eldflugorna somnar.') : (S.tant[id] ? 'Irrblosset vaknar och lyser blått.' : 'Irrblosset somnar i burken.'));
-    renderPack(); saveSoon(); return;
+    renderPack(); saveSoon(); if (LEVEL) markLevelSeen(); return;
   }
   if (it.typ !== 'klader') return;
   if (S.pa[it.plats] === id) delete S.pa[it.plats]; else S.pa[it.plats] = id;
@@ -876,7 +1154,7 @@ function musicButton(){
   const b = $('#btnMusik'), on = !!(window.Musik && Musik.spelar);
   $('#icoMusik').src = SPEAKER_URLS[on ? 0 : 1]; b.title = on ? 'Stäng av musiken' : 'Sätt på musiken'; b.setAttribute('aria-pressed', String(on));
 }
-function musicSync(){ if (window.Musik) Musik.natt(!!S.natt); }
+function musicSync(){ if (window.Musik) Musik.natt(!!S.natt || !!LEVEL); }   // the calm night song in a cave too
 function firstGesture(ev){
   for (const t of ['pointerdown', 'touchend', 'click', 'keydown']) removeEventListener(t, firstGesture);
   if ((ev.target.closest && ev.target.closest('#btnMusik')) || !window.Musik || !musicWanted()) return;
@@ -903,6 +1181,8 @@ const PLACE_PARTS = [
   { on: id => isDay() && plotsAt(id).length > 0, block: id => plotsAt(id).map(plotBlock).join(''), active: id => plotsAt(id).some(plotLeft) },
   { on: id => isDay() && !!STOPP[id], block: id => stopBlock(id), active: id => !S.stopp[id] },
   { on: id => !isDay() && !!NATTSTOPP[id], block: id => stopBlock('natt:' + id), active: id => !S.stopp['natt:' + id] },
+  // the way into a level: yellow while something is left there and he has a light he can take in
+  { on: id => !!levelAt(id), block: id => levelEntryBlock(id), active: id => Object.keys(LIGHTS).some(x => S.saker.includes(x)) && levelLeft(levelAt(id)[0]) },
   { on: id => !!viraHere() && id === VIRA.plats, block: () => viraBlock(), active: () => true },                       // a shop
   { on: id => !!neighbour() && id === GRANNE.plats, block: () => neighbourBlock(), active: () => !S.saker.includes(GRANNE.ger) },
   { on: id => id === 'hem', block: () => sleepBlock(), active: () => true },   // he can always sleep at home (Peter 2026-10-23)
@@ -1118,6 +1398,15 @@ function renderPanel(view){
     for (const part of PLACE_PARTS) if (part.on(n.id)) h += part.block(n.id);
     if (S.natt && h.length === before) h += `<p class="sub" style="text-transform:none;letter-spacing:0">Det är natt. Här sover alla.</p>`;
     h += `</div>`;
+  } else if (view.type === 'bana'){
+    // In a level: what is around him (levelSpot), a way back out, and how to walk
+    const L = LEVEL, d = L.def, T = d.texter, sp = L.spot || levelSpot();
+    const advs = Object.keys(d.aventyr || {}).filter(ch => sp.includes(ch)), done = ch => S.stopp[`bana:${L.id}:${ch}`];
+    const text = sp.includes('!') ? T.ljusAv : advs.length ? T[advs[0] + (done(advs[0]) ? 'Klar' : '')] : sp.includes('~') ? T.vatten : sp.includes('E') ? T.E : sp.includes('X') ? T.X : d.text;
+    h = `<span class="tag">Du är här</span><h2>${esc(d.namn)}</h2><p>${esc(text)}</p><div class="panel-body">`;
+    for (const ch of advs) h += stopBlock(`bana:${L.id}:${ch}`);
+    if (sp.includes('~')) h += fishBlock(d.fiske);
+    h += `<div class="roads"><button class="btn alt" type="button" data-banaut="1">${esc(T.tillbaka)}</button></div><p class="sub" style="text-transform:none;letter-spacing:0">${esc(T.styr)}</p></div>`;
   } else if (view.type === 'gate'){
     const g = view.gate, e = g.edge, open = S.stars >= g.req;
     const names = `${NODES[e.a].name} och ${NODES[e.b].name}`;
@@ -1153,7 +1442,7 @@ function plotBlock(p){
   return `<div class="plot" data-plot="${p.id}"><div><b>${names} vill bygga här</b><span>${b.val.every(x => x.kostnad === b.val[0].kostnad) ? b.val[0].kostnad + ' stjärnstoft att bygga' : 'från ' + p.cost + ' stjärnstoft att bygga'}</span></div>${btn}</div>`;
 }
 let current = null;
-const showNode = () => renderPanel({ type: 'node', id: S.node });
+const showNode = () => renderPanel(LEVEL ? { type: 'bana' } : { type: 'node', id: S.node });
 const showGate = g => renderPanel({ type: 'gate', gate: g });
 const showPlot = p => renderPanel({ type: 'plot', plot: p });
 panel.addEventListener('click', ev => {
@@ -1169,6 +1458,8 @@ panel.addEventListener('click', ev => {
   else if (b.dataset.kista) openChest();
   else if (b.dataset.fiska) startFishing(b.dataset.fiska);
   else if (b.dataset.sov) sleep();
+  else if (b.dataset.bana){ const [lid, side] = b.dataset.bana.split(':'); enterLevel(lid, side); }
+  else if (b.dataset.banaut && LEVEL) levelWalkTo(...LEVEL.pos[LEVEL.door]);
   else if (b.dataset.brev) readLetter2();
   else if (b.dataset.fbrev) readFishLetter();
   else if (b.dataset.handel) startTrade();
@@ -1328,9 +1619,10 @@ function takeStep(ad, o){
 // gets (an animal, a bait, stardust or a secret fishing place), the other endings are lost.
 const STOPP = berattelse.stopp, NATTSTOPP = berattelse.nattstopp || {};
 // A place can have a second adventure that only happens at night (berattelse.json nattstopp), saved as 'natt:<place>'
-const stopDef = key => key.startsWith('natt:') ? NATTSTOPP[key.slice(5)] : STOPP[key];
+// and a level has adventures next to its letters, saved as 'bana:<level>:<letter>'
+const stopDef = key => key.startsWith('natt:') ? NATTSTOPP[key.slice(5)] : key.startsWith('bana:') ? BANOR[key.split(':')[1]].aventyr[key.split(':')[2]] : STOPP[key];
 function stopBlock(id){
-  const s = stopDef(id), done = S.stopp[id], going = S.steg['stopp:' + id], here = S.node === id.replace('natt:', '') && !boy.route;
+  const s = stopDef(id), done = S.stopp[id], going = S.steg['stopp:' + id], here = (id.startsWith('bana:') ? !!LEVEL : S.node === id.replace('natt:', '')) && !boy.route;
   const btn = done || !here ? '' : `<button class="btn" type="button" data-stopp="${id}">${esc(going ? berattelse.dialog.stoppFortsatt : s.knapp)}</button>`;
   return `<div class="plot"><div><b>${esc(s.rubrik)}</b>${done ? `<span>${esc(berattelse.dialog.stoppKlar)} ${esc(rewardText(done))}</span>` : ''}</div>${btn}</div>`;
 }
@@ -1359,7 +1651,7 @@ function finishStop(id, till, out){
   if (till.djur) giveAnimal(till.djur, out[out.length - 1].t, () => itemModal(things));
   if (till.stoft){ S.coins += till.stoft; updateHud('coins'); sparkle(boy.x + 8, boy.y + 2, 24); toast(rewardText(till)); }
   if (till.fiskeplats){ S.hittat.push(till.fiskeplats); buildTerrain(); sparkle(NODES[till.fiskeplats].x*TS + 8, NODES[till.fiskeplats].y*TS + 8, 26); toast(rewardText(till)); }
-  startDialog([...out, { p: null, t: rewardText(till) }], () => [{ label: 'Tillbaka till kartan', alt: true, run: toNode }]);
+  startDialog([...out, { p: null, t: rewardText(till) }], () => [{ label: LEVEL ? 'Tillbaka' : 'Tillbaka till kartan', alt: true, run: toNode }]);
   if (!till.djur) itemModal(things);
 }
 function confirmBuild(p, v, pre){
@@ -1797,7 +2089,7 @@ function fixBait(fz){
   if (!ok) fz.agn = isRod(fz.redskap) ? 'mask' : '';
 }
 function fishBlock(id){
-  const T = FISKE.texter, here = S.node === id && !boy.route;
+  const T = FISKE.texter, here = (LEVEL ? LEVEL.def.fiske === id : S.node === id) && !boy.route;
   if (!myTools().length) return `<div class="plot"><div><b>${esc(T.rubrik)}</b><span>${esc(T.ingetSpo)}</span></div></div>`;
   return `<div class="plot"><div><b>${esc(T.rubrik)}</b></div>${here ? `<button class="btn" type="button" data-fiska="${id}">${esc(T.knapp)}</button>` : ''}</div>`;
 }
@@ -1840,7 +2132,7 @@ function startFishing(id){
 }
 function stopFishing(){ if (fishing){ fishing.timers.forEach(clearTimeout); clearInterval(fishing.loop); } fishing = null; }
 function renderFishing(){
-  const T = FISKE.texter, fz = fishing, n = NODES[fz.plats];
+  const T = FISKE.texter, fz = fishing, n = NODES[fz.plats] || { name: LEVEL ? LEVEL.def.namn : '' };
   current = { type: 'fish' };
   clearInterval(typeTimer); clearInterval(blinkTimer);
   let h = `<span class="tag">Fiske</span><h2>${esc(n.name)}</h2>`;
@@ -2167,6 +2459,7 @@ $('#btnReset').addEventListener('click', () => {
   showIntro();
 });
 function restart(){
+  LEVEL = null; $('#dpad').hidden = true; boy.walking = false;
   S = START(); buildBoy(S.pa); boy.route = null; placeBoy(S.node); plotAnim.clear(); gateAnim.clear(); FX.length = 0; buildTerrain();
   lastRevealKey = ''; maskDirty = true; revealAround(boy.x + 8, boy.y + 8);
   cam.follow = true; cam.focus = null; centerOn(boy.x + 8, boy.y + 8, true);
@@ -2191,6 +2484,7 @@ cv.addEventListener('pointerup', e => {
 });
 cv.addEventListener('pointercancel', () => { down = null; });
 function tapAt(wx, wy){
+  if (LEVEL) return levelWalkTo(Math.floor(wx / TS), Math.floor(wy / TS));
   const tx = Math.floor(wx / TS), ty = Math.floor(wy / TS);
   if (pendingTickets().length && tx === CHEST_AT.x && ty === CHEST_AT.y){ if (S.node === CHEST_AT.node && !boy.route) openChest(); else { walkTo(CHEST_AT.node); toast('Kistan står vid Skolan.'); } return; }
   for (const id in NODES){ const n = NODES[id]; if (nodeShown(id) && Math.abs(wx - (n.x*TS + 8)) < 13 && Math.abs(wy - (n.y*TS + 6)) < 14){ walkTo(id); return; } }
@@ -2200,7 +2494,7 @@ function tapAt(wx, wy){
 addEventListener('keydown', e => { if (fishing && (fishing.phase === 'vanta' || fishing.phase === 'nu') && (e.key === ' ' || e.key === 'Enter')){ e.preventDefault(); pull(); } });
 cv.addEventListener('keydown', e => {
   const dirs = { ArrowUp: [0,-1], ArrowDown: [0,1], ArrowLeft: [-1,0], ArrowRight: [1,0] };
-  const d = dirs[e.key]; if (!d || boy.route) return;
+  const d = dirs[e.key]; if (!d || boy.route || LEVEL) return;
   e.preventDefault();
   for (const ed of edgesOf(S.node)){
     const t = ed.a === S.node ? ed.tiles : [...ed.tiles].reverse();
@@ -2221,6 +2515,8 @@ function initIcons(){
   STAR_URL = iconURL(STAR, 4); DUST_URL = iconURL(DUST, 4); LOCK_URL = iconURL(LOCK, 4); RUNE_URL = iconURL(RUNE, 4); SCROLL_URL = iconURL(SCROLL, 4);
   FISH_BIG = iconURL(FISH, 8); $('#icoFish').src = iconURL(FISH, 4); $('#icoLetter').src = iconURL(ENVELOPE, 3); $('#icoRykten').src = iconURL(RUMOR_ICO, 3);
   TICKET_URL = iconURL(TICKET, 4); RUNE_BIG = iconURL(RUNE, 8); SCROLL_BIG = iconURL(SCROLL, 8); TICKET_BIG = iconURL(TICKET, 8); $('#icoTicket').src = TICKET_URL;
+  const pil = iconURL(sprite(["...o...", "..oyo..", ".oyyyo.", "oyyyyyo", "ooooooo"], { o:'#3f2631', y:'#fee761' }), 3);
+  document.querySelectorAll('img[data-pil]').forEach(im => { im.src = pil; });
   $('#icoRunes').src = RUNE_URL; $('#icoBag').src = iconURL(BAG, 4); $('#icoBook').src = iconURL(BOOK, 4);
   $('#logoStar').src = STAR_URL; $('#icoStar').src = STAR_URL; $('#icoCoin').src = DUST_URL;
   document.querySelectorAll('img[data-ico]').forEach(im => { im.src = im.dataset.ico === 'star' ? STAR_URL : DUST_URL; });
