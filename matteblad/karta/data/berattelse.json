@@ -107,7 +107,7 @@
       "namn": "Bergsgrottan",
       "text": "Under bergen öppnar sig en grotta. Därinne är det becksvart.",
       "natt": "Bergen står svarta mot himlen, och grottan är ännu svartare.",
-      "rykte": "Folk säger att det finns en strand bakom berget som ingen har sett. Men grottan är för mörk att gå igenom."
+      "rykte": "Folk säger att vakten vid Bergsgrottan aldrig släpper in någon på dagen. Men om nätterna snarkar han så att det hörs ända till Sjöviken."
     },
     "bakom": {
       "namn": "Bakom berget",
@@ -350,6 +350,10 @@
     "vira": {
       "namn": "Vira",
       "yrke": "Örtkvinna"
+    },
+    "holger": {
+      "namn": "Holger",
+      "yrke": "Vakt"
     }
   },
   "saker": {
@@ -3580,9 +3584,10 @@
               {
                 "label": "Följ stövelspåren",
                 "kostnad": 0,
-                "text": "Spåren går upp mot grottan och tar slut vid berget. I sanden glittrar stjärnstoft som har fallit ur den grå kappan. Stjärnsvalan slet sig aldrig. Gråskuggan tog henne.",
+                "text": "Spåren går upp mot grottan och tar slut vid berget. Där ligger repbiten, och bredvid den en blå glaskula som har fallit ur den grå kappan. Stjärnsvalan slet sig aldrig. Gråskuggan tog henne.",
                 "till": {
-                  "stoft": 5
+                  "fynd": "brantrep",
+                  "extra": "glaskula"
                 }
               }
             ]
@@ -3874,6 +3879,7 @@
     },
     "plats:berget:dag": {
       "pekar": "berget",
+      "natt": true,
       "klar": [
         "hittat:bakom"
       ]
@@ -3918,5 +3924,30 @@
     "sak:brantrep": {
       "pekar": "sjo"
     }
+  },
+  "vakt": {
+    "person": "holger",
+    "plats": "berget",
+    "borta": "natt:bakom",
+    "rubrik": "En vakt står vid grottan",
+    "knapp": "Prata med vakten",
+    "rubrikNatt": "Vakten sover",
+    "textNatt": "Han sitter mot berget och snarkar så att det ekar i grottan.",
+    "smyg": "Smyg förbi in i grottan",
+    "hej": "Stopp där! Här går ingen in i grottan. Det har jag lovat.",
+    "fragor": [
+      {
+        "label": "Fråga vem han har lovat",
+        "svar": "Det säger jag inte. En som går i grått, mer behöver du inte veta."
+      },
+      {
+        "label": "Fråga vad som finns i grottan",
+        "svar": "Mörker och droppar. Och en strand på andra sidan som ingen ska se."
+      },
+      {
+        "label": "Fråga om han aldrig vilar",
+        "svar": "Jag vaktar från morgon till kväll. Sedan sover jag som en stock. Det går ändå ingen här på natten."
+      }
+    ]
   }
 }

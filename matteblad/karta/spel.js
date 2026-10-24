@@ -720,6 +720,7 @@ function frame(now){
     if (!chestOpening && glow){ ctx.fillStyle = 'rgba(254,231,97,.35)'; ctx.fillRect(CHEST_AT.x*TS - 1, CHEST_AT.y*TS + 1, 18, 13); }
     ctx.drawImage(chestOpening && t >= .6 ? CHEST_OPEN : CHEST, CHEST_AT.x*TS + shake, CHEST_AT.y*TS);
   }
+  drawGuard(now);
   drawActors(now);
   drawScene(now);
   drawFX(dt);
@@ -729,6 +730,7 @@ function frame(now){
   nightLevel += ((S.natt ? 1 : 0) - nightLevel) * Math.min(1, dt * 1.6);
   if (Math.abs(nightLevel - (S.natt ? 1 : 0)) < .005) nightLevel = S.natt ? 1 : 0;
   if (nightLevel > 0) drawNight(now, nightLevel);
+  drawZzz(now);
   // etiketter i skärmskala
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   const sx = wx => wx * scaleDev - ox, sy = wy => wy * scaleDev - oy;
@@ -789,8 +791,21 @@ const lvTile = () => [Math.round(boy.x / TS), Math.round(boy.y / TS)];
 // without a lit light: only near an opening (L.near) or where he has seen with his light
 const lvCanGo = (x, y) => !!litLight() || !!LEVEL.near[y * LEVEL.w + x] || !!LEVEL.seen[y * LEVEL.w + x];
 const levelBusy = () => !$('#modal').hidden || !current || current.type !== 'bana';
+// A guard stands at the way in by day and lets nobody in; at night he sleeps and he can sneak past. When he has seen
+// Gråskuggan row away (the adventure `borta` has begun) the guard is gone (berattelse.json vakt, Peter 2026-10-24).
+const VAKT = berattelse.vakt;
+const guardGone = () => !VAKT || !!S.stopp[VAKT.borta] || !!S.steg['stopp:' + VAKT.borta];
+const guardHere = id => !!VAKT && VAKT.plats === id && !guardGone();
+function talkGuard(line){
+  startDialog([{ p: VAKT.person, t: line || VAKT.hej }], () => [
+    ...VAKT.fragor.map(f => ({ label: esc(f.label), run: () => talkGuard(f.svar) })),
+    { label: 'Tillbaka', alt: true, run: toNode },
+  ]);
+}
 function levelEntryBlock(id){
   const [lid, d] = levelAt(id), T = d.texter, side = d.ingang === id ? 'in' : 'ut', here = S.node === id && !boy.route;
+  if (guardHere(id) && !S.natt) return `<div class="plot"><div><b>${esc(VAKT.rubrik)}</b></div>${here ? `<button class="btn" type="button" data-vakt="1">${esc(VAKT.knapp)}</button>` : ''}</div>`;
+  if (guardHere(id)) return `<div class="plot"><div><b>${esc(VAKT.rubrikNatt)}</b><span>${esc(VAKT.textNatt)}</span></div>${here ? `<button class="btn" type="button" data-bana="${lid}:${side}">${esc(VAKT.smyg)}</button>` : ''}</div>`;
   return `<div class="plot"><div><b>${esc(side === 'in' ? T.rubrik : T.rubrikTillbaka)}</b></div>${here ? `<button class="btn" type="button" data-bana="${lid}:${side}">${esc(side === 'in' ? T.gaIn : T.gaTillbaka)}</button>` : ''}</div>`;
 }
 function enterLevel(lid, side){
@@ -1076,6 +1091,25 @@ function drawRowboat(x, y, f, rowing){
     ctx.drawImage(GREY, x + 15, y - 5);   // standing beside it on the sand
   }
 }
+const GUARDPAL = { o:'#3f2631', H:'#8b9bb4', h:'#c0cbdc', s:'#fcbc8f', k:'#262b44', B:'#8b5a3c', T:'#a22633', t:'#e43b44', y:'#feae34', p:'#3a4466', w:'#c0cbdc', b:'#b86f50' };
+const GUARD = { dag: sprite(["....oooo..owo.", "...oHHHHoowwwo", "..oHhhHHHoobo.", "..oHHHHHHoobo.", "..oHHHHHHoobo.", "..ossssssoobo.", "..oskssksoobo.", "..oBBBBBBoobo.", "..ooBBBBooobo.", ".oTtTTTTTTobo.", ".oTtTTTTTTsbo.", ".oBBByBBBBobo.", ".oTtTTTTTTobo.", "..oppooppoobo.", "..oppooppoobo.", "...oo..oo.obo."], GUARDPAL), natt: sprite([".........o....", "........owo...", "....ooooowo...", "...oHHHHoobo..", "..oHhhHHHobo..", "..oHHHHHHobo..", "..oHHHHHHobo..", "..ossssssoobo.", "..okksskkoobo.", "..oBBBBBBoobo.", "..ooBBBBooobo.", ".oTtTTTTTToobo", ".oBBByBBBBoobo", ".oppppppppppbo", ".oppppppppppbo", "..ooooooooooo."], GUARDPAL) };
+const ZZZ = sprite(["wwww", "..w.", ".w..", "wwww"], { w:'#ffffff' });
+function drawGuard(now){
+  if (!VAKT || guardGone()) return;
+  const n = NODES[VAKT.plats]; if (!n || !seenAt(n.x, n.y)) return;
+  const x = n.x*TS + 13, y = (n.y - 1)*TS + 1;
+  ctx.drawImage(S.natt ? GUARD.natt : GUARD.dag, x, y);
+}
+// his Z's are drawn on top of the night, so they show in the dark
+function drawZzz(now){
+  if (!VAKT || guardGone() || !S.natt || reduceMotion) return;
+  const n = NODES[VAKT.plats]; if (!n || !seenAt(n.x, n.y)) return;
+  const x = n.x*TS + 13, y = (n.y - 1)*TS + 1;
+  for (let i = 0; i < 3; i++){
+    const t = (now / 1600 + i / 3) % 1;
+    ctx.save(); ctx.globalAlpha = Math.sin(t * Math.PI) * .9; ctx.drawImage(ZZZ, Math.round(x + 7 + t * 8), Math.round(y - 1 - t * 12)); ctx.restore();
+  }
+}
 function drawScene(now){
   if (!S.natt || !ROW_FROM) return;
   const f = reduceMotion ? 0 : Math.floor(now / 320) % 2;
@@ -1274,7 +1308,7 @@ const PLACE_PARTS = [
   { on: id => isDay() && !!STOPP[id], block: id => stopBlock(id), active: id => !S.stopp[id] },
   { on: id => !isDay() && !!NATTSTOPP[id], block: id => stopBlock('natt:' + id), active: id => !S.stopp['natt:' + id] },
   // the way into a level: yellow while something is left there and he has a light he can take in
-  { on: id => !!levelAt(id), block: id => levelEntryBlock(id), active: id => Object.keys(LIGHTS).some(x => S.saker.includes(x)) && levelLeft(levelAt(id)[0]) },
+  { on: id => !!levelAt(id), block: id => levelEntryBlock(id), active: id => (guardHere(id) && !S.natt) || (Object.keys(LIGHTS).some(x => S.saker.includes(x)) && levelLeft(levelAt(id)[0])) },
   { on: id => !!viraHere() && id === VIRA.plats, block: () => viraBlock(), active: () => true },                       // a shop
   { on: id => !!neighbour() && id === GRANNE.plats, block: () => neighbourBlock(), active: () => !S.saker.includes(GRANNE.ger) },
   { on: id => id === 'hem', block: () => sleepBlock(), active: () => true },   // he can always sleep at home (Peter 2026-10-23)
@@ -1345,15 +1379,10 @@ function tentBlock(){
   if (!S.natt) return `<div class="plot"><div><b>${esc(H.rubrikDag)}</b><span>${esc(H.stangt)}</span></div></div>`;
   return `<div class="plot"><div><b>${esc(H.rubrikNatt)}</b></div>${here ? `<button class="btn" type="button" data-handel="1">${esc(H.knapp)}</button>` : ''}</div>`;
 }
-function tradeOffers(){
-  const H = berattelse.handel, out = [];
-  for (const [id, n] of Object.entries(H.fisk || {})) if (S.fiskbok[id] > 0 && !S.salt['fisk:' + id]) out.push({ key: 'fisk:' + id, namn: FISKE.fiskar[id].namn, text: FISKE.fiskar[id].text, n, tack: H.tack && H.tack[id], sell: () => { S.fiskbok[id]--; renderFishBook(); } });
-  return out;
-}
 function startTrade(seen){
-  const H = berattelse.handel, offers = tradeOffers();
+  const H = berattelse.handel;
   const wares = Object.entries(H.saljer || {}).filter(([id]) => !S.saker.includes(id)), packs = Object.entries(H.agn || {});
-  // he only sells, he buys no fish (Peter 2026-10-20). When he first greets he says one of several things (prat), one of them
+  // he only sells, he buys nothing (Peter 2026-10-20; no stardust is ever given in the game, 2026-10-24). When he first greets he says one of several things (prat), one of them
   // about the strange fish since the ship came (Peter 2026-10-22)
   const talk = [H.hej, ...(H.prat || [])], V = H.visar, hidden = V && !S.hittat.includes(V.plats);
   const hello = !wares.length && !packs.length ? H.inget : seen ? H.hej : talk[Math.floor(Math.random() * talk.length)];
@@ -1369,7 +1398,6 @@ function startTrade(seen){
     ...(wares.length || packs.length ? [{ rubrik: 'Köp' }] : []),
     ...wares.map(([id, n]) => buyChoice(id, n, 0, () => buyFrom(id, n))),
     ...packs.map(([id, o]) => buyChoice(id, o.pris, o.antal, () => buyPack(id, o, H.person, H.kopt[id], () => startTrade(true)))),
-    ...offers.map(o => ({ label: `Sälj ${esc(o.namn.toLowerCase())} ${price(o.n)}<small>${esc(o.text)}</small>`, run: () => sellTo(o) })),
     { label: 'Tillbaka till kartan', alt: true, run: toNode },
   ]), seen);
 }
@@ -1447,16 +1475,6 @@ function talkNeighbour(){
     if (!S.saker.includes(GRANNE.ger)){ S.saker.push(GRANNE.ger); renderPack(); saveSoon(); itemModal(GRANNE.ger); }
     return [{ label: 'Tillbaka till kartan', alt: true, run: toNode }];
   });
-}
-function sellTo(o){
-  if (S.salt[o.key]) return;
-  o.sell(); S.salt[o.key] = true; earn(o.n); saveSoon();
-  sparkle(boy.x + 8, boy.y + 2, 18, '#2ce8f5');
-  toast(`Du sålde ${o.namn.toLowerCase()} för ${o.n} stjärnstoft.`);
-  startDialog([{ p: berattelse.handel.person, t: o.tack || 'Tack. Den tar jag väl hand om.' }], () => [
-    { label: 'Något mer', run: () => startTrade(true) },
-    { label: 'Tillbaka till kartan', alt: true, run: toNode },
-  ]);
 }
 
 /* ---------- panel ---------- */
@@ -1550,6 +1568,7 @@ panel.addEventListener('click', ev => {
   else if (b.dataset.kista) openChest();
   else if (b.dataset.fiska) startFishing(b.dataset.fiska);
   else if (b.dataset.sov) sleep();
+  else if (b.dataset.vakt) talkGuard();
   else if (b.dataset.bana){ const [lid, side] = b.dataset.bana.split(':'); enterLevel(lid, side); }
   else if (b.dataset.banaut && LEVEL) levelWalkTo(...LEVEL.pos[LEVEL.door]);
   else if (b.dataset.brev) readLetter2();
@@ -1732,7 +1751,6 @@ function rewardText(till){
 function rewardMain(till){
   if (till.djur) return `${berattelse.djur[till.djur].art} skrevs in i djurboken.`;
   if (till.agn) return `Du fick ${SAKER[till.agn].namn.toLowerCase()}.`;
-  if (till.stoft) return `Du fick ${till.stoft} stjärnstoft.`;
   if (till.fynd) return itemFound(till.fynd);
   return `En hemlig fiskeplats syns nu på kartan: ${NODES[till.fiskeplats].name}.`;
 }
@@ -1742,7 +1760,6 @@ function finishStop(id, till, out){
   for (const x of things) S.saker.push(x);
   if (things.length){ renderPack(); sparkle(boy.x + 8, boy.y + 2, 18); }
   if (till.djur) giveAnimal(till.djur, out[out.length - 1].t, () => itemModal(things));
-  if (till.stoft){ S.coins += till.stoft; updateHud('coins'); sparkle(boy.x + 8, boy.y + 2, 24); toast(rewardText(till)); }
   if (till.fiskeplats){ S.hittat.push(till.fiskeplats); buildTerrain(); sparkle(NODES[till.fiskeplats].x*TS + 8, NODES[till.fiskeplats].y*TS + 8, 26); toast(rewardText(till)); }
   startDialog([...out, { p: null, t: rewardText(till) }], () => [{ label: LEVEL ? 'Tillbaka' : 'Tillbaka till kartan', alt: true, run: toNode }]);
   if (!till.djur) itemModal(things);
@@ -2010,8 +2027,6 @@ const SAVED_FIELDS = ['node', 'built', 'valda', 'saker', 'steg', 'handlat', 'dju
 const b64 = text => { const bytes = new TextEncoder().encode(text); let s = ''; for (const b of bytes) s += String.fromCharCode(b); return btoa(s); };
 const unb64 = data => new TextDecoder().decode(Uint8Array.from(atob(data.replace(/\s/g, '')), c => c.charCodeAt(0)));
 function spend(n){ S.coins -= n; S.spent += n; }
-// Stardust he earns (selling to the night fisherman) is saved as negative spending, since the rest is counted from the scrolls
-function earn(n){ spend(-n); updateHud('coins'); }
 function gh(method, body){
   if (VIEW && method !== 'GET') return Promise.reject(new Error('Tittläge: inget sparas'));   // looking at his game never writes
   return fetch(`https://api.github.com/repos/${SAVE.repo}/contents/${SAVE.file}`, { method, cache: 'no-store', keepalive: method === 'PUT',
