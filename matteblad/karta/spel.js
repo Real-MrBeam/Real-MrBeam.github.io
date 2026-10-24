@@ -720,7 +720,6 @@ function frame(now){
     if (!chestOpening && glow){ ctx.fillStyle = 'rgba(254,231,97,.35)'; ctx.fillRect(CHEST_AT.x*TS - 1, CHEST_AT.y*TS + 1, 18, 13); }
     ctx.drawImage(chestOpening && t >= .6 ? CHEST_OPEN : CHEST, CHEST_AT.x*TS + shake, CHEST_AT.y*TS);
   }
-  drawGuard(now);
   drawActors(now);
   drawScene(now);
   drawFX(dt);
@@ -730,7 +729,6 @@ function frame(now){
   nightLevel += ((S.natt ? 1 : 0) - nightLevel) * Math.min(1, dt * 1.6);
   if (Math.abs(nightLevel - (S.natt ? 1 : 0)) < .005) nightLevel = S.natt ? 1 : 0;
   if (nightLevel > 0) drawNight(now, nightLevel);
-  drawZzz(now);
   // etiketter i skärmskala
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   const sx = wx => wx * scaleDev - ox, sy = wy => wy * scaleDev - oy;
@@ -1089,25 +1087,6 @@ function drawRowboat(x, y, f, rowing){
   } else {
     ctx.drawImage(ROWBOAT, x, y);
     ctx.drawImage(GREY, x + 15, y - 5);   // standing beside it on the sand
-  }
-}
-const GUARDPAL = { o:'#3f2631', H:'#8b9bb4', h:'#c0cbdc', s:'#fcbc8f', k:'#262b44', B:'#8b5a3c', T:'#a22633', t:'#e43b44', y:'#feae34', p:'#3a4466', w:'#c0cbdc', b:'#b86f50' };
-const GUARD = { dag: sprite(["....oooo..owo.", "...oHHHHoowwwo", "..oHhhHHHoobo.", "..oHHHHHHoobo.", "..oHHHHHHoobo.", "..ossssssoobo.", "..oskssksoobo.", "..oBBBBBBoobo.", "..ooBBBBooobo.", ".oTtTTTTTTobo.", ".oTtTTTTTTsbo.", ".oBBByBBBBobo.", ".oTtTTTTTTobo.", "..oppooppoobo.", "..oppooppoobo.", "...oo..oo.obo."], GUARDPAL), natt: sprite([".........o....", "........owo...", "....ooooowo...", "...oHHHHoobo..", "..oHhhHHHobo..", "..oHHHHHHobo..", "..oHHHHHHobo..", "..ossssssoobo.", "..okksskkoobo.", "..oBBBBBBoobo.", "..ooBBBBooobo.", ".oTtTTTTTToobo", ".oBBByBBBBoobo", ".oppppppppppbo", ".oppppppppppbo", "..ooooooooooo."], GUARDPAL) };
-const ZZZ = sprite(["wwww", "..w.", ".w..", "wwww"], { w:'#ffffff' });
-function drawGuard(now){
-  if (!VAKT || guardGone()) return;
-  const n = NODES[VAKT.plats]; if (!n || !seenAt(n.x, n.y)) return;
-  const x = n.x*TS + 13, y = (n.y - 1)*TS + 1;
-  ctx.drawImage(S.natt ? GUARD.natt : GUARD.dag, x, y);
-}
-// his Z's are drawn on top of the night, so they show in the dark
-function drawZzz(now){
-  if (!VAKT || guardGone() || !S.natt || reduceMotion) return;
-  const n = NODES[VAKT.plats]; if (!n || !seenAt(n.x, n.y)) return;
-  const x = n.x*TS + 13, y = (n.y - 1)*TS + 1;
-  for (let i = 0; i < 3; i++){
-    const t = (now / 1600 + i / 3) % 1;
-    ctx.save(); ctx.globalAlpha = Math.sin(t * Math.PI) * .9; ctx.drawImage(ZZZ, Math.round(x + 7 + t * 8), Math.round(y - 1 - t * 12)); ctx.restore();
   }
 }
 function drawScene(now){
