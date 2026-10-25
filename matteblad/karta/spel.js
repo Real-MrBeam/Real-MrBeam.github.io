@@ -1071,7 +1071,8 @@ function drawLevelDark(now){
   if (L.seenDirty){
     L.seenDirty = false;
     const m = L.memory.getContext('2d'); m.clearRect(0, 0, W, H);
-    for (let y = 0; y < L.h; y++) for (let x = 0; x < L.w; x++){ m.fillStyle = DEBUG.mode || L.seen[y * L.w + x] ? 'rgba(8,6,14,.8)' : '#08060e'; m.fillRect(x * TS, y * TS, TS, TS); }
+    // pitch black where his light has not been, also in debug (Peter 2026-10-25)
+    for (let y = 0; y < L.h; y++) for (let x = 0; x < L.w; x++){ m.fillStyle = L.seen[y * L.w + x] ? 'rgba(8,6,14,.8)' : '#08060e'; m.fillRect(x * TS, y * TS, TS, TS); }
   }
   const d = L.dark.getContext('2d');
   d.globalCompositeOperation = 'source-over'; d.clearRect(0, 0, W, H); d.drawImage(L.memory, 0, 0);
@@ -1080,12 +1081,14 @@ function drawLevelDark(now){
   const lit = litLight(), bx = boy.x + 8, by = boy.y + 6, flick = reduceMotion ? 1 : 1 + .03 * Math.sin(now / 170) * Math.sin(now / 97);
   const lampA = l => reduceMotion ? 1 : l.k === 'eld' ? .88 + .12 * Math.sin(now / 90 + l.x) * Math.sin(now / 53 + l.y) : l.k === 'kristall' ? .8 + .2 * Math.sin(now / 900 + l.x * .1) : 1;
   hole(bx, by, (lit ? 3.6 : 1.2) * TS * flick, 1);
-  for (const l of L.lamps) hole(l.x, l.y, l.r * (l.k === 'kristall' ? .55 : 1) * lampA(l), l.a);
+  // something that shines lights its surroundings only where he has been; before that only itself shows, as a small light
+  const seenAt = l => !!L.seen[Math.floor(l.y / TS) * L.w + Math.floor(l.x / TS)];
+  for (const l of L.lamps) hole(l.x, l.y, (seenAt(l) ? l.r * (l.k === 'kristall' ? .55 : 1) : TS * .55) * lampA(l), l.a);
   ctx.drawImage(L.dark, 0, 0);
   ctx.save(); ctx.globalCompositeOperation = 'lighter';
   const glow = (x, y, r, c, a) => { const g = ctx.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, `rgba(${c},${a})`); g.addColorStop(1, `rgba(${c},0)`); ctx.fillStyle = g; ctx.fillRect(x - r, y - r, r * 2, r * 2); };
   if (lit) glow(bx, by, 3.2 * TS * flick, LIGHTS[lit], .16);
-  for (const l of L.lamps) glow(l.x, l.y, l.r * (l.k === 'kristall' ? 1.3 : 1) * lampA(l), l.c, (l.k === 'kristall' ? .5 : .22) * l.a);   // the crystals glow faintly blue
+  for (const l of L.lamps) glow(l.x, l.y, (seenAt(l) ? l.r * (l.k === 'kristall' ? 1.3 : 1) : TS) * lampA(l), l.c, (l.k === 'kristall' ? .5 : .22) * l.a);   // the crystals glow faintly blue
   ctx.restore();
 }
 // The arrows on the map (shown only in a level) and the arrow keys or WASD
