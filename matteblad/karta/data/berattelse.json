@@ -782,6 +782,43 @@
       "typ": "fynd",
       "varde": 1,
       "rykte": "Stjärnsvalan slet sig aldrig. Gråskuggan brände av repet och rodde ut till skeppet."
+    },
+    "grodkrona": {
+      "namn": "Grodkrona",
+      "text": "En liten guldkrona, lagom stor för en groda. Den är lite slemmig.",
+      "typ": "fynd",
+      "varde": 3
+    },
+    "stjarnskarva": {
+      "namn": "Stjärnskärva",
+      "text": "En liten skärva som fortfarande glimmar. Den föll med stjärnregnet över Ängen.",
+      "typ": "fynd",
+      "varde": 4
+    },
+    "flaskpost": {
+      "namn": "Flaskpost",
+      "text": "Ett brev i en flaska. Det mesta är bortnött, men längst ner står det Stjärnsvalan.",
+      "typ": "fynd",
+      "varde": 2,
+      "rykte": "Någon har skrivit ett brev om Stjärnsvalan och kastat det i sjön."
+    },
+    "fiolstrang": {
+      "namn": "Fiolsträng",
+      "text": "En sträng som har lossnat från en fiol. Den klingar när vinden tar i den.",
+      "typ": "fynd",
+      "varde": 2
+    },
+    "hackhuvud": {
+      "namn": "Rostigt hackhuvud",
+      "text": "Ett gammalt hackhuvud från tiden då någon bröt malm i gruvan.",
+      "typ": "fynd",
+      "varde": 2
+    },
+    "avbrutenara": {
+      "namn": "Avbruten åra",
+      "text": "En åra som har gått av på mitten, grå av ålder. Vems båt var den från?",
+      "typ": "fynd",
+      "varde": 1
     }
   },
   "bygg": {
@@ -2804,7 +2841,13 @@
       "nyckel",
       "konservburk",
       "glasflaska",
-      "fiskehatt"
+      "fiskehatt",
+      "grodkrona",
+      "stjarnskarva",
+      "flaskpost",
+      "fiolstrang",
+      "hackhuvud",
+      "avbrutenara"
     ],
     "fangar": {
       "metspo": [
@@ -2930,6 +2973,25 @@
         "vassen",
         "udden",
         "sjo"
+      ],
+      "grodkrona": [
+        "vassen"
+      ],
+      "stjarnskarva": [
+        "angen"
+      ],
+      "flaskpost": [
+        "udden",
+        "sjo"
+      ],
+      "fiolstrang": [
+        "norrabron"
+      ],
+      "hackhuvud": [
+        "grotta"
+      ],
+      "avbrutenara": [
+        "bakom"
       ]
     }
   },
@@ -3921,6 +3983,9 @@
       ]
     },
     "sak:brantrep": {
+      "pekar": "sjo"
+    },
+    "sak:flaskpost": {
       "pekar": "sjo"
     }
   },
