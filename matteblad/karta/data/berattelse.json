@@ -3640,12 +3640,12 @@
     "knapp": "Prata med {namn}",
     "val": {
       "bikupor": {
-        "hej": "Du är också vaken? Ända sedan natten då stjärnorna föll, när marken skakade till och vattnet bubblade upp ur gropen på ängen, kan jag inte sova. Bina surrar oroligt i kuporna.",
+        "hej": "Du är också vaken? Ända sedan stjärnregnet, när marken skakade till och vattnet bubblade upp ur gropen på ängen, kan jag inte sova. Bina surrar oroligt i kuporna.",
         "ger": "Ta min nattmössa, du. Jag har ändå ingen nytta av den längre.",
         "igen": "Jag står här och tittar på dammen. Ibland lyser det därnere, som om någon har tappat en stjärna."
       },
       "cirkel": {
-        "hej": "Kan inte du heller sova? Ända sedan natten då stjärnorna föll, när marken skakade till och vattnet bubblade upp ur gropen på ängen, glöder stenarna i min cirkel hela nätterna. Jag får inte en blund.",
+        "hej": "Kan inte du heller sova? Ända sedan stjärnregnet, när marken skakade till och vattnet bubblade upp ur gropen på ängen, glöder stenarna i min cirkel hela nätterna. Jag får inte en blund.",
         "ger": "Här, ta min nattmössa. Den hjälper ändå inte mig.",
         "igen": "Titta på dammen. Ibland lyser det därnere, som om någon har tappat en stjärna."
       }
