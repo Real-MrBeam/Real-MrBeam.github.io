@@ -97,6 +97,8 @@ const DUST = sprite([
 const RUNE = sprite([
   "...oooooo...", "..osssssso..", ".ossCsssSso.", ".osCsCssSso.", ".ossCsssSso.", "ossCCsssSsso", "osssCsssSsso",
   "ossCsCssSsso", "osssssSSSsso", ".oSSSSSSSSo.", "..oooooooo.."], { o:'#3f2631', s:'#8b9bb4', S:'#5a6988', C:'#2ce8f5' });
+// A rune shard: a broken piece of a rune with one glowing sign, for a quiz or marked homework (Peter 2026-10-25)
+const SHARD = sprite(["...oo...", "..osso..", ".ossCso.", "ossCsSo.", "osCCsSso", "ossCsSso", ".osssSo.", "..oSSo..", "...oo..."], { o:'#3f2631', s:'#8b9bb4', S:'#5a6988', C:'#2ce8f5' });
 const SCROLL = sprite([
   ".oooooooooo.", "oPPppppppPPo", "oPpkkkkkkpPo", ".oppppppppo.", ".opkkkkkkpo.", ".oppppppppo.", ".opkkkkkppo.",
   ".oppppppppo.", "oPppppppppPo", "oPPrrppppPPo", ".oooooooooo."], { o:'#3f2631', p:'#ead4aa', P:'#c9a46c', k:'#8b6a4a', r:'#e43b44' });
@@ -135,6 +137,7 @@ const CATCH = {
   oring: markFish({ b:'#b08a5a', B:'#7a5a36', d:'#e43b44', e:'#262b44' }, (x, y) => ({ '4,4': 'd', '6,2': 'e', '7,5': 'd', '5,6': 'e', '8,4': 'e' })[x + ',' + y] || ''),
   regnbage: markFish({ b:'#c0cbdc', B:'#8b9bb4', p:'#f6757a' }, (x, y) => y === 4 && x > 1 && x < 9 ? 'p' : ''),
   gadda: sprite(["..oooooooooo..o.", ".owkggdgggdggoBo", "ooygggggggggggBo", ".oGGGGGGGGGGGoBo", "..oooooooooo..o."], { o:'#3f2631', k:'#262b44', g:'#6e8f3a', G:'#46602a', d:'#d8e08a', y:'#c9b27d', B:'#46602a' }),
+  gammelgadda: sprite(["..oooooooooo..o.", ".owkggdgggdggoBo", "oosgggggggggggBo", ".oGGGGGGGGGGGoBo", "..oooooooooo..o."], { o:'#3f2631', k:'#262b44', g:'#5d6b3a', G:'#3a4422', d:'#c9c38a', s:'#e43b44', w:'#fee761', B:'#3a4422' }),
   harr: sprite(["...oooo.....", "..oPPPPo....", "..oooo....o.", ".obbbbo..obo", "obwbbbbooBbo", "obkbbbbbbBo.", "obbbbbbbbBo.", "obbbbbbooBbo", ".oBBBBo..oBo", "..oooo....o."], { o:'#3f2631', w:'#ffffff', k:'#262b44', b:'#9a8fb5', B:'#68386c', P:'#b55088' }),
   mansik: markFish({ b:'#e6ecf5', B:'#9fb0c8', m:'#ffffff' }, (x, y) => y === 3 && x > 2 && x < 8 ? 'm' : ''),
   lysal: sprite(["................", ".ooooooooooo..o.", "owkgggGggggGooGo", "oggggggggggggggo", ".oooooooooooooo."], { o:'#3f2631', w:'#ffffff', k:'#262b44', g:'#7ad97a', G:'#c6f0a0' }),
@@ -1541,7 +1544,7 @@ function talkNeighbour(){
 const panel = $('#panel');
 function esc(s){ return String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c])); }
 function iconURL(c, s){ const k = document.createElement('canvas'); k.width = c.width*s; k.height = c.height*s; const x = k.getContext('2d'); x.imageSmoothingEnabled = false; x.drawImage(c, 0, 0, k.width, k.height); return k.toDataURL(); }
-let FISH_BIG = '', STAR_URL = '', DUST_URL = '', LOCK_URL = '', RUNE_URL = '', SCROLL_URL = '', TICKET_URL = '', RUNE_BIG = '', SCROLL_BIG = '', TICKET_BIG = '';
+let SHARD_URL = '', SHARD_BIG = '', FISH_BIG = '', STAR_URL = '', DUST_URL = '', LOCK_URL = '', RUNE_URL = '', SCROLL_URL = '', TICKET_URL = '', RUNE_BIG = '', SCROLL_BIG = '', TICKET_BIG = '';
 function plotPreview(p){
   const c = document.createElement('canvas'); c.width = 48; c.height = 48; c.className = 'pix';
   const x = c.getContext('2d'); x.imageSmoothingEnabled = false;
@@ -2046,7 +2049,7 @@ function renderLog(fresh){
   $('#log').innerHTML = S.log.length ? S.log.slice().reverse().map((e, i) => {
     const where = placeName(e.plats);
     const left = e.typ === 'runa'
-      ? `<img class="pix" src="${RUNE_URL}" alt=""><span><b>${esc(e.amne || 'Runa')}</b> ${[where ? 'vid ' + esc(where) : '', e.procent != null ? e.procent + ' %' : ''].filter(Boolean).join(', ')}</span>`
+      ? `<img class="pix" src="${e.skarva ? SHARD_URL : RUNE_URL}" alt=""><span><b>${esc(e.amne || (e.skarva ? 'Runskärva' : 'Runa'))}</b> ${[where ? 'vid ' + esc(where) : '', e.procent != null ? e.procent + ' %' : ''].filter(Boolean).join(', ')}</span>`
       : `<img class="pix" src="${SCROLL_URL}" alt=""><span><b>${esc(e.amne || 'Pergamentrulle')}</b> ${where ? 'vid ' + esc(where) + ', ' : ''}${e.ratt} av ${e.av} rätt</span>`;
     // the stars are the same pixel star as up in the corner, with a number, like the stardust on the scrolls
     const right = e.typ === 'runa' ? `<img class="pix" src="${STAR_URL}" alt="">${e.stjarnor + (e.bonus || 0)}<span class="sr"> stjärnor</span>` : `<img class="pix" src="${DUST_URL}" alt="">${e.stoft}`;
@@ -2059,14 +2062,20 @@ const starsFor = pct => berattelse.regler.stjarnor.find(r => pct >= r.minProcent
 function applyReal(events){
   initIcons();
   let stars = 0, stoft = 0;
+  const R = berattelse.regler.skarva;
   const handelser = events.map((e, i) => {
     if (e.typ === 'rulle'){ stoft += e.stoft; return e; }
-    const prev = events.slice(0, i).reverse().find(x => x.typ === 'runa' && x.amne === e.amne && x.procent != null);
+    if (e.skarva){
+      const pct = e.procent ?? Math.round(e.poang / e.max * 100), st = pct >= R.minProcent ? R.stjarnor : 0;
+      stars += st;
+      return { ...e, procent: pct, stjarnor: st, bonus: 0, biljett: false };
+    }
+    const prev = events.slice(0, i).reverse().find(x => x.typ === 'runa' && !x.skarva && x.amne === e.amne && x.procent != null);
     const st = e.stjarnor ?? starsFor(e.procent);
     const bonus = e.procent != null && prev && e.procent > prev.procent ? 1 : 0;
     stars += st + bonus;
     return { ...e, stjarnor: st, bonus, biljett: e.guldbiljett === true || (e.procent != null && e.procent > 90) };
-  });
+  }).filter(e => !(e.skarva && !e.stjarnor));
   REAL = { stars, stoft, handelser };
   restart();
 }
@@ -2187,8 +2196,12 @@ function markSeen(ids){
 }
 // The text of a rune or scroll: the title, the story and what it gave. Used for the news and when he taps a line in the list.
 function eventSteps(e, last){
-  const rune = e.typ === 'runa', where = placeName(e.plats);
-  const title = rune ? (e.amne ? `Runa: ${e.amne}` : 'Du hittade en runa') : e.amne ? `Pergamentrulle: ${e.amne}` : 'Du hittade en pergamentrulle';
+  const rune = e.typ === 'runa', shard = !!e.skarva, where = placeName(e.plats);
+  const title = shard ? (e.amne ? `Runskärva: ${e.amne}` : 'Du hittade en runskärva') : rune ? (e.amne ? `Runa: ${e.amne}` : 'Du hittade en runa') : e.amne ? `Pergamentrulle: ${e.amne}` : 'Du hittade en pergamentrulle';
+  if (shard) return [
+    { icon: SHARD_BIG, title, text: where ? `Den låg vid ${where}.` : '', button: 'Tolka runskärvan' },
+    { icon: SHARD_BIG, title, text: e.text, reward: `Runskärvan gav ${e.stjarnor} ${e.stjarnor === 1 ? 'stjärna' : 'stjärnor'}.`, button: last ? 'Till kartan' : 'Nästa' },
+  ];
   const reward = rune
     ? `Runan gav ${e.stjarnor} ${e.stjarnor === 1 ? 'stjärna' : 'stjärnor'}${e.bonus ? ', och en extra för att du tolkade bättre än förra gången' : ''}.`
     : `Rullen gav ${e.stoft} stjärnstoft.`;
@@ -2334,6 +2347,7 @@ function renderFishing(){
 }
 // The ordinary fish this tool can take at this place (fiske.fangar). fiske.max of each go in the book.
 const MAXFISK = FISKE.max || 99;
+const maxOf = id => FISKE.fiskar[id].max || MAXFISK;   // a fish of its own kind (Gammelgäddan) goes in the book once
 // at night some places have fish that only swim in the dark (fiske.platser fiskarNatt)
 const placeFish = plats => { const p = FISKE.platser[plats]; return S.natt && p.fiskarNatt ? [...p.fiskar, ...p.fiskarNatt] : p.fiskar; };
 const catchList = fz => { const can = FISKE.fangar && FISKE.fangar[fz.redskap]; return placeFish(fz.plats).filter(id => !can || can.includes(id)); };
@@ -2342,7 +2356,9 @@ const catchList = fz => { const can = FISKE.fangar && FISKE.fangar[fz.redskap]; 
 const bites = fz => {
   const b = SAKER[fz.agn];
   if (b && b.typ === 'lock') return [];
-  return catchList(fz).map(id => ({ id, w: !b ? 1 : (b.nej || []).includes(id) ? 0 : (b.gillar || {})[id] || 1 })).filter(e => e.w > 0);
+  // a fish can bite only on one bait (bara) and be rare (sallan), like Gammelgäddan (2026-10-25)
+  return catchList(fz).filter(id => !FISKE.fiskar[id].bara || FISKE.fiskar[id].bara === fz.agn)
+    .map(id => ({ id, w: (!b ? 1 : (b.nej || []).includes(id) ? 0 : (b.gillar || {})[id] || 1) * (FISKE.fiskar[id].sallan || 1) })).filter(e => e.w > 0);
 };
 const pickW = l => { let x = Math.random() * l.reduce((a, e) => a + e.w, 0); for (const e of l){ x -= e.w; if (x < 0) return e.id; } return l[l.length - 1].id; };
 function cast(){
@@ -2389,7 +2405,7 @@ function pull(){
     return openModal([{ icon: itemPicture(id), title: SAKER[id].namn, text: `${s.fynd} ${SAKER[id].text}`, reward: SAKER[id].typ === 'klader' ? 'Lades i väskan. Du kan ta på den där.' : 'Lades i väskan.', button: 'Till kartan' }], () => showNode());
   }
   // a kind he has not caught is a little more likely
-  const list = bites(fz), fresh = list.filter(e => S.fiskbok[e.id] === undefined);
+  const list = bites(fz), fresh = list.filter(e => S.fiskbok[e.id] === undefined && !FISKE.fiskar[e.id].sallan);
   const id = pickW(fresh.length && Math.random() < .35 ? fresh : list), b = SAKER[fz.agn];
   const kg = weigh(id, b && b.stor);
   if (isRod(fz.redskap) && FISKE.fiskar[id].kamp) return startFight(id, kg);
@@ -2409,7 +2425,7 @@ function land(id, kg){
   const rec = S.rekord[id], best = rec === undefined || kg > rec;
   if (best) S.rekord[id] = kg;
   let step;
-  if ((S.fiskbok[id] || 0) >= MAXFISK){
+  if ((S.fiskbok[id] || 0) >= maxOf(id)){
     step = { icon: catchIcon(id), title: fish.namn, text: best ? T.tillbakaRekord : T.tillbaka3, reward: best ? `${kgText(kg)} kg. Nytt rekord!` : `${kgText(kg)} kg. Ditt rekord är ${kgText(rec)} kg.`, button: 'Till kartan' };
   } else {
     const isNew = S.fiskbok[id] === undefined; S.fiskbok[id] = (S.fiskbok[id] || 0) + 1;
@@ -2480,11 +2496,11 @@ const fishIcon = id => FISH_ICON[id] || (FISH_ICON[id] = iconURL(CATCH[id] || FI
 function renderFishBook(){
   renderRumors();
   const ids = Object.keys(FISKE.fiskar).filter(id => S.fiskbok[id] !== undefined);
-  const all = Object.keys(FISKE.fiskar), done = all.filter(id => (S.fiskbok[id] || 0) >= MAXFISK).length;
+  const all = Object.keys(FISKE.fiskar), done = all.filter(id => (S.fiskbok[id] || 0) >= maxOf(id)).length;
   // the society's line wraps on its own: the name and what they want, and under it how far he has come (Peter 2026-10-24)
   const head = S.brevFiske ? `<li class="fs-head"><span><b>Fiskesällskapet</b> vill ha tre av varje sort.</span><span class="st">${done} av ${all.length} sorter klara</span></li>` : '';
   $('#fishbook').innerHTML = head + (ids.length
-    ? ids.map(id => `<li><span class="fishico"><img class="pix" src="${fishIcon(id)}" alt=""></span><span><b>${esc(FISKE.fiskar[id].namn)}</b> ${esc(FISKE.fiskar[id].text)}${S.rekord[id] !== undefined ? ` <span class="rek">Rekord ${kgText(S.rekord[id])} kg</span>` : ''}</span><span class="st">${S.fiskbok[id] || 0} / ${MAXFISK}</span></li>`).join('')
+    ? ids.map(id => `<li><span class="fishico"><img class="pix" src="${fishIcon(id)}" alt=""></span><span><b>${esc(FISKE.fiskar[id].namn)}</b> ${esc(FISKE.fiskar[id].text)}${S.rekord[id] !== undefined ? ` <span class="rek">Rekord ${kgText(S.rekord[id])} kg</span>` : ''}</span><span class="st">${S.fiskbok[id] || 0} / ${maxOf(id)}</span></li>`).join('')
     : '<li><span>Inga fiskar ännu.</span></li>');
 }
 
@@ -2593,7 +2609,7 @@ $('#btnGeRykten').addEventListener('click', () => {
   for (const k of keys) if (!S.rykten.includes(k)) S.rykten.push(k);
   renderRumors(); toast('Alla rykten lades i listan.');
 });
-$('#btnGeFisk').addEventListener('click', () => { for (const id in FISKE.fiskar){ S.fiskbok[id] = Math.min(MAXFISK, (S.fiskbok[id] || 0) + 1); S.rekord[id] = Math.max(S.rekord[id] || 0, weigh(id)); } renderFishBook(); toast('En av varje fisk lades i fiskboken.'); });
+$('#btnGeFisk').addEventListener('click', () => { for (const id in FISKE.fiskar){ S.fiskbok[id] = Math.min(maxOf(id), (S.fiskbok[id] || 0) + 1); S.rekord[id] = Math.max(S.rekord[id] || 0, weigh(id)); } renderFishBook(); toast('En av varje fisk lades i fiskboken.'); });
 $('#btnGe').addEventListener('click', showGive);
 $('#btnGeAlla').addEventListener('click', () => { for (const id in SAKER) if (SAKER[id].typ !== 'djur') debugGive(id); renderPack(); toast('Alla saker lades i väskan.'); });
 $('#btnGeDjur').addEventListener('click', () => { for (const id in SAKER) if (SAKER[id].typ === 'djur') debugGive(id); for (const id in berattelse.djur) if (!S.djur.includes(id)) S.djur.push(id); renderBook(); toast('Alla djur skrevs in i djurboken.'); });
@@ -2683,6 +2699,7 @@ function initIcons(){
   if (STAR_URL) return;
   STAR_URL = iconURL(STAR, 4); DUST_URL = iconURL(DUST, 4); LOCK_URL = iconURL(LOCK, 4); RUNE_URL = iconURL(RUNE, 4); SCROLL_URL = iconURL(SCROLL, 4);
   FISH_BIG = iconURL(FISH, 8); $('#icoFish').src = iconURL(FISH, 4); $('#icoLetter').src = iconURL(ENVELOPE, 3); $('#icoRykten').src = iconURL(RUMOR_ICO, 3);
+  SHARD_URL = iconURL(SHARD, 4); SHARD_BIG = iconURL(SHARD, 8);
   TICKET_URL = iconURL(TICKET, 4); RUNE_BIG = iconURL(RUNE, 8); SCROLL_BIG = iconURL(SCROLL, 8); TICKET_BIG = iconURL(TICKET, 8); $('#icoTicket').src = TICKET_URL;
   const pil = iconURL(sprite(["...o...", "..oyo..", ".oyyyo.", "oyyyyyo", "ooooooo"], { o:'#3f2631', y:'#fee761' }), 3);
   document.querySelectorAll('img[data-pil]').forEach(im => { im.src = pil; });

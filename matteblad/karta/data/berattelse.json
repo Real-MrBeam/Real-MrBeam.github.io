@@ -193,7 +193,11 @@
         "minProcent": 0,
         "antal": 1
       }
-    ]
+    ],
+    "skarva": {
+      "minProcent": 80,
+      "stjarnor": 1
+    }
   },
   "exempel": {
     "start": {
@@ -2469,7 +2473,8 @@
           "groda",
           "gadda",
           "sutare",
-          "sutare"
+          "sutare",
+          "gammelgadda"
         ],
         "vanta": [
           3500,
@@ -2808,6 +2813,18 @@
           1.8
         ],
         "kamp": "hopp"
+      },
+      "gammelgadda": {
+        "namn": "Gammelgäddan",
+        "text": "En urgammal gädda med ärr över nosen och en rostig krok i käken. Hon är äldre än någon i Glimmerdal.",
+        "vikt": [
+          7,
+          11
+        ],
+        "kamp": "ryck",
+        "bara": "glimmerskeden",
+        "sallan": 0.3,
+        "max": 1
       }
     },
     "texter": {
@@ -2866,7 +2883,8 @@
         "braxen",
         "sik",
         "grottfisk",
-        "roding"
+        "roding",
+        "gammelgadda"
       ],
       "flugspo": [
         "oring",
@@ -3079,6 +3097,11 @@
         "sak": "flojt",
         "t": "Vassen till flöjten skar jag vid Norra bron. Där spelar någon fiol om nätterna, samma melodi varje gång.",
         "rykte": "rykte:flojt"
+      },
+      {
+        "sak": "glimmerskeden",
+        "rykte": "rykte:gammelgaddan",
+        "t": "Gammelgäddan i Vassen har slitit av fler linor än jag kan räkna. Hon hugger bara på det som blänker."
       }
     ]
   },
@@ -3720,7 +3743,8 @@
     "skugga": "Nattfiskaren har sett en grå skugga gå över bron mot Höstskogen.",
     "skeppet": "Nattfiskaren säger att konstiga nya fiskar har dykt upp i sjön sedan det lysande skeppet började segla där om nätterna.",
     "flojt": "Nattfiskaren skar vassen till flöjten vid Norra bron. Där spelar någon fiol om nätterna, samma melodi varje gång.",
-    "stjarnsvalan": "Siri säger att det lysande skeppet är hennes Stjärnsvalan. Om nätterna kommer det närmast land vid Sjöviken."
+    "stjarnsvalan": "Siri säger att det lysande skeppet är hennes Stjärnsvalan. Om nätterna kommer det närmast land vid Sjöviken.",
+    "gammelgaddan": "Nattfiskaren säger att Gammelgäddan i Vassen bara hugger på det som blänker."
   },
   "personRykten": {
     "vira": [
@@ -3987,6 +4011,12 @@
     },
     "sak:flaskpost": {
       "pekar": "sjo"
+    },
+    "rykte:gammelgaddan": {
+      "pekar": "vassen",
+      "klar": [
+        "fisk:gammelgadda"
+      ]
     }
   },
   "vakt": {
