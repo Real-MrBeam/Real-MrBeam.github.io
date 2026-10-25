@@ -2834,7 +2834,8 @@
       "agn": "Agn",
       "lockbete": "Lockbete",
       "ingetPaAgn": "Ingen fisk här vill ha {agn}. Prova ett annat agn.",
-      "brastDrag": "Linan gick av, och {agn} följde med fisken ner i djupet."
+      "brastDrag": "Linan gick av, och {agn} följde med fisken ner i djupet.",
+      "forlorat": "Det trodde du att du aldrig skulle få! Det måste ha flutit hit med strömmen."
     },
     "fynd": [
       "stovel",
@@ -2993,7 +2994,8 @@
       "avbrutenara": [
         "bakom"
       ]
-    }
+    },
+    "forloratChans": 0.04
   },
   "locka": [
     {
