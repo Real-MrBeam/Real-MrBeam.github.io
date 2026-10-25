@@ -2989,7 +2989,12 @@
     },
     "fyndPlatser": {
       "fiskehatt": [
-        "vassen"
+        "vassen",
+        "udden",
+        "sjo"
+      ],
+      "stjarnskarva": [
+        "angen"
       ]
     }
   },
