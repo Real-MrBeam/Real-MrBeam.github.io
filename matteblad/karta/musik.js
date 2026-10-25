@@ -1,6 +1,6 @@
 // Djuren i Glimmerdal: the music. A tiny chip synth in the browser (pulse waves, a triangle bass and noise drums, like an old
-// game console) plays six songs of our own: three for the day ("Glimmerdal", "Ängsdans" and "Morgondagg") and three for the
-// night ("Stjärnnatt", "Månsken" and "Nattugglan"). The songs of the day or of the night take turns. No sound files, nothing downloaded.
+// game console) plays seven songs of our own: three for the day ("Glimmerdal", "Ängsdans" and "Morgondagg") and four for the
+// night ("Stjärnnatt", "Månsken", "Nattugglan" and "Serenad"). The songs of the day or of the night take turns. No sound files, nothing downloaded.
 //
 // A song is a list of bars. Each bar has a chord (the bass and the arpeggio are made from it) and a melody of 8 steps (eighth notes):
 // a note such as "E5", "-" holds the note before, "." is a rest. The drums are a pattern of 8 steps per bar.
@@ -125,8 +125,26 @@ const NATTUGGLAN = (() => {
     ljud: { lead: { form: .5, vol: .068 }, arp: { form: .125, vol: .028, oktav: 5, takt: 2 }, bas: { vol: .16 }, eko: .3 },
   };
 })();
+// Serenad: a slow night song of our own, a singing melody over soft broken chords like a guitar under a window (Peter 2026-10-25)
+const SERENAD = (() => {
+  const intro = [bar('G', '. . . . . . . .'), bar('G', '. . . . . . . .')];
+  const A = [bar('G', 'D5 - G5 - B5 - - A5'), bar('Em', 'G5 - - - E5 - - -'), bar('C', 'E5 - G5 - C6 - B5 A5'), bar('D', 'A5 - - - - - . .')];
+  const A2 = [bar('G', 'D5 - G5 - B5 - D6 -'), bar('Em', 'E6 - D6 - B5 - G5 -'), bar('Am', 'C6 - B5 A5 E5 - A5 -'), bar('D', 'F#5 - - - A5 - D6 -')];
+  const B = [
+    bar('C', 'E6 - - - D6 - C6 -'), bar('G', 'B5 - - - D6 - G6 -'), bar('Am', 'E6 - D6 C6 A5 - C6 -'), bar('D', 'D6 - - - - - . .'),
+    bar('C', 'G6 - E6 - C6 - E6 -'), bar('G', 'D6 - B5 - G5 - B5 -'), bar('Am', 'A5 - C6 - E6 - D6 C6'), bar('D', 'B5 - - - A5 - - -'),
+  ];
+  const slut = [...A2.slice(0, 3), bar('G', 'G5 - - - - - - -')];
+  return {
+    namn: 'Serenad', bpm: 76, tid: 'natt',
+    takter: [...intro, ...A, ...A2, ...B, ...A, ...slut],
+    trummor: { k: 'k . . . . . . .', s: '. . . . . . . .', h: '. . . . . . . .' },
+    ljud: { lead: { klang: 'flojt', vol: .06 }, arp: { klang: 'gitarr', vol: .03, oktav: 4, takt: 1 }, bas: { vol: .15 }, eko: .3 },
+  };
+})();
+STJARNNATT.ljud.lead.klang = 'klocka';   // Stjärnnatt rings like a music box (Peter 2026-10-25)
 GLIMMERDAL.tid = 'dag'; STJARNNATT.tid = 'natt';
-const SONGS = [GLIMMERDAL, STJARNNATT, ANGSDANS, MANSKEN, MORGONDAGG, NATTUGGLAN];
+const SONGS = [GLIMMERDAL, STJARNNATT, ANGSDANS, MANSKEN, MORGONDAGG, NATTUGGLAN, SERENAD];
 
 // ---------- the instruments
 const waves = new WeakMap();
@@ -144,7 +162,35 @@ function noise(ctx) {
   for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
   noiseBuf.set(ctx, b); return b;
 }
-function tone(ctx, dest, { f, t, len, vol, duty, tri }) {
+// Other sounds a song can choose (klang, Peter 2026-10-25): flöjt (a soft triangle with a slow vibrato), gitarr (a pluck that
+// fades fast), klocka (a clear ringing tone with an overtone, like a music box) and strak (fades in and sings, for long notes).
+// Without klang it is the old console pulse.
+function klang(ctx, dest, kind, { f, t, len, vol }) {
+  const g = ctx.createGain(), end = t + Math.max(.05, len);
+  const osc = (type, fr) => { const o = ctx.createOscillator(); o.type = type; o.frequency.value = fr; return o; };
+  const vibrato = (o, depth, from) => { const l = osc('sine', 5.2), lg = ctx.createGain(); lg.gain.setValueAtTime(0, t); lg.gain.linearRampToValueAtTime(f * depth, t + from); l.connect(lg).connect(o.frequency); l.start(t); l.stop(end + .3); };
+  if (kind === 'flojt') {
+    const o = osc('triangle', f); vibrato(o, .007, .25);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol * 1.8, t + .05); g.gain.setValueAtTime(vol * 1.6, end - .06); g.gain.linearRampToValueAtTime(0, end + .05);
+    o.connect(g).connect(dest); o.start(t); o.stop(end + .1);
+  } else if (kind === 'gitarr') {
+    const o = osc('sawtooth', f), lp = ctx.createBiquadFilter(), ring = Math.min(1.4, len + .5);
+    lp.type = 'lowpass'; lp.frequency.setValueAtTime(f * 6, t); lp.frequency.exponentialRampToValueAtTime(f * 1.2, t + ring);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol * 1.6, t + .004); g.gain.exponentialRampToValueAtTime(.0005, t + ring);
+    o.connect(lp).connect(g).connect(dest); o.start(t); o.stop(t + ring + .05);
+  } else if (kind === 'klocka') {
+    const ring = Math.max(1.2, len + .6), o = osc('sine', f), o2 = osc('sine', f * 3), g2 = ctx.createGain();
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol * 2, t + .005); g.gain.exponentialRampToValueAtTime(.0005, t + ring);
+    g2.gain.value = .25; o2.connect(g2).connect(g);
+    o.connect(g).connect(dest); o.start(t); o2.start(t); o.stop(t + ring + .05); o2.stop(t + ring + .05);
+  } else {   // strak
+    const o = osc('sawtooth', f), lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = Math.min(2400, f * 4); vibrato(o, .005, .4);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol * 1.1, t + .18); g.gain.setValueAtTime(vol * 1.1, end - .05); g.gain.linearRampToValueAtTime(0, end + .2);
+    o.connect(lp).connect(g).connect(dest); o.start(t); o.stop(end + .25);
+  }
+}
+function tone(ctx, dest, { f, t, len, vol, duty, tri, kind }) {
+  if (kind) return klang(ctx, dest, kind, { f, t, len, vol });
   const o = ctx.createOscillator(), g = ctx.createGain();
   if (tri) o.type = 'triangle'; else o.setPeriodicWave(pulse(ctx, duty));
   o.frequency.value = f;
@@ -189,7 +235,7 @@ function spela(ctx, dest, index, t0) {
     mel.forEach((tok, i) => {
       if (tok === '-' || tok === '.') return;
       let n = 1; while (i + n < 8 && mel[i + n] === '-') n++;
-      tone(ctx, out, { f: freq(tok), t: tb + i * step, len: n * step * .92, vol: L.lead.vol, duty: L.lead.form });
+      tone(ctx, out, { f: freq(tok), t: tb + i * step, len: n * step * .92, vol: L.lead.vol, duty: L.lead.form, kind: L.lead.klang });
     });
     // bass: the root on beat 1 and 3, the fifth on beat 2 and 4
     const root = notes[0], fifth = notes[2];
@@ -197,7 +243,7 @@ function spela(ctx, dest, index, t0) {
     // arpeggio: the chord tones going up, one per step (or every other step in the slow song)
     for (let i = 0; i < 8; i += L.arp.takt) {
       const nm = notes[(i / L.arp.takt) % 3];
-      tone(ctx, out, { f: freq(nm + L.arp.oktav), t: tb + i * step, len: step * .8 * L.arp.takt, vol: L.arp.vol, duty: L.arp.form });
+      tone(ctx, out, { f: freq(nm + L.arp.oktav), t: tb + i * step, len: step * .8 * L.arp.takt, vol: L.arp.vol, duty: L.arp.form, kind: L.arp.klang });
     }
     // drums, not in the intro
     if (bi >= 2) for (const [k, pat] of Object.entries(song.trummor)) pat.split(' ').forEach((tok, i) => { if (tok === k) drum(ctx, dest, k, tb + i * step, song.bpm < 100); });
