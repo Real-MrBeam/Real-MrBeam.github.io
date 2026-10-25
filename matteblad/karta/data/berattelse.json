@@ -3966,8 +3966,7 @@
     "borta": "natt:bakom",
     "rubrik": "En vakt står vid gruvan",
     "knapp": "Prata med vakten",
-    "rubrikNatt": "Vakten sover",
-    "textNatt": "Han sitter mot berget och snarkar så att det ekar i gruvan.",
+    "rubrikNatt": "Vakten verkar sova",
     "smyg": "Smyg förbi in i gruvan",
     "hej": "Stopp där! Här får ingen gå in. Gruvan är gammal, och det kan rasa när som helst.",
     "fragor": [
@@ -3983,7 +3982,10 @@
         "label": "Fråga om han står här hela tiden",
         "svar": "Dag och natt. En riktig vakt vilar aldrig."
       }
-    ]
+    ],
+    "knappNatt": "Smyg närmare",
+    "sover": "Holger sitter mot berget med hjälmen nere över ögonen. Han snarkar så att det ekar i gruvan. Spjutet har han lutat mot väggen.",
+    "vand": "Vänd tillbaka"
   },
   "dammen": {
     "plats": "angen",

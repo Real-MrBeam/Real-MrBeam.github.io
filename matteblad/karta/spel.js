@@ -817,10 +817,17 @@ function talkGuard(line){
     { label: 'Tillbaka', alt: true, run: toNode },
   ]);
 }
+// At night he goes closer and sees the sleeping guard (his portrait), and chooses to sneak in or turn back
+function sneakGuard(lid, side){
+  startDialog([{ p: VAKT.person, t: VAKT.sover }], () => [
+    { label: esc(VAKT.smyg), run: () => { dlg = null; enterLevel(lid, side); showMap(); } },
+    { label: esc(VAKT.vand), alt: true, run: toNode },
+  ]);
+}
 function levelEntryBlock(id){
   const [lid, d] = levelAt(id), T = d.texter, side = d.ingang === id ? 'in' : 'ut', here = S.node === id && !boy.route;
   if (guardHere(id) && !S.natt) return `<div class="plot"><div><b>${esc(VAKT.rubrik)}</b></div>${here ? `<button class="btn" type="button" data-vakt="1">${esc(VAKT.knapp)}</button>` : ''}</div>`;
-  if (guardHere(id)) return `<div class="plot"><div><b>${esc(VAKT.rubrikNatt)}</b><span>${esc(VAKT.textNatt)}</span></div>${here ? `<button class="btn" type="button" data-bana="${lid}:${side}">${esc(VAKT.smyg)}</button>` : ''}</div>`;
+  if (guardHere(id)) return `<div class="plot"><div><b>${esc(VAKT.rubrikNatt)}</b></div>${here ? `<button class="btn" type="button" data-vaktnatt="${lid}:${side}">${esc(VAKT.knappNatt)}</button>` : ''}</div>`;
   return `<div class="plot"><div><b>${esc(side === 'in' ? T.rubrik : T.rubrikTillbaka)}</b></div>${here ? `<button class="btn" type="button" data-bana="${lid}:${side}">${esc(side === 'in' ? T.gaIn : T.gaTillbaka)}</button>` : ''}</div>`;
 }
 function enterLevel(lid, side){
@@ -1639,6 +1646,7 @@ panel.addEventListener('click', ev => {
   else if (b.dataset.fiska) startFishing(b.dataset.fiska);
   else if (b.dataset.sov) sleep();
   else if (b.dataset.vakt) talkGuard();
+  else if (b.dataset.vaktnatt){ const [lid, side] = b.dataset.vaktnatt.split(':'); sneakGuard(lid, side); }
   else if (b.dataset.bana){ const [lid, side] = b.dataset.bana.split(':'); enterLevel(lid, side); showMap(); }   // on a phone the map is above the panel
   else if (b.dataset.banaut && LEVEL) levelWalkTo(...LEVEL.pos[LEVEL.door]);
   else if (b.dataset.brev) readLetter2();
