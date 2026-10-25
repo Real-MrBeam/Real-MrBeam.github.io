@@ -1,6 +1,6 @@
 // Djuren i Glimmerdal: the music. A tiny chip synth in the browser (pulse waves, a triangle bass and noise drums, like an old
 // game console) plays seven songs of our own: three for the day ("Glimmerdal", "Ängsdans" and "Morgondagg") and four for the
-// night ("Stjärnnatt", "Månsken", "Nattugglan" and "Serenad"). The songs of the day or of the night take turns. No sound files, nothing downloaded.
+// night ("Stjärnnatt", "Månsken", "Nattugglan" and "Nattviol"). The songs of the day or of the night take turns. No sound files, nothing downloaded.
 //
 // A song is a list of bars. Each bar has a chord (the bass and the arpeggio are made from it) and a melody of 8 steps (eighth notes):
 // a note such as "E5", "-" holds the note before, "." is a rest. The drums are a pattern of 8 steps per bar.
@@ -125,7 +125,7 @@ const NATTUGGLAN = (() => {
     ljud: { lead: { form: .5, vol: .068 }, arp: { form: .125, vol: .028, oktav: 5, takt: 2 }, bas: { vol: .16 }, eko: .3 },
   };
 })();
-// Serenad: a slow night song of our own, a singing melody over soft broken chords like a guitar under a window (Peter 2026-10-25)
+// Nattviol (first called Serenad): a slow night song of our own, a singing melody over soft broken chords like a guitar under a window (Peter 2026-10-25)
 const SERENAD = (() => {
   const intro = [bar('G', '. . . . . . . .'), bar('G', '. . . . . . . .')];
   const A = [bar('G', 'D5 - G5 - B5 - - A5'), bar('Em', 'G5 - - - E5 - - -'), bar('C', 'E5 - G5 - C6 - B5 A5'), bar('D', 'A5 - - - - - . .')];
@@ -136,13 +136,13 @@ const SERENAD = (() => {
   ];
   const slut = [...A2.slice(0, 3), bar('G', 'G5 - - - - - - -')];
   return {
-    namn: 'Serenad', bpm: 76, tid: 'natt',
+    namn: 'Nattviol', bpm: 76, tid: 'natt',
     takter: [...intro, ...A, ...A2, ...B, ...A, ...slut],
     trummor: { k: 'k . . . . . . .', s: '. . . . . . . .', h: '. . . . . . . .' },
     ljud: { lead: { klang: 'flojt', vol: .06 }, arp: { klang: 'gitarr', vol: .03, oktav: 4, takt: 1 }, bas: { vol: .15 }, eko: .3 },
   };
 })();
-STJARNNATT.ljud.lead.klang = 'orgel'; STJARNNATT.ljud.arp.klang = 'orgel';   // Stjärnnatt on an organ (Peter 2026-10-25, first a music box)
+STJARNNATT.ljud.lead.klang = 'klocka';   // Stjärnnatt rings like a music box (Peter 2026-10-25; the organ is kept for the caves)
 MORGONDAGG.ljud.lead.klang = 'marimba'; MORGONDAGG.ljud.arp.klang = 'marimba';   // Morgondagg on a marimba (Peter 2026-10-25)
 GLIMMERDAL.tid = 'dag'; STJARNNATT.tid = 'natt';
 const SONGS = [GLIMMERDAL, STJARNNATT, ANGSDANS, MANSKEN, MORGONDAGG, NATTUGGLAN, SERENAD];
@@ -186,10 +186,10 @@ function klang(ctx, dest, kind, { f, t, len, vol }) {
     g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol * 2, t + .005); g.gain.exponentialRampToValueAtTime(.0005, t + ring);
     g2.gain.value = .25; o2.connect(g2).connect(g);
     o.connect(g).connect(dest); o.start(t); o2.start(t); o.stop(t + ring + .05); o2.stop(t + ring + .05);
-  } else if (kind === 'orgel') {   // an organ: sines stacked like drawbars, held level while the key is down, with a slow sway
+  } else if (kind === 'orgel') {   // an organ, kept for the caves: sines stacked like drawbars, held level, with a slow sway
     const bars = [[.5, .5], [1, 1], [2, .7], [3, .35], [4, .3], [6, .12]], trem = osc('sine', 5.8), tg = ctx.createGain(), sway = ctx.createGain();
     sway.gain.value = 1; tg.gain.value = .12; trem.connect(tg).connect(sway.gain);
-    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol * .9, t + .02); g.gain.setValueAtTime(vol * .9, end); g.gain.linearRampToValueAtTime(0, end + .06);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol * .45, t + .02); g.gain.setValueAtTime(vol * .45, end); g.gain.linearRampToValueAtTime(0, end + .06);
     for (const [h, a] of bars) { const o = osc('sine', f * h), pg = ctx.createGain(); pg.gain.value = a; o.connect(pg).connect(g); o.start(t); o.stop(end + .1); }
     g.connect(sway).connect(dest); trem.start(t); trem.stop(end + .1);
   } else if (kind === 'elpiano') {   // FM like an electric piano: a sine whose brightness (the modulation) fades, plus a small tine
