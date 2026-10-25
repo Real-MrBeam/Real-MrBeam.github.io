@@ -741,7 +741,7 @@
     },
     "manbete": {
       "namn": "Viras månbete",
-      "text": "Lysande kulor av månört. Nattens fiskar älskar dem.",
+      "text": "Lysande kulor av månört. Månsiken nappar inte på något annat.",
       "typ": "agn",
       "antal": 5,
       "stor": true,
@@ -749,8 +749,7 @@
         "mansik": 3,
         "lake": 3,
         "gos": 2,
-        "stjarnruda": 2,
-        "mankungen": 3
+        "stjarnruda": 2
       },
       "egennamn": true
     },
@@ -2474,8 +2473,7 @@
           "groda",
           "gadda",
           "sutare",
-          "sutare",
-          "gammelgadda"
+          "sutare"
         ],
         "vanta": [
           3500,
@@ -2484,8 +2482,7 @@
         "fiskarNatt": [
           "mansik",
           "mansik",
-          "lysal",
-          "mankungen"
+          "lysal"
         ]
       },
       "stenblocket": {
@@ -2520,7 +2517,8 @@
           "mort",
           "mort",
           "mort",
-          "abborre"
+          "abborre",
+          "gammelgadda"
         ],
         "fiskarNatt": [
           "lake",
@@ -2708,7 +2706,8 @@
           0.2,
           1.2
         ],
-        "kamp": "lugn"
+        "kamp": "lugn",
+        "bara": "manbete"
       },
       "lysal": {
         "namn": "Lysål",
@@ -2827,18 +2826,6 @@
         "bara": "glimmerskeden",
         "sallan": 0.3,
         "max": 1
-      },
-      "mankungen": {
-        "namn": "Månkungen",
-        "text": "En jättelik månsik som lyser silvervit som fullmånen. Ingen har sett en större.",
-        "vikt": [
-          3,
-          5
-        ],
-        "kamp": "tung",
-        "bara": "manbete",
-        "sallan": 0.3,
-        "max": 1
       }
     },
     "texter": {
@@ -2898,8 +2885,7 @@
         "sik",
         "grottfisk",
         "roding",
-        "gammelgadda",
-        "mankungen"
+        "gammelgadda"
       ],
       "flugspo": [
         "oring",
@@ -3116,7 +3102,7 @@
       {
         "sak": "glimmerskeden",
         "rykte": "rykte:gammelgaddan",
-        "t": "Gammelgäddan i Vassen har slitit av fler linor än jag kan räkna. Hon hugger bara på det som blänker."
+        "t": "Gammelgäddan vid Udden har slitit av fler linor än jag kan räkna. Hon hugger bara på det som blänker."
       }
     ]
   },
@@ -3759,13 +3745,13 @@
     "skeppet": "Nattfiskaren säger att konstiga nya fiskar har dykt upp i sjön sedan det lysande skeppet började segla där om nätterna.",
     "flojt": "Nattfiskaren skar vassen till flöjten vid Norra bron. Där spelar någon fiol om nätterna, samma melodi varje gång.",
     "stjarnsvalan": "Siri säger att det lysande skeppet är hennes Stjärnsvalan. Om nätterna kommer det närmast land vid Sjöviken.",
-    "gammelgaddan": "Nattfiskaren säger att Gammelgäddan i Vassen bara hugger på det som blänker.",
-    "mankungen": "Vira säger att Månkungen, den största månsiken i Vassen, bara simmar upp när månbete ligger i vattnet."
+    "gammelgaddan": "Nattfiskaren säger att Gammelgäddan vid Udden bara hugger på det som blänker.",
+    "mansik": "Vira säger att månsiken i Vassen bara nappar på hennes månbete."
   },
   "personRykten": {
     "vira": [
       "rykte:graskuggan",
-      "rykte:mankungen"
+      "rykte:mansik"
     ],
     "siri": [
       "rykte:stjarnsvalan"
@@ -4030,16 +4016,16 @@
       "pekar": "sjo"
     },
     "rykte:gammelgaddan": {
-      "pekar": "vassen",
+      "pekar": "udden",
       "klar": [
         "fisk:gammelgadda"
       ]
     },
-    "rykte:mankungen": {
+    "rykte:mansik": {
       "pekar": "vassen",
       "natt": true,
       "klar": [
-        "fisk:mankungen"
+        "fisk:mansik"
       ]
     }
   },
