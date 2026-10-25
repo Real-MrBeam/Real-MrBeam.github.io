@@ -142,8 +142,8 @@ const SERENAD = (() => {
     ljud: { lead: { klang: 'flojt', vol: .06 }, arp: { klang: 'gitarr', vol: .03, oktav: 4, takt: 1 }, bas: { vol: .15 }, eko: .3 },
   };
 })();
-STJARNNATT.ljud.lead.klang = 'klocka';
-MORGONDAGG.ljud.lead.klang = 'marimba'; MORGONDAGG.ljud.arp.klang = 'marimba';   // Morgondagg on a marimba (Peter 2026-10-25)   // Stjärnnatt rings like a music box (Peter 2026-10-25)
+STJARNNATT.ljud.lead.klang = 'orgel'; STJARNNATT.ljud.arp.klang = 'orgel';   // Stjärnnatt on an organ (Peter 2026-10-25, first a music box)
+MORGONDAGG.ljud.lead.klang = 'marimba'; MORGONDAGG.ljud.arp.klang = 'marimba';   // Morgondagg on a marimba (Peter 2026-10-25)
 GLIMMERDAL.tid = 'dag'; STJARNNATT.tid = 'natt';
 const SONGS = [GLIMMERDAL, STJARNNATT, ANGSDANS, MANSKEN, MORGONDAGG, NATTUGGLAN, SERENAD];
 
@@ -165,8 +165,8 @@ function noise(ctx) {
 }
 // Other sounds a song can choose (klang, Peter 2026-10-25): flöjt (a soft triangle with a slow vibrato), gitarr (a pluck that
 // fades fast), klocka (a clear ringing tone with an overtone, like a music box), strak (fades in and sings, for long notes) and
-// piano (a soft hammer with overtones that die away), elpiano (FM like an electric piano), marimba (wood) and synt (an
-// analogue synth with two detuned saws and a filter).
+// piano (a soft hammer with overtones that die away), elpiano (FM like an electric piano), marimba (wood), synt (an
+// analogue synth with two detuned saws and a filter) and orgel (stacked sines like an organ).
 // Without klang it is the old console pulse.
 function klang(ctx, dest, kind, { f, t, len, vol }) {
   const g = ctx.createGain(), end = t + Math.max(.05, len);
@@ -186,6 +186,12 @@ function klang(ctx, dest, kind, { f, t, len, vol }) {
     g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol * 2, t + .005); g.gain.exponentialRampToValueAtTime(.0005, t + ring);
     g2.gain.value = .25; o2.connect(g2).connect(g);
     o.connect(g).connect(dest); o.start(t); o2.start(t); o.stop(t + ring + .05); o2.stop(t + ring + .05);
+  } else if (kind === 'orgel') {   // an organ: sines stacked like drawbars, held level while the key is down, with a slow sway
+    const bars = [[.5, .5], [1, 1], [2, .7], [3, .35], [4, .3], [6, .12]], trem = osc('sine', 5.8), tg = ctx.createGain(), sway = ctx.createGain();
+    sway.gain.value = 1; tg.gain.value = .12; trem.connect(tg).connect(sway.gain);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol * .9, t + .02); g.gain.setValueAtTime(vol * .9, end); g.gain.linearRampToValueAtTime(0, end + .06);
+    for (const [h, a] of bars) { const o = osc('sine', f * h), pg = ctx.createGain(); pg.gain.value = a; o.connect(pg).connect(g); o.start(t); o.stop(end + .1); }
+    g.connect(sway).connect(dest); trem.start(t); trem.stop(end + .1);
   } else if (kind === 'elpiano') {   // FM like an electric piano: a sine whose brightness (the modulation) fades, plus a small tine
     const ring = Math.min(2.6, len + 1), c = osc('sine', f), m = osc('sine', f), mg = ctx.createGain(), tine = osc('sine', f * 14), tg = ctx.createGain(), tm = ctx.createGain();
     mg.gain.setValueAtTime(f * 2.2, t); mg.gain.exponentialRampToValueAtTime(f * .25, t + .6); m.connect(mg).connect(c.frequency);
