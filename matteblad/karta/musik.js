@@ -142,7 +142,8 @@ const SERENAD = (() => {
     ljud: { lead: { klang: 'flojt', vol: .06 }, arp: { klang: 'gitarr', vol: .03, oktav: 4, takt: 1 }, bas: { vol: .15 }, eko: .3 },
   };
 })();
-STJARNNATT.ljud.lead.klang = 'klocka';   // Stjärnnatt rings like a music box (Peter 2026-10-25)
+STJARNNATT.ljud.lead.klang = 'klocka';
+MORGONDAGG.ljud.lead.klang = 'marimba'; MORGONDAGG.ljud.arp.klang = 'marimba';   // Morgondagg on a marimba (Peter 2026-10-25)   // Stjärnnatt rings like a music box (Peter 2026-10-25)
 GLIMMERDAL.tid = 'dag'; STJARNNATT.tid = 'natt';
 const SONGS = [GLIMMERDAL, STJARNNATT, ANGSDANS, MANSKEN, MORGONDAGG, NATTUGGLAN, SERENAD];
 
@@ -163,7 +164,9 @@ function noise(ctx) {
   noiseBuf.set(ctx, b); return b;
 }
 // Other sounds a song can choose (klang, Peter 2026-10-25): flöjt (a soft triangle with a slow vibrato), gitarr (a pluck that
-// fades fast), klocka (a clear ringing tone with an overtone, like a music box) and strak (fades in and sings, for long notes).
+// fades fast), klocka (a clear ringing tone with an overtone, like a music box), strak (fades in and sings, for long notes) and
+// piano (a soft hammer with overtones that die away), elpiano (FM like an electric piano), marimba (wood) and synt (an
+// analogue synth with two detuned saws and a filter).
 // Without klang it is the old console pulse.
 function klang(ctx, dest, kind, { f, t, len, vol }) {
   const g = ctx.createGain(), end = t + Math.max(.05, len);
@@ -183,6 +186,33 @@ function klang(ctx, dest, kind, { f, t, len, vol }) {
     g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol * 2, t + .005); g.gain.exponentialRampToValueAtTime(.0005, t + ring);
     g2.gain.value = .25; o2.connect(g2).connect(g);
     o.connect(g).connect(dest); o.start(t); o2.start(t); o.stop(t + ring + .05); o2.stop(t + ring + .05);
+  } else if (kind === 'elpiano') {   // FM like an electric piano: a sine whose brightness (the modulation) fades, plus a small tine
+    const ring = Math.min(2.6, len + 1), c = osc('sine', f), m = osc('sine', f), mg = ctx.createGain(), tine = osc('sine', f * 14), tg = ctx.createGain(), tm = ctx.createGain();
+    mg.gain.setValueAtTime(f * 2.2, t); mg.gain.exponentialRampToValueAtTime(f * .25, t + .6); m.connect(mg).connect(c.frequency);
+    tm.gain.setValueAtTime(f * 3, t); tm.gain.exponentialRampToValueAtTime(1, t + .08); tine.connect(tm).connect(c.frequency);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol * 2.2, t + .005); g.gain.exponentialRampToValueAtTime(vol * 1.1, t + .3);
+    g.gain.setValueAtTime(vol * 1.1, end); g.gain.exponentialRampToValueAtTime(.0005, Math.min(t + ring, end + .4));
+    c.connect(g).connect(dest); for (const o of [c, m, tine]) { o.start(t); o.stop(t + ring + .05); }
+  } else if (kind === 'marimba') {   // wood: a sine and a high partial that dies very fast
+    const ring = .7, o = osc('sine', f), o2 = osc('sine', f * 3.9), g2 = ctx.createGain();
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol * 2.4, t + .003); g.gain.exponentialRampToValueAtTime(.0005, t + ring);
+    g2.gain.setValueAtTime(.5, t); g2.gain.exponentialRampToValueAtTime(.001, t + .07); o2.connect(g2).connect(g);
+    o.connect(g).connect(dest); for (const x of [o, o2]) { x.start(t); x.stop(t + ring + .05); }
+  } else if (kind === 'synt') {   // an analogue synth: two slightly detuned saws through a filter that opens and closes
+    const o = osc('sawtooth', f), o2 = osc('sawtooth', f * 1.006), lp = ctx.createBiquadFilter();
+    lp.type = 'lowpass'; lp.Q.value = 6; lp.frequency.setValueAtTime(f * 1.5, t); lp.frequency.exponentialRampToValueAtTime(f * 7, t + .06); lp.frequency.exponentialRampToValueAtTime(f * 2.5, t + .5);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol * 1.1, t + .015); g.gain.setValueAtTime(vol * .9, end - .05); g.gain.linearRampToValueAtTime(0, end + .12);
+    o.connect(lp); o2.connect(lp); lp.connect(g).connect(dest); for (const x of [o, o2]) { x.start(t); x.stop(end + .15); }
+  } else if (kind === 'piano') {   // a soft hammer: a few overtones that die away, the higher ones first (Peter 2026-10-25)
+    const ring = Math.min(2.4, len + 1.2), parts = [[1, 1, 1], [2, .35, .5], [3, .12, .35], [4, .05, .25]];
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol * 2.2, t + .006); g.gain.exponentialRampToValueAtTime(vol * .9, t + .25);
+    g.gain.setValueAtTime(vol * .9, end); g.gain.exponentialRampToValueAtTime(.0005, Math.min(t + ring, end + .45));
+    for (const [h, a, d] of parts){
+      const o = osc('sine', f * h * (h > 1 ? 1.0015 : 1)), pg = ctx.createGain();
+      pg.gain.setValueAtTime(a, t); pg.gain.exponentialRampToValueAtTime(a * .02, t + ring * d);
+      o.connect(pg).connect(g); o.start(t); o.stop(t + ring + .05);
+    }
+    g.connect(dest);
   } else {   // strak
     const o = osc('sawtooth', f), lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = Math.min(2400, f * 4); vibrato(o, .005, .4);
     g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol * 1.1, t + .18); g.gain.setValueAtTime(vol * 1.1, end - .05); g.gain.linearRampToValueAtTime(0, end + .2);
@@ -219,7 +249,7 @@ function drum(ctx, dest, kind, t, soft) {
 }
 
 // Schedules a whole song from time t0 and returns how long it is, in seconds
-function spela(ctx, dest, index, t0) {
+function spela(ctx, dest, index, t0, skip = 0) {
   const song = SONGS[index], L = song.ljud, step = 60 / song.bpm / 2;
   let out = dest;
   if (L.eko) {   // a soft echo for the dreamy song
@@ -229,7 +259,8 @@ function spela(ctx, dest, index, t0) {
     out = mix;
   }
   song.takter.forEach((b, bi) => {
-    const tb = t0 + bi * 8 * step, notes = CHORD[b.ch];
+    if (bi < skip) return;   // the first bars (the quiet intro) are left out
+    const tb = t0 + (bi - skip) * 8 * step, notes = CHORD[b.ch];
     // melody: a note lasts until the next note or rest
     const mel = b.mel.split(' ');
     mel.forEach((tok, i) => {
@@ -248,11 +279,12 @@ function spela(ctx, dest, index, t0) {
     // drums, not in the intro
     if (bi >= 2) for (const [k, pat] of Object.entries(song.trummor)) pat.split(' ').forEach((tok, i) => { if (tok === k) drum(ctx, dest, k, tb + i * step, song.bpm < 100); });
   });
-  return song.takter.length * 8 * step + 1.5;
+  return (song.takter.length - skip) * 8 * step + 1.5;
 }
 
 // ---------- the player on the page: the songs take turns with a short pause between them
 // Each time the game starts, the first song of the day and of the night is picked at random (Peter 2026-10-22), then they take turns
+const LAST_KEY = 'glimmerdal:senastLat';
 const P = { ctx: null, master: null, bus: null, next: { dag: Math.floor(Math.random() * 60), natt: Math.floor(Math.random() * 60) }, end: 0, timer: 0, on: false, vol: .35, natt: false };
 // Off and on again carries on in the same song where it stopped (the sound is only paused). Day and night switch the song at once.
 function start() {
@@ -278,11 +310,15 @@ function tick() {
     if (P.bus) P.bus.disconnect();
     P.bus = P.ctx.createGain(); P.bus.connect(P.master);
     const t0 = now + (P.end ? 2 : .1);
-    // the songs of the day, or of the night, take turns
+    // the songs of the day, or of the night, take turns. The first one after the page has loaded is never the one that was
+    // last heard (remembered in the browser), and it begins with its tune, without the quiet bars at the start (Peter 2026-10-25)
     const tid = P.natt ? 'natt' : 'dag', list = SONGS.map((s, i) => i).filter(i => SONGS[i].tid === tid);
-    const index = list[P.next[tid] % list.length];
+    const first = !P.played;
+    let index = list[P.next[tid] % list.length];
+    if (first && list.length > 1){ let last = null; try { last = localStorage.getItem(LAST_KEY); } catch (e) { /* no memory */ } if (SONGS[index].namn === last) { P.next[tid]++; index = list[P.next[tid] % list.length]; } }
     P.next[tid] = (P.next[tid] + 1) % list.length;
-    P.end = t0 + spela(P.ctx, P.bus, index, t0); P.lat = SONGS[index].namn;
+    P.end = t0 + spela(P.ctx, P.bus, index, t0, first ? 2 : 0); P.lat = SONGS[index].namn; P.played = true;
+    try { localStorage.setItem(LAST_KEY, P.lat); } catch (e) { /* only this time */ }
   }
 }
 function stop() {
