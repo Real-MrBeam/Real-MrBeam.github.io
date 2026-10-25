@@ -435,7 +435,9 @@ function centerOn(wx, wy, snap){
 }
 
 /* ---------- logik ---------- */
-const edgeOpen = e => !e.gate || S.stars >= e.gate.req;
+// In test mode (?debug, not the looking mode) every gate is open, so Peter can go everywhere (2026-10-25)
+const gateOpen = g => S.stars >= g.req || (TEST && !VIEW);
+const edgeOpen = e => !e.gate || gateOpen(e.gate);
 const otherEnd = (e, id) => e.a === id ? e.b : e.a;
 // A hidden stop (a secret fishing place) cannot be seen or walked to until an adventure has found it. In debug mode it shows.
 const hiddenNode = id => !!NODES[id].hidden && !DEBUG.mode && !S.hittat.includes(id);
@@ -715,7 +717,7 @@ function frame(now){
   for (const id in NODES) if (nodeShown(id)) drawNode(NODES[id], now, reach.has(id));
   for (const g of GATES){
     if (!gateShown(g)) continue;
-    const open = S.stars >= g.req;
+    const open = gateOpen(g);
     const a = gateAnim.get(g);
     let img = open ? GATE_OPEN : GATE_CLOSED, shake = 0;
     if (a){ const t = (now - a) / 1000; if (t < .6){ img = GATE_CLOSED; shake = (Math.floor(t * 30) % 2) ? 1 : -1; } else if (t > 2) gateAnim.delete(g); }
@@ -748,7 +750,7 @@ function frame(now){
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   const sx = wx => wx * scaleDev - ox, sy = wy => wy * scaleDev - oy;
   for (const g of GATES){
-    if (S.stars >= g.req || !gateShown(g)) continue;
+    if (gateOpen(g) || !gateShown(g)) continue;
     pill(sx(g.x*TS + 8), sy(g.y*TS - 6), [LOCK, String(g.req), STAR], { color: '#fee761' });
   }
   // What things cost is not shown on the map (Peter 2026-10-18), only in the panel. The stars a gate needs are shown above.
@@ -1585,7 +1587,7 @@ function renderPanel(view){
     if (sp.includes('~')) h += fishBlock(d.fiske);
     h += `<div class="roads"><button class="btn alt" type="button" data-banaut="1">${esc(T.tillbaka)}</button></div><p class="sub" style="text-transform:none;letter-spacing:0">${esc(T.styr)}</p></div>`;
   } else if (view.type === 'gate'){
-    const g = view.gate, e = g.edge, open = S.stars >= g.req;
+    const g = view.gate, e = g.edge, open = gateOpen(g);
     const names = `${NODES[e.a].name} och ${NODES[e.b].name}`;
     const pct = Math.min(100, Math.round(S.stars / g.req * 100));
     const left = g.req - S.stars;
@@ -1636,7 +1638,7 @@ panel.addEventListener('click', ev => {
   else if (b.dataset.fiska) startFishing(b.dataset.fiska);
   else if (b.dataset.sov) sleep();
   else if (b.dataset.vakt) talkGuard();
-  else if (b.dataset.bana){ const [lid, side] = b.dataset.bana.split(':'); enterLevel(lid, side); }
+  else if (b.dataset.bana){ const [lid, side] = b.dataset.bana.split(':'); enterLevel(lid, side); showMap(); }   // on a phone the map is above the panel
   else if (b.dataset.banaut && LEVEL) levelWalkTo(...LEVEL.pos[LEVEL.door]);
   else if (b.dataset.brev) readLetter2();
   else if (b.dataset.fbrev) readFishLetter();
@@ -2677,7 +2679,7 @@ function tapAt(wx, wy){
   const tx = Math.floor(wx / TS), ty = Math.floor(wy / TS);
   if (pendingTickets().length && tx === CHEST_AT.x && ty === CHEST_AT.y){ if (S.node === CHEST_AT.node && !boy.route) openChest(); else { walkTo(CHEST_AT.node); toast('Kistan står vid Skolan.'); } return; }
   for (const id in NODES){ const n = NODES[id]; if (nodeShown(id) && Math.abs(wx - (n.x*TS + 8)) < 13 && Math.abs(wy - (n.y*TS + 6)) < 14){ walkTo(id); return; } }
-  for (const g of GATES){ if (gateShown(g) && tx === g.x && (ty === g.y || ty === g.y - 1)){ showGate(g); if (S.stars < g.req) toast(`Porten öppnas vid ${g.req} stjärnor. Du har ${S.stars}.`); return; } }
+  for (const g of GATES){ if (gateShown(g) && tx === g.x && (ty === g.y || ty === g.y - 1)){ showGate(g); if (!gateOpen(g)) toast(`Porten öppnas vid ${g.req} stjärnor. Du har ${S.stars}.`); return; } }
   for (const p of PLOTS){ if (seenAt(p.x + 1, p.y + 1) && tx >= p.x && tx <= p.x + 2 && ty >= p.y - 1 && ty <= p.y + 2){ goPlot(p); return; } }
 }
 addEventListener('keydown', e => { if (fishing && (fishing.phase === 'vanta' || fishing.phase === 'nu') && (e.key === ' ' || e.key === 'Enter')){ e.preventDefault(); pull(); } });
