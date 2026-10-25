@@ -2482,7 +2482,8 @@
         "fiskarNatt": [
           "mansik",
           "mansik",
-          "lysal"
+          "lysal",
+          "mankungen"
         ]
       },
       "stenblocket": {
@@ -2826,6 +2827,18 @@
         "bara": "glimmerskeden",
         "sallan": 0.3,
         "max": 1
+      },
+      "mankungen": {
+        "namn": "Månkungen",
+        "text": "En jättelik månsik med en ryggfena som en liten guldkrona. Ingen har sett en större.",
+        "vikt": [
+          3,
+          5
+        ],
+        "kamp": "tung",
+        "bara": "glimmerskeden",
+        "sallan": 0.3,
+        "max": 1
       }
     },
     "texter": {
@@ -2885,7 +2898,8 @@
         "sik",
         "grottfisk",
         "roding",
-        "gammelgadda"
+        "gammelgadda",
+        "mankungen"
       ],
       "flugspo": [
         "oring",
