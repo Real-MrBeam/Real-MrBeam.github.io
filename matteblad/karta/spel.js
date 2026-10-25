@@ -2381,15 +2381,6 @@ function pull(){
     stopFishing(); giveAnimal(rule.djur, rule.text, () => showNode());
     return saveSoon();
   }
-  // now and then (fiske.forloratChans) something he locked himself out of comes up instead (Peter 2026-10-25)
-  const lost = lockedOut();
-  if (lost.length && Math.random() < (FISKE.forloratChans || 0)){
-    const id = lost[Math.floor(Math.random() * lost.length)], it = SAKER[id];
-    S.saker.push(id); renderPack(); saveSoon(); stopFishing();
-    sparkle(boy.x + 8, boy.y + 2, 26, '#fee761');
-    if (it.djur && !S.djur.includes(it.djur)) return giveAnimal(it.djur, `${s.fynd} ${FISKE.texter.forlorat}`, () => showNode());
-    return openModal([{ icon: itemPicture(id), title: it.namn, text: `${s.fynd} ${it.text}`, reward: `${FISKE.texter.forlorat} Lades i väskan.`, button: 'Till kartan' }], () => showNode());
-  }
   const finds = (FISKE.fynd || []).filter(id => !S.saker.includes(id) && !S.salt['fynd:' + id] && (!FISKE.fyndPlatser || !FISKE.fyndPlatser[id] || FISKE.fyndPlatser[id].includes(fz.plats)));
   if (finds.length && Math.random() < .2){
     const id = finds[Math.floor(Math.random() * finds.length)]; S.saker.push(id); renderPack(); saveSoon(); stopFishing();
@@ -2406,30 +2397,6 @@ function pull(){
 }
 // Every fish gets a weight within its kind (fiske.fiskar vikt, kg). Most are small, a big one is rare; with a bait for big fish
 // (saker stor) a big one is more common.
-// What he has locked himself out of by a choice: the gift of the person he did not choose and the other gift he could have
-// picked, what the other one sells or swaps, and what the endings of a played adventure that he did not reach give. Things
-// that can still be bought or fished up, and animals he already has, are left out.
-function lockedOut(){
-  const H = berattelse.handel || {}, can = new Set([...Object.keys(H.saljer || {}), ...Object.keys(H.agn || {}), ...Object.keys((VIRA && VIRA.agn) || {}), ...(FISKE.fynd || []),
-    ...Object.values(FISKE.platser).filter(p => p.lan).map(p => p.lan.ger)]);
-  const out = new Set();
-  for (const p of PLOTS){
-    if (!p.bygg || !S.built[p.id]) continue;
-    const v = valOf(p);
-    for (const o of BYGG[p.bygg].val){
-      if (o === v){ if (S.handlat[p.id]) for (const id of o.gava || []) if (id !== S.handlat[p.id]) out.add(id); continue; }
-      for (const id of [...(o.gava || []), o.extra, o.byte && o.byte.ger]) if (id) out.add(id);
-    }
-  }
-  for (const key of Object.keys(S.stopp)){
-    const d = stopDef(key); if (!d) continue;
-    for (const st of Object.values(d.aventyr.steg)) for (const o of [...st.val, ...(st.fyndVal ? [st.fyndVal] : [])]){
-      if (o.ge) out.add(o.ge);
-      if (o.till && typeof o.till === 'object') for (const k of ['agn', 'fynd', 'extra']) if (o.till[k]) out.add(o.till[k]);
-    }
-  }
-  return [...out].filter(id => SAKER[id] && !S.saker.includes(id) && !S.agnAnvant.includes(id) && !can.has(id) && !(SAKER[id].djur && S.djur.includes(SAKER[id].djur)));
-}
 const weigh = (id, big) => { const [lo, hi] = FISKE.fiskar[id].vikt; return Math.round((lo + (hi - lo) * Math.random() ** (big ? 1.2 : 2)) * 100) / 100; };
 const kgText = kg => kg.toFixed(2).replace('.', ',');
 // The fish is up: into the fish book (three of a kind), and the heaviest of each kind is his record (S.rekord). A fourth
