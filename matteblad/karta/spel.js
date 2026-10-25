@@ -856,8 +856,9 @@ function enterLevel(lid, side){
   }));
   markLevelSeen();
   cam.follow = true; cam.focus = null; centerOn(boy.x + 8, boy.y + 8, true);
-  $('#dpad').hidden = false; musicSync(); toast(litLight() ? d.in : d.texter.inMorkt);
-  showNode();
+  // the panel first, so he can walk at once even if something after it fails
+  $('#dpad').hidden = false; showNode();
+  toast(litLight() ? d.in : d.texter.inMorkt); musicSync();
 }
 function leaveLevel(door){
   const d = LEVEL.def, node = door === 'X' ? d.utgang : d.ingang;
@@ -1349,7 +1350,7 @@ function musicButton(){
   const b = $('#btnMusik'), on = !!(window.Musik && Musik.spelar);
   $('#icoMusik').src = SPEAKER_URLS[on ? 0 : 1]; b.title = on ? 'Stäng av musiken' : 'Sätt på musiken'; b.setAttribute('aria-pressed', String(on));
 }
-function musicSync(){ if (window.Musik){ Musik.natt(!!S.natt); Musik.grotta(!!LEVEL); } }   // Droppsten, the cave song, in a level
+function musicSync(){ if (window.Musik){ Musik.natt(!!S.natt); if (Musik.grotta) Musik.grotta(!!LEVEL); } }   // Droppsten, the cave song, in a level (an older musik.js has no grotta)
 function firstGesture(ev){
   for (const t of ['pointerdown', 'touchend', 'click', 'keydown']) removeEventListener(t, firstGesture);
   if ((ev.target.closest && ev.target.closest('#btnMusik')) || !window.Musik || !musicWanted()) return;
