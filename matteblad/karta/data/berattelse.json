@@ -2362,10 +2362,9 @@
               {
                 "label": "Sitt kvar och låtsas inte märka den",
                 "kostnad": 0,
-                "text": "Geten lägger huvudet på din axel. I munnen har den ett gammalt silvermynt som den har hittat uppe i berget. Den får heta Bjällra.",
+                "text": "Geten nosar på dig, tappar något blankt i sanden och skuttar sedan iväg upp i berget. Det är ett gammalt silvermynt.",
                 "till": {
-                  "djur": "get",
-                  "extra": "silvermynt"
+                  "fynd": "silvermynt"
                 }
               }
             ]
@@ -2384,10 +2383,9 @@
               {
                 "label": "Titta ut över dalen tillsammans",
                 "kostnad": 0,
-                "text": "Ni sitter länge och tittar. I en skreva bredvid geten blänker en stjärnkristall. När du klättrar ner följer geten med. Den får heta Bjällra.",
+                "text": "Ni sitter länge och tittar. I en skreva blänker en stjärnkristall, och när du sträcker dig efter den hoppar geten iväg upp i berget. Bjällran klingar längre och längre bort.",
                 "till": {
-                  "djur": "get",
-                  "extra": "stjarnkristall"
+                  "fynd": "stjarnkristall"
                 }
               }
             ]
@@ -3229,10 +3227,9 @@
               {
                 "label": "Vänta tyst",
                 "kostnad": 0,
-                "text": "Efter en stund släpper fladdermusen grenen och landar på din axel. Den piper som en Fladder, så det får den heta.",
+                "text": "Du väntar tyst. Fladdermusen släpper grenen och flyger ut i natten. På grenen där den hängde glittrar en daggpärla.",
                 "till": {
-                  "djur": "fladder",
-                  "extra": "glodkol"
+                  "fynd": "daggparla"
                 }
               }
             ]
@@ -3457,10 +3454,9 @@
               {
                 "label": "Kliv upp på relingen och titta in",
                 "kostnad": 0,
-                "text": "På däcket ligger en guldring och blänker i lanternans sken. Fågeln flyger ner och sätter sig på din axel. Den får heta Lova.",
+                "text": "På däcket ligger en guldring och blänker i lanternans sken. Du tar den, och när du kliver ner flyger fågeln ut över sjön mot skeppet.",
                 "till": {
-                  "djur": "lom",
-                  "extra": "guldring"
+                  "fynd": "guldring"
                 }
               }
             ],

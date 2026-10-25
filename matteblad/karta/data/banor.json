@@ -138,10 +138,9 @@
                 {
                   "label": "Låt den känna",
                   "kostnad": 0,
-                  "text": "En liten vit salamander klättrar upp på din hand. Under den, i sanden, glittrar en sten. Salamandern får heta Olle.",
+                  "text": "Något nuddar dina fingrar och är borta. Där det nuddade glittrar en sten i sanden, och salamandern simmar ner i det svarta djupet.",
                   "till": {
-                    "djur": "olm",
-                    "extra": "glittersten"
+                    "fynd": "glittersten"
                   }
                 },
                 {
