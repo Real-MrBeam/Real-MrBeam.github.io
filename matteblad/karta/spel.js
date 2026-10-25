@@ -1344,7 +1344,7 @@ function musicButton(){
   const b = $('#btnMusik'), on = !!(window.Musik && Musik.spelar);
   $('#icoMusik').src = SPEAKER_URLS[on ? 0 : 1]; b.title = on ? 'Stäng av musiken' : 'Sätt på musiken'; b.setAttribute('aria-pressed', String(on));
 }
-function musicSync(){ if (window.Musik) Musik.natt(!!S.natt || !!LEVEL); }   // the calm night song in a cave too
+function musicSync(){ if (window.Musik){ Musik.natt(!!S.natt); Musik.grotta(!!LEVEL); } }   // Droppsten, the cave song, in a level
 function firstGesture(ev){
   for (const t of ['pointerdown', 'touchend', 'click', 'keydown']) removeEventListener(t, firstGesture);
   if ((ev.target.closest && ev.target.closest('#btnMusik')) || !window.Musik || !musicWanted()) return;

@@ -9,6 +9,7 @@
 //   Musik.stop()
 //   Musik.paus(true | false)   pauses while the page is hidden
 //   Musik.natt(true | false)   switches between the songs of the day and the songs of the night
+//   Musik.grotta(true | false)   the cave song while he is in a level
 //   Musik.spela(ctx, dest, index, t0)   schedules one whole song on any AudioContext (also an OfflineAudioContext), returns its length
 (function (root) {
 'use strict';
@@ -142,10 +143,12 @@ const SERENAD = (() => {
     ljud: { lead: { klang: 'flojt', vol: .06 }, arp: { klang: 'gitarr', vol: .03, oktav: 4, takt: 1 }, bas: { vol: .15 }, eko: .3 },
   };
 })();
-STJARNNATT.ljud.lead.klang = 'klocka';   // Stjärnnatt rings like a music box (Peter 2026-10-25; the organ is kept for the caves)
+STJARNNATT.ljud.lead.klang = 'klocka';   // Stjärnnatt rings like a music box (Peter 2026-10-25)
+// Droppsten: Stjärnnatt on a soft organ, the song of the caves (Peter 2026-10-25). It plays only inside a level (Musik.grotta).
+const DROPPSTEN = { ...STJARNNATT, namn: 'Droppsten', tid: 'grotta', ljud: { ...STJARNNATT.ljud, lead: { ...STJARNNATT.ljud.lead, klang: 'orgel' }, arp: { ...STJARNNATT.ljud.arp, klang: 'orgel' } } };
 MORGONDAGG.ljud.lead.klang = 'marimba'; MORGONDAGG.ljud.arp.klang = 'marimba';   // Morgondagg on a marimba (Peter 2026-10-25)
 GLIMMERDAL.tid = 'dag'; STJARNNATT.tid = 'natt';
-const SONGS = [GLIMMERDAL, STJARNNATT, ANGSDANS, MANSKEN, MORGONDAGG, NATTUGGLAN, SERENAD];
+const SONGS = [GLIMMERDAL, STJARNNATT, ANGSDANS, MANSKEN, MORGONDAGG, NATTUGGLAN, SERENAD, DROPPSTEN];
 
 // ---------- the instruments
 const waves = new WeakMap();
@@ -318,7 +321,7 @@ function tick() {
     const t0 = now + (P.end ? 2 : .1);
     // the songs of the day, or of the night, take turns. The first one after the page has loaded is never the one that was
     // last heard (remembered in the browser), and it begins with its tune, without the quiet bars at the start (Peter 2026-10-25)
-    const tid = P.natt ? 'natt' : 'dag', list = SONGS.map((s, i) => i).filter(i => SONGS[i].tid === tid);
+    const tid = P.grotta ? 'grotta' : P.natt ? 'natt' : 'dag', list = SONGS.map((s, i) => i).filter(i => SONGS[i].tid === tid);
     const first = !P.played;
     let index = list[P.next[tid] % list.length];
     if (first && list.length > 1){ let last = null; try { last = localStorage.getItem(LAST_KEY); } catch (e) { /* no memory */ } if (SONGS[index].namn === last) { P.next[tid]++; index = list[P.next[tid] % list.length]; } }
@@ -335,10 +338,16 @@ function stop() {
   setTimeout(() => { if (!P.on) P.ctx.suspend(); }, 350);
 }
 // The song that is playing fades out, and the right one for day or night starts
+// In a cave (a level) the cave songs play, whatever the time of day
+function grotta(v) {
+  v = !!v; if (!!P.grotta === v) return;
+  P.grotta = v;
+  if (P.ctx){ const old = P.bus; P.bus = null; P.end = 0; if (old) { const t = P.ctx.currentTime; old.gain.setValueAtTime(old.gain.value, t); old.gain.linearRampToValueAtTime(0, t + .8); setTimeout(() => old.disconnect(), 1000); } tick(); }
+}
 function natt(v) {
   v = !!v; if (P.natt === v) return;
   P.natt = v;
-  if (!P.ctx) return;
+  if (!P.ctx || P.grotta) return;
   const old = P.bus; P.bus = null; P.end = 0;
   if (old) { const t = P.ctx.currentTime; old.gain.setValueAtTime(old.gain.value, t); old.gain.linearRampToValueAtTime(0, t + .8); setTimeout(() => old.disconnect(), 1000); }
   tick();
@@ -383,5 +392,5 @@ function flojt(index) {
   return dur;
 }
 
-root.Musik = { flojt, nasta, antalFlojt: FLOJT.length, start, stop, paus, spela, natt, get spelar() { return P.on; }, get lat() { return P.lat || ''; }, lattar: SONGS.map(s => s.namn) };
+root.Musik = { flojt, nasta, grotta, antalFlojt: FLOJT.length, start, stop, paus, spela, natt, get spelar() { return P.on; }, get lat() { return P.lat || ''; }, lattar: SONGS.map(s => s.namn) };
 })(typeof window !== 'undefined' ? window : globalThis);
