@@ -28,8 +28,7 @@
     "sjo": {
       "namn": "Sjöviken",
       "text": "En vik där vattnet ligger blankt och stilla. Vassen vajar längs stranden.",
-      "rykte": "Folk säger att något stort simmar runt i sjön och gömmer sig i Vassen.",
-      "rykteNatt": "Folk säger att det lysande skeppet kommer närmast land vid Sjöviken, och att något ropar från det om nätterna."
+      "natt": "Ute på sjön glider ett blått ljus, närmare land än det brukar. Något ropar därute."
     },
     "fiske": {
       "namn": "Fiskeläget",
@@ -77,7 +76,7 @@
       "namn": "Södra bron",
       "text": "En bro över älven där strömmen går lugn. Ett bra ställe att fiska på.",
       "rykte": "Under Södra bron står abborrarna i stim, och längre ner lurar gäddan.",
-      "rykteNatt": "Folk säger att det lyser grönt i leran under Södra bron om nätterna."
+      "natt": "Bron står svart mot himlen. Under den lyser det grönt i leran."
     },
     "norrabron": {
       "namn": "Norra bron",
@@ -106,15 +105,12 @@
     "berget": {
       "namn": "Gamla gruvan",
       "text": "Under bergen går en gammal gruva in. Därinne är det becksvart.",
-      "natt": "Bergen står svarta mot himlen, och gruvan är ännu svartare.",
-      "rykte": "Folk säger att det rasar sten i den gamla gruvan, och att en vakt står vid öppningen så att ingen går in."
+      "natt": "Bergen står svarta mot himlen, och gruvan är ännu svartare."
     },
     "bakom": {
       "namn": "Bakom berget",
-      "text": "En liten sandstrand mellan berget och vattnet. I sanden syns bara fåglarnas spår.",
-      "natt": "Stranden bakom berget ligger tyst, och vattnet blänker.",
-      "rykte": "Folk säger att det klingar uppe i berget bakom gruvan, som en liten bjällra.",
-      "rykteNatt": "Folk säger att någon i en grå kappa går på stranden bakom berget om nätterna."
+      "text": "En liten sandstrand mellan berget och vattnet. Uppe i berget klingar en liten bjällra.",
+      "natt": "Stranden bakom berget ligger tyst, och vattnet blänker."
     }
   },
   "portar": {
@@ -1138,16 +1134,35 @@
                 "label": "Titta på det avslitna repet",
                 "kostnad": 0,
                 "text": "Repet är inte avslitet. Änden är svart och bränd, som om något mycket varmt hade dragit i det.",
-                "till": "c"
+                "till": "b"
               }
             ]
           },
           "b": {
             "p": "siri",
-            "t": "Varje natt seglar hon förbi, men hon hittar inte in i viken. Hon behöver ett ljus att styra mot. Men badvakten där borta vill bygga en brygga på samma plats.",
+            "t": "Jag heter Siri. Varje natt seglar mitt skepp förbi, men hon hittar inte in i viken. Hon behöver ett ljus att styra mot, en fyr. Men badvakten där borta vill bygga en brygga på samma plats.",
             "val": [
               {
-                "label": "Kasta stjärnstoft mot himlen",
+                "label": "Gå bort till badvakten",
+                "kostnad": 0,
+                "text": "Du går längs stranden mot mannen med visselpipan.",
+                "till": "c"
+              },
+              {
+                "label": "Fråga om repet",
+                "kostnad": 0,
+                "p": "siri",
+                "text": "Det var mitt skepp som slet sig. Hon heter Stjärnsvalan, och hon har seglat själv ända sedan stjärnorna föll.",
+                "till": "c"
+              }
+            ]
+          },
+          "c": {
+            "p": "bertil",
+            "t": "Jag heter Bertil och är badvakt. Barnen badar här varje dag, men det finns ingen brygga att hoppa från. En riktig badbrygga, det är vad Sjöviken behöver.",
+            "val": [
+              {
+                "label": "Kasta stjärnstoft mot himlen för Siris fyr",
                 "kostnad": 3,
                 "text": "Stjärnstoftet stiger högt över stranden och blir till ett ljus som sveper runt, runt. Siri sänker kikaren. ”Precis så. En fyr.”",
                 "till": {
@@ -1155,49 +1170,11 @@
                 }
               },
               {
-                "label": "Gå bort till badvakten",
-                "kostnad": 0,
-                "text": "Du går längs stranden mot mannen med visselpipan.",
-                "till": "d"
-              }
-            ]
-          },
-          "c": {
-            "t": "En bit bort längs stranden står en man med en visselpipa runt halsen och vinkar åt dig.",
-            "val": [
-              {
-                "label": "Gå till mannen med visselpipan",
-                "kostnad": 0,
-                "text": "Du går längs stranden mot honom.",
-                "till": "d"
-              },
-              {
-                "label": "Fråga kvinnan med kikaren om repet",
-                "kostnad": 0,
-                "p": "siri",
-                "text": "Det var mitt skepp som slet sig. Hon heter Stjärnsvalan, och hon har seglat själv ända sedan stjärnorna föll.",
-                "till": "b"
-              }
-            ]
-          },
-          "d": {
-            "p": "bertil",
-            "t": "Jag heter Bertil och är badvakt. Barnen badar här varje dag, men det finns ingen brygga att hoppa från. En riktig badbrygga, det är vad Sjöviken behöver.",
-            "val": [
-              {
-                "label": "Kasta stjärnstoft på vattnet",
+                "label": "Kasta stjärnstoft på vattnet för Bertils brygga",
                 "kostnad": 3,
                 "text": "Planka efter planka stiger upp ur vattnet och lägger sig i rad ut i sjön. Bertil blåser glatt i visselpipan.",
                 "till": {
                   "bygg": "badbrygga"
-                }
-              },
-              {
-                "label": "Kasta stjärnstoft mot himlen för skeppet",
-                "kostnad": 3,
-                "text": "Bertil kliar sig i nacken. ”Ett skepp som seglar själv? Då behövs nog ett ljus mer än en brygga.” Stoftet stiger och blir till ett ljus som sveper runt över viken.",
-                "till": {
-                  "bygg": "fyr"
                 }
               }
             ]
@@ -2519,7 +2496,8 @@
           "mort",
           "mort",
           "abborre",
-          "gammelgadda"
+          "gammelgadda",
+          "braxen"
         ],
         "fiskarNatt": [
           "lake",
@@ -2529,18 +2507,6 @@
         "vanta": [
           2500,
           6000
-        ]
-      },
-      "sjo": {
-        "fiskar": [
-          "braxen",
-          "braxen",
-          "sik",
-          "abborre"
-        ],
-        "vanta": [
-          3000,
-          6500
         ]
       },
       "grotta": {
@@ -2556,7 +2522,8 @@
         "fiskar": [
           "roding",
           "roding",
-          "oring"
+          "oring",
+          "sik"
         ],
         "vanta": [
           3000,
@@ -2607,7 +2574,7 @@
         ],
         "text": "Vassen böjer sig. En puckel, och sedan en till, glider fram genom vattnet. Ett vänligt huvud på en lång hals tittar upp och nosar nyfiket på det du har med dig.",
         "rykten": [
-          "plats:sjo:dag",
+          "rykte:sjoodjur",
           "sak:kraftbur",
           "sak:blabar",
           "sak:snackor",
@@ -3004,8 +2971,7 @@
     "fyndPlatser": {
       "fiskehatt": [
         "vassen",
-        "udden",
-        "sjo"
+        "udden"
       ],
       "stjarnskarva": [
         "angen"
@@ -3744,7 +3710,8 @@
     "flojt": "Nattfiskaren skar vassen till flöjten vid Norra bron. Där spelar någon fiol om nätterna, samma melodi varje gång.",
     "stjarnsvalan": "Siri säger att det lysande skeppet är hennes Stjärnsvalan. Om nätterna kommer det närmast land vid Sjöviken.",
     "gammelgaddan": "Nattfiskaren säger att Gammelgäddan vid Udden bara hugger på det som blänker.",
-    "mansik": "Vira säger att månsiken i Vassen bara nappar på hennes månbete."
+    "mansik": "Vira säger att månsiken i Vassen bara nappar på hennes månbete.",
+    "sjoodjur": "Bertil säger att något stort simmar runt i sjön och gömmer sig i Vassen."
   },
   "personRykten": {
     "vira": [
@@ -3753,6 +3720,9 @@
     ],
     "siri": [
       "rykte:stjarnsvalan"
+    ],
+    "bertil": [
+      "rykte:sjoodjur"
     ]
   },
   "ryktesInfo": {
@@ -3868,12 +3838,6 @@
         "stopp:natt:host"
       ]
     },
-    "plats:sjo:dag": {
-      "pekar": "vassen",
-      "klar": [
-        "djur:sigge"
-      ]
-    },
     "plats:angen:natt": {
       "pekar": "angen",
       "natt": true,
@@ -3964,12 +3928,6 @@
       "pekar": "norrabron",
       "natt": true
     },
-    "plats:berget:dag": {
-      "pekar": "berget",
-      "klar": [
-        "hittat:bakom"
-      ]
-    },
     "sak:gratyg": {
       "pekar": "berget"
     },
@@ -3978,33 +3936,6 @@
       "natt": true,
       "klar": [
         "stopp:natt:sjo"
-      ]
-    },
-    "plats:sjo:natt": {
-      "pekar": "sjo",
-      "natt": true,
-      "klar": [
-        "stopp:natt:sjo"
-      ]
-    },
-    "plats:sodrabron:natt": {
-      "pekar": "sodrabron",
-      "natt": true,
-      "klar": [
-        "stopp:natt:sodrabron"
-      ]
-    },
-    "plats:bakom:dag": {
-      "pekar": "bakom",
-      "klar": [
-        "djur:get"
-      ]
-    },
-    "plats:bakom:natt": {
-      "pekar": "bakom",
-      "natt": true,
-      "klar": [
-        "stopp:natt:bakom"
       ]
     },
     "sak:brantrep": {
@@ -4024,6 +3955,12 @@
       "natt": true,
       "klar": [
         "fisk:mansik"
+      ]
+    },
+    "rykte:sjoodjur": {
+      "pekar": "vassen",
+      "klar": [
+        "djur:sigge"
       ]
     }
   },
