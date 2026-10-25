@@ -168,7 +168,17 @@ const GATE_OPEN = sprite([...GATE_TOP,
   ".oSso......oSso.", ".oSso......oSso.", ".oSso......oSso.", ".oSso......oSso.", ".osso......osso.", ".oooo......oooo."], GATEPAL);
 
 /* ---------- världen: byggs av varld.js ur data/karta.json och data/berattelse.json ---------- */
-const { M, inb, at, key, occ, OBJ, put, NODES, EDGES, GATES, PLOTS, ITEMS, EMPTY_PLOT, CASTLE, CASTLE_X, CASTLE_Y, FLAGS, waterD } = Varld.byggVarld(karta, berattelse);
+// The pond on Ängen is not there at the start. It comes the first night after something is built in Hemmet, when stars fall over
+// Ängen and the ground shakes (Peter 2026-10-25, berattelse.json dammen). The map is built without the pond, and setPond copies
+// the ground of the world with the pond into it.
+const WORLD = Varld.byggVarld({ ...karta, vatten: { ...karta.vatten, dammar: [] } }, berattelse), WET = Varld.byggVarld(karta, berattelse);
+const { M, inb, at, key, occ, OBJ, put, NODES, EDGES, GATES, PLOTS, ITEMS, EMPTY_PLOT, CASTLE, CASTLE_X, CASTLE_Y, FLAGS } = WORLD;
+let waterD = WORLD.waterD;
+const DRY_M = M.map(r => r.slice());
+function setPond(on){
+  M.forEach((row, y) => row.splice(0, row.length, ...(on ? WET.M[y] : DRY_M[y])));
+  waterD = on ? WET.waterD : WORLD.waterD; WFIELD = null; WATER_STARS = null;
+}
 
 /* ---------- tileset ---------- */
 const tiles = new Image();
@@ -363,7 +373,7 @@ const START = () => ({
   stars: REAL ? REAL.stars : startData.stjarnor, coins: REAL ? REAL.stoft : startData.stjarnstoft, node: startData.plats,
   built: Object.fromEntries(startData.byggt.map(id => [id, true])),
   valda: {}, saker: [], steg: {}, handlat: {}, djur: [], fram: [], stopp: {}, hittat: [], spent: 0, kistor: [], agnAnvant: [], agnLager: {}, fiskbok: {}, rekord: {}, namn: {}, bytt: {}, salt: {}, pa: {}, rykten: [],
-  sett: new Uint8Array(MW*MH),
+  sett: new Uint8Array(MW*MH), damm: false,
   log: REAL ? REAL.handelser.slice() : startData.logg.map(r => ({ typ: 'runa', amne: r.amne, procent: Math.round(r.poang / r.max * 100), stjarnor: r.stjarnor, bonus: r.bonus })),
   testIdx: 0,
 });
@@ -675,7 +685,7 @@ function frame(now){
   if (Math.abs(tx - cam.x) < .05) cam.x = tx; if (Math.abs(ty - cam.y) < .05) cam.y = ty;
 
   if (now - lastWater > 380){ terrainFrame = (terrainFrame + 1) % 3; lastWater = now; }
-  const ox = Math.round(cam.x * scaleDev), oy = Math.round(cam.y * scaleDev);
+  const sh = shake(now), ox = Math.round((cam.x + sh) * scaleDev), oy = Math.round((cam.y + sh * .6) * scaleDev);
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.fillStyle = FOG_COLOR; ctx.fillRect(0, 0, cv.width, cv.height);
   ctx.setTransform(scaleDev, 0, 0, scaleDev, -ox, -oy);
@@ -729,6 +739,7 @@ function frame(now){
   nightLevel += ((S.natt ? 1 : 0) - nightLevel) * Math.min(1, dt * 1.6);
   if (Math.abs(nightLevel - (S.natt ? 1 : 0)) < .005) nightLevel = S.natt ? 1 : 0;
   if (nightLevel > 0) drawNight(now, nightLevel);
+  drawStarfall(now, dt);
   // etiketter i skärmskala
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   const sx = wx => wx * scaleDev - ox, sy = wy => wy * scaleDev - oy;
@@ -864,7 +875,7 @@ function levelPicture(){
   for (let cy = 0; cy < L.h; cy++) for (let cx = 0; cx < L.w; cx++){
     const ch = lvCell(cx, cy), px = cx * TS, py = cy * TS;
     if (ch === '#'){
-      if (near(cx, cy)) tile(x, wall(cx, cy + 1) ? B.vagg : B.vaggFram, px, py);
+      if (near(cx, cy)) tile(x, B.vagg, px, py);   // the same rock all round (Peter 2026-10-25: no bands along the upper walls)
       else { x.fillStyle = '#140e12'; x.fillRect(px, py, TS, TS); }
       continue;
     }
@@ -879,10 +890,45 @@ function levelPicture(){
       continue;
     }
     tile(x, B.golv, px, py);
-    if (wall(cx, cy - 1)) tile(x, B.golvSkugga, px, py);
-    if (B[ch]) tile(x, B[ch], px, py);
+    if (ch === L.def.rals) drawRail(x, cx, cy, px, py);
+    else if (B[ch]) tile(x, B[ch], px, py);
   }
   return c;
+}
+// Mine rails (rals in banor.json, Peter 2026-10-25). A rail tile joins the rail tiles and openings next to it. Straight pieces
+// are the pack's own (bild ralsLodrat and ralsVagrat); the pack has no curves that can lie on the floor and no buffer, so those
+// are drawn here in the same colours: two joins at an angle make a curve, three a switch (straight on, and a curve towards the
+// way in), and where the rails end a wooden buffer with a red board stops them.
+const RAIL = { plank: '#a67557', plankM: '#905e43', plankD: '#4b3c39', railD: '#354951', rail: '#758276', railK: '#1d2c33', red: '#e43b44' };
+function drawRail(c, cx, cy, px, py){
+  const R = LEVEL.def.rals, B = LEVEL.def.bild, at = (dx, dy) => [R, 'E', 'X'].includes(lvCell(cx + dx, cy + dy));
+  const has = { up: at(0, -1), down: at(0, 1), left: at(-1, 0), right: at(1, 0) };
+  const ends = Object.keys(has).filter(k => has[k]);
+  c.save(); c.translate(px, py);
+  const straight = vertical => tile(c, vertical ? B.ralsLodrat : B.ralsVagrat, 0, 0);
+  const curve = (v, h, onTop) => {   // between up or down (v) and left or right (h): arcs round the shared corner of the tile
+    const ox = h === 'right' ? 16 : 0, oy = v === 'down' ? 16 : 0;
+    c.save(); c.beginPath(); c.rect(0, 0, 16, 16); c.clip();
+    c.lineCap = 'butt';
+    if (!onTop) for (let a = 0; a < Math.PI * 2; a += Math.PI / 10){
+      for (const [w, col] of [[3, RAIL.plankD], [2, RAIL.plank]]){ c.strokeStyle = col; c.lineWidth = w; c.beginPath(); c.moveTo(ox + Math.cos(a) * 1, oy + Math.sin(a) * 1); c.lineTo(ox + Math.cos(a) * 16, oy + Math.sin(a) * 16); c.stroke(); }
+    }
+    for (const r of [4, 13]) for (const [w, col] of [[3, RAIL.railK], [2, RAIL.railD], [1, RAIL.rail]]){ c.strokeStyle = col; c.lineWidth = w; c.beginPath(); c.arc(ox, oy, r, 0, Math.PI * 2); c.stroke(); }
+    c.restore();
+  };
+  const buffer = side => {   // a wooden buffer across the rails at the open side, with a red board
+    const box = { up: [1, 0, 14, 5], down: [1, 11, 14, 5], left: [0, 1, 5, 14], right: [11, 1, 5, 14] }[side];
+    c.fillStyle = RAIL.plankD; c.fillRect(...box);
+    c.fillStyle = RAIL.plank; c.fillRect(box[0] + 1, box[1] + 1, box[2] - 2, box[3] - 2);
+    c.fillStyle = RAIL.red; side === 'up' || side === 'down' ? c.fillRect(box[0] + 1, box[1] + 2, box[2] - 2, 2) : c.fillRect(box[0] + 2, box[1] + 1, 2, box[3] - 2);
+  };
+  const opp = { up: 'down', down: 'up', left: 'right', right: 'left' };
+  // a switch: the straight piece, and the rails of the curve on top of it
+  if (has.up && has.down){ straight(true); for (const h of ['left', 'right']) if (has[h]) curve('down', h, true); }
+  else if (has.left && has.right){ straight(false); for (const v of ['up', 'down']) if (has[v]) curve(v, 'left', true); }
+  else if (ends.length === 2) curve(has.up ? 'up' : 'down', has.left ? 'left' : 'right');
+  else if (ends.length === 1){ straight(ends[0] === 'up' || ends[0] === 'down'); buffer(opp[ends[0]]); }
+  c.restore();
 }
 function markLevelSeen(){
   if (!litLight()) return;
@@ -1098,6 +1144,47 @@ function drawScene(now){
   if (!S.stopp['natt:bakom'] && !S.steg['stopp:natt:bakom'] && seenAt(NODES.bakom.x, NODES.bakom.y)) drawRowboat(ROW_FROM.x, ROW_FROM.y, 0, false);
 }
 
+/* ---------- natten då stjärnorna föll ---------- */
+const DAMM = berattelse.dammen;
+const pondHidden = id => !!DAMM && id === DAMM.plats && !S.damm;
+let STARFALL = null;
+function maybeStarfall(){
+  if (!DAMM || S.damm || !S.natt || !S.built[DAMM.tomt] || STARFALL || !$('#modal').hidden) return;
+  const d = karta.vatten.dammar[0], t0 = performance.now() + 900;
+  STARFALL = { t0, x: d.cx * TS, y: d.cy * TS, stars: [], next: t0, pond: false };
+  lastRevealKey = ''; revealAround(STARFALL.x, STARFALL.y, 4); lastRevealKey = '';
+  cam.follow = false; cam.focus = { x: STARFALL.x, y: STARFALL.y, until: t0 + 6500 };
+}
+const shake = now => STARFALL && !reduceMotion && now > STARFALL.t0 + 2600 && now < STARFALL.t0 + 3900 ? Math.sin(now / 22) * 2.5 : 0;
+function drawStarfall(now, dt){
+  const F = STARFALL; if (!F || now < F.t0) return;
+  const t = now - F.t0;
+  // stars fall from the sky for a while, most of them towards the pond
+  while (t < 2800 && now >= F.next){
+    F.next += reduceMotion ? 300 : 70;
+    const tx = F.x + (Math.random() - .5) * (Math.random() < .7 ? 50 : 260), ty = F.y + (Math.random() - .5) * (Math.random() < .7 ? 24 : 160);
+    F.stars.push({ x: tx - 90 - Math.random() * 60, y: ty - 170 - Math.random() * 60, tx, ty, t: 0, life: .55 + Math.random() * .35 });
+  }
+  ctx.save(); ctx.globalCompositeOperation = 'lighter';
+  for (let i = F.stars.length - 1; i >= 0; i--){
+    const s = F.stars[i]; s.t += dt;
+    const k = Math.min(1, s.t / s.life), x = s.x + (s.tx - s.x) * k, y = s.y + (s.ty - s.y) * k, dx = (s.tx - s.x) / 40, dy = (s.ty - s.y) / 40;
+    if (k >= 1){ F.stars.splice(i, 1); for (let j = 0; j < 4; j++) FX.push({ k: 'spark', x, y, vx: (Math.random() - .5) * 40, vy: -10 - Math.random() * 25, t: 0, life: .5, col: '#fee761' }); continue; }
+    for (let j = 12; j >= 0; j--){ ctx.fillStyle = `rgba(255,${240 - j * 8},${170 - j * 8},${1 - j * .07})`; const s = j ? (j < 5 ? 2 : 1) : 4; ctx.fillRect(Math.round(x - dx * j * .8 - s / 2), Math.round(y - dy * j * .8 - s / 2), s, s); }
+    const g = ctx.createRadialGradient(x, y, 0, x, y, 10); g.addColorStop(0, 'rgba(255,240,180,.55)'); g.addColorStop(1, 'rgba(255,240,180,0)'); ctx.fillStyle = g; ctx.fillRect(x - 10, y - 10, 20, 20);
+  }
+  ctx.restore();
+  // the ground shakes, and the water comes up
+  if (!F.pond && t > 3100){
+    F.pond = true; S.damm = true; saveSoon(); setPond(true); buildTerrain(); maskDirty = true;
+    sparkle(F.x, F.y, 40, '#2ce8f5'); sparkle(F.x, F.y, 30); dust(F.x, F.y);
+  }
+  if (t > 4800 && !F.told){
+    F.told = true;
+    openModal([{ icon: iconURL(STAR, 8), title: DAMM.rubrik, text: DAMM.text, button: 'Fortsätt' }], () => { STARFALL = null; showNode(); });
+  }
+}
+
 /* ---------- natten ---------- */
 // At night the map turns blue (multiply), windows glow yellow, the torches flicker and stars twinkle in the water.
 // The lights are the tiles in LIGHT_TILES: where on the tile the light sits, and what kind of light it is.
@@ -1207,7 +1294,7 @@ function sleepBlock(){
 function sleep(){
   S.natt = !S.natt; saveSoon(); musicSync(); nattLabel();
   toast(S.natt ? 'Du somnade i stugan och vaknade när månen var uppe.' : 'Du sov gott, och nu är det morgon igen.');
-  showNode();
+  showNode(); maybeStarfall();
 }
 
 // Reading a rune or a scroll again: tap it in the list
@@ -1290,7 +1377,7 @@ const PLACE_PARTS = [
   { on: id => !!berattelse.handel && id === berattelse.handel.plats, block: () => tentBlock(), active: () => !!S.natt },   // a shop at night
   // fishing: at night a fishing place is light as long as he has something to fish with; by day while a water animal or a kind
   // he has not caught is left there
-  { on: id => !!FISKE.platser[id], block: id => fishBlock(id), active: id => S.natt ? myTools().length > 0 : FISKE.djur.some(r => r.plats === id && !S.djur.includes(r.djur)) || newFishAt(id) },
+  { on: id => !!FISKE.platser[id] && !pondHidden(id), block: id => fishBlock(id), active: id => S.natt ? myTools().length > 0 : FISKE.djur.some(r => r.plats === id && !S.djur.includes(r.djur)) || newFishAt(id) },
   { on: id => isDay() && !!(FISKE.platser[id] && FISKE.platser[id].lan), block: id => lanBlock(id), active: id => !S.saker.includes(FISKE.platser[id].lan.ger) },   // a shop
   { on: id => isDay() && LOCKA.some(r => r.plats === id), block: id => LOCKA.filter(r => r.plats === id).map(lureBlock).join(''), active: id => LOCKA.some(r => r.plats === id && !S.djur.includes(r.djur)) },
   { on: id => isDay() && id === CHEST_AT.node && pendingTickets().length > 0, block: () => `<div class="plot"><div><b>En guldkista står vid skolan</b></div><button class="btn" type="button" data-kista="1">Öppna kistan</button></div>`, active: () => true },
@@ -1436,7 +1523,7 @@ function startVira(seen){
 // shook and the pond came up on Ängen. At night he or she stands by the pond and gives him a nightcap (berattelse granne,
 // Peter 2026-10-22). Later the neighbour only looks at the pond, where something glows now and then (the star crucian).
 const GRANNE = berattelse.granne;
-const neighbour = () => { if (!GRANNE || !S.natt || !S.built[GRANNE.tomt]) return null; const p = PLOTS.find(q => q.id === GRANNE.tomt), v = p && valOf(p); return v && GRANNE.val[v.id] ? { ...GRANNE.val[v.id], person: v.person, namn: PERS[v.person].namn } : null; };
+const neighbour = () => { if (!GRANNE || !S.natt || !S.built[GRANNE.tomt] || pondHidden(GRANNE.plats)) return null; const p = PLOTS.find(q => q.id === GRANNE.tomt), v = p && valOf(p); return v && GRANNE.val[v.id] ? { ...GRANNE.val[v.id], person: v.person, namn: PERS[v.person].namn } : null; };
 function neighbourBlock(){
   const n = neighbour(), here = S.node === GRANNE.plats && !boy.route;
   return `<div class="plot"><div><b>${esc(GRANNE.rubrik.replace('{namn}', n.namn))}</b></div>${here ? `<button class="btn" type="button" data-granne="1">${esc(GRANNE.knapp.replace('{namn}', n.namn))}</button>` : ''}</div>`;
@@ -1472,7 +1559,7 @@ function renderPanel(view){
     const n = NODES[view.id];
     // No road buttons (Peter 2026-10-18): he walks by tapping the dots on the map, or with the arrow keys
     // a place can have its own text for the night (berattelse.json platser natt)
-    const ptext = S.natt && berattelse.platser[n.id] && berattelse.platser[n.id].natt || n.text;
+    const ptext = pondHidden(n.id) ? (S.natt ? DAMM.torrNatt : DAMM.torrText) : S.natt && berattelse.platser[n.id] && berattelse.platser[n.id].natt || n.text;
     if (!boy.route) setTimeout(() => hearRumor(`plats:${n.id}:${S.natt ? 'natt' : 'dag'}`), 600);
     h = `<span class="tag">Du är här</span><h2>${esc(n.name)}</h2><p>${esc(ptext)}</p><div class="panel-body">`;
     // Everything the place offers comes from PLACE_PARTS (the same list that colours the plate). At night everything is closed
@@ -1989,14 +2076,14 @@ function tellNews(){
   if (!REAL) return;
   const seen = seenEvents();
   newsQueue = REAL.handelser.filter(e => !seen.includes(e.id));
-  if (!introSeen()) showIntro(); else if (newsQueue.length) showNews();
+  if (!introSeen()) showIntro(); else if (newsQueue.length) showNews(); else maybeStarfall();
 }
 /* ---------- sparning ---------- */
 // His game is saved as spel.json in the private repo Real-MrBeam/stjarnkartan-data through GitHub's API. The key arrives
 // encrypted in the page (#lasNyckel) and opens with the password, like the portraits. Without the key nothing is saved.
 // Stars and stardust are never saved: they are counted from the runes and scrolls. Only what he has spent is saved.
 const SAVE = { repo: '', file: '', key: '', sha: null, timer: 0, off: false, loaded: false };
-const SAVED_FIELDS = ['node', 'built', 'valda', 'saker', 'steg', 'handlat', 'djur', 'fram', 'stopp', 'hittat', 'spent', 'kistor', 'agnAnvant', 'fiskbok', 'namn', 'bytt', 'intro', 'natt', 'salt', 'lasta', 'pa', 'tant', 'brev2', 'rykten', 'brevFiske', 'rekord', 'agnLager'];
+const SAVED_FIELDS = ['node', 'built', 'valda', 'saker', 'steg', 'handlat', 'djur', 'fram', 'stopp', 'hittat', 'spent', 'kistor', 'agnAnvant', 'fiskbok', 'namn', 'bytt', 'intro', 'natt', 'salt', 'lasta', 'pa', 'tant', 'brev2', 'rykten', 'brevFiske', 'rekord', 'agnLager', 'damm'];
 const b64 = text => { const bytes = new TextEncoder().encode(text); let s = ''; for (const b of bytes) s += String.fromCharCode(b); return btoa(s); };
 const unb64 = data => new TextDecoder().decode(Uint8Array.from(atob(data.replace(/\s/g, '')), c => c.charCodeAt(0)));
 function spend(n){ S.coins -= n; S.spent += n; }
@@ -2052,7 +2139,7 @@ function applySaved(data){
   if (typeof data.sett === 'string') S.sett = Uint8Array.from(atob(data.sett), c => c.charCodeAt(0));
   S.coins = (REAL ? REAL.stoft : startData.stjarnstoft) - S.spent;
   boy.route = null; placeBoy(S.node); plotAnim.clear(); petState.clear();
-  lastRevealKey = ''; maskDirty = true; buildTerrain();
+  lastRevealKey = ''; maskDirty = true; setPond(!!S.damm); buildTerrain();
   cam.follow = true; centerOn(boy.x + 8, boy.y + 8, true);
   updateHud(); renderLog(); renderPack(); renderBook(); renderTickets(); renderFishBook();
   if (S.intro && introOpen){ introOpen = false; markIntro(); toNode(); }
@@ -2542,7 +2629,7 @@ $('#btnReset').addEventListener('click', () => {
 });
 function restart(){
   LEVEL = null; $('#dpad').hidden = true; boy.walking = false;
-  S = START(); buildBoy(S.pa); boy.route = null; placeBoy(S.node); plotAnim.clear(); gateAnim.clear(); FX.length = 0; buildTerrain();
+  S = START(); setPond(false); buildBoy(S.pa); boy.route = null; placeBoy(S.node); plotAnim.clear(); gateAnim.clear(); FX.length = 0; buildTerrain();
   lastRevealKey = ''; maskDirty = true; revealAround(boy.x + 8, boy.y + 8);
   cam.follow = true; cam.focus = null; centerOn(boy.x + 8, boy.y + 8, true);
   dlg = null; updateHud(); renderLog(); renderPack(); renderBook(); renderTickets(); renderFishBook(); renderLetters(); renderRumors(); showNode();
