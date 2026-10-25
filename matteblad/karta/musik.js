@@ -1,6 +1,6 @@
 // Djuren i Glimmerdal: the music. A tiny chip synth in the browser (pulse waves, a triangle bass and noise drums, like an old
-// game console) plays seven songs of our own: three for the day ("Glimmerdal", "Ängsdans" and "Morgondagg") and four for the
-// night ("Stjärnnatt", "Månsken", "Nattugglan" and "Nattviol"). The songs of the day or of the night take turns. No sound files, nothing downloaded.
+// game console) plays seven songs of our own: three for the day ("Glimmerdal", "Ängsdans" and "Morgondagg"), three for the
+// night ("Månsken", "Nattugglan" and "Nattviol") and one for the caves ("Droppsten", the old night song Stjärnnatt on an organ). The songs of the day or of the night take turns. No sound files, nothing downloaded.
 //
 // A song is a list of bars. Each bar has a chord (the bass and the arpeggio are made from it) and a melody of 8 steps (eighth notes):
 // a note such as "E5", "-" holds the note before, "." is a rest. The drums are a pattern of 8 steps per bar.
@@ -143,12 +143,11 @@ const SERENAD = (() => {
     ljud: { lead: { klang: 'flojt', vol: .06 }, arp: { klang: 'gitarr', vol: .03, oktav: 4, takt: 1 }, bas: { vol: .15 }, eko: .3 },
   };
 })();
-STJARNNATT.ljud.lead.klang = 'klocka';   // Stjärnnatt rings like a music box (Peter 2026-10-25)
 // Droppsten: Stjärnnatt on a soft organ, the song of the caves (Peter 2026-10-25). It plays only inside a level (Musik.grotta).
 const DROPPSTEN = { ...STJARNNATT, namn: 'Droppsten', tid: 'grotta', ljud: { ...STJARNNATT.ljud, lead: { ...STJARNNATT.ljud.lead, klang: 'orgel' }, arp: { ...STJARNNATT.ljud.arp, klang: 'orgel' } } };
 MORGONDAGG.ljud.lead.klang = 'marimba'; MORGONDAGG.ljud.arp.klang = 'marimba';   // Morgondagg on a marimba (Peter 2026-10-25)
 GLIMMERDAL.tid = 'dag'; STJARNNATT.tid = 'natt';
-const SONGS = [GLIMMERDAL, STJARNNATT, ANGSDANS, MANSKEN, MORGONDAGG, NATTUGGLAN, SERENAD, DROPPSTEN];
+const SONGS = [GLIMMERDAL, ANGSDANS, MANSKEN, MORGONDAGG, NATTUGGLAN, SERENAD, DROPPSTEN];   // Stjärnnatt itself no longer plays (Peter 2026-10-25), only as Droppsten
 
 // ---------- the instruments
 const waves = new WeakMap();
