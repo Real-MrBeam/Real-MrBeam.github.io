@@ -137,6 +137,7 @@ const CATCH = {
   oring: markFish({ b:'#b08a5a', B:'#7a5a36', d:'#e43b44', e:'#262b44' }, (x, y) => ({ '4,4': 'd', '6,2': 'e', '7,5': 'd', '5,6': 'e', '8,4': 'e' })[x + ',' + y] || ''),
   regnbage: markFish({ b:'#c0cbdc', B:'#8b9bb4', p:'#f6757a' }, (x, y) => y === 4 && x > 1 && x < 9 ? 'p' : ''),
   gadda: sprite(["..oooooooooo..o.", ".owkggdgggdggoBo", "ooygggggggggggBo", ".oGGGGGGGGGGGoBo", "..oooooooooo..o."], { o:'#3f2631', k:'#262b44', g:'#6e8f3a', G:'#46602a', d:'#d8e08a', y:'#c9b27d', B:'#46602a' }),
+  mankungen: sprite(["..y.y.y.........", "..yyyyy.........", "..oooooooooo..o.", ".owkmmmmmmmmmoBo", "oommmmmmmmmmmmBo", ".oMMMMMMMMMMMoBo", "..oooooooooo..o."], { o:'#3f2631', w:'#ffffff', k:'#262b44', m:'#e6ecf5', M:'#9fb0c8', B:'#9fb0c8', y:'#fee761' }),   // a crown (2026-10-25)
   gammelgadda: sprite(["..oooooooooo..o.", ".owkggdgggdggoBo", "oosgggggggggggBo", ".oGGGGGGGGGGGoBo", "..oooooooooo..o."], { o:'#3f2631', k:'#262b44', g:'#5d6b3a', G:'#3a4422', d:'#c9c38a', s:'#e43b44', w:'#fee761', B:'#3a4422' }),
   harr: sprite(["...oooo.....", "..oPPPPo....", "..oooo....o.", ".obbbbo..obo", "obwbbbbooBbo", "obkbbbbbbBo.", "obbbbbbbbBo.", "obbbbbbooBbo", ".oBBBBo..oBo", "..oooo....o."], { o:'#3f2631', w:'#ffffff', k:'#262b44', b:'#9a8fb5', B:'#68386c', P:'#b55088' }),
   mansik: markFish({ b:'#e6ecf5', B:'#9fb0c8', m:'#ffffff' }, (x, y) => y === 3 && x > 2 && x < 8 ? 'm' : ''),

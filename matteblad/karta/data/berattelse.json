@@ -749,7 +749,8 @@
         "mansik": 3,
         "lake": 3,
         "gos": 2,
-        "stjarnruda": 2
+        "stjarnruda": 2,
+        "mankungen": 3
       },
       "egennamn": true
     },
@@ -2483,7 +2484,8 @@
         "fiskarNatt": [
           "mansik",
           "mansik",
-          "lysal"
+          "lysal",
+          "mankungen"
         ]
       },
       "stenblocket": {
@@ -2825,6 +2827,18 @@
         "bara": "glimmerskeden",
         "sallan": 0.3,
         "max": 1
+      },
+      "mankungen": {
+        "namn": "Månkungen",
+        "text": "En jättelik månsik som lyser silvervit som fullmånen. Ingen har sett en större.",
+        "vikt": [
+          3,
+          5
+        ],
+        "kamp": "tung",
+        "bara": "manbete",
+        "sallan": 0.3,
+        "max": 1
       }
     },
     "texter": {
@@ -2884,7 +2898,8 @@
         "sik",
         "grottfisk",
         "roding",
-        "gammelgadda"
+        "gammelgadda",
+        "mankungen"
       ],
       "flugspo": [
         "oring",
@@ -3744,11 +3759,13 @@
     "skeppet": "Nattfiskaren säger att konstiga nya fiskar har dykt upp i sjön sedan det lysande skeppet började segla där om nätterna.",
     "flojt": "Nattfiskaren skar vassen till flöjten vid Norra bron. Där spelar någon fiol om nätterna, samma melodi varje gång.",
     "stjarnsvalan": "Siri säger att det lysande skeppet är hennes Stjärnsvalan. Om nätterna kommer det närmast land vid Sjöviken.",
-    "gammelgaddan": "Nattfiskaren säger att Gammelgäddan i Vassen bara hugger på det som blänker."
+    "gammelgaddan": "Nattfiskaren säger att Gammelgäddan i Vassen bara hugger på det som blänker.",
+    "mankungen": "Vira säger att Månkungen, den största månsiken i Vassen, bara simmar upp när månbete ligger i vattnet."
   },
   "personRykten": {
     "vira": [
-      "rykte:graskuggan"
+      "rykte:graskuggan",
+      "rykte:mankungen"
     ],
     "siri": [
       "rykte:stjarnsvalan"
@@ -4016,6 +4033,13 @@
       "pekar": "vassen",
       "klar": [
         "fisk:gammelgadda"
+      ]
+    },
+    "rykte:mankungen": {
+      "pekar": "vassen",
+      "natt": true,
+      "klar": [
+        "fisk:mankungen"
       ]
     }
   },
