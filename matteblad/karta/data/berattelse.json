@@ -2989,28 +2989,7 @@
     },
     "fyndPlatser": {
       "fiskehatt": [
-        "vassen",
-        "udden",
-        "sjo"
-      ],
-      "grodkrona": [
         "vassen"
-      ],
-      "stjarnskarva": [
-        "angen"
-      ],
-      "flaskpost": [
-        "udden",
-        "sjo"
-      ],
-      "fiolstrang": [
-        "norrabron"
-      ],
-      "hackhuvud": [
-        "grotta"
-      ],
-      "avbrutenara": [
-        "bakom"
       ]
     }
   },
