@@ -1929,6 +1929,7 @@ function nameModal(id, story, done, reward){
 const bookIcons = {};
 const bookIcon = id => bookIcons[id] || (bookIcons[id] = iconURL(PETS[id].right[0], 3));
 function renderBook(){
+  gainJingle();
   renderRumors();
   const D = berattelse.dialog.djurbok;
   $('#bookCount').textContent = S.djur.length ? `Du har hittat ${S.djur.length} djur. ${S.fram.length} av ${MAX_FRAM} är framme.` : D.tom;
@@ -2031,7 +2032,16 @@ function renderRumors(){
     + (done.length ? `<li class="kat-rubrik"><button type="button" class="klara-knapp" data-visaklara="1" aria-expanded="${showDoneRumors}">${showDoneRumors ? 'Dölj' : 'Visa'} klara (${done.length})</button></li>${showDoneRumors ? done.map(rumorItem).join('') : ''}` : '');
 }
 $('#rykten').addEventListener('click', ev => { if (ev.target.closest('[data-visaklara]')){ showDoneRumors = !showDoneRumors; renderRumors(); } });
+// A little jingle when he gets something: a thing, a pack of bait or an animal (Peter 2026-10-26). The count is compared with
+// the last time; after loading or starting again it only takes the new count, without a sound.
+let haveCount = -1;
+function gainJingle(){
+  const n = S.saker.length + S.djur.length + Object.values(S.agnLager || {}).reduce((a, x) => a + x, 0);
+  if (haveCount >= 0 && n > haveCount && window.Musik && Musik.jingel) Musik.jingel();
+  haveCount = n;
+}
 function renderPack(){
+  gainJingle();
   if (S.rykten) for (const id of S.saker) if (SAKER[id] && SAKER[id].rykte && !S.rykten.includes('sak:' + id)) hearRumor('sak:' + id);
   // used things that call forth an animal are gone; mask is there as soon as he has a rod, a pack while some is left
   const packs = Object.keys(SAKER).filter(id => SAKER[id].typ === 'agn' && hasBait(id) && !S.saker.includes(id) && (SAKER[id].antal || myTools().some(t => baitFits(t, id))));
@@ -2151,6 +2161,7 @@ async function loadSave(){
   }
 }
 function applySaved(data){
+  haveCount = -1;
   const shownHere = S.lasta || [];
   for (const k of SAVED_FIELDS) if (data[k] !== undefined) S[k] = data[k];
   if (!S.pa) S.pa = {};
@@ -2680,7 +2691,7 @@ $('#btnReset').addEventListener('click', () => {
 });
 function restart(){
   LEVEL = null; $('#dpad').hidden = true; boy.walking = false;
-  S = START(); setPond(false); buildBoy(S.pa); boy.route = null; placeBoy(S.node); plotAnim.clear(); gateAnim.clear(); FX.length = 0; buildTerrain();
+  S = START(); haveCount = -1; setPond(false); buildBoy(S.pa); boy.route = null; placeBoy(S.node); plotAnim.clear(); gateAnim.clear(); FX.length = 0; buildTerrain();
   lastRevealKey = ''; maskDirty = true; revealAround(boy.x + 8, boy.y + 8);
   cam.follow = true; cam.focus = null; centerOn(boy.x + 8, boy.y + 8, true);
   dlg = null; updateHud(); renderLog(); renderPack(); renderBook(); renderTickets(); renderFishBook(); renderLetters(); renderRumors(); showNode();
