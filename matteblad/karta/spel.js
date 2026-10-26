@@ -2306,7 +2306,9 @@ function lanBlock(id){
 function talkFisher(id){
   const L = FISKE.platser[id].lan;
   if (S.saker.includes(L.ger) && !L.agn) return;
-  sellOrSwap({ who: null, hej: L.hej, hejIgen: L.hejIgen, tack: L.tack, ger: L.ger, pris: L.pris, fynd: L.fynd, packs: Object.entries(L.agn || {}), packTack: L.agnTack,
+  // a fisherman with a name (Ebbe on Södra bron) tells a tip about fish when he greets, one of several (prat, Peter 2026-10-26)
+  const tip = L.prat && L.prat[Math.floor(Math.random() * L.prat.length)];
+  sellOrSwap({ who: L.person || null, hej: L.hej, hejIgen: L.hejIgen, tip, tack: L.tack, ger: L.ger, pris: L.pris, fynd: L.fynd, packs: Object.entries(L.agn || {}), packTack: L.agnTack,
     again: () => talkFisher(id), back: toNode, done: () => {} });
 }
 // A thing in a shop (Peter 2026-10-23): the price first (or the find he gives for it), then the name and how many as the title,
@@ -2327,7 +2329,7 @@ function sellOrSwap(o){
     if (how !== 'pris') itemModal(o.ger);
   };
   // a fisherman can also sell packs of flies (packs), again and again (Peter 2026-10-26)
-  startDialog([{ p: o.who, t: has && o.hejIgen ? o.hejIgen : o.hej }], () => [
+  startDialog([{ p: o.who, t: has && o.hejIgen ? o.hejIgen : o.hej }, ...(o.tip ? [{ p: o.who, t: o.tip }] : [])], () => [
     { rubrik: 'Köp' }, ...(has ? [] : [buyChoice(o.ger, o.pris, 0, () => give('pris'))]),
     ...(o.packs || []).map(([id, po]) => buyChoice(id, po.pris, po.antal, () => buyPack(id, po, o.who, o.packTack, o.again))),
     ...(finds.length ? [{ rubrik: 'Byt' }, ...finds.map(id => swapChoice(o.ger, id, 0, () => give(id)))] : []),

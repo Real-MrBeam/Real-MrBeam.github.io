@@ -354,6 +354,10 @@
     "holger": {
       "namn": "Holger",
       "yrke": "Vakt"
+    },
+    "ebbe": {
+      "namn": "Ebbe",
+      "yrke": "Fiskare"
     }
   },
   "saker": {
@@ -2432,10 +2436,10 @@
           "rubrik": "En gammal fiskare sitter på bron",
           "knapp": "Prata med fiskaren",
           "ger": "hav",
-          "tack": "\"Där ser man. Håven är din. Jag fiskar bättre utan.\"",
+          "tack": "Där ser man. Håven är din. Jag fiskar bättre utan.",
           "klar": "Du har redan en håv.",
           "pris": 5,
-          "hej": "Den gamla fiskaren fnyser vänligt. \"Min håv kan du få. Eller byt mot en glasflaska, jag samlar på sådana.\"",
+          "hej": "Min håv kan du få. Eller byt mot en glasflaska, jag samlar på sådana.",
           "fynd": "glasflaska",
           "agn": {
             "flugor": {
@@ -2447,8 +2451,17 @@
               "antal": 5
             }
           },
-          "hejIgen": "Den gamla fiskaren nickar. \"Flugor har jag alltid, om du har ett flugspö.\"",
-          "agnTack": "\"Låt flugan vila på ytan, och dra försiktigt när fisken vänder.\""
+          "agnTack": "Låt flugan vila på ytan, och dra försiktigt när fisken vänder.",
+          "person": "ebbe",
+          "prat": [
+            "Harr och regnbåge tar bara fluga. Dem hittar du uppe vid Norra bron, där forsen sjunger.",
+            "Bakom berget simmar röding och öring i det kalla vattnet. Men de vill ha fluga, inte mask.",
+            "Om nätterna jagar aspen vid ytan på Udden. Den hugger bara på fluga.",
+            "Sarven tar insekter vid stranden bakom berget när solen står högt.",
+            "Under bron står abborrarna i stim, och längre ner lurar gäddan.",
+            "Ibland glittrar det i djupet under bron, som om något där nere väntar på ljus."
+          ],
+          "hejIgen": "Välkommen tillbaka. Flugor har jag alltid."
         },
         "vanta": [
           2500,
