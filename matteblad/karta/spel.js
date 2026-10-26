@@ -2345,12 +2345,15 @@ function renderFishing(){
       <div class="roads"><button class="btn" type="button" data-kasta="1">${esc(SATT(fz).kasta)}</button><button class="btn alt" type="button" data-back="1">${esc(T.tillbaka)}</button></div></div>`;
   } else if (fz.phase === 'vanta' || fz.phase === 'nu'){
     const s = SATT(fz), still = isRod(fz.redskap) ? `<img class="float pix" src="${iconURL(FLOAT, 3)}" alt="">` : `<img class="float pix" src="${iconURL(BUBBLES, 3)}" alt="">`;
-    h += `<p aria-live="polite">${esc(fz.phase === 'nu' ? s.nu : s.vanta)}</p><div class="panel-body">
+    // the same layout as the fight below (text of a fixed height, the pond, room for the line meter, the button), so the button
+    // stays in the same place when it bites and when the fight starts (Peter 2026-10-26)
+    h += `<p aria-live="polite" class="fisk-text">${esc(fz.phase === 'nu' ? s.nu : s.vanta)}</p><div class="panel-body">
       <div class="pond${fz.phase === 'nu' ? ' dip' : ''}">${fz.phase === 'nu' ? `<img class="splash pix" src="${iconURL(SPLASH, 3)}" alt="">` : still}</div>
-      <div class="roads"><button class="btn" type="button" data-dra="1">${esc(s.dra)}</button></div></div>`;
+      <div class="meter kamp-mat" style="visibility:hidden" aria-hidden="true"><div class="bar"><i></i></div><span>${esc(T.linan)}</span></div>
+      <div class="roads"><button class="btn veva" type="button" data-dra="1">${esc(s.dra)}</button></div></div>`;
   } else if (fz.phase === 'kamp'){
     // the fish is a shadow under the water until it is landed; the line runs from the shore (left) to its mouth
-    h += `<p aria-live="polite" class="kamp-text">${esc(T.kamp)}</p><div class="panel-body">
+    h += `<p aria-live="polite" class="kamp-text fisk-text">${esc(T.kamp)}</p><div class="panel-body">
       <div class="pond kamp"><span class="lina"></span><img class="fisk pix" src="${fishIcon(fz.kamp.id)}" alt=""></div>
       <div class="meter kamp-mat"><div class="bar"><i></i></div><span>${esc(T.linan)}</span></div>
       <div class="roads"><button class="btn veva" type="button" data-veva="1">${esc(T.veva)}</button></div></div>`;
