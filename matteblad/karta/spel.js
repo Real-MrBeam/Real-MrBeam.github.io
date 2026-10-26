@@ -550,6 +550,8 @@ function dust(wx, wy){
   for (let i = 0; i < 14; i++){ const a = Math.random() * Math.PI * 2, s = 10 + Math.random() * 22; FX.push({ k: 'dust', x: wx + Math.cos(a)*10, y: wy + Math.sin(a)*8, vx: Math.cos(a)*s, vy: Math.sin(a)*s*.6 - 6, t: 0, life: .55 + Math.random()*.35, r: 2 + Math.random()*3 }); }
 }
 // partiklar: sparks, dust, and drops of water that fall from the roof of a cave and splash
+// the pixels of the note that rises from Ihåliga eken (Peter 2026-10-26)
+const NOTE_PX = ['..##.', '..#.#', '..#..', '..#..', '.##..', '###..', '.#...'].flatMap((r, y) => [...r].map((c, x) => c === '#' ? [x, y] : null).filter(Boolean));
 function drawFX(dt){
   for (let i = FX.length - 1; i >= 0; i--){
     const p = FX[i]; p.t += dt;
@@ -561,6 +563,12 @@ function drawFX(dt){
     p.x += p.vx * dt; p.y += p.vy * dt;
     if (p.k === 'spark'){ p.vy += 60 * dt; ctx.fillStyle = p.col; const s = p.t < p.life * .6 ? 2 : 1; ctx.fillRect(Math.round(p.x), Math.round(p.y), s, s); }
     else if (p.k === 'drop'){ ctx.fillStyle = '#c0eaff'; ctx.fillRect(Math.round(p.x), Math.round(p.y), 1, 2); }
+    else if (p.k === 'not'){   // a white note that sways up from the tree and fades
+      const a = Math.min(1, p.t * 3, (p.life - p.t) * 1.5), x = Math.round(p.x + Math.sin(p.t * 3) * 3), y = Math.round(p.y);
+      ctx.globalAlpha = Math.max(0, a);
+      for (const [c, d] of [['#262b44', 1], ['#ffffff', 0]]){ ctx.fillStyle = c; NOTE_PX.forEach(([nx, ny]) => { for (const [ox, oy] of d ? [[-1, 0], [1, 0], [0, -1], [0, 1]] : [[0, 0]]) ctx.fillRect(x + nx + ox, y + ny + oy, 1, 1); }); }
+      ctx.globalAlpha = 1;
+    }
     else { p.vx *= .92; p.vy *= .92; const r = Math.max(1, Math.round(p.r * (1 - p.t / p.life))); ctx.fillStyle = p.t < p.life*.5 ? '#ffffff' : '#c0cbdc'; ctx.fillRect(Math.round(p.x) - r, Math.round(p.y) - r, r*2, r*2); }
   }
 }
@@ -1347,6 +1355,13 @@ function playFlute(){
     }, d2 * 1000);
   }, dur * 1000 + 700);
 }
+// Every 20 seconds a white note rises from Ihåliga eken, wherever he is, so he sees that something can be heard there (Peter
+// 2026-10-26). Under the fog it is hidden like everything else.
+setInterval(() => {
+  if (LEVEL || document.hidden || reduceMotion) return;
+  const n = NODES[MELODI.vind]; if (!n) return;
+  FX.push({ k: 'not', x: n.x * TS + 6, y: n.y * TS - 10, vx: 0, vy: -9, t: 0, life: 3.2 });
+}, 20000);
 // The wind in Ihåliga eken whistles the beginning of the tree's melody now and then while he stands there (only with the sound on)
 let windNode = '', windNext = 0;
 setInterval(() => {
