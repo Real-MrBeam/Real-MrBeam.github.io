@@ -395,16 +395,21 @@ function flojt(index) {
 // ---------- the jingle when he gets something (Peter 2026-10-26): four quick chip notes up and a bell on top. Only when the
 // sound is on; the music is turned down for a moment while it plays.
 const JINGEL = [['G5', 0], ['C6', .08], ['E6', .16], ['G6', .24]];
-function jingel() {
-  if (!P.on || !P.ctx || P.ctx.state !== 'running') return;
-  const ctx = P.ctx, out = ctx.createGain(), t0 = ctx.currentTime + .03; out.gain.value = .5; out.connect(ctx.destination);
+// jingelPa(ctx, dest, t0) schedules it on any AudioContext (also an OfflineAudioContext, to make a sound file of it)
+function jingelPa(ctx, dest, t0) {
+  const out = ctx.createGain(); out.gain.value = .5; out.connect(dest);
   for (const [n, d] of JINGEL) tone(ctx, out, { f: freq(n), t: t0 + d, len: .09, vol: .12, duty: .25 });
   tone(ctx, out, { f: freq('C7'), t: t0 + .34, len: .5, vol: .16, kind: 'klocka' });
   tone(ctx, out, { f: freq('G6'), t: t0 + .34, len: .5, vol: .1, kind: 'klocka' });
+  return out;
+}
+function jingel() {
+  if (!P.on || !P.ctx || P.ctx.state !== 'running') return;
+  const ctx = P.ctx, out = jingelPa(ctx, ctx.destination, ctx.currentTime + .03);
   setTimeout(() => out.disconnect(), 2500);
   const t = ctx.currentTime, dur = .9;
   P.master.gain.cancelScheduledValues(t); P.master.gain.setValueAtTime(P.master.gain.value, t); P.master.gain.linearRampToValueAtTime(P.vol * .4, t + .05); P.master.gain.setValueAtTime(P.vol * .4, t + dur); P.master.gain.linearRampToValueAtTime(P.vol, t + dur + .5);
 }
 
-root.Musik = { jingel, flojt, nasta, grotta, antalFlojt: FLOJT.length, start, stop, paus, spela, natt, get spelar() { return P.on; }, get lat() { return P.lat || ''; }, lattar: SONGS.map(s => s.namn) };
+root.Musik = { jingel, jingelPa, flojt, nasta, grotta, antalFlojt: FLOJT.length, start, stop, paus, spela, natt, get spelar() { return P.on; }, get lat() { return P.lat || ''; }, lattar: SONGS.map(s => s.namn) };
 })(typeof window !== 'undefined' ? window : globalThis);
