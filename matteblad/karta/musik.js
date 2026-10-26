@@ -12,7 +12,8 @@
 //   Musik.grotta(true | false)   the cave song while he is in a level
 //   Musik.jingel(sort)   a short tune when he gets something, 'djur' a longer one for a new animal, 'fisk' one for a new fish
 //                        in the fish book, 'stjarnor' or 'stoft' for stars and stardust (the same) (only when the sound is on)
-//   Musik.trad(sort)   the tree's melody: 'flojt', 'fiol' (Näcken) or 'vind' (the wind in the oak), returns its length
+//   Musik.trad(sort)   the tree's melody: 'flojt', 'fiol' (Näcken), 'vind' (the wind in the oak) or 'borjan' (the flute
+//                      before he has learnt it), returns its length
 //   Musik.spela(ctx, dest, index, t0)   schedules one whole song on any AudioContext (also an OfflineAudioContext), returns its length
 (function (root) {
 'use strict';
@@ -363,37 +364,6 @@ function nasta() {
 }
 function paus(hidden) { if (!P.ctx || !P.on) return; if (hidden) P.ctx.suspend(); else P.ctx.resume(); }
 
-// ---------- the flute: a few short tunes, a soft sine tone with a little vibrato. It plays even when the music is off, and the
-// music is turned down while it plays. Musik.flojt(index) plays one tune and returns its length in seconds.
-const FLOJT = [
-  'E5 G5 A5 - G5 E5 D5 - - .',
-  'C6 B5 A5 G5 A5 - - . . .',
-  'G5 A5 B5 D6 - B5 G5 - - .',
-  'A5 C6 E6 - D6 C6 A5 - - .',
-  'D6 - C6 A5 G5 A5 C6 - D6 -',
-];
-function flojt(index) {
-  const AC = root.AudioContext || root.webkitAudioContext; if (!AC) return 0;
-  if (!P.ctx) { P.ctx = new AC(); P.master = P.ctx.createGain(); P.master.gain.value = 0; P.master.connect(P.ctx.destination); }
-  P.ctx.resume();
-  const ctx = P.ctx, out = ctx.createGain(); out.gain.value = .26; out.connect(ctx.destination);
-  const toks = FLOJT[((index % FLOJT.length) + FLOJT.length) % FLOJT.length].split(' '), step = .27, t0 = ctx.currentTime + .05;
-  toks.forEach((tok, i) => {
-    if (tok === '-' || tok === '.') return;
-    let n = 1; while (i + n < toks.length && toks[i + n] === '-') n++;
-    const t = t0 + i * step, len = n * step * .95;
-    const o = ctx.createOscillator(), g = ctx.createGain(), lfo = ctx.createOscillator(), depth = ctx.createGain();
-    const f = freq(tok) * .5;   // an octave lower than written: a calm, deep flute
-    o.type = 'sine'; o.frequency.value = f;
-    lfo.frequency.value = 4.5; depth.gain.value = f * .004; lfo.connect(depth).connect(o.frequency);
-    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(1, t + .09); g.gain.setValueAtTime(.8, t + len - .1); g.gain.linearRampToValueAtTime(0, t + len);
-    o.connect(g).connect(out); o.start(t); lfo.start(t); o.stop(t + len + .02); lfo.stop(t + len + .02);
-  });
-  const dur = toks.length * step + .1;
-  if (P.on) { const t = ctx.currentTime; P.master.gain.cancelScheduledValues(t); P.master.gain.setValueAtTime(P.master.gain.value, t); P.master.gain.linearRampToValueAtTime(P.vol * .3, t + .2); P.master.gain.setValueAtTime(P.vol * .3, t + dur); P.master.gain.linearRampToValueAtTime(P.vol, t + dur + .6); }
-  return dur;
-}
-
 // ---------- the jingle when he gets something (Peter 2026-10-26): four quick chip notes up and a bell on top. Only when the
 // sound is on; the music is turned down for a moment while it plays.
 const JINGEL = [['G5', 0], ['C6', .08], ['E6', .16], ['G6', .24]];
@@ -464,9 +434,10 @@ const TRAD = { step: .22,
     ['D3', 'A3', 'D4', 'F4'], ['A2', 'E3', 'A3', 'C4'], ['C3', 'G3', 'C4', 'E4'], ['A2', 'E3', 'A3', 'C4']],
   vind: 9 };   // the wind only gets this far, and stops, as if it waits for the rest
 // tradPa(ctx, dest, t0, sort) schedules it on any AudioContext: 'flojt' (the flute with the guitar), 'fiol' (Näcken's fiddle
-// over a low drone) or 'vind' (the beginning, whistled by the wind). Returns its length in seconds.
+// over a low drone), 'vind' (the beginning, whistled by the wind) or 'borjan' (the beginning on the flute, all he can play
+// before he has learnt it, Peter 2026-10-26). Returns its length in seconds.
 function tradPa(ctx, dest, t0, sort) {
-  const st = TRAD.step, toks = sort === 'vind' ? TRAD.mel.slice(0, TRAD.vind) : TRAD.mel;
+  const st = TRAD.step, toks = sort === 'vind' || sort === 'borjan' ? TRAD.mel.slice(0, TRAD.vind) : TRAD.mel;
   toks.forEach((tok, i) => {
     if (tok === '-') return;
     let n = 1; while (i + n < toks.length && toks[i + n] === '-') n++;
@@ -478,7 +449,7 @@ function tradPa(ctx, dest, t0, sort) {
   if (sort === 'flojt') TRAD.ack.forEach((ch, b) => [0, 1, 2, 3, 2, 1].forEach((k, q) =>
     tone(ctx, dest, { f: freq(ch[k]), t: t0 + (b * 8 + [0, 1, 2, 3, 5, 6][q]) * st, len: st * 2.5, vol: .07, kind: 'gitarr' })));
   if (sort === 'fiol') [['A2', 0, 32], ['D3', 32, 8], ['A2', 40, 24]].forEach(([n, a, l]) => tone(ctx, dest, { f: freq(n), t: t0 + a * st, len: l * st, vol: .06, kind: 'strak' }));
-  return toks.length * st + (sort === 'vind' ? .8 : 1.2);
+  return toks.length * st + (toks.length < TRAD.mel.length ? .8 : 1.2);
 }
 // Musik.trad(sort) plays it now and returns its length. The flute and the fiddle play even when the music is off (like the
 // flute did), the wind only when the sound is on. The music is turned down while it plays.
@@ -494,5 +465,5 @@ function trad(sort) {
   return dur;
 }
 
-root.Musik = { trad, tradPa, jingel, jingelPa, flojt, nasta, grotta, antalFlojt: FLOJT.length, start, stop, paus, spela, natt, get spelar() { return P.on; }, get lat() { return P.lat || ''; }, lattar: SONGS.map(s => s.namn) };
+root.Musik = { trad, tradPa, jingel, jingelPa, nasta, grotta, start, stop, paus, spela, natt, get spelar() { return P.on; }, get lat() { return P.lat || ''; }, lattar: SONGS.map(s => s.namn) };
 })(typeof window !== 'undefined' ? window : globalThis);

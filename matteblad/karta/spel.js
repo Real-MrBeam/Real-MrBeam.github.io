@@ -1322,16 +1322,16 @@ $('#log').addEventListener('click', ev => readEvent(ev.target.closest('li[data-l
 $('#log').addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key === ' '){ const li = ev.target.closest('li[data-las]'); if (li){ ev.preventDefault(); readEvent(li); } } });
 
 // Putting clothes on and off from the bag: one hat and one pair of boots at a time
-// The flute plays one of a few short tunes, the next one each time. Notes rise from the boy while it plays.
-// The tree's melody (Peter 2026-10-26): at Norra bron at night Näcken answers the flute under the water and plays the whole
+// The flute plays the beginning of the tree's melody, all he knows of it (Peter 2026-10-26, before: five short tunes). Notes
+// rise from the boy while it plays. The tree's melody (Peter 2026-10-26): at Norra bron at night Näcken answers the flute under the water and plays the whole
 // melody on his fiddle; he knows it is the one the wind whistles in Ihåliga eken. From then on (S.melodi) the flute plays it.
 const MELODI = berattelse.melodi;
-let flojtNr = 0, flojtTill = 0;
+let flojtTill = 0;
 const fluteNotes = (dur, n) => { for (let i = 0; i < n; i++) setTimeout(() => FX.push({ k: 'spark', x: boy.x + 10 + Math.random() * 4, y: boy.y - 4, vx: (Math.random() - .3) * 10, vy: -22 - Math.random() * 10, t: 0, life: 1.1, col: i % 2 ? '#fee761' : '#ffffff' }), i * dur * 1000 / n); };
 function playFlute(){
   if (!window.Musik || performance.now() < flojtTill) return;
   if (S.melodi){ const dur = Musik.trad('flojt'); flojtTill = performance.now() + dur * 1000; fluteNotes(dur, 14); return; }
-  const dur = Musik.flojt(flojtNr++);
+  const dur = Musik.trad('borjan');
   flojtTill = performance.now() + dur * 1000;
   fluteNotes(dur, 5);
   if (S.node !== MELODI.plats || !S.natt || LEVEL) return;
