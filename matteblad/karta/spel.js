@@ -154,6 +154,8 @@ const CATCH = {
   gos: sprite(["....o.o.o.......", "..oooooooooo..o.", ".owkgsggsggsgoBo", "ooggggggggggggBo", ".oGGGGGGGGGGGoBo", "..oooooooooo..o."], { o:'#3f2631', w:'#fee761', k:'#262b44', g:'#9aa58a', s:'#4a5a3a', G:'#6a755a', B:'#4a5a3a' }),
   simpa: sprite(["..ooo.......", ".obbbooo.o..", "owkbbsbbooBo", "obbbbbbbbbBo", "obsbbbsbooBo", ".oFFoooo..o.", "..oo........"], { o:'#3f2631', w:'#ffffff', k:'#262b44', b:'#8b7a5a', s:'#4a3a2a', B:'#5a4a3a', F:'#a08a5a' }),
   roding: markFish({ b:'#6e7a52', B:'#e4703a', s:'#e8dcb0', r:'#e4703a' }, (x, y) => y >= 5 && y <= 6 ? 'r' : (x + y) % 3 === 0 && y <= 4 ? 's' : ''),   // red belly, pale spots (2026-10-24)
+  sarv: markFish({ b:'#d9c27a', B:'#e43b44', s:'#a89a6a' }, (x, y) => y <= 2 ? 's' : ''),   // golden with red fins (2026-10-26)
+  asp: markFish({ b:'#dfe6ef', B:'#5a6988', s:'#8b9bb4' }, (x, y) => y <= 3 ? 's' : ''),   // silver, a dark back (2026-10-26)
   grottfisk: markFish({ b:'#efe0dc', B:'#c9a3a8', w:'#efe0dc', k:'#d8b4b8', r:'#f6757a' }, (x, y) => x === 4 && y > 2 && y < 7 ? 'r' : ''),   // no eyes (2026-10-24)
   krafta: sprite([".oo......oo.", "orro....orro", "orrro..orrro", ".oorroorroo.", "..orkrrkro..", "..oRrrrrRo..", ".ooRrrrrRoo.", "..oRrrrrRo..", ".ooRrrrrRoo.", "...oRrrRo...", "..oRRRRRRo..", "..oooooooo.."], { o:'#3f2631', k:'#262b44', r:'#e43b44', R:'#a22633' }),
 };
