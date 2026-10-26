@@ -91,9 +91,9 @@
       if (story.byggd) return { id: t.id, node: t.plats, x: t.x, y: t.y, name: story.namn, cost: story.kostnad, item: t.byggnad, prebuilt: true };
       const bygg = berattelse.bygg[story.bygg];
       if (!bygg) throw new Error(`Tomten ${t.id} pekar på bygget ${story.bygg} som saknas i berattelse.json`);
-      return { id: t.id, node: t.plats, x: t.x, y: t.y, name: story.namn, cost: Math.min(...bygg.val.map(v => v.kostnad)), bygg: story.bygg, ...(t.tom ? { tom: t.tom } : {}), ...(t.skog ? { skog: true } : {}) };
+      return { id: t.id, node: t.plats, x: t.x, y: t.y, name: story.namn, cost: Math.min(...bygg.val.map(v => v.kostnad)), bygg: story.bygg, ...(t.tom ? { tom: t.tom } : {}), ...(t.skog ? { skog: true } : {}), ...(t.vatten ? { vatten: true } : {}) };
     });
-    for (const p of PLOTS) fillR(p.x, p.y, p.x + 2, p.y + 2, "g");
+    for (const p of PLOTS) if (!p.vatten) fillR(p.x, p.y, p.x + 2, p.y + 2, "g");   // a plot at the water's edge keeps its water (2026-10-26)
     const ITEMS = karta.byggnader;
     const EMPTY_PLOT = karta.tomTomt;
 

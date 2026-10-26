@@ -1211,7 +1211,7 @@ const FIRE_OUT = { 'o:18,10': 'o:8,16', 'o:21,12': 'o:9,16' };
 // The burning ones flicker between three pictures (own drawings in row 16, Peter 2026-10-23), each fire in its own time
 const FIRE_FRAMES = { 'o:18,10': ['o:18,10', 'o:19,16', 'o:20,16'], 'o:21,12': ['o:21,12', 'o:21,16', 'o:22,16'] };
 const fireFrame = (i, now, px) => { const f = FIRE_FRAMES[i]; return !f || reduceMotion ? i : f[Math.floor(now / 160 + px * .013) % f.length]; };
-const LIGHT_TILES = { 84: [8, 8, 'win'], 88: [8, 8, 'win'], 'o:27,2': [8, 8, 'win'], 125: [8, 8, 'slit'], 51: [8, 10, 'small'], 55: [8, 10, 'small'], 'o:18,10': [8, 4, 'fire'], 'o:21,12': [8, 9, 'fire'], 'o:28,15': [8, 8, 'tent'], 'o:15,16': [6, 10, 'small'], 'o:1,17': [8, 7, 'fyr'] };   // the last one is the lamp of Siri's lighthouse
+const LIGHT_TILES = { 84: [8, 8, 'win'], 88: [8, 8, 'win'], 'o:27,2': [8, 8, 'win'], 125: [8, 8, 'slit'], 51: [8, 10, 'small'], 55: [8, 10, 'small'], 'o:18,10': [8, 4, 'fire'], 'o:21,12': [8, 9, 'fire'], 'o:28,15': [8, 8, 'tent'], 'o:15,16': [6, 10, 'small'], 'o:9,17': [8, 6, 'fyr'] };   // the last one is the lamp of Siri's small lighthouse by the water
 const lightIn = i => { for (const j of Array.isArray(i) ? i : [i]) if (LIGHT_TILES[j]) return LIGHT_TILES[j]; return null; };
 function nightLights(){
   if (!STATIC_LIGHTS){
@@ -2269,20 +2269,24 @@ let fishing = null; // { plats, redskap, agn, phase: 'val' | 'vanta' | 'nu' | 'k
 const myTools = () => ['metspo', ...FISKE.redskap].filter(id => S.saker.includes(id));
 const isRod = tool => FISKE.verktyg[tool] === 'spo';
 const SATT = fz => FISKE.satt[FISKE.verktyg[fz.redskap]];
-const hasBait = id => { const it = SAKER[id]; return it.alltid || (it.antal ? (S.agnLager[id] || 0) > 0 : S.saker.includes(id)); };
-const myBaits = () => Object.keys(SAKER).filter(id => SAKER[id].typ === 'agn' && hasBait(id));
+const hasBait = id => { const it = SAKER[id]; return it.alltid || (it.antal ? (S.agnLager[id] || 0) > 0 : S.saker.includes(id) && !S.agnAnvant.includes(id)); };
+// The fly rod and the raft take flies (agn with fluga), the other rods the other baits (Peter 2026-10-26)
+const flyTool = tool => (FISKE.flugredskap || []).includes(tool);
+const baitFits = (tool, id) => SAKER[id].typ === 'agn' && (flyTool(tool) ? !!SAKER[id].fluga : isRod(tool) && !SAKER[id].fluga);
+const myBaits = tool => Object.keys(SAKER).filter(id => baitFits(tool, id) && hasBait(id));
 const myLocks = () => S.saker.filter(id => SAKER[id] && SAKER[id].typ === 'lock' && !S.agnAnvant.includes(id));
 const heard = keys => (keys || []).some(k => S.rykten.includes(k));
 const nameIn = id => SAKER[id].egennamn ? SAKER[id].namn : SAKER[id].namn.toLowerCase();
 // the things he can put out here with this tool: for an animal of this place that he has not found and has heard about
-const locksHere = fz => FISKE.djur.filter(r => r.plats === fz.plats && !S.djur.includes(r.djur) && r.redskap.includes(fz.redskap) && heard(r.rykten))
+// lures never on the fly rod (Peter 2026-10-26)
+const locksHere = fz => fz.redskap === 'flugspo' ? [] : FISKE.djur.filter(r => r.plats === fz.plats && !S.djur.includes(r.djur) && r.redskap.includes(fz.redskap) && heard(r.rykten))
   .flatMap(r => r.agn.filter(id => myLocks().includes(id)));
 const animalRule = fz => FISKE.djur.find(r => r.plats === fz.plats && r.redskap.includes(fz.redskap) && r.agn.includes(fz.agn) && !S.djur.includes(r.djur) && heard(r.rykten));
 // a rod always has a bait on the hook (mask if nothing else), the other tools never; a choice that no longer fits is reset
 function fixBait(fz){
   const it = SAKER[fz.agn];
-  const ok = it ? (it.typ === 'lock' ? locksHere(fz).includes(fz.agn) : isRod(fz.redskap) && hasBait(fz.agn)) : !isRod(fz.redskap);
-  if (!ok) fz.agn = isRod(fz.redskap) ? 'mask' : '';
+  const ok = it ? (it.typ === 'lock' ? locksHere(fz).includes(fz.agn) : baitFits(fz.redskap, fz.agn) && hasBait(fz.agn)) : !isRod(fz.redskap) && !flyTool(fz.redskap);
+  if (!ok) fz.agn = flyTool(fz.redskap) ? (myBaits(fz.redskap)[0] || '') : isRod(fz.redskap) ? 'mask' : '';
 }
 function fishBlock(id){
   const T = FISKE.texter, here = (LEVEL ? LEVEL.def.fiske === id : S.node === id) && !boy.route;
@@ -2337,12 +2341,13 @@ function renderFishing(){
     const tool = (id, name) => `<button class="btn${fz.redskap === id ? '' : ' alt'}" type="button" data-redskap="${id}">${esc(name)}</button>`;
     const pick = id => `<button class="btn${fz.agn === id ? '' : ' alt'}" type="button" data-agn="${id}">${esc(SAKER[id].namn)}${SAKER[id].antal ? ` (${S.agnLager[id]})` : ''}</button>`;
     // the baits only for a rod (Peter 2026-10-22), the special things only where they can be used
-    const baits = isRod(fz.redskap) ? myBaits() : [], locks = locksHere(fz);
+    const baits = myBaits(fz.redskap), locks = locksHere(fz), noFly = fz.redskap === 'flugspo' && !fz.agn;
     h += `<p>${esc(T.valj)}</p><div class="panel-body">
       <div><p class="sub">Redskap</p><div class="roads">${myTools().map(id => tool(id, SAKER[id].namn)).join('')}</div></div>
       ${baits.length ? `<div><p class="sub">${esc(T.agn)}</p><div class="roads">${baits.map(pick).join('')}</div></div>` : ''}
       ${locks.length ? `<div><p class="sub">${esc(T.lockbete)}</p><div class="roads">${locks.map(pick).join('')}</div></div>` : ''}
-      <div class="roads"><button class="btn" type="button" data-kasta="1">${esc(SATT(fz).kasta)}</button><button class="btn alt" type="button" data-back="1">${esc(T.tillbaka)}</button></div></div>`;
+      ${noFly ? `<p class="sub" style="text-transform:none;letter-spacing:0">${esc(T.ingaFlugor)}</p>` : ''}
+      <div class="roads">${noFly ? '' : `<button class="btn" type="button" data-kasta="1">${esc(SATT(fz).kasta)}</button>`}<button class="btn alt" type="button" data-back="1">${esc(T.tillbaka)}</button></div></div>`;
   } else if (fz.phase === 'vanta' || fz.phase === 'nu'){
     const s = SATT(fz), still = isRod(fz.redskap) ? `<img class="float pix" src="${iconURL(FLOAT, 3)}" alt="">` : `<img class="float pix" src="${iconURL(BUBBLES, 3)}" alt="">`;
     // the same layout as the fight below (text of a fixed height, the pond, room for the line meter, the button), so the button

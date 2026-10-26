@@ -438,8 +438,13 @@
     "flugask": {
       "namn": "Flugask",
       "text": "Ovanliga flugor i en liten ask.",
-      "typ": "lock",
-      "rykte": "Fia säger att forsen vid Norra bron gömmer något som vill ha flugor."
+      "typ": "agn",
+      "rykte": "Fia säger att forsen vid Norra bron gömmer något som vill ha flugor.",
+      "fluga": true,
+      "gillar": {
+        "regnbage": 3,
+        "roding": 2
+      }
     },
     "hav": {
       "namn": "Håv",
@@ -474,8 +479,13 @@
     "silverfluga": {
       "namn": "Silverflugor",
       "text": "Flugor som glänser som silver.",
-      "typ": "lock",
-      "rykte": "Den som spelar fiol vid Norra bron sägs inte kunna låta bli silverflugor."
+      "typ": "agn",
+      "rykte": "Den som spelar fiol vid Norra bron sägs inte kunna låta bli silverflugor.",
+      "fluga": true,
+      "gillar": {
+        "harr": 3,
+        "oring": 2
+      }
     },
     "snackor": {
       "namn": "Blanka snäckor",
@@ -819,6 +829,19 @@
       "text": "En åra som har gått av på mitten, grå av ålder. Vems båt var den från?",
       "typ": "fynd",
       "varde": 1
+    },
+    "flugor": {
+      "namn": "Flugor",
+      "text": "Små fjäderflugor till flugspöet. Öring och harr hugger gärna.",
+      "typ": "agn",
+      "fluga": true,
+      "antal": 5,
+      "gillar": {
+        "oring": 2,
+        "harr": 2,
+        "regnbage": 2,
+        "roding": 2
+      }
     }
   },
   "bygg": {
@@ -2568,7 +2591,8 @@
         "agn": [
           "snackor",
           "trolldryck",
-          "blabar"
+          "blabar",
+          "silverfluga"
         ],
         "text": "Vassen böjer sig. En puckel, och sedan en till, glider fram genom vattnet. Ett vänligt huvud på en lång hals tittar upp och nosar nyfiket på det du har med dig.",
         "rykten": [
@@ -2830,7 +2854,8 @@
       "agn": "Agn",
       "lockbete": "Lockbete",
       "ingetPaAgn": "Ingen fisk här vill ha {agn}. Prova ett annat agn.",
-      "brastDrag": "Linan gick av, och {agn} följde med fisken ner i djupet."
+      "brastDrag": "Linan gick av, och {agn} följde med fisken ner i djupet.",
+      "ingaFlugor": "Du har inga flugor. Nattfiskaren säljer flugor."
     },
     "fynd": [
       "stovel",
@@ -2974,7 +2999,11 @@
       "stjarnskarva": [
         "angen"
       ]
-    }
+    },
+    "flugredskap": [
+      "flugspo",
+      "flotte"
+    ]
   },
   "locka": [
     {
@@ -3014,12 +3043,17 @@
       "lykta": "Den lyser inte av sig själv. Tänd den i väskan.",
       "flojt": "Jag har aldrig fått en ton ur den. Kanske är det platsen som är fel.",
       "glimmerskeden": "Vänta när gäddan drar, annars följer skeden med ner.",
-      "majs": "Majs. Rudorna älskar det, gäddorna fnyser åt det."
+      "majs": "Majs. Rudorna älskar det, gäddorna fnyser åt det.",
+      "flugor": "Flugorna ska vila på ytan. Dra försiktigt när öringen vänder."
     },
     "baraSaljer": "God natt, eller god kväll. Jag har lite att sälja.",
     "agn": {
       "majs": {
         "pris": 2,
+        "antal": 5
+      },
+      "flugor": {
+        "pris": 3,
         "antal": 5
       }
     },
