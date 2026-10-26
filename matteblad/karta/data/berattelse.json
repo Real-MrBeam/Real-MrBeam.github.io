@@ -437,14 +437,14 @@
     },
     "flugask": {
       "namn": "Flugask",
-      "text": "Ovanliga flugor i en liten ask.",
+      "text": "Vanliga flugor i en liten ask. Följer alltid med flugspöet.",
       "typ": "agn",
-      "rykte": "Fia säger att forsen vid Norra bron gömmer något som vill ha flugor.",
       "fluga": true,
       "gillar": {
         "regnbage": 3,
         "roding": 2
-      }
+      },
+      "alltid": true
     },
     "hav": {
       "namn": "Håv",
@@ -485,7 +485,8 @@
       "gillar": {
         "harr": 3,
         "oring": 2
-      }
+      },
+      "antal": 5
     },
     "snackor": {
       "namn": "Blanka snäckor",
@@ -1249,9 +1250,9 @@
           "tack": "Tack. Nu finns det en riktig fiskebutik vid älven. Kom tillbaka när du vill lära dig kasta, det tar bara några år.",
           "gava": [
             "flugspo",
-            "flugask"
+            "silverfluga"
           ],
-          "gavaHej": "Ett flugspö kräver tålamod, men det betalar sig. Välj en gåva: ett spö eller en ask med ovanliga flugor."
+          "gavaHej": "Ett flugspö kräver tålamod, men det betalar sig. Välj en gåva: ett spö eller ett paket silverflugor."
         },
         {
           "id": "natbod",
@@ -2435,7 +2436,19 @@
           "klar": "Du har redan en håv.",
           "pris": 5,
           "hej": "Den gamla fiskaren fnyser vänligt. \"Min håv kan du få. Eller byt mot en glasflaska, jag samlar på sådana.\"",
-          "fynd": "glasflaska"
+          "fynd": "glasflaska",
+          "agn": {
+            "flugor": {
+              "pris": 3,
+              "antal": 5
+            },
+            "silverfluga": {
+              "pris": 4,
+              "antal": 5
+            }
+          },
+          "hejIgen": "Den gamla fiskaren nickar. \"Flugor har jag alltid, om du har ett flugspö.\"",
+          "agnTack": "\"Låt flugan vila på ytan, och dra försiktigt när fisken vänder.\""
         },
         "vanta": [
           2500,
@@ -2576,8 +2589,7 @@
           "plats:norrabron:natt",
           "sak:flugspo",
           "sak:flotte",
-          "sak:silverfluga",
-          "sak:flugask"
+          "sak:silverfluga"
         ]
       },
       {
@@ -3043,17 +3055,12 @@
       "lykta": "Den lyser inte av sig själv. Tänd den i väskan.",
       "flojt": "Jag har aldrig fått en ton ur den. Kanske är det platsen som är fel.",
       "glimmerskeden": "Vänta när gäddan drar, annars följer skeden med ner.",
-      "majs": "Majs. Rudorna älskar det, gäddorna fnyser åt det.",
-      "flugor": "Flugorna ska vila på ytan. Dra försiktigt när öringen vänder."
+      "majs": "Majs. Rudorna älskar det, gäddorna fnyser åt det."
     },
     "baraSaljer": "God natt, eller god kväll. Jag har lite att sälja.",
     "agn": {
       "majs": {
         "pris": 2,
-        "antal": 5
-      },
-      "flugor": {
-        "pris": 3,
         "antal": 5
       }
     },
@@ -3836,12 +3843,6 @@
       ]
     },
     "sak:silverfluga": {
-      "pekar": "norrabron",
-      "klar": [
-        "djur:nacken"
-      ]
-    },
-    "sak:flugask": {
       "pekar": "norrabron",
       "klar": [
         "djur:nacken"

@@ -1395,7 +1395,7 @@ const PLACE_PARTS = [
   // fishing: at night a fishing place is light as long as he has something to fish with; by day while a water animal or a kind
   // he has not caught is left there
   { on: id => !!FISKE.platser[id] && !pondHidden(id), block: id => fishBlock(id), active: id => S.natt ? myTools().length > 0 : FISKE.djur.some(r => r.plats === id && !S.djur.includes(r.djur)) || newFishAt(id) },
-  { on: id => isDay() && !!(FISKE.platser[id] && FISKE.platser[id].lan), block: id => lanBlock(id), active: id => !S.saker.includes(FISKE.platser[id].lan.ger) },   // a shop
+  { on: id => isDay() && !!(FISKE.platser[id] && FISKE.platser[id].lan), block: id => lanBlock(id), active: id => !S.saker.includes(FISKE.platser[id].lan.ger) || !!FISKE.platser[id].lan.agn },   // a shop
   { on: id => isDay() && LOCKA.some(r => r.plats === id), block: id => LOCKA.filter(r => r.plats === id).map(lureBlock).join(''), active: id => LOCKA.some(r => r.plats === id && !S.djur.includes(r.djur)) },
   { on: id => isDay() && id === CHEST_AT.node && pendingTickets().length > 0, block: () => `<div class="plot"><div><b>En guldkista står vid skolan</b></div><button class="btn" type="button" data-kista="1">Öppna kistan</button></div>`, active: () => true },
   { on: id => isDay() && id === 'slott', block: () => `<div><button class="btn" type="button" data-slott="1">${esc(berattelse.dialog.slottKnapp)}</button></div>`, active: () => false },
@@ -1834,8 +1834,8 @@ function rewardMain(till){
 }
 function finishStop(id, till, out){
   S.stopp[id] = till; renderRumors(); delete S.steg['stopp:' + id]; saveSoon();
-  const things = [till.agn, till.fynd, till.extra].filter(x => x && !S.saker.includes(x));
-  for (const x of things) S.saker.push(x);
+  const things = [till.agn, till.fynd, till.extra].filter(x => x && (SAKER[x].antal || !S.saker.includes(x)));
+  for (const x of things) if (SAKER[x].antal) S.agnLager[x] = (S.agnLager[x] || 0) + SAKER[x].antal; else S.saker.push(x);
   if (things.length){ renderPack(); sparkle(boy.x + 8, boy.y + 2, 18); }
   if (till.djur) giveAnimal(till.djur, out[out.length - 1].t, () => itemModal(things));
   if (till.fiskeplats){ S.hittat.push(till.fiskeplats); buildTerrain(); sparkle(NODES[till.fiskeplats].x*TS + 8, NODES[till.fiskeplats].y*TS + 8, 26); toast(rewardText(till)); }
@@ -1895,7 +1895,7 @@ function tradeFish(p, v){
 function takeGift(p, id){
   const v = valOf(p), it = SAKER[id];
   if (S.handlat[p.id] || !v.gava.includes(id)) return;
-  S.handlat[p.id] = id; if (!S.saker.includes(id)) S.saker.push(id);
+  S.handlat[p.id] = id; if (it.antal) S.agnLager[id] = (S.agnLager[id] || 0) + it.antal; else if (!S.saker.includes(id)) S.saker.push(id);
   const extra = v.extra && !S.saker.includes(v.extra) ? v.extra : null;
   if (extra) S.saker.push(extra);
   saveSoon(); renderPack();
@@ -2273,7 +2273,7 @@ const hasBait = id => { const it = SAKER[id]; return it.alltid || (it.antal ? (S
 // The fly rod and the raft take flies (agn with fluga), the other rods the other baits (Peter 2026-10-26)
 const flyTool = tool => (FISKE.flugredskap || []).includes(tool);
 const baitFits = (tool, id) => SAKER[id].typ === 'agn' && (flyTool(tool) ? !!SAKER[id].fluga : isRod(tool) && !SAKER[id].fluga);
-const myBaits = tool => Object.keys(SAKER).filter(id => baitFits(tool, id) && hasBait(id));
+const myBaits = tool => Object.keys(SAKER).filter(id => baitFits(tool, id) && hasBait(id)).sort((a, c) => (SAKER[c].alltid ? 1 : 0) - (SAKER[a].alltid ? 1 : 0));
 const myLocks = () => S.saker.filter(id => SAKER[id] && SAKER[id].typ === 'lock' && !S.agnAnvant.includes(id));
 const heard = keys => (keys || []).some(k => S.rykten.includes(k));
 const nameIn = id => SAKER[id].egennamn ? SAKER[id].namn : SAKER[id].namn.toLowerCase();
@@ -2296,12 +2296,13 @@ function fishBlock(id){
 // A fisherman on a bridge lends a tool for a fish of a kind he has caught there
 function lanBlock(id){
   const L = FISKE.platser[id].lan, here = S.node === id && !boy.route, got = S.saker.includes(L.ger);
-  return `<div class="plot"><div><b>${esc(L.rubrik)}</b>${got ? `<span>${esc(L.klar)}</span>` : ''}</div>${here && !got ? `<button class="btn" type="button" data-lan="${id}">${esc(L.knapp)}</button>` : ''}</div>`;
+  return `<div class="plot"><div><b>${esc(L.rubrik)}</b>${got && !L.agn ? `<span>${esc(L.klar)}</span>` : ''}</div>${here && (!got || L.agn) ? `<button class="btn" type="button" data-lan="${id}">${esc(L.knapp)}</button>` : ''}</div>`;
 }
 function talkFisher(id){
   const L = FISKE.platser[id].lan;
-  if (S.saker.includes(L.ger)) return;
-  sellOrSwap({ who: null, hej: L.hej, tack: L.tack, ger: L.ger, pris: L.pris, fynd: L.fynd, back: toNode, done: () => {} });
+  if (S.saker.includes(L.ger) && !L.agn) return;
+  sellOrSwap({ who: null, hej: L.hej, hejIgen: L.hejIgen, tack: L.tack, ger: L.ger, pris: L.pris, fynd: L.fynd, packs: Object.entries(L.agn || {}), packTack: L.agnTack,
+    again: () => talkFisher(id), back: toNode, done: () => {} });
 }
 // A thing in a shop (Peter 2026-10-23): the price first (or the find he gives for it), then the name and how many as the title,
 // and a short text under it. The headings "Köp" and "Byt" stand over the buttons. Shop texts are kept short (the test checks).
@@ -2310,7 +2311,7 @@ const buyChoice = (id, pris, antal, run) => ({ label: wareLabel(id, price(pris),
 const swapChoice = (id, fynd, antal, run) => ({ label: wareLabel(id, `<span class="price"><img class="pix" src="${katIcon('fynd')}" alt="Byt"></span>`, antal, `Du ger ${SAKER[fynd].namn.toLowerCase()}`), cls: 'vara-btn', run });
 // Someone sells a thing for stardust, or swaps it for the one find he or she wants (the fishermen on the bridges, Hulda). Peter 2026-10-21.
 function sellOrSwap(o){
-  const finds = o.fynd && S.saker.includes(o.fynd) ? [o.fynd] : [];
+  const has = S.saker.includes(o.ger), finds = !has && o.fynd && S.saker.includes(o.fynd) ? [o.fynd] : [];
   const give = how => {
     if (S.saker.includes(o.ger)) return o.back();
     if (how === 'pris'){ if (S.coins < o.pris){ toast(berattelse.dialog.ingaStoft.replace('{n}', o.pris - S.coins)); return; } spend(o.pris); updateHud('coins'); }
@@ -2320,8 +2321,10 @@ function sellOrSwap(o){
     startDialog([{ p: o.who, t: o.tack }], () => [{ label: 'Tillbaka', alt: true, run: o.back }]);
     if (how !== 'pris') itemModal(o.ger);
   };
-  startDialog([{ p: o.who, t: o.hej }], () => [
-    { rubrik: 'Köp' }, buyChoice(o.ger, o.pris, 0, () => give('pris')),
+  // a fisherman can also sell packs of flies (packs), again and again (Peter 2026-10-26)
+  startDialog([{ p: o.who, t: has && o.hejIgen ? o.hejIgen : o.hej }], () => [
+    { rubrik: 'Köp' }, ...(has ? [] : [buyChoice(o.ger, o.pris, 0, () => give('pris'))]),
+    ...(o.packs || []).map(([id, po]) => buyChoice(id, po.pris, po.antal, () => buyPack(id, po, o.who, o.packTack, o.again))),
     ...(finds.length ? [{ rubrik: 'Byt' }, ...finds.map(id => swapChoice(o.ger, id, 0, () => give(id)))] : []),
     { label: 'Tillbaka', alt: true, run: o.back },
   ]);
@@ -2415,7 +2418,9 @@ function pull(){
   // the thing for an animal is used up when the animal comes
   const rule = animalRule(fz);
   if (rule){
-    S.agnAnvant.push(fz.agn); renderPack();
+    const it = SAKER[fz.agn];
+    if (it && it.antal) S.agnLager[fz.agn] = Math.max(0, (S.agnLager[fz.agn] || 0) - 1); else if (it && !it.alltid) S.agnAnvant.push(fz.agn);
+    renderPack();
     sparkle(boy.x + 8, boy.y + 2, 20, '#2ce8f5');
     stopFishing(); giveAnimal(rule.djur, rule.text, () => showNode());
     return saveSoon();
