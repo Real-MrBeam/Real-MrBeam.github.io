@@ -402,23 +402,28 @@ const JINGEL_DJUR = { step: .11, lead: [['C6', 0, 1], ['E6', 1, 1], ['G6', 2, 1]
   bas: [['C4', 0, 4], ['F3', 4, 2], ['G3', 6, 4]], slut: ['C7', 'E7', 'G7'], slutAt: 11 };
 // A new fish in the fish book (Peter 2026-10-26): quick marimba notes up like bubbles, and two bells
 const JINGEL_FISK = [['G5', 0], ['C6', .07], ['E6', .14], ['G6', .21], ['C7', .28]];
-// Stars and stardust share one jingle of their own, unlike all the others (Peter 2026-10-26: longer, grander and lower): a
-// fanfare on a brassy synth over strings and a deep bass, C, F and back to C, with soft bells at the end.
-// [note, start in steps, length in steps]
-const JINGEL_SKATT = { step: .17,
-  lead: [['G4', 0, 1], ['C5', 1, 1], ['E5', 2, 1], ['G5', 3, 2], ['E5', 5, 1], ['G5', 6, 1], ['C6', 7, 6]],
-  strak: [[['C4', 'E4', 'G4'], 0, 4], [['F4', 'A4', 'C5'], 4, 3], [['C4', 'E4', 'G4', 'C5'], 7, 7]],
-  bas: [['C3', 0, 4], ['F2', 4, 3], ['C2', 7, 7]], klockor: [['G6', 7], ['C7', 7.3], ['E7', 7.6]] };
+// Stars and stardust share one jingle of their own, unlike all the others (Peter 2026-10-26: longer, grander and lower, then
+// more like the fanfare of an old role-playing game when a battle is won). Our own tune, not a copy: a triplet run up on
+// brass with a snare under it, then the victory cadence A flat, B flat and C, a triplet again and a long last note, over
+// strings, a deep bass and a kick. [note or chord, start in seconds, length in seconds]
+const JINGEL_SKATT = {
+  lead: [['E5', 0, .12], ['F5', .13, .12], ['G5', .26, .12], ['C6', .39, .48], ['D#6', .9, .34], ['F6', 1.27, .34],
+    ['D6', 1.64, .12], ['E6', 1.77, .12], ['F6', 1.9, .12], ['G6', 2.03, 1.1]],
+  strak: [[['C4', 'E4', 'G4'], .39, .5], [['G#3', 'C4', 'D#4'], .9, .37], [['A#3', 'D4', 'F4'], 1.27, .37], [['C4', 'E4', 'G4', 'C5'], 2.03, 1.3]],
+  bas: [['C3', .39, .48], ['G#2', .9, .35], ['A#2', 1.27, .35], ['C3', 2.03, 1.1], ['C2', 2.03, 1.1]],
+  kick: [.39, .9, 1.27, 2.03], snare: [0, .13, .26, 1.64, 1.77, 1.9], klockor: [['G6', 2.1], ['C7', 2.2], ['E7', 2.3]] };
 // jingelPa(ctx, dest, t0, sort) schedules it on any AudioContext (also an OfflineAudioContext, to make a sound file of it)
 // and returns its gain node
 function jingelPa(ctx, dest, t0, sort) {
   const out = ctx.createGain(); out.gain.value = .5; out.connect(dest);
   if (sort === 'stjarnor' || sort === 'stoft') {
-    const J = JINGEL_SKATT, st = J.step;
-    for (const [n, a, l] of J.lead) tone(ctx, out, { f: freq(n), t: t0 + a * st, len: l * st * .95, vol: .13, kind: 'synt' });
-    for (const [ch, a, l] of J.strak) for (const n of ch) tone(ctx, out, { f: freq(n), t: t0 + a * st, len: l * st, vol: .05, kind: 'strak' });
-    for (const [n, a, l] of J.bas) tone(ctx, out, { f: freq(n), t: t0 + a * st, len: l * st * .95, vol: .28, tri: true });
-    for (const [n, a] of J.klockor) tone(ctx, out, { f: freq(n), t: t0 + a * st, len: 1, vol: .05, kind: 'klocka' });
+    const J = JINGEL_SKATT;
+    for (const [n, a, l] of J.lead) { tone(ctx, out, { f: freq(n), t: t0 + a, len: l, vol: .12, kind: 'synt' }); tone(ctx, out, { f: freq(n) / 2, t: t0 + a, len: l, vol: .08, kind: 'synt' }); }
+    for (const [ch, a, l] of J.strak) for (const n of ch) tone(ctx, out, { f: freq(n), t: t0 + a, len: l, vol: .05, kind: 'strak' });
+    for (const [n, a, l] of J.bas) tone(ctx, out, { f: freq(n), t: t0 + a, len: l, vol: .24, tri: true });
+    for (const a of J.kick) drum(ctx, out, 'k', t0 + a, false);
+    for (const a of J.snare) drum(ctx, out, 's', t0 + a, false);
+    for (const [n, a] of J.klockor) tone(ctx, out, { f: freq(n), t: t0 + a, len: 1, vol: .04, kind: 'klocka' });
     return out;
   }
   if (sort === 'fisk') {
@@ -444,7 +449,7 @@ function jingel(sort) {
   if (!P.on || !P.ctx || P.ctx.state !== 'running') return;
   const ctx = P.ctx, out = jingelPa(ctx, ctx.destination, ctx.currentTime + .03, sort);
   setTimeout(() => out.disconnect(), 5000);
-  const t = ctx.currentTime, dur = sort === 'stjarnor' || sort === 'stoft' ? 2.8 : sort === 'djur' ? 2.2 : sort === 'fisk' ? 1.1 : .9;
+  const t = ctx.currentTime, dur = sort === 'stjarnor' || sort === 'stoft' ? 3.2 : sort === 'djur' ? 2.2 : sort === 'fisk' ? 1.1 : .9;
   P.master.gain.cancelScheduledValues(t); P.master.gain.setValueAtTime(P.master.gain.value, t); P.master.gain.linearRampToValueAtTime(P.vol * .4, t + .05); P.master.gain.setValueAtTime(P.vol * .4, t + dur); P.master.gain.linearRampToValueAtTime(P.vol, t + dur + .5);
 }
 
