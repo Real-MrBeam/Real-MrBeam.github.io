@@ -2521,7 +2521,8 @@
         "vanta": [
           2000,
           5000
-        ]
+        ],
+        "utanFlugor": true
       },
       "udden": {
         "fiskar": [
@@ -2549,7 +2550,8 @@
         "vanta": [
           3000,
           6500
-        ]
+        ],
+        "utanFlugor": true
       },
       "bakom": {
         "fiskar": [
@@ -2866,7 +2868,8 @@
       "lockbete": "Lockbete",
       "ingetPaAgn": "Ingen fisk här vill ha {agn}. Prova ett annat agn.",
       "brastDrag": "Linan gick av, och {agn} följde med fisken ner i djupet.",
-      "ingaFlugor": "Du har inga flugor. Nattfiskaren säljer flugor."
+      "ingaFlugor": "Du har inga flugor. Nattfiskaren säljer flugor.",
+      "ingenFlugfiske": "Här går det inte att flugfiska."
     },
     "fynd": [
       "stovel",

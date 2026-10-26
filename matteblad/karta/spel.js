@@ -1379,7 +1379,7 @@ document.addEventListener('visibilitychange', () => { if (window.Musik) Musik.pa
 const isDay = () => !S.natt;
 const plotsAt = id => PLOTS.filter(p => p.node === id);
 const plotLeft = p => { if (p.prebuilt) return false; if (!S.built[p.id]) return true; const v = valOf(p); return !!(v && (!S.handlat[p.id] || (v.byte && !S.bytt[p.id]))); };
-const newFishAt = id => { const fp = FISKE.platser[id]; return myTools().some(t => (FISKE.fangar[t] || []).some(f => fp.fiskar.includes(f) && S.fiskbok[f] === undefined)); };
+const newFishAt = id => { const fp = FISKE.platser[id]; return toolsAt(id).some(t => (FISKE.fangar[t] || []).some(f => fp.fiskar.includes(f) && S.fiskbok[f] === undefined)); };
 const PLACE_PARTS = [
   { on: id => isDay() && plotsAt(id).length > 0, block: id => plotsAt(id).map(plotBlock).join(''), active: id => plotsAt(id).some(plotLeft) },
   { on: id => isDay() && !!STOPP[id], block: id => stopBlock(id), active: id => !S.stopp[id] },
@@ -1656,6 +1656,7 @@ panel.addEventListener('click', ev => {
   else if (b.dataset.granne) talkNeighbour();
   else if (b.dataset.lan) talkFisher(b.dataset.lan);
   else if (b.dataset.locka) lure(b.dataset.locka);
+  else if (b.dataset.ejhar) toast(FISKE.texter.ingenFlugfiske);   // the fly rod, greyed out in the pond and the cave
   else if (b.dataset.redskap !== undefined){ fishing.redskap = b.dataset.redskap; renderFishing(); }
   else if (b.dataset.agn !== undefined){ const id = b.dataset.agn; fishing.agn = fishing.agn === id && SAKER[id].typ === 'lock' ? '' : id; renderFishing(); }
   else if (b.dataset.kasta) cast();
@@ -2031,7 +2032,7 @@ $('#rykten').addEventListener('click', ev => { if (ev.target.closest('[data-visa
 function renderPack(){
   if (S.rykten) for (const id of S.saker) if (SAKER[id] && SAKER[id].rykte && !S.rykten.includes('sak:' + id)) hearRumor('sak:' + id);
   // used things that call forth an animal are gone; mask is there as soon as he has a rod, a pack while some is left
-  const packs = myBaits().filter(id => !S.saker.includes(id) && (SAKER[id].antal || myTools().some(isRod)));
+  const packs = Object.keys(SAKER).filter(id => SAKER[id].typ === 'agn' && hasBait(id) && !S.saker.includes(id) && (SAKER[id].antal || myTools().some(t => baitFits(t, id))));
   const own = [...S.saker.filter(id => SAKER[id] && SAKER[id].typ !== 'djur' && !S.agnAnvant.includes(id)), ...packs]
     .sort((a, b) => KAT_ORDER.indexOf(katOf(a)) - KAT_ORDER.indexOf(katOf(b)) || (SAKER[b].alltid ? 1 : 0) - (SAKER[a].alltid ? 1 : 0));
   renderRumors();
@@ -2267,6 +2268,8 @@ function openModal(steps, done){
 const FISKE = berattelse.fiske;
 let fishing = null; // { plats, redskap, agn, phase: 'val' | 'vanta' | 'nu' | 'kamp' | 'miss', timers, loop, kamp }
 const myTools = () => ['metspo', ...FISKE.redskap].filter(id => S.saker.includes(id));
+// the tools he can use at a place: no fly fishing in the pond or the cave (utanFlugor, Peter 2026-10-26)
+const toolsAt = plats => myTools().filter(t => !(FISKE.platser[plats] && FISKE.platser[plats].utanFlugor && t === 'flugspo'));
 const isRod = tool => FISKE.verktyg[tool] === 'spo';
 const SATT = fz => FISKE.satt[FISKE.verktyg[fz.redskap]];
 const hasBait = id => { const it = SAKER[id]; return it.alltid || (it.antal ? (S.agnLager[id] || 0) > 0 : S.saker.includes(id) && !S.agnAnvant.includes(id)); };
@@ -2290,7 +2293,7 @@ function fixBait(fz){
 }
 function fishBlock(id){
   const T = FISKE.texter, here = (LEVEL ? LEVEL.def.fiske === id : S.node === id) && !boy.route;
-  if (!myTools().length) return `<div class="plot"><div><b>${esc(T.rubrik)}</b><span>${esc(T.ingetSpo)}</span></div></div>`;
+  if (!toolsAt(id).length) return `<div class="plot"><div><b>${esc(T.rubrik)}</b><span>${esc(T.ingetSpo)}</span></div></div>`;
   return `<div class="plot"><div><b>${esc(T.rubrik)}</b></div>${here ? `<button class="btn" type="button" data-fiska="${id}">${esc(T.knapp)}</button>` : ''}</div>`;
 }
 // A fisherman on a bridge lends a tool for a fish of a kind he has caught there
@@ -2330,7 +2333,7 @@ function sellOrSwap(o){
   ]);
 }
 function startFishing(id){
-  fishing = { plats: id, redskap: myTools()[0], agn: '', phase: 'val', timers: [] };
+  fishing = { plats: id, redskap: toolsAt(id)[0], agn: '', phase: 'val', timers: [] };
   fixBait(fishing); renderFishing();
 }
 function stopFishing(){ if (fishing){ fishing.timers.forEach(clearTimeout); clearInterval(fishing.loop); } fishing = null; }
@@ -2346,7 +2349,7 @@ function renderFishing(){
     // the baits only for a rod (Peter 2026-10-22), the special things only where they can be used
     const baits = myBaits(fz.redskap), locks = locksHere(fz), noFly = fz.redskap === 'flugspo' && !fz.agn;
     h += `<p>${esc(T.valj)}</p><div class="panel-body">
-      <div><p class="sub">Redskap</p><div class="roads">${myTools().map(id => tool(id, SAKER[id].namn)).join('')}</div></div>
+      <div><p class="sub">Redskap</p><div class="roads">${myTools().map(id => toolsAt(fz.plats).includes(id) ? tool(id, SAKER[id].namn) : `<button class="btn alt locked" type="button" data-ejhar="1">${esc(SAKER[id].namn)}</button>`).join('')}</div></div>
       ${baits.length ? `<div><p class="sub">${esc(T.agn)}</p><div class="roads">${baits.map(pick).join('')}</div></div>` : ''}
       ${locks.length ? `<div><p class="sub">${esc(T.lockbete)}</p><div class="roads">${locks.map(pick).join('')}</div></div>` : ''}
       ${noFly ? `<p class="sub" style="text-transform:none;letter-spacing:0">${esc(T.ingaFlugor)}</p>` : ''}
