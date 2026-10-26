@@ -1355,20 +1355,23 @@ function playFlute(){
     }, d2 * 1000);
   }, dur * 1000 + 700);
 }
-// Every 20 seconds a white note rises from Ihåliga eken, wherever he is, so he sees that something can be heard there (Peter
-// 2026-10-26). Under the fog it is hidden like everything else.
-setInterval(() => {
-  if (LEVEL || document.hidden || reduceMotion) return;
-  const n = NODES[MELODI.vind]; if (!n) return;
-  FX.push({ k: 'not', x: n.x * TS + 6, y: n.y * TS - 10, vx: 0, vy: -9, t: 0, life: 3.2 });
-}, 20000);
-// The wind in Ihåliga eken whistles the beginning of the tree's melody now and then while he stands there (only with the sound on)
+// The wind in Ihåliga eken whistles the beginning of the tree's melody about every 20 seconds. It is heard only when he stands
+// there (with the sound on), but a white note rises from the oak with each of its notes wherever he is, so he sees from afar
+// that something can be heard there (Peter 2026-10-26). Under the fog the notes are hidden like everything else.
 let windNode = '', windNext = 0;
+const windNotes = () => {
+  const n = NODES[MELODI.vind]; if (!n || reduceMotion) return;
+  for (const t of Musik.tradToner('vind')) setTimeout(() => FX.push({ k: 'not', x: n.x * TS + 2 + Math.random() * 8, y: n.y * TS - 10, vx: 0, vy: -9, t: 0, life: 3.2 }), t * 1000);
+};
 setInterval(() => {
-  if (S.node !== MELODI.vind || LEVEL || boy.route || document.hidden || !window.Musik || !Musik.trad){ windNode = ''; return; }
-  const now = performance.now();
-  if (windNode !== S.node){ windNode = S.node; windNext = now + 2500; }
-  if (now >= windNext && now >= flojtTill){ const d = Musik.trad('vind'); windNext = now + (d ? d * 1000 : 0) + 20000; }
+  if (LEVEL || document.hidden || !window.Musik || !Musik.trad) return;
+  const now = performance.now(), here = S.node === MELODI.vind && !boy.route;
+  if (here && windNode !== S.node && windNext - now > 2500) windNext = now + 2500;   // soon after he arrives
+  windNode = here ? S.node : '';
+  if (now < windNext || (here && now < flojtTill)) return;
+  if (here) Musik.trad('vind');
+  windNotes();
+  windNext = now + Musik.tradToner('vind').slice(-1)[0] * 1000 + 20000;
 }, 500);
 function useItem(id){
   const it = SAKER[id]; if (!it) return;

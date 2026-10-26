@@ -451,6 +451,11 @@ function tradPa(ctx, dest, t0, sort) {
   if (sort === 'fiol') [['A2', 0, 32], ['D3', 32, 8], ['A2', 40, 24]].forEach(([n, a, l]) => tone(ctx, dest, { f: freq(n), t: t0 + a * st, len: l * st, vol: .06, kind: 'strak' }));
   return toks.length * st + (toks.length < TRAD.mel.length ? .8 : 1.2);
 }
+// tradToner(sort): when each note of it starts, in seconds from the beginning (for notes rising from the tree in time)
+function tradToner(sort) {
+  const toks = sort === 'vind' || sort === 'borjan' ? TRAD.mel.slice(0, TRAD.vind) : TRAD.mel;
+  return toks.map((tok, i) => tok === '-' ? null : i * TRAD.step).filter(t => t !== null);
+}
 // Musik.trad(sort) plays it now and returns its length. The flute and the fiddle play even when the music is off (like the
 // flute did), the wind only when the sound is on. The music is turned down while it plays.
 function trad(sort) {
@@ -465,5 +470,5 @@ function trad(sort) {
   return dur;
 }
 
-root.Musik = { trad, tradPa, jingel, jingelPa, nasta, grotta, start, stop, paus, spela, natt, get spelar() { return P.on; }, get lat() { return P.lat || ''; }, lattar: SONGS.map(s => s.namn) };
+root.Musik = { trad, tradPa, tradToner, jingel, jingelPa, nasta, grotta, start, stop, paus, spela, natt, get spelar() { return P.on; }, get lat() { return P.lat || ''; }, lattar: SONGS.map(s => s.namn) };
 })(typeof window !== 'undefined' ? window : globalThis);
