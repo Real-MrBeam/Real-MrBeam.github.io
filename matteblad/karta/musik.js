@@ -432,7 +432,7 @@ const TRAD = { step: .22,
     + 'D5 - E5 G5 A5 - G5 E5 D5 - C5 D5 E5 - - - G5 - E5 D5 C5 - D5 B4 A4 - - - - - - -').trim().split(' '),
   ack: [['A2', 'E3', 'A3', 'C4'], ['E2', 'B2', 'E3', 'G3'], ['A2', 'E3', 'A3', 'C4'], ['E2', 'B2', 'E3', 'G3'],
     ['D3', 'A3', 'D4', 'F4'], ['A2', 'E3', 'A3', 'C4'], ['C3', 'G3', 'C4', 'E4'], ['A2', 'E3', 'A3', 'C4']],
-  vind: 12 };   // the wind (and the flute before he has learnt it) only gets this far (Peter 2026-10-26: two more notes), and stops, as if it waits for the rest
+  vind: 16 };   // the wind (and the flute away from the oak) only gets this far (Peter 2026-10-26: three more notes, the first phrase), and stops, as if it waits for the rest
 // tradPa(ctx, dest, t0, sort) schedules it on any AudioContext: 'flojt' (the flute with the guitar), 'fiol' (Näcken's fiddle
 // over a low drone), 'vind' (the beginning, whistled by the wind) or 'borjan' (the beginning on the flute, all he can play
 // before he has learnt it, Peter 2026-10-26). Returns its length in seconds.
