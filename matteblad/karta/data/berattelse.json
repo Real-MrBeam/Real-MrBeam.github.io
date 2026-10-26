@@ -832,21 +832,6 @@
       "text": "En åra som har gått av på mitten, grå av ålder. Vems båt var den från?",
       "typ": "fynd",
       "varde": 1
-    },
-    "flugor": {
-      "namn": "Flugor",
-      "text": "Små fjäderflugor till flugspöet. Öring och harr hugger gärna.",
-      "typ": "agn",
-      "fluga": true,
-      "antal": 5,
-      "gillar": {
-        "oring": 2,
-        "harr": 2,
-        "regnbage": 2,
-        "roding": 2,
-        "sarv": 2,
-        "asp": 2
-      }
     }
   },
   "bygg": {
@@ -2442,10 +2427,6 @@
           "hej": "Min håv kan du få. Eller byt mot en glasflaska, jag samlar på sådana.",
           "fynd": "glasflaska",
           "agn": {
-            "flugor": {
-              "pris": 3,
-              "antal": 5
-            },
             "silverfluga": {
               "pris": 4,
               "antal": 5
@@ -2461,7 +2442,7 @@
             "Under bron står abborrarna i stim, och längre ner lurar gäddan.",
             "Ibland glittrar det i djupet under bron, som om något där nere väntar på ljus."
           ],
-          "hejIgen": "Välkommen tillbaka. Flugor har jag alltid."
+          "hejIgen": "Välkommen tillbaka. Silverflugor har jag alltid."
         },
         "vanta": [
           2500,
@@ -2903,7 +2884,7 @@
       "lockbete": "Lockbete",
       "ingetPaAgn": "Ingen fisk här vill ha {agn}. Prova ett annat agn.",
       "brastDrag": "Linan gick av, och {agn} följde med fisken ner i djupet.",
-      "ingaFlugor": "Du har inga flugor. Nattfiskaren säljer flugor.",
+      "ingaFlugor": "Du har inga flugor.",
       "ingenFlugfiske": "Här går det inte att flugfiska."
     },
     "fynd": [
