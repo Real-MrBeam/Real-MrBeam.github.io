@@ -731,8 +731,7 @@
       "gillar": {
         "gadda": 3,
         "gos": 3,
-        "abborre": 2,
-        "oring": 2
+        "abborre": 2
       },
       "nej": [
         "ruda",
@@ -2911,7 +2910,6 @@
       "metspo": [
         "abborre",
         "gadda",
-        "oring",
         "mansik",
         "ruda",
         "stjarnruda",
@@ -2922,7 +2920,6 @@
         "braxen",
         "sik",
         "grottfisk",
-        "roding",
         "gammelgadda",
         "mankungen"
       ],
