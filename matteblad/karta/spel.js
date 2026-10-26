@@ -2242,7 +2242,8 @@ function eventSteps(e, last){
 function showNews(){
   const list = newsQueue; newsQueue = [];
   // a rune or scroll stays new until he has read its story to the end (Peter 2026-10-21): closing the page halfway shows it again
-  const steps = list.flatMap((e, i) => eventSteps(e, i === list.length - 1));
+  // the step that tells what it gave has the jingle of stars or of stardust (Peter 2026-10-26), only the first time, not when he reads it again
+  const steps = list.flatMap((e, i) => eventSteps(e, i === list.length - 1).map(s => s.reward ? { ...s, ljud: e.typ === 'runa' ? 'stjarnor' : 'stoft' } : s));
   openModal(steps, () => { markSeen(list.map(e => e.id)); updateHud('stars'); renderTickets(); });
 }
 // Something he gets (a gift, a find, a thing from an adventure, a swap) is shown in a box like the runes (Peter 2026-10-23):
@@ -2261,6 +2262,7 @@ function openModal(steps, done){
   let i = 0;
   const show = () => {
     const s = steps[i];
+    if (s.ljud && window.Musik && Musik.jingel) Musik.jingel(s.ljud);   // a step can have a jingle, the stars or the stardust of the news
     $('#modalIcon').src = s.icon; $('#modalTitle').textContent = s.title; $('#modalText').textContent = s.text;
     $('#modalReward').textContent = s.reward || ''; $('#modalReward').hidden = !s.reward;
     $('#modalBtn').textContent = s.button; $('#modal').hidden = false;
@@ -2601,7 +2603,7 @@ function addTest(){
   const before = S.stars;
   S.log.push({ typ: 'runa', id: 'prov-' + S.testIdx, amne: t.subj, procent, stjarnor: st, bonus, biljett: procent > 90 });
   S.stars += st + bonus;
-  updateHud('stars'); renderLog(true); renderTickets();
+  updateHud('stars'); renderLog(true); renderTickets(); if (window.Musik && Musik.jingel) Musik.jingel('stjarnor');
   const opened = GATES.filter(g => before < g.req && S.stars >= g.req);
   let msg = `Runa i ${t.subj}: ${procent} % tolkat ger ${st + bonus} ${st + bonus === 1 ? 'stjärna' : 'stjärnor'}${bonus ? ', med bonus för förbättring' : ''}.`;
   if (opened.length){
@@ -2618,7 +2620,7 @@ function addTest(){
 function addSheet(){
   stopSaving();
   const mb = berattelse.exempel.mattebladRatt; const right = mb.min + Math.floor(Math.random() * (mb.max - mb.min + 1));
-  S.coins += right; S.log.push({ typ: 'rulle', ratt: right, av: mb.max, stoft: right }); updateHud('coins'); renderLog(true);
+  S.coins += right; S.log.push({ typ: 'rulle', ratt: right, av: mb.max, stoft: right }); updateHud('coins'); renderLog(true); if (window.Musik && Musik.jingel) Musik.jingel('stoft');
   toast(`Pergamentrulle: ${right} rätt ger ${right} stjärnstoft.`);
   if (current && current.type !== 'walk') renderPanel(current);
 }

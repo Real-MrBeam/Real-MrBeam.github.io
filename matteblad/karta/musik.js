@@ -11,7 +11,7 @@
 //   Musik.natt(true | false)   switches between the songs of the day and the songs of the night
 //   Musik.grotta(true | false)   the cave song while he is in a level
 //   Musik.jingel(sort)   a short tune when he gets something, 'djur' a longer one for a new animal, 'fisk' one for a new fish
-//                        in the fish book (only when the sound is on)
+//                        in the fish book, 'stjarnor' for stars and 'stoft' for stardust (only when the sound is on)
 //   Musik.spela(ctx, dest, index, t0)   schedules one whole song on any AudioContext (also an OfflineAudioContext), returns its length
 (function (root) {
 'use strict';
@@ -402,10 +402,27 @@ const JINGEL_DJUR = { step: .11, lead: [['C6', 0, 1], ['E6', 1, 1], ['G6', 2, 1]
   bas: [['C4', 0, 4], ['F3', 4, 2], ['G3', 6, 4]], slut: ['C7', 'E7', 'G7'], slutAt: 11 };
 // A new fish in the fish book (Peter 2026-10-26): quick marimba notes up like bubbles, and two bells
 const JINGEL_FISK = [['G5', 0], ['C6', .07], ['E6', .14], ['G6', .21], ['C7', .28]];
+// Stars and stardust have their own jingles, unlike all the others (Peter 2026-10-26). Stars: a bright fanfare up in fifths
+// on a thin chip tone over a bass, and high bells that twinkle. Stardust: a quick glittering run of bells falling down like
+// dust, and a soft tone at the bottom.
+const JINGEL_STJARNOR = { lead: [['C6', 0, .12], ['G6', .12, .12], ['C7', .24, .5]], bas: [['C4', 0, .24], ['G3', .24, .6]], glitter: ['G7', 'C8', 'E7', 'G7', 'C8'], glitterAt: .3 };
+const JINGEL_STOFT = ['C8', 'A7', 'G7', 'E7', 'D7', 'C7', 'A6', 'G6', 'E6'];
 // jingelPa(ctx, dest, t0, sort) schedules it on any AudioContext (also an OfflineAudioContext, to make a sound file of it)
 // and returns its gain node
 function jingelPa(ctx, dest, t0, sort) {
   const out = ctx.createGain(); out.gain.value = .5; out.connect(dest);
+  if (sort === 'stjarnor') {
+    const J = JINGEL_STJARNOR;
+    for (const [n, a, l] of J.lead) tone(ctx, out, { f: freq(n), t: t0 + a, len: l, vol: .1, duty: .125 });
+    for (const [n, a, l] of J.bas) tone(ctx, out, { f: freq(n), t: t0 + a, len: l, vol: .2, tri: true });
+    J.glitter.forEach((n, i) => tone(ctx, out, { f: freq(n), t: t0 + J.glitterAt + i * .09, len: .6, vol: .07, kind: 'klocka' }));
+    return out;
+  }
+  if (sort === 'stoft') {
+    JINGEL_STOFT.forEach((n, i) => tone(ctx, out, { f: freq(n), t: t0 + i * .045, len: .4, vol: .06, kind: 'klocka' }));
+    tone(ctx, out, { f: freq('C6'), t: t0 + JINGEL_STOFT.length * .045, len: .6, vol: .12, kind: 'elpiano' });
+    return out;
+  }
   if (sort === 'fisk') {
     for (const [n, d] of JINGEL_FISK) tone(ctx, out, { f: freq(n), t: t0 + d, len: .25, vol: .1, kind: 'marimba' });
     tone(ctx, out, { f: freq('E7'), t: t0 + .4, len: .7, vol: .1, kind: 'klocka' });
@@ -429,7 +446,7 @@ function jingel(sort) {
   if (!P.on || !P.ctx || P.ctx.state !== 'running') return;
   const ctx = P.ctx, out = jingelPa(ctx, ctx.destination, ctx.currentTime + .03, sort);
   setTimeout(() => out.disconnect(), 4000);
-  const t = ctx.currentTime, dur = sort === 'djur' ? 2.2 : sort === 'fisk' ? 1.1 : .9;
+  const t = ctx.currentTime, dur = sort === 'djur' ? 2.2 : sort === 'stjarnor' ? 1.3 : sort === 'fisk' ? 1.1 : .9;
   P.master.gain.cancelScheduledValues(t); P.master.gain.setValueAtTime(P.master.gain.value, t); P.master.gain.linearRampToValueAtTime(P.vol * .4, t + .05); P.master.gain.setValueAtTime(P.vol * .4, t + dur); P.master.gain.linearRampToValueAtTime(P.vol, t + dur + .5);
 }
 
