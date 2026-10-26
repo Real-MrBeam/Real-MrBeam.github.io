@@ -10,7 +10,7 @@
 //   Musik.paus(true | false)   pauses while the page is hidden
 //   Musik.natt(true | false)   switches between the songs of the day and the songs of the night
 //   Musik.grotta(true | false)   the cave song while he is in a level
-//   Musik.jingel()   a short tune when he gets something (only when the sound is on)
+//   Musik.jingel(djur)   a short tune when he gets something, a longer one for a new animal (only when the sound is on)
 //   Musik.spela(ctx, dest, index, t0)   schedules one whole song on any AudioContext (also an OfflineAudioContext), returns its length
 (function (root) {
 'use strict';
@@ -395,19 +395,32 @@ function flojt(index) {
 // ---------- the jingle when he gets something (Peter 2026-10-26): four quick chip notes up and a bell on top. Only when the
 // sound is on; the music is turned down for a moment while it plays.
 const JINGEL = [['G5', 0], ['C6', .08], ['E6', .16], ['G6', .24]];
-// jingelPa(ctx, dest, t0) schedules it on any AudioContext (also an OfflineAudioContext, to make a sound file of it)
-function jingelPa(ctx, dest, t0) {
+// A new animal has its own, longer jingle (Peter 2026-10-26): a little tune on the chip with a triangle bass under it, and
+// three bells together at the end. [note, start in eighths, length in eighths]
+const JINGEL_DJUR = { step: .11, lead: [['C6', 0, 1], ['E6', 1, 1], ['G6', 2, 1], ['C7', 3, 2], ['A6', 5, 1], ['B6', 6, 1], ['G6', 7, 1], ['A6', 8, 1], ['B6', 9, 1], ['D7', 10, 1]],
+  bas: [['C4', 0, 4], ['F3', 4, 2], ['G3', 6, 4]], slut: ['C7', 'E7', 'G7'], slutAt: 11 };
+// jingelPa(ctx, dest, t0, djur) schedules it on any AudioContext (also an OfflineAudioContext, to make a sound file of it)
+// and returns its gain node
+function jingelPa(ctx, dest, t0, djur) {
   const out = ctx.createGain(); out.gain.value = .5; out.connect(dest);
+  if (djur) {
+    const J = JINGEL_DJUR, s = J.step;
+    for (const [n, a, l] of J.lead) tone(ctx, out, { f: freq(n), t: t0 + a * s, len: l * s * .9, vol: .11, duty: .25 });
+    for (const [n, a, l] of J.bas) tone(ctx, out, { f: freq(n), t: t0 + a * s, len: l * s * .9, vol: .2, tri: true });
+    J.slut.forEach((n, i) => tone(ctx, out, { f: freq(n), t: t0 + J.slutAt * s + i * .03, len: 1.2, vol: .1, kind: 'klocka' }));
+    tone(ctx, out, { f: freq('C4'), t: t0 + J.slutAt * s, len: .9, vol: .2, tri: true });
+    return out;
+  }
   for (const [n, d] of JINGEL) tone(ctx, out, { f: freq(n), t: t0 + d, len: .09, vol: .12, duty: .25 });
   tone(ctx, out, { f: freq('C7'), t: t0 + .34, len: .5, vol: .16, kind: 'klocka' });
   tone(ctx, out, { f: freq('G6'), t: t0 + .34, len: .5, vol: .1, kind: 'klocka' });
   return out;
 }
-function jingel() {
+function jingel(djur) {
   if (!P.on || !P.ctx || P.ctx.state !== 'running') return;
-  const ctx = P.ctx, out = jingelPa(ctx, ctx.destination, ctx.currentTime + .03);
-  setTimeout(() => out.disconnect(), 2500);
-  const t = ctx.currentTime, dur = .9;
+  const ctx = P.ctx, out = jingelPa(ctx, ctx.destination, ctx.currentTime + .03, djur);
+  setTimeout(() => out.disconnect(), 4000);
+  const t = ctx.currentTime, dur = djur ? 2.2 : .9;
   P.master.gain.cancelScheduledValues(t); P.master.gain.setValueAtTime(P.master.gain.value, t); P.master.gain.linearRampToValueAtTime(P.vol * .4, t + .05); P.master.gain.setValueAtTime(P.vol * .4, t + dur); P.master.gain.linearRampToValueAtTime(P.vol, t + dur + .5);
 }
 

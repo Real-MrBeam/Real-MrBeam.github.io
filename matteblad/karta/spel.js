@@ -2032,13 +2032,13 @@ function renderRumors(){
     + (done.length ? `<li class="kat-rubrik"><button type="button" class="klara-knapp" data-visaklara="1" aria-expanded="${showDoneRumors}">${showDoneRumors ? 'Dölj' : 'Visa'} klara (${done.length})</button></li>${showDoneRumors ? done.map(rumorItem).join('') : ''}` : '');
 }
 $('#rykten').addEventListener('click', ev => { if (ev.target.closest('[data-visaklara]')){ showDoneRumors = !showDoneRumors; renderRumors(); } });
-// A little jingle when he gets something: a thing, a pack of bait or an animal (Peter 2026-10-26). The count is compared with
-// the last time; after loading or starting again it only takes the new count, without a sound.
-let haveCount = -1;
+// A little jingle when he gets something: a thing or a pack of bait, and a longer one for a new animal (Peter 2026-10-26).
+// The counts are compared with the last time; after loading or starting again they only take the new counts, without a sound.
+let haveCount = -1, animalCount = -1;
 function gainJingle(){
-  const n = S.saker.length + S.djur.length + Object.values(S.agnLager || {}).reduce((a, x) => a + x, 0);
-  if (haveCount >= 0 && n > haveCount && window.Musik && Musik.jingel) Musik.jingel();
-  haveCount = n;
+  const n = S.saker.length + S.djur.length + Object.values(S.agnLager || {}).reduce((a, x) => a + x, 0), d = S.djur.length;
+  if (haveCount >= 0 && n > haveCount && window.Musik && Musik.jingel) Musik.jingel(animalCount >= 0 && d > animalCount);
+  haveCount = n; animalCount = d;
 }
 function renderPack(){
   gainJingle();
