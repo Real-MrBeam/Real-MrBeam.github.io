@@ -2037,7 +2037,7 @@ $('#rykten').addEventListener('click', ev => { if (ev.target.closest('[data-visa
 let haveCount = -1, animalCount = -1;
 function gainJingle(){
   const n = S.saker.length + S.djur.length + Object.values(S.agnLager || {}).reduce((a, x) => a + x, 0), d = S.djur.length;
-  if (haveCount >= 0 && n > haveCount && window.Musik && Musik.jingel) Musik.jingel(animalCount >= 0 && d > animalCount);
+  if (haveCount >= 0 && n > haveCount && window.Musik && Musik.jingel) Musik.jingel(animalCount >= 0 && d > animalCount ? 'djur' : '');
   haveCount = n; animalCount = d;
 }
 function renderPack(){
@@ -2475,6 +2475,7 @@ function land(id, kg){
     step = { icon: catchIcon(id), title: fish.namn, text: best ? T.tillbakaRekord : T.tillbaka3, reward: best ? `${kgText(kg)} kg. Nytt rekord!` : `${kgText(kg)} kg. Ditt rekord är ${kgText(rec)} kg.`, button: 'Till kartan' };
   } else {
     const isNew = S.fiskbok[id] === undefined; S.fiskbok[id] = (S.fiskbok[id] || 0) + 1;
+    if (isNew && window.Musik && Musik.jingel) Musik.jingel('fisk');   // a new fish in the fish book has its own jingle (Peter 2026-10-26)
     step = { icon: catchIcon(id), title: fish.namn, text: fish.text, reward: `${kgText(kg)} kg. ${isNew ? 'Ny i fiskboken.' : `${best ? 'Nytt rekord! ' : ''}Du har fått ${S.fiskbok[id]} sådana nu.`}`, button: 'Till kartan' };
   }
   renderFishBook(); saveSoon(); stopFishing();
