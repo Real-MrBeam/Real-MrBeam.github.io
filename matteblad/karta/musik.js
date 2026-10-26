@@ -12,6 +12,7 @@
 //   Musik.grotta(true | false)   the cave song while he is in a level
 //   Musik.jingel(sort)   a short tune when he gets something, 'djur' a longer one for a new animal, 'fisk' one for a new fish
 //                        in the fish book, 'stjarnor' or 'stoft' for stars and stardust (the same) (only when the sound is on)
+//   Musik.trad(sort)   the tree's melody: 'flojt', 'fiol' (Näcken) or 'vind' (the wind in the oak), returns its length
 //   Musik.spela(ctx, dest, index, t0)   schedules one whole song on any AudioContext (also an OfflineAudioContext), returns its length
 (function (root) {
 'use strict';
@@ -453,5 +454,45 @@ function jingel(sort) {
   P.master.gain.cancelScheduledValues(t); P.master.gain.setValueAtTime(P.master.gain.value, t); P.master.gain.linearRampToValueAtTime(P.vol * .4, t + .05); P.master.gain.setValueAtTime(P.vol * .4, t + dur); P.master.gain.linearRampToValueAtTime(P.vol, t + dur + .5);
 }
 
-root.Musik = { jingel, jingelPa, flojt, nasta, grotta, antalFlojt: FLOJT.length, start, stop, paus, spela, natt, get spelar() { return P.on; }, get lat() { return P.lat || ''; }, lattar: SONGS.map(s => s.namn) };
+// ---------- the tree's melody (Peter 2026-10-26): the wind whistles its beginning in Ihåliga eken, Näcken answers the flute at
+// Norra bron at night with the whole of it on his fiddle, and after that the flute always plays it. A calm, a little wistful
+// tune in A minor, 64 eighths; under the flute a guitar picks the chords, one per 8 steps.
+const TRAD = { step: .22,
+  mel: ('A4 - C5 D5 E5 - - - G5 E5 D5 - E5 - - - A4 - C5 D5 E5 - G5 A5 B5 - A5 G5 E5 - - - '
+    + 'D5 - E5 G5 A5 - G5 E5 D5 - C5 D5 E5 - - - G5 - E5 D5 C5 - D5 B4 A4 - - - - - - -').trim().split(' '),
+  ack: [['A2', 'E3', 'A3', 'C4'], ['E2', 'B2', 'E3', 'G3'], ['A2', 'E3', 'A3', 'C4'], ['E2', 'B2', 'E3', 'G3'],
+    ['D3', 'A3', 'D4', 'F4'], ['A2', 'E3', 'A3', 'C4'], ['C3', 'G3', 'C4', 'E4'], ['A2', 'E3', 'A3', 'C4']],
+  vind: 9 };   // the wind only gets this far, and stops, as if it waits for the rest
+// tradPa(ctx, dest, t0, sort) schedules it on any AudioContext: 'flojt' (the flute with the guitar), 'fiol' (Näcken's fiddle
+// over a low drone) or 'vind' (the beginning, whistled by the wind). Returns its length in seconds.
+function tradPa(ctx, dest, t0, sort) {
+  const st = TRAD.step, toks = sort === 'vind' ? TRAD.mel.slice(0, TRAD.vind) : TRAD.mel;
+  toks.forEach((tok, i) => {
+    if (tok === '-') return;
+    let n = 1; while (i + n < toks.length && toks[i + n] === '-') n++;
+    const t = t0 + i * st, len = n * st * .95, f = freq(tok);
+    if (sort === 'fiol') tone(ctx, dest, { f, t, len: len + .05, vol: .14, kind: 'strak' });
+    else if (sort === 'vind') tone(ctx, dest, { f: f * 2, t, len: len * 1.2, vol: .05, kind: 'flojt' });
+    else tone(ctx, dest, { f, t, len, vol: .16, kind: 'flojt' });
+  });
+  if (sort === 'flojt') TRAD.ack.forEach((ch, b) => [0, 1, 2, 3, 2, 1].forEach((k, q) =>
+    tone(ctx, dest, { f: freq(ch[k]), t: t0 + (b * 8 + [0, 1, 2, 3, 5, 6][q]) * st, len: st * 2.5, vol: .07, kind: 'gitarr' })));
+  if (sort === 'fiol') [['A2', 0, 32], ['D3', 32, 8], ['A2', 40, 24]].forEach(([n, a, l]) => tone(ctx, dest, { f: freq(n), t: t0 + a * st, len: l * st, vol: .06, kind: 'strak' }));
+  return toks.length * st + (sort === 'vind' ? .8 : 1.2);
+}
+// Musik.trad(sort) plays it now and returns its length. The flute and the fiddle play even when the music is off (like the
+// flute did), the wind only when the sound is on. The music is turned down while it plays.
+function trad(sort) {
+  if (sort === 'vind' && !P.on) return 0;
+  const AC = root.AudioContext || root.webkitAudioContext; if (!AC) return 0;
+  if (!P.ctx) { P.ctx = new AC(); P.master = P.ctx.createGain(); P.master.gain.value = 0; P.master.connect(P.ctx.destination); }
+  P.ctx.resume();
+  const ctx = P.ctx, out = ctx.createGain(); out.gain.value = .5; out.connect(ctx.destination);
+  const dur = tradPa(ctx, out, ctx.currentTime + .05, sort);
+  setTimeout(() => out.disconnect(), (dur + 3) * 1000);
+  if (P.on) { const t = ctx.currentTime, low = sort === 'vind' ? .5 : .2; P.master.gain.cancelScheduledValues(t); P.master.gain.setValueAtTime(P.master.gain.value, t); P.master.gain.linearRampToValueAtTime(P.vol * low, t + .3); P.master.gain.setValueAtTime(P.vol * low, t + dur); P.master.gain.linearRampToValueAtTime(P.vol, t + dur + 1); }
+  return dur;
+}
+
+root.Musik = { trad, tradPa, jingel, jingelPa, flojt, nasta, grotta, antalFlojt: FLOJT.length, start, stop, paus, spela, natt, get spelar() { return P.on; }, get lat() { return P.lat || ''; }, lattar: SONGS.map(s => s.namn) };
 })(typeof window !== 'undefined' ? window : globalThis);

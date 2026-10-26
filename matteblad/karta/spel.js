@@ -1323,13 +1323,37 @@ $('#log').addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key =
 
 // Putting clothes on and off from the bag: one hat and one pair of boots at a time
 // The flute plays one of a few short tunes, the next one each time. Notes rise from the boy while it plays.
+// The tree's melody (Peter 2026-10-26): at Norra bron at night Näcken answers the flute under the water and plays the whole
+// melody on his fiddle; he knows it is the one the wind whistles in Ihåliga eken. From then on (S.melodi) the flute plays it.
+const MELODI = berattelse.melodi;
 let flojtNr = 0, flojtTill = 0;
+const fluteNotes = (dur, n) => { for (let i = 0; i < n; i++) setTimeout(() => FX.push({ k: 'spark', x: boy.x + 10 + Math.random() * 4, y: boy.y - 4, vx: (Math.random() - .3) * 10, vy: -22 - Math.random() * 10, t: 0, life: 1.1, col: i % 2 ? '#fee761' : '#ffffff' }), i * dur * 1000 / n); };
 function playFlute(){
   if (!window.Musik || performance.now() < flojtTill) return;
+  if (S.melodi){ const dur = Musik.trad('flojt'); flojtTill = performance.now() + dur * 1000; fluteNotes(dur, 14); return; }
   const dur = Musik.flojt(flojtNr++);
   flojtTill = performance.now() + dur * 1000;
-  for (let i = 0; i < 5; i++) setTimeout(() => FX.push({ k: 'spark', x: boy.x + 10 + Math.random() * 4, y: boy.y - 4, vx: (Math.random() - .3) * 10, vy: -22 - Math.random() * 10, t: 0, life: 1.1, col: i % 2 ? '#fee761' : '#ffffff' }), i * dur * 180);
+  fluteNotes(dur, 5);
+  if (S.node !== MELODI.plats || !S.natt || LEVEL) return;
+  flojtTill += 60000;   // no flute while Näcken answers
+  setTimeout(() => {
+    toast(MELODI.hor);
+    const d2 = Musik.trad('fiol'); flojtTill = performance.now() + d2 * 1000;
+    for (let i = 0; i < 10; i++) setTimeout(() => sparkle(boy.x + 8 + (Math.random() - .5) * 30, boy.y + 14, 6, '#2ce8f5'), i * d2 * 100);
+    setTimeout(() => {
+      S.melodi = true; saveSoon(); renderPack();
+      openModal([{ icon: itemPicture('flojt'), title: MELODI.rubrik, text: MELODI.svar, reward: MELODI.lart, button: 'Fortsätt' }], () => showNode());
+    }, d2 * 1000);
+  }, dur * 1000 + 700);
 }
+// The wind in Ihåliga eken whistles the beginning of the tree's melody now and then while he stands there (only with the sound on)
+let windNode = '', windNext = 0;
+setInterval(() => {
+  if (S.node !== MELODI.vind || LEVEL || boy.route || document.hidden || !window.Musik || !Musik.trad){ windNode = ''; return; }
+  const now = performance.now();
+  if (windNode !== S.node){ windNode = S.node; windNext = now + 2500; }
+  if (now >= windNext && now >= flojtTill){ const d = Musik.trad('vind'); windNext = now + (d ? d * 1000 : 0) + 20000; }
+}, 500);
 function useItem(id){
   const it = SAKER[id]; if (!it) return;
   if (id === 'flojt') return playFlute();
@@ -2040,8 +2064,10 @@ function gainJingle(){
   if (haveCount >= 0 && n > haveCount && window.Musik && Musik.jingel) Musik.jingel(animalCount >= 0 && d > animalCount ? 'djur' : '');
   haveCount = n; animalCount = d;
 }
+const FLOJT_TEXT = SAKER.flojt && SAKER.flojt.text;
 function renderPack(){
   gainJingle();
+  if (SAKER.flojt) SAKER.flojt.text = S.melodi ? MELODI.flojtText : FLOJT_TEXT;   // the flute knows the tree's melody
   if (S.rykten) for (const id of S.saker) if (SAKER[id] && SAKER[id].rykte && !S.rykten.includes('sak:' + id)) hearRumor('sak:' + id);
   // used things that call forth an animal are gone; mask is there as soon as he has a rod, a pack while some is left
   const packs = Object.keys(SAKER).filter(id => SAKER[id].typ === 'agn' && hasBait(id) && !S.saker.includes(id) && (SAKER[id].antal || myTools().some(t => baitFits(t, id))));
@@ -2120,7 +2146,7 @@ function tellNews(){
 // encrypted in the page (#lasNyckel) and opens with the password, like the portraits. Without the key nothing is saved.
 // Stars and stardust are never saved: they are counted from the runes and scrolls. Only what he has spent is saved.
 const SAVE = { repo: '', file: '', key: '', sha: null, timer: 0, off: false, loaded: false };
-const SAVED_FIELDS = ['node', 'built', 'valda', 'saker', 'steg', 'handlat', 'djur', 'fram', 'stopp', 'hittat', 'spent', 'kistor', 'agnAnvant', 'fiskbok', 'namn', 'bytt', 'intro', 'natt', 'salt', 'lasta', 'pa', 'tant', 'brev2', 'rykten', 'brevFiske', 'rekord', 'agnLager', 'damm'];
+const SAVED_FIELDS = ['node', 'built', 'valda', 'saker', 'steg', 'handlat', 'djur', 'fram', 'stopp', 'hittat', 'spent', 'kistor', 'agnAnvant', 'fiskbok', 'namn', 'bytt', 'intro', 'natt', 'salt', 'lasta', 'pa', 'tant', 'brev2', 'rykten', 'brevFiske', 'rekord', 'agnLager', 'damm', 'melodi'];
 const b64 = text => { const bytes = new TextEncoder().encode(text); let s = ''; for (const b of bytes) s += String.fromCharCode(b); return btoa(s); };
 const unb64 = data => new TextDecoder().decode(Uint8Array.from(atob(data.replace(/\s/g, '')), c => c.charCodeAt(0)));
 function spend(n){ S.coins -= n; S.spent += n; }
