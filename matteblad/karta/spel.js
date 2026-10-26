@@ -2298,8 +2298,9 @@ const nameIn = id => SAKER[id].egennamn ? SAKER[id].namn : SAKER[id].namn.toLowe
 // the things he can put out here with this tool: for an animal of this place that he has not found and has heard about
 // lures never on the fly rod (Peter 2026-10-26)
 const locksHere = fz => fz.redskap === 'flugspo' ? [] : FISKE.djur.filter(r => r.plats === fz.plats && !S.djur.includes(r.djur) && r.redskap.includes(fz.redskap) && heard(r.rykten))
-  .flatMap(r => r.agn.filter(id => myLocks().includes(id) || (SAKER[id].fluga && hasBait(id))));   // the raft takes no bait, only flies as a lure for Näcken (Peter 2026-10-26)
-const animalRule = fz => FISKE.djur.find(r => r.plats === fz.plats && r.redskap.includes(fz.redskap) && r.agn.includes(fz.agn) && !S.djur.includes(r.djur) && heard(r.rykten));
+  .flatMap(r => r.agn.filter(id => myLocks().includes(id)));
+// an animal without baits (agn: []) comes to the tool alone, like Näcken to the raft (Peter 2026-10-26: flies are only for fishing)
+const animalRule = fz => FISKE.djur.find(r => r.plats === fz.plats && r.redskap.includes(fz.redskap) && (r.agn.length ? r.agn.includes(fz.agn) : !fz.agn) && !S.djur.includes(r.djur) && heard(r.rykten));
 // a rod always has a bait on the hook (mask if nothing else), the other tools never; a choice that no longer fits is reset
 function fixBait(fz){
   const it = SAKER[fz.agn];

@@ -436,8 +436,7 @@
     "flugspo": {
       "namn": "Flugspö",
       "text": "Ett lätt spö med lång lina.",
-      "typ": "verktyg",
-      "rykte": "Vid Norra bron låter forsen ibland nästan som musik."
+      "typ": "verktyg"
     },
     "flugask": {
       "namn": "Flugask",
@@ -484,7 +483,6 @@
       "namn": "Silverflugor",
       "text": "Flugor som glänser som silver.",
       "typ": "agn",
-      "rykte": "Den som spelar fiol vid Norra bron sägs inte kunna låta bli silverflugor.",
       "fluga": true,
       "gillar": {
         "harr": 3,
@@ -1477,7 +1475,7 @@
       "namn": "Näcken",
       "art": "Vattenande",
       "text": "Spelar fiol i forsen så vackert att fiskarna stannar och lyssnar.",
-      "hur": "Steg upp ur vattnet medan du fiskade.",
+      "hur": "Steg upp ur forsen när du flöt på flotten.",
       "fiske": true
     },
     "sigge": {
@@ -2576,34 +2574,26 @@
         "djur": "nacken",
         "plats": "norrabron",
         "redskap": [
-          "flugspo",
           "flotte"
         ],
-        "agn": [
-          "silverfluga",
-          "flugask"
-        ],
+        "agn": [],
         "text": "Vattnet i forsen blir alldeles stilla. Någon spelar fiol under ytan, och upp ur skummet stiger en gestalt med långt mörkt hår och en fiol under armen.",
         "rykten": [
           "plats:norrabron:natt",
-          "sak:flugspo",
-          "sak:flotte",
-          "sak:silverfluga"
+          "sak:flotte"
         ]
       },
       {
         "djur": "sigge",
         "plats": "vassen",
         "redskap": [
-          "flugspo",
           "kraftbur",
           "snorkel"
         ],
         "agn": [
           "snackor",
           "trolldryck",
-          "blabar",
-          "silverfluga"
+          "blabar"
         ],
         "text": "Vassen böjer sig. En puckel, och sedan en till, glider fram genom vattnet. Ett vänligt huvud på en lång hals tittar upp och nosar nyfiket på det du har med dig.",
         "rykten": [
@@ -3847,18 +3837,6 @@
     "sak:flotte": {
       "pekar": "norrabron",
       "natt": true,
-      "klar": [
-        "djur:nacken"
-      ]
-    },
-    "sak:flugspo": {
-      "pekar": "norrabron",
-      "klar": [
-        "djur:nacken"
-      ]
-    },
-    "sak:silverfluga": {
-      "pekar": "norrabron",
       "klar": [
         "djur:nacken"
       ]
