@@ -1343,6 +1343,8 @@ function playFlute(){
   const dur = Musik.trad('borjan');
   flojtTill = performance.now() + dur * 1000;
   fluteNotes(dur, 5);
+  // at the oak before he knows the whole melody: the right place, but only the beginning (Peter 2026-10-28)
+  if (!S.melodi && S.node === MELODI.vind && !LEVEL){ setTimeout(() => toast(MELODI.nastan), dur * 1000 + 400); return; }
   if (S.melodi || S.node !== MELODI.plats || !S.natt || LEVEL) return;
   flojtTill += 60000;   // no flute while Näcken answers
   setTimeout(() => {
@@ -2137,7 +2139,7 @@ function updateHud(which){
   if (which){ const el = which === 'stars' ? $('#chipStars') : $('#coinCount').parentElement; el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); }
 }
 let toastTimer = 0;
-function toast(msg){ const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 3200); }
+function toast(msg){ const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, Math.max(3200, msg.length * 45)); }   // long lines stay longer
 function hideHint(){ $('#hint').hidden = true; }
 // One line per rune or scroll, the newest first
 const placeName = id => (id && NODES[id] ? NODES[id].name : '');
