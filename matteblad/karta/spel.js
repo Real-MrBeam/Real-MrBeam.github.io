@@ -2465,15 +2465,19 @@ function cast(){
     fz.timers.push(setTimeout(() => miss(catchList(fz).length && fz.agn ? T.ingetPaAgn.replace('{agn}', nameIn(fz.agn)) : T.ingetHar), wait));
     return;
   }
-  fz.timers.push(setTimeout(() => { fz.phase = 'nu'; renderFishing(); }, wait));
+  fz.timers.push(setTimeout(() => { fz.phase = 'nu'; buzz([70, 50, 70]); renderFishing(); }, wait));
   fz.timers.push(setTimeout(() => { if (fz.phase === 'nu') miss(s.sent); }, wait + 1100));
 }
+// The phone vibrates while he fishes (Peter 2026-10-28): when it bites, when the fish pulls or jumps, when the line is close to
+// snapping, when it snaps and when the fish or an animal is landed. Only where the browser can (Android; iPhones cannot).
+const buzz = p => { try { if (navigator.vibrate) navigator.vibrate(p); } catch (e) { /* no vibration here */ } };
 function miss(text){ const fz = fishing; fz.timers.forEach(clearTimeout); fz.timers = []; clearInterval(fz.loop); fz.loop = 0; fz.kamp = null; fz.phase = 'miss'; fz.miss = text; renderFishing(); }
 // the line snaps: the fish is gone, and a lure (tappas) goes with it
 function snap(){
   const fz = fishing, b = SAKER[fz.agn];
-  if (!b || !b.tappas) return miss(FISKE.texter.brast);
+  if (!b || !b.tappas){ buzz(400); return miss(FISKE.texter.brast); }
   const name = nameIn(fz.agn);
+  buzz(400);
   S.saker = S.saker.filter(x => x !== fz.agn); fz.agn = 'mask'; renderPack(); saveSoon();
   miss(FISKE.texter.brastDrag.replace('{agn}', name));
 }
@@ -2488,6 +2492,7 @@ function pull(){
     if (it && it.antal) S.agnLager[fz.agn] = Math.max(0, (S.agnLager[fz.agn] || 0) - 1); else if (it && !it.alltid) S.agnAnvant.push(fz.agn);
     renderPack();
     sparkle(boy.x + 8, boy.y + 2, 20, '#2ce8f5');
+    buzz([120, 60, 120, 60, 350]);
     stopFishing(); giveAnimal(rule.djur, rule.text, () => showNode());
     return saveSoon();
   }
@@ -2513,6 +2518,7 @@ const kgText = kg => kg.toFixed(2).replace('.', ',');
 // of a kind goes back into the water, but if it is heavier its weight is still written in.
 function land(id, kg){
   const fz = fishing, fish = FISKE.fiskar[id], T = FISKE.texter;
+  buzz([80, 60, 80, 60, 220]);
   // a bait from a pack is used up when the fish is landed, not when it gets away
   if (SAKER[fz.agn] && SAKER[fz.agn].antal){ S.agnLager[fz.agn]--; renderPack(); }
   sparkle(boy.x + 8, boy.y + 2, 20, '#2ce8f5');
@@ -2553,6 +2559,7 @@ function fightTick(){
     if (k.state === 'vilar' && Math.random() < k.K.drar){ k.state = 'akta'; k.until = t + LINA.akta; }
     else if (k.state === 'akta'){ k.state = k.K.hopp ? 'hoppar' : 'drar'; k.until = t + (k.K.hopp ? 500 + Math.random() * 300 : 700 + Math.random() * 600); }
     else { k.state = 'vilar'; k.until = t + 900 + Math.random() * 900; }
+    if (k.state === 'drar') buzz(250); else if (k.state === 'hoppar') buzz([40, 40, 40, 40, 40]);
   }
   if (k.state === 'drar'){ k.line += k.K.kraft * dt; k.dist = Math.min(1.3, k.dist + .05 * dt); }
   k.line = Math.max(0, k.line - LINA.slapp * dt);
@@ -2565,6 +2572,7 @@ function veva(){
   const t = performance.now(), fast = t - k.prev < LINA.fort;
   k.tapped = k.prev = t; if (fast) k.fast = t;
   k.line += LINA.tryck + (k.state === 'drar' ? LINA.drar : k.state === 'hoppar' ? LINA.hopp : 0) + (fast ? LINA.ryck : 0);
+  buzz(k.line > .8 ? 45 : 12);   // a tick on each turn of the reel, harder when the line is about to snap
   k.dist -= (k.state === 'vilar' || k.state === 'akta' ? 1 : .5) / k.need;
   if (k.line >= 1) return snap();
   if (k.dist <= 0){ clearInterval(fz.loop); fz.loop = 0; fz.kamp = null; return land(k.id, k.kg); }
