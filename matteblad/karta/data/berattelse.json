@@ -2424,13 +2424,6 @@
           "pris": 5,
           "hej": "Min håv kan du få. Eller byt mot en glasflaska, jag samlar på sådana.",
           "fynd": "glasflaska",
-          "agn": {
-            "silverfluga": {
-              "pris": 4,
-              "antal": 5
-            }
-          },
-          "agnTack": "Låt flugan vila på ytan, och dra försiktigt när fisken vänder.",
           "person": "ebbe",
           "prat": [
             "Harr och regnbåge tar bara fluga. Dem hittar du uppe vid Norra bron, där forsen sjunger.",
@@ -2440,7 +2433,7 @@
             "Under bron står abborrarna i stim, och längre ner lurar gäddan.",
             "Ibland glittrar det i djupet under bron, som om något där nere väntar på ljus."
           ],
-          "hejIgen": "Välkommen tillbaka. Silverflugor har jag alltid."
+          "hejIgen": "Välkommen tillbaka. Flugor säljer jag inte, men Fia drömmer om en fiskebutik här vid älven."
         },
         "vanta": [
           2500,
