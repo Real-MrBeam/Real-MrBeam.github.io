@@ -1273,7 +1273,7 @@ const FIRE_OUT = { 'o:18,10': 'o:8,16', 'o:21,12': 'o:9,16' };
 // The burning ones flicker between three pictures (own drawings in row 16, Peter 2026-10-23), each fire in its own time
 const FIRE_FRAMES = { 'o:18,10': ['o:18,10', 'o:19,16', 'o:20,16'], 'o:21,12': ['o:21,12', 'o:21,16', 'o:22,16'] };
 const fireFrame = (i, now, px) => { const f = FIRE_FRAMES[i]; return !f || reduceMotion ? i : f[Math.floor(now / 160 + px * .013) % f.length]; };
-const LIGHT_TILES = { 84: [8, 8, 'win'], 88: [8, 8, 'win'], 'o:27,2': [8, 8, 'win'], 125: [8, 8, 'slit'], 51: [8, 10, 'small'], 55: [8, 10, 'small'], 'o:18,10': [8, 4, 'fire'], 'o:21,12': [8, 9, 'fire'], 'o:28,15': [8, 8, 'tent'], 'o:15,16': [6, 10, 'small'], 'o:9,17': [8, 6, 'fyr'] };   // the last one is the lamp of Siri's small lighthouse by the water
+const LIGHT_TILES = { 84: [8, 8, 'win'], 88: [8, 8, 'win'], 'o:27,2': [8, 8, 'win'], 125: [8, 8, 'slit'], 51: [8, 10, 'small'], 55: [8, 10, 'small'], 'o:18,10': [8, 4, 'fire'], 'o:21,12': [8, 9, 'fire'], 'o:28,15': [8, 8, 'tent'], 'o:15,16': [6, 10, 'small'], 'o:9,17': [8, 6, 'fyr'], 'o:24,2': [8, 8, 'rosa'] };   // the last two: the lamp of Siri's small lighthouse by the water, the church window (faint pink)
 const lightIn = i => { for (const j of Array.isArray(i) ? i : [i]) if (LIGHT_TILES[j]) return LIGHT_TILES[j]; return null; };
 function nightLights(){
   if (!STATIC_LIGHTS){
@@ -1327,9 +1327,9 @@ function drawNight(now, lv){
   for (const L of lights){
     const fire = L.k === 'fire', flick = fire && !reduceMotion ? .85 + .15 * Math.sin(now / 90 + L.x) * Math.sin(now / 53 + L.y) : 1;
     // the ship on the lake glows a mysterious blue, everything else warm
-    const rad = (fire ? 30 : L.k === 'lamp' ? 26 : L.k === 'fyr' ? 24 : L.k === 'win' || L.k === 'tent' ? 20 : L.k === 'plate' ? 13 : 12) * flick, c = fire ? '255,140,50' : L.k === 'lamp' ? '90,170,255' : L.k === 'fyr' ? '255,240,190' : L.k === 'plate' ? '255,235,180' : '255,200,100';
+    const rad = (fire ? 30 : L.k === 'lamp' ? 26 : L.k === 'fyr' ? 24 : L.k === 'win' || L.k === 'tent' ? 20 : L.k === 'plate' ? 13 : L.k === 'rosa' ? 16 : 12) * flick, c = fire ? '255,140,50' : L.k === 'rosa' ? '255,100,200' : L.k === 'lamp' ? '90,170,255' : L.k === 'fyr' ? '255,240,190' : L.k === 'plate' ? '255,235,180' : '255,200,100';
     const g = ctx.createRadialGradient(L.x, L.y, 0, L.x, L.y, rad);
-    g.addColorStop(0, `rgba(${c},${.5 * lv})`); g.addColorStop(1, `rgba(${c},0)`);
+    g.addColorStop(0, `rgba(${c},${(L.k === 'rosa' ? .42 : .5) * lv})`); g.addColorStop(1, `rgba(${c},0)`);   // the church window only faintly
     ctx.fillStyle = g; ctx.fillRect(L.x - rad, L.y - rad, rad * 2, rad * 2);
   }
   for (const [id, col] of [['lykta', '255,210,120'], ['flaskat', '90,170,255'], ['eldflugor', '150,230,90']]){
@@ -1341,7 +1341,7 @@ function drawNight(now, lv){
   }
   ctx.globalCompositeOperation = 'source-over';
   for (const L of lights){
-    if (L.k === 'fire' || L.k === 'tent' || L.k === 'lamp' || L.k === 'plate' || L.k === 'fyr') continue;
+    if (L.k === 'fire' || L.k === 'tent' || L.k === 'lamp' || L.k === 'plate' || L.k === 'fyr' || L.k === 'rosa') continue;
     const [w, h] = L.k === 'win' ? [6, 6] : [2, 4];
     ctx.fillStyle = `rgba(254,231,97,${.85 * lv})`; ctx.fillRect(Math.round(L.x - w / 2), Math.round(L.y - h / 2), w, h);
   }
