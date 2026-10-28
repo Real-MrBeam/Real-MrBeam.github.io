@@ -32,7 +32,7 @@
     },
     "fiske": {
       "namn": "Fiskeläget",
-      "text": "Ett litet fiskeläge vid älven, med båtar på land och nät på tork. Härifrån går vägen norrut mot tornet."
+      "text": "Ett litet fiskeläge vid älven, med båtar på land och nät på tork. Här har Fia sin fiskebutik. Härifrån går vägen norrut mot tornet."
     },
     "torn": {
       "namn": "Tornet",
@@ -165,10 +165,6 @@
     "sjo": {
       "namn": "Tomt i Sjöviken",
       "bygg": "sjo"
-    },
-    "fiske": {
-      "namn": "Tomt i Fiskeläget",
-      "bygg": "fiske"
     },
     "torn": {
       "namn": "Tomt vid Tornet",
@@ -1219,44 +1215,6 @@
             "kompass"
           ],
           "gavaHej": "Ta något som tack. Min gamla seglarmössa, eller kompassen som alltid pekar mot Stjärnsvalan."
-        }
-      ]
-    },
-    "fiske": {
-      "val": [
-        {
-          "id": "flugbutik",
-          "person": "fia",
-          "namn": "Flugfiskebutik",
-          "byggs": "En butik med flugspön i fönstret",
-          "kostnad": 18,
-          "byggnad": "flugbutik",
-          "onskan": "Jag heter Fia och har flugfiskat i den här älven sedan jag var liten. Jag vill öppna en butik där folk kan lära sig kasta. Men Nisse vill ha samma plats till sin nätbod.",
-          "forlorare": "Flugor, alltså. Min farfar hade skakat på huvudet. Näten får väl torka på staketet ett tag till.",
-          "forlorarePerson": "nisse",
-          "tack": "Tack. Nu finns det en riktig fiskebutik vid älven. Kom tillbaka när du vill lära dig kasta, det tar bara några år.",
-          "gava": [
-            "flugspo",
-            "silverfluga"
-          ],
-          "gavaHej": "Ett flugspö kräver tålamod, men det betalar sig. Välj en gåva: ett spö eller ett paket silverflugor."
-        },
-        {
-          "id": "natbod",
-          "person": "nisse",
-          "namn": "Nätbod",
-          "byggs": "En bod med nät på tork",
-          "kostnad": 18,
-          "byggnad": "natbod",
-          "onskan": "Jag heter Nisse och fiskar med nät, som min far och hans far gjorde före mig. Näten behöver en bod där de kan torka. Fia vill bygga sin flugbutik på samma ställe.",
-          "forlorare": "Då fiskar jag med spö uppströms i stället. Fisken bryr sig ändå inte om var butiken står.",
-          "forlorarePerson": "fia",
-          "tack": "Tack. Nu får näten torka i solen som förr, och jag slipper ha dem hängande i köket.",
-          "gava": [
-            "hav",
-            "kraftbur"
-          ],
-          "gavaHej": "Vad du fångar beror på var du lägger ut redskapen. Välj en gåva: en håv eller en kräftbur."
         }
       ]
     },
@@ -2433,7 +2391,7 @@
             "Under bron står abborrarna i stim, och längre ner lurar gäddan.",
             "Ibland glittrar det i djupet under bron, som om något där nere väntar på ljus."
           ],
-          "hejIgen": "Välkommen tillbaka. Flugor säljer jag inte, men Fia drömmer om en fiskebutik här vid älven."
+          "hejIgen": "Välkommen tillbaka. Flugor säljer jag inte, men Fia har allt i sin butik i Fiskeläget."
         },
         "vanta": [
           2500,
@@ -2454,8 +2412,7 @@
           "ger": "flugspo",
           "tack": "Fiskaren ler. \"Ta väl hand om det. Forsen är snällare mot den som har tålamod.\"",
           "klar": "Du har redan ett flugspö.",
-          "pris": 6,
-          "hej": "Fiskaren nickar mot forsen. \"Mitt gamla flugspö kan du få. Eller byt mot nyckeln jag tappade i älven.\"",
+          "hej": "Fiskaren nickar mot forsen. \"Mitt gamla flugspö kan du få, om du hittar nyckeln jag tappade i älven.\"",
           "fynd": "nyckel"
         },
         "vanta": [
@@ -4025,5 +3982,30 @@
     "svar": "Fiolen spelar din melodi färdigt, klart och tydligt. Du känner igen den. Det är samma melodi som vinden visslar i Ihåliga eken, fast hela.",
     "lart": "Nu kan du hela trädets melodi. Men den vill bli spelad på rätt plats.",
     "flojtText": "En liten flöjt av vass. Den kan trädets melodi, men spelar den hela bara på rätt plats."
+  },
+  "butiker": {
+    "fiske": {
+      "person": "fia",
+      "rubrik": "Fias fiskebutik",
+      "knapp": "Gå in i butiken",
+      "rubrikNatt": "Fiskebutiken är stängd",
+      "stangt": "Dörren är låst. På skylten står det: Öppet när solen är uppe.",
+      "ger": "flugspo",
+      "pris": 6,
+      "saljer": {
+        "kraftbur": 5
+      },
+      "hej": "Välkommen till fiskebutiken. Här finns allt för den som vill fiska.",
+      "hejIgen": "Hej igen. Silverflugor har jag alltid.",
+      "tack": "Ta väl hand om det. Fisken är snällare mot den som har tålamod.",
+      "klar": "Du har redan ett flugspö.",
+      "agn": {
+        "silverfluga": {
+          "pris": 4,
+          "antal": 5
+        }
+      },
+      "agnTack": "Låt flugan vila på ytan, och dra försiktigt när fisken vänder."
+    }
   }
 }

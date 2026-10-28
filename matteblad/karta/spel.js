@@ -1465,7 +1465,8 @@ const PLACE_PARTS = [
   // fishing: at night a fishing place is light as long as he has something to fish with; by day while a water animal or a kind
   // he has not caught is left there
   { on: id => !!FISKE.platser[id] && !pondHidden(id), block: id => fishBlock(id), active: id => S.natt ? myTools().length > 0 : FISKE.djur.some(r => r.plats === id && !S.djur.includes(r.djur)) || newFishAt(id) },
-  { on: id => isDay() && !!(FISKE.platser[id] && FISKE.platser[id].lan), block: id => lanBlock(id), active: id => !S.saker.includes(FISKE.platser[id].lan.ger) || !!FISKE.platser[id].lan.agn },   // a shop
+  { on: id => isDay() && !!LAN(id), block: id => lanBlock(id), active: id => !S.saker.includes(LAN(id).ger) || !!LAN(id).agn || Object.keys(LAN(id).saljer || {}).some(x => !S.saker.includes(x)) },   // a shop
+  { on: id => !isDay() && !!BUTIKER[id], block: id => `<div class="plot"><div><b>${esc(BUTIKER[id].rubrikNatt)}</b><span>${esc(BUTIKER[id].stangt)}</span></div></div>`, active: () => false },
   { on: id => isDay() && LOCKA.some(r => r.plats === id), block: id => LOCKA.filter(r => r.plats === id).map(lureBlock).join(''), active: id => LOCKA.some(r => r.plats === id && !S.djur.includes(r.djur)) },
   { on: id => isDay() && id === CHEST_AT.node && pendingTickets().length > 0, block: () => `<div class="plot"><div><b>En guldkista står vid skolan</b></div><button class="btn" type="button" data-kista="1">Öppna kistan</button></div>`, active: () => true },
   { on: id => isDay() && id === 'slott', block: () => `<div><button class="btn" type="button" data-slott="1">${esc(berattelse.dialog.slottKnapp)}</button></div>`, active: () => false },
@@ -2382,17 +2383,20 @@ function fishBlock(id){
   if (!toolsAt(id).length) return `<div class="plot"><div><b>${esc(T.rubrik)}</b><span>${esc(T.ingetSpo)}</span></div></div>`;
   return `<div class="plot"><div><b>${esc(T.rubrik)}</b></div>${here ? `<button class="btn" type="button" data-fiska="${id}">${esc(T.knapp)}</button>` : ''}</div>`;
 }
-// A fisherman on a bridge lends a tool for a fish of a kind he has caught there
+// A fisherman on a bridge sells or swaps a tool, and a shop by day (Fias fiskebutik in Fiskeläget, Peter 2026-10-28) works the
+// same way: one tool and packs of bait. The shop is closed at night.
+const BUTIKER = berattelse.butiker || {};
+const LAN = id => (FISKE.platser[id] && FISKE.platser[id].lan) || BUTIKER[id];
 function lanBlock(id){
-  const L = FISKE.platser[id].lan, here = S.node === id && !boy.route, got = S.saker.includes(L.ger);
+  const L = LAN(id), here = S.node === id && !boy.route, got = S.saker.includes(L.ger);
   return `<div class="plot"><div><b>${esc(L.rubrik)}</b>${got && !L.agn ? `<span>${esc(L.klar)}</span>` : ''}</div>${here && (!got || L.agn) ? `<button class="btn" type="button" data-lan="${id}">${esc(L.knapp)}</button>` : ''}</div>`;
 }
 function talkFisher(id){
-  const L = FISKE.platser[id].lan;
+  const L = LAN(id);
   if (S.saker.includes(L.ger) && !L.agn) return;
   // a fisherman with a name (Ebbe on Södra bron) tells a tip about fish when he greets, one of several (prat, Peter 2026-10-26)
   const tip = L.prat && L.prat[Math.floor(Math.random() * L.prat.length)];
-  sellOrSwap({ who: L.person || null, hej: L.hej, hejIgen: L.hejIgen, tip, tack: L.tack, ger: L.ger, pris: L.pris, fynd: L.fynd, packs: Object.entries(L.agn || {}), packTack: L.agnTack,
+  sellOrSwap({ who: L.person || null, hej: L.hej, hejIgen: L.hejIgen, tip, tack: L.tack, ger: L.ger, pris: L.pris, fynd: L.fynd, more: Object.entries(L.saljer || {}), packs: Object.entries(L.agn || {}), packTack: L.agnTack,
     again: () => talkFisher(id), back: toNode, done: () => {} });
 }
 // A thing in a shop (Peter 2026-10-23): the price first (or the find he gives for it), then the name and how many as the title,
@@ -2403,18 +2407,20 @@ const swapChoice = (id, fynd, antal, run) => ({ label: wareLabel(id, `<span clas
 // Someone sells a thing for stardust, or swaps it for the one find he or she wants (the fishermen on the bridges, Hulda). Peter 2026-10-21.
 function sellOrSwap(o){
   const has = S.saker.includes(o.ger), finds = !has && o.fynd && S.saker.includes(o.fynd) ? [o.fynd] : [];
-  const give = how => {
-    if (S.saker.includes(o.ger)) return o.back();
-    if (how === 'pris'){ if (S.coins < o.pris){ toast(berattelse.dialog.ingaStoft.replace('{n}', o.pris - S.coins)); return; } spend(o.pris); updateHud('coins'); }
+  // a shop can sell more tools than its own (more: Fias kräftbur, Peter 2026-10-28)
+  const give = (how, id = o.ger, pris = o.pris) => {
+    if (S.saker.includes(id)) return o.back();
+    if (how === 'pris'){ if (S.coins < pris){ toast(berattelse.dialog.ingaStoft.replace('{n}', pris - S.coins)); return; } spend(pris); updateHud('coins'); }
     else S.saker = S.saker.filter(x => x !== how);
-    S.saker.push(o.ger); o.done(); renderPack(); saveSoon();
-    if (how === 'pris') toast(`${SAKER[o.ger].namn} lades i väskan.`);
+    S.saker.push(id); o.done(); renderPack(); saveSoon();
+    if (how === 'pris') toast(`${SAKER[id].namn} lades i väskan.`);
     startDialog([{ p: o.who, t: o.tack }], () => [{ label: 'Tillbaka', alt: true, run: o.back }]);
-    if (how !== 'pris') itemModal(o.ger);
+    if (how !== 'pris') itemModal(id);
   };
   // a fisherman can also sell packs of flies (packs), again and again (Peter 2026-10-26)
   startDialog([{ p: o.who, t: has && o.hejIgen ? o.hejIgen : o.hej }, ...(o.tip ? [{ p: o.who, t: o.tip }] : [])], () => [
-    { rubrik: 'Köp' }, ...(has ? [] : [buyChoice(o.ger, o.pris, 0, () => give('pris'))]),
+    { rubrik: 'Köp' }, ...(has || !o.pris ? [] : [buyChoice(o.ger, o.pris, 0, () => give('pris'))]),   // the fisherman on Norra bron only swaps
+    ...(o.more || []).filter(([id]) => !S.saker.includes(id)).map(([id, pris]) => buyChoice(id, pris, 0, () => give('pris', id, pris))),
     ...(o.packs || []).map(([id, po]) => buyChoice(id, po.pris, po.antal, () => buyPack(id, po, o.who, o.packTack, o.again))),
     ...(finds.length ? [{ rubrik: 'Byt' }, ...finds.map(id => swapChoice(o.ger, id, 0, () => give(id)))] : []),
     { label: 'Tillbaka', alt: true, run: o.back },
