@@ -595,6 +595,57 @@ function drawNode(n, now, reachable){
   ctx.fillStyle = reachable ? '#ffffff' : '#c0cbdc'; ctx.fillRect(cx - 4, cy - 2, 2, 1);
 }
 const FLAG_PLOT = FLAGS.map(f => PLOTS.find(p => f.x >= p.x*TS && f.x < (p.x + 3)*TS && f.y >= p.y*TS && f.y < (p.y + 3)*TS));
+// Gamla kvarnen (Peter 2026-10-28): a small wooden tower on the roof with four sails that turn slowly. The sails reach up over
+// the trees, so they are drawn here and not as tiles. karta.json kvarn gives the hub in tiles. The frames are turned pixel by
+// pixel (nearest), so the sails stay sharp like the rest of the map.
+const MILL = karta.kvarn, MILL_STEPS = 16;
+let MILL_FRAMES = null;
+function millFrames(){
+  const N = 64, c = N / 2, base = new Uint8ClampedArray(N * N * 4);
+  const set = (x, y, [r, g, b]) => { const i = (y * N + x) * 4; base[i] = r; base[i + 1] = g; base[i + 2] = b; base[i + 3] = 255; };
+  const OUT = [63, 38, 49], WOOD = [115, 62, 57], SAIL = [232, 214, 176], LINE = [184, 150, 110];
+  for (let arm = 0; arm < 4; arm++){
+    const px = [];
+    for (let y = 3; y < c - 2; y++){ px.push([0, y, WOOD]); px.push([-1, y, OUT]); px.push([1, y, OUT]); }   // the spar
+    for (let y = 4; y < c - 9; y++) for (let x = 2; x <= 8; x++){   // the lattice sail on one side of the spar
+      const edge = x === 8 || y === 4 || y === c - 10;
+      px.push([x, y, edge ? OUT : (y % 4 === 0 || x === 5) ? LINE : SAIL]);
+    }
+    for (const [x, y, col] of px){
+      let X = c + x, Y = y;   // the arm pointing up, then turned a quarter at a time
+      for (let r = 0; r < arm; r++) [X, Y] = [N - 1 - Y, X];
+      set(X, Y, col);
+    }
+  }
+  const frames = [];
+  for (let k = 0; k < MILL_STEPS; k++){
+    const a = k / MILL_STEPS * Math.PI / 2, cs = Math.cos(a), sn = Math.sin(a);
+    const cv2 = document.createElement('canvas'); cv2.width = cv2.height = N;
+    const g = cv2.getContext('2d'), img = g.createImageData(N, N);
+    for (let y = 0; y < N; y++) for (let x = 0; x < N; x++){
+      const dx = x + .5 - c, dy = y + .5 - c, sx = Math.floor(c + dx * cs + dy * sn), sy = Math.floor(c - dx * sn + dy * cs);
+      if (sx < 0 || sy < 0 || sx >= N || sy >= N) continue;
+      const i = (sy * N + sx) * 4, j = (y * N + x) * 4;
+      for (let q = 0; q < 4; q++) img.data[j + q] = base[i + q];
+    }
+    g.putImageData(img, 0, 0); frames.push(cv2);
+  }
+  return frames;
+}
+function drawMill(now){
+  if (!MILL) return;
+  if (!MILL_FRAMES) MILL_FRAMES = millFrames();
+  const hx = Math.round(MILL.x * TS), hy = Math.round(MILL.y * TS), roof = Math.round(MILL.tak * TS);
+  // the tower: wooden boards from the roof up to the hub, with a small pointed cap
+  ctx.fillStyle = '#3f2631'; ctx.fillRect(hx - 6, hy - 3, 12, roof - hy + 3);
+  ctx.fillStyle = '#733e39'; ctx.fillRect(hx - 5, hy - 2, 10, roof - hy + 1);
+  ctx.fillStyle = '#9e5b4a'; for (let y = hy; y < roof; y += 3) ctx.fillRect(hx - 5, y, 10, 1);
+  ctx.fillStyle = '#3f2631'; for (let i = 0; i < 6; i++) ctx.fillRect(hx - 6 + i, hy - 4 - i, 12 - 2 * i, 1);
+  const k = reduceMotion ? 0 : Math.floor(now / 200) % MILL_STEPS;
+  ctx.drawImage(MILL_FRAMES[k], hx - 32, hy - 32);
+  ctx.fillStyle = '#3f2631'; ctx.fillRect(hx - 2, hy - 2, 4, 4);
+  ctx.fillStyle = '#c0cbdc'; ctx.fillRect(hx - 1, hy - 1, 2, 2);
+}
 function drawFlag(f, now, i){
   const x = f.x, y = f.y;
   ctx.fillStyle = '#3f2631'; ctx.fillRect(x, y - 10, 1, 11);
@@ -724,6 +775,7 @@ function frame(now){
     const p = FLAG_PLOT[i], at = p && builtShown(p) ? { x: p.x*TS + 24, y: p.y*TS + 2 } : f;
     if (seenAt(Math.floor(at.x / TS), Math.floor(at.y / TS))) drawFlag(at, now, i);
   });
+  if (MILL && seenAt(Math.floor(MILL.x), Math.floor(MILL.tak))) drawMill(now);
   for (const id in NODES) if (nodeShown(id)) drawNode(NODES[id], now, reach.has(id));
   for (const g of GATES){
     if (!gateShown(g)) continue;
