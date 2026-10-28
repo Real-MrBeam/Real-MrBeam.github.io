@@ -7,6 +7,7 @@
 //
 //   Musik.start()   starts (after a click, browsers do not allow sound before that)
 //   Musik.stop()
+//   Musik.effekter(true | false)   the sound effects (jingles, the flute, the fiddle, the wind) on or off, apart from the music
 //   Musik.paus(true | false)   pauses while the page is hidden
 //   Musik.natt(true | false)   switches between the songs of the day and the songs of the night
 //   Musik.grotta(true | false)   the cave song while he is in a level
@@ -297,7 +298,7 @@ function spela(ctx, dest, index, t0, skip = 0) {
 // ---------- the player on the page: the songs take turns with a short pause between them
 // Each time the game starts, the first song of the day and of the night is picked at random (Peter 2026-10-22), then they take turns
 const LAST_KEY = 'glimmerdal:senastLat';
-const P = { ctx: null, master: null, bus: null, next: { dag: Math.floor(Math.random() * 60), natt: Math.floor(Math.random() * 60) }, end: 0, timer: 0, on: false, vol: .35, natt: false };
+const P = { fx: true, ctx: null, master: null, bus: null, next: { dag: Math.floor(Math.random() * 60), natt: Math.floor(Math.random() * 60) }, end: 0, timer: 0, on: false, vol: .35, natt: false };
 // Off and on again carries on in the same song where it stopped (the sound is only paused). Day and night switch the song at once.
 function start() {
   if (P.on) return;
@@ -338,7 +339,15 @@ function stop() {
   P.on = false;
   const t = P.ctx.currentTime;
   P.master.gain.cancelScheduledValues(t); P.master.gain.setValueAtTime(P.master.gain.value, t); P.master.gain.linearRampToValueAtTime(0, t + .3);
-  setTimeout(() => { if (!P.on) P.ctx.suspend(); }, 350);
+  setTimeout(() => { if (!P.on && !P.fx) P.ctx.suspend(); }, 350);   // the sound effects keep the sound awake
+}
+// The sound effects are turned on and off on their own (Peter 2026-10-28). The audio context is made when the first one plays.
+function effekter(v) { P.fx = !!v; if (!P.fx && !P.on && P.ctx) P.ctx.suspend(); }
+function ctxFx() {
+  const AC = root.AudioContext || root.webkitAudioContext; if (!AC) return null;
+  if (!P.ctx) { P.ctx = new AC(); P.master = P.ctx.createGain(); P.master.gain.value = 0; P.master.connect(P.ctx.destination); }
+  P.ctx.resume();
+  return P.ctx;
 }
 // The song that is playing fades out, and the right one for day or night starts
 // In a cave (a level) the cave songs play, whatever the time of day
@@ -362,10 +371,10 @@ function nasta() {
   if (old) { const t = P.ctx.currentTime; old.gain.setValueAtTime(old.gain.value, t); old.gain.linearRampToValueAtTime(0, t + .4); setTimeout(() => old.disconnect(), 600); }
   tick();
 }
-function paus(hidden) { if (!P.ctx || !P.on) return; if (hidden) P.ctx.suspend(); else P.ctx.resume(); }
+function paus(hidden) { if (!P.ctx || (!P.on && !P.fx)) return; if (hidden) P.ctx.suspend(); else P.ctx.resume(); }
 
 // ---------- the jingle when he gets something (Peter 2026-10-26): four quick chip notes up and a bell on top. Only when the
-// sound is on; the music is turned down for a moment while it plays.
+// sound effects are on; the music is turned down for a moment while it plays.
 const JINGEL = [['G5', 0], ['C6', .08], ['E6', .16], ['G6', .24]];
 // A new animal has its own, longer jingle (Peter 2026-10-26): a little tune on the chip with a triangle bass under it, and
 // three bells together at the end. [note, start in eighths, length in eighths]
@@ -417,7 +426,7 @@ function jingelPa(ctx, dest, t0, sort) {
   return out;
 }
 function jingel(sort) {
-  if (!P.on || !P.ctx || P.ctx.state !== 'running') return;
+  if (!P.fx || !ctxFx()) return;
   const ctx = P.ctx, out = jingelPa(ctx, ctx.destination, ctx.currentTime + .03, sort);
   setTimeout(() => out.disconnect(), 5000);
   const t = ctx.currentTime, dur = sort === 'stjarnor' || sort === 'stoft' ? 3.2 : sort === 'djur' ? 2.2 : sort === 'fisk' ? 1.1 : .9;
@@ -456,13 +465,11 @@ function tradToner(sort) {
   const toks = sort === 'vind' || sort === 'borjan' ? TRAD.mel.slice(0, TRAD.vind) : TRAD.mel;
   return toks.map((tok, i) => tok === '-' ? null : i * TRAD.step).filter(t => t !== null);
 }
-// Musik.trad(sort) plays it now and returns its length. The flute and the fiddle play even when the music is off (like the
-// flute did), the wind only when the sound is on. The music is turned down while it plays.
+// Musik.trad(sort) plays it now and returns its length. It is a sound effect: it plays when the sound effects are on, whether
+// the music is on or not. The music is turned down while it plays.
 function trad(sort) {
-  if (sort === 'vind' && !P.on) return 0;
-  const AC = root.AudioContext || root.webkitAudioContext; if (!AC) return 0;
-  if (!P.ctx) { P.ctx = new AC(); P.master = P.ctx.createGain(); P.master.gain.value = 0; P.master.connect(P.ctx.destination); }
-  P.ctx.resume();
+  if (!P.fx) return sort === 'vind' ? 0 : tradToner(sort).slice(-1)[0] + 1;   // silent, but the flute and Näcken still take their time
+  if (!ctxFx()) return 0;
   const ctx = P.ctx, out = ctx.createGain(); out.gain.value = .5; out.connect(ctx.destination);
   const dur = tradPa(ctx, out, ctx.currentTime + .05, sort);
   setTimeout(() => out.disconnect(), (dur + 3) * 1000);
@@ -470,5 +477,5 @@ function trad(sort) {
   return dur;
 }
 
-root.Musik = { trad, tradPa, tradToner, jingel, jingelPa, nasta, grotta, start, stop, paus, spela, natt, get spelar() { return P.on; }, get lat() { return P.lat || ''; }, lattar: SONGS.map(s => s.namn) };
+root.Musik = { effekter, get effekterPa() { return P.fx; }, trad, tradPa, tradToner, jingel, jingelPa, nasta, grotta, start, stop, paus, spela, natt, get spelar() { return P.on; }, get lat() { return P.lat || ''; }, lattar: SONGS.map(s => s.namn) };
 })(typeof window !== 'undefined' ? window : globalThis);

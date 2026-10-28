@@ -1356,7 +1356,7 @@ function playFlute(){
   }, dur * 1000 + 700);
 }
 // The wind in Ihåliga eken whistles the beginning of the tree's melody about every 20 seconds. It is heard only when he stands
-// there (with the sound on), but a white note rises from the oak with each of its notes wherever he is, so he sees from afar
+// there (with the sound effects on), but a white note rises from the oak with each of its notes wherever he is, so he sees from afar
 // that something can be heard there (Peter 2026-10-26). Under the fog the notes are hidden like everything else.
 let windNode = '', windNext = 0;
 const windNotes = () => {
@@ -1393,19 +1393,32 @@ $('#pack').addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key 
 // The choice is remembered in the browser. At night only "Stjärnnatt" plays. The music pauses while the page is hidden.
 const MUSIC_KEY = 'glimmerdal:musik';
 const musicWanted = () => { try { return localStorage.getItem(MUSIC_KEY) !== 'av'; } catch (e) { return true; } };
+// Three buttons in the header (Peter 2026-10-28): the music (a note), the sound effects (the speaker) and the vibrations (a
+// phone). Each choice is remembered in this browser.
+const FX_KEY = 'glimmerdal:ljud', VIB_KEY = 'glimmerdal:vibration';
+const wanted = key => { try { return localStorage.getItem(key) !== 'av'; } catch (e) { return true; } };
+const remember = (key, on) => { try { localStorage.setItem(key, on ? 'pa' : 'av'); } catch (e) { /* only this time */ } };
+const NOTE_ICON = ["....yyyyyy..", "....y....y..", "....y....y..", "....y....y..", "..yyy..yyy..", ".yyyy.yyyy..", "..yy...yy...", "............"];
+const PHONE_ICON = ["..y.wwww.y..", ".y..wkkw..y.", "y...wkkw...y", ".y..wkkw..y.", "..y.wkkw.y..", "....wkkw....", "....wwww....", "............"];
+// the off picture: grey, without the waves, and a red line across
+const offIcon = (rows, keep) => rows.map((r, y) => [...r].map((c, x) => x === 9 - y || x === 10 - y ? 'r' : c === 'y' ? (keep ? 'g' : '.') : c).join(''));
 const SPEAKER = ["....ww......", "...www...y..", "wwwgww.y..y.", "wwgggw..y..y", "wwgggw..y..y", "wwwgww.y..y.", "...www...y..", "....ww......"];
 const SPEAKER_OFF = ["....ww......", "...www......", "wwwgww.r..r.", "wwgggw..rr..", "wwgggw..rr..", "wwwgww.r..r.", "...www......", "....ww......"];
-const SPEAKER_PAL = { w: '#ffffff', g: '#c0cbdc', y: '#fee761', r: '#e43b44' };
-let SPEAKER_URLS = null;
+const SPEAKER_PAL = { w: '#ffffff', g: '#c0cbdc', y: '#fee761', r: '#e43b44', k: '#262b44' };
+let ICON_URLS = null;
 function musicButton(){
-  if (!SPEAKER_URLS) SPEAKER_URLS = [iconURL(sprite(SPEAKER, SPEAKER_PAL), 3), iconURL(sprite(SPEAKER_OFF, SPEAKER_PAL), 3)];
-  const b = $('#btnMusik'), on = !!(window.Musik && Musik.spelar);
-  $('#icoMusik').src = SPEAKER_URLS[on ? 0 : 1]; b.title = on ? 'Stäng av musiken' : 'Sätt på musiken'; b.setAttribute('aria-pressed', String(on));
+  if (!ICON_URLS){ const u = rows => iconURL(sprite(rows, SPEAKER_PAL), 3);
+    ICON_URLS = { musik: [u(NOTE_ICON), u(offIcon(NOTE_ICON, true))], ljud: [u(SPEAKER), u(SPEAKER_OFF)], vibra: [u(PHONE_ICON), u(offIcon(PHONE_ICON, false))] }; }
+  const set = (id, key, on, pa, av) => { const b = $('#btn' + id); $('#ico' + id).src = ICON_URLS[key][on ? 0 : 1]; b.title = on ? av : pa; b.setAttribute('aria-pressed', String(on)); };
+  set('Musik', 'musik', !!(window.Musik && Musik.spelar), 'Sätt på musiken', 'Stäng av musiken');
+  set('Ljud', 'ljud', wanted(FX_KEY), 'Sätt på ljudeffekterna', 'Stäng av ljudeffekterna');
+  set('Vibra', 'vibra', wanted(VIB_KEY), 'Sätt på vibrationerna', 'Stäng av vibrationerna');
 }
+if (window.Musik && Musik.effekter) Musik.effekter(wanted(FX_KEY));
 function musicSync(){ if (window.Musik){ Musik.natt(!!S.natt); if (Musik.grotta) Musik.grotta(!!LEVEL); } }   // Droppsten, the cave song, in a level (an older musik.js has no grotta)
 function firstGesture(ev){
   for (const t of ['pointerdown', 'touchend', 'click', 'keydown']) removeEventListener(t, firstGesture);
-  if ((ev.target.closest && ev.target.closest('#btnMusik')) || !window.Musik || !musicWanted()) return;
+  if ((ev.target.closest && ev.target.closest('#btnMusik, #btnLjud, #btnVibra')) || !window.Musik || !musicWanted()) return;
   musicSync(); Musik.start(); musicButton();
 }
 // on phones Safari only counts touchend and click as a tap that may start sound
@@ -1414,6 +1427,16 @@ $('#btnMusik').addEventListener('click', () => {
   if (!window.Musik) return;
   if (Musik.spelar){ Musik.stop(); try { localStorage.setItem(MUSIC_KEY, 'av'); } catch (e) { /* only this time */ } }
   else { musicSync(); Musik.start(); try { localStorage.setItem(MUSIC_KEY, 'pa'); } catch (e) { /* only this time */ } }
+  musicButton();
+});
+$('#btnLjud').addEventListener('click', () => {
+  const on = !wanted(FX_KEY); remember(FX_KEY, on);
+  if (window.Musik && Musik.effekter){ Musik.effekter(on); if (on) Musik.jingel(); }   // a little jingle to hear that it is on
+  musicButton();
+});
+$('#btnVibra').addEventListener('click', () => {
+  const on = !wanted(VIB_KEY); remember(VIB_KEY, on);
+  if (on) buzz([60, 40, 60]);
   musicButton();
 });
 document.addEventListener('visibilitychange', () => { if (window.Musik) Musik.paus(document.hidden); });
@@ -2470,7 +2493,7 @@ function cast(){
 }
 // The phone vibrates while he fishes (Peter 2026-10-28): when it bites, when the fish pulls or jumps, when the line is close to
 // snapping, when it snaps and when the fish or an animal is landed. Only where the browser can (Android; iPhones cannot).
-const buzz = p => { try { if (navigator.vibrate) navigator.vibrate(p); } catch (e) { /* no vibration here */ } };
+const buzz = p => { try { if (navigator.vibrate && wanted(VIB_KEY)) navigator.vibrate(p); } catch (e) { /* no vibration here */ } };
 function miss(text){ const fz = fishing; fz.timers.forEach(clearTimeout); fz.timers = []; clearInterval(fz.loop); fz.loop = 0; fz.kamp = null; fz.phase = 'miss'; fz.miss = text; renderFishing(); }
 // the line snaps: the fish is gone, and a lure (tappas) goes with it
 function snap(){
