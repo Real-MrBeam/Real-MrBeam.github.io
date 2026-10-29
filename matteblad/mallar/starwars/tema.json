@@ -31,7 +31,7 @@
     {
       "minProcent": 90,
       "niva": "Guld",
-      "namn": "Lukes ljussvärd",
+      "namn": "Kylo Rens treuddssvärd",
       "bild": "pris/svard-guld.svg",
       "farg": "#d49a00",
       "text": "Nästan alla rätt! Öppna lådan och se vad du hittat!"
@@ -39,7 +39,7 @@
     {
       "minProcent": 70,
       "niva": "Silver",
-      "namn": "Mace Windus ljussvärd",
+      "namn": "Lukes ljussvärd",
       "bild": "pris/svard-silver.svg",
       "farg": "#8a99b2",
       "text": "Snyggt jobbat! Öppna lådan och se vad du hittat!"

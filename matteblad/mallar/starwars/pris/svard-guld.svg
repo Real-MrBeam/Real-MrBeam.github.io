@@ -1,10 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><g transform="rotate(35 50 50)">
-  <rect x="38" y="-6" width="24" height="76" rx="12" fill="#3ddc4a" opacity=".35"/>
-  <rect x="42" y="-3" width="16" height="72" rx="8" fill="#3ddc4a" stroke="#1a7a24" stroke-width="1.5"/>
-  <rect x="47" y="0" width="6" height="66" rx="3" fill="#eaffea"/>
-  <rect x="40" y="67" width="20" height="7" rx="2" fill="#fff3a0" stroke="#0b1030" stroke-width="1.5"/>
-  <rect x="42" y="74" width="16" height="22" rx="2.5" fill="#ffd23f" stroke="#0b1030" stroke-width="1.5"/>
-  <path d="M42 79 H58 M42 84 H58 M42 89 H58" stroke="#c48a00" stroke-width="2.2"/>
-  <circle cx="50" cy="70.5" r="2" fill="#3ddc4a"/>
-  <rect x="43" y="96" width="14" height="5" rx="2" fill="#fff3a0" stroke="#0b1030" stroke-width="1.5"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><g transform="rotate(45 50 50)">
+  <polygon points="43,74 41.4,69 43,64 41.4,59 43,54 41.4,49 43,44 41.4,39 43,34 41.4,29 43,24 41.4,19 43,14 41.4,9 43,4 41.4,-1 43,-6 41.4,-11 43,-16 57,-16 58.6,-11 57,-6 58.6,-1 57,4 58.6,9 57,14 58.6,19 57,24 58.6,29 57,34 58.6,39 57,44 58.6,49 57,54 58.6,59 57,64 58.6,69 57,74" fill="#ff2a2a" opacity=".35"/>
+  <rect x="31" y="70" width="14" height="9" rx="4.5" fill="#ff2a2a" opacity=".35"/>
+  <rect x="55" y="70" width="14" height="9" rx="4.5" fill="#ff2a2a" opacity=".35"/>
+  <rect x="45.5" y="-15" width="9" height="89" rx="4.5" fill="#ff2a2a" stroke="#8a0000" stroke-width="1.2"/>
+  <rect x="48.5" y="-13" width="3" height="85" rx="1.5" fill="#ffe3e3"/>
+  <rect x="33" y="72" width="12" height="5" rx="2.5" fill="#ff2a2a" stroke="#8a0000" stroke-width="1"/>
+  <rect x="55" y="72" width="12" height="5" rx="2.5" fill="#ff2a2a" stroke="#8a0000" stroke-width="1"/>
+  <rect x="35" y="73.8" width="9" height="1.4" rx=".7" fill="#ffe3e3"/>
+  <rect x="56" y="73.8" width="9" height="1.4" rx=".7" fill="#ffe3e3"/>
+  <rect x="43" y="71" width="14" height="7" rx="1" fill="#ffd23f" stroke="#0b1030" stroke-width="1.2"/>
+  <rect x="45" y="78" width="10" height="29" rx="1.5" fill="#2b2e38" stroke="#0b1030" stroke-width="1.2"/>
+  <path d="M45 84 H55 M45 89 H55 M45 94 H55 M45 99 H55" stroke="#c48a00" stroke-width="1.6"/>
+  <rect x="45.5" y="107" width="9" height="5" rx="1.5" fill="#ffd23f" stroke="#0b1030" stroke-width="1.2"/>
 </g></svg>
