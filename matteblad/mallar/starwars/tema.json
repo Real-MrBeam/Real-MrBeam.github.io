@@ -23,32 +23,32 @@
     {
       "minProcent": 100,
       "niva": "Kristall",
-      "namn": "Kristalldroid",
-      "bild": "pris/kristall.svg",
+      "namn": "Kristall-ljussvärd",
+      "bild": "pris/svard-kristall.svg",
       "farg": "#7b5cff",
       "text": "Alla rätt! Öppna lådan och se vad för sällsynt fynd du hittat!"
     },
     {
       "minProcent": 90,
       "niva": "Guld",
-      "namn": "Gyllene protokolldroid",
-      "bild": "pris/guld.svg",
+      "namn": "Gyllene ljussvärd",
+      "bild": "pris/svard-guld.svg",
       "farg": "#d49a00",
       "text": "Nästan alla rätt! Öppna lådan och se vad du hittat!"
     },
     {
       "minProcent": 70,
       "niva": "Silver",
-      "namn": "Astromekdroid",
-      "bild": "pris/silver.svg",
+      "namn": "Lila ljussvärd",
+      "bild": "pris/svard-silver.svg",
       "farg": "#8a99b2",
       "text": "Snyggt jobbat! Öppna lådan och se vad du hittat!"
     },
     {
       "minProcent": 0,
       "niva": "Brons",
-      "namn": "Sonddroid",
-      "bild": "pris/brons.svg",
+      "namn": "Blått ljussvärd",
+      "bild": "pris/svard-brons.svg",
       "farg": "#c9772a",
       "text": "Bra kämpat! Öppna lådan och se vad du hittat! Kolla tipsen nedan."
     }
