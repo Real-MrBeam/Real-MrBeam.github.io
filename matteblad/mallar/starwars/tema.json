@@ -22,16 +22,16 @@
   "pris": [
     {
       "minProcent": 100,
-      "niva": "Kristall",
-      "namn": "Kristall-ljussvärd",
-      "bild": "pris/svard-kristall.svg",
-      "farg": "#7b5cff",
-      "text": "Alla rätt! Öppna lådan och se vad för sällsynt fynd du hittat!"
+      "niva": "Mästare",
+      "namn": "Mörkersvärdet (Mandalorianens)",
+      "bild": "pris/svard-morker.svg",
+      "farg": "#3a3f4b",
+      "text": "Alla rätt, Mästare! Öppna lådan och se vad för sällsynt fynd du hittat!"
     },
     {
       "minProcent": 90,
       "niva": "Guld",
-      "namn": "Gyllene ljussvärd",
+      "namn": "Lukes ljussvärd",
       "bild": "pris/svard-guld.svg",
       "farg": "#d49a00",
       "text": "Nästan alla rätt! Öppna lådan och se vad du hittat!"
@@ -39,7 +39,7 @@
     {
       "minProcent": 70,
       "niva": "Silver",
-      "namn": "Lila ljussvärd",
+      "namn": "Mace Windus ljussvärd",
       "bild": "pris/svard-silver.svg",
       "farg": "#8a99b2",
       "text": "Snyggt jobbat! Öppna lådan och se vad du hittat!"
@@ -47,7 +47,7 @@
     {
       "minProcent": 0,
       "niva": "Brons",
-      "namn": "Blått ljussvärd",
+      "namn": "Obi-Wans ljussvärd",
       "bild": "pris/svard-brons.svg",
       "farg": "#c9772a",
       "text": "Bra kämpat! Öppna lådan och se vad du hittat! Kolla tipsen nedan."
