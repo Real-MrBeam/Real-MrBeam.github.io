@@ -2302,7 +2302,7 @@ function applySaved(data){
   boy.route = null; placeBoy(S.node); plotAnim.clear(); petState.clear();
   lastRevealKey = ''; maskDirty = true; setPond(!!S.damm); buildTerrain();
   cam.follow = true; centerOn(boy.x + 8, boy.y + 8, true);
-  updateHud(); renderLog(); renderPack(); renderBook(); renderTickets(); renderFishBook();
+  updateHud(); renderLog(); renderPack(); renderBook(); renderTickets(); renderFishBook(); tabsLoaded();
   if (S.intro && introOpen){ introOpen = false; markIntro(); toNode(); }
   else if (!dlg) showNode();
 }
@@ -2824,6 +2824,59 @@ function renderLetters(){
 const openLetter = li => { if (!li) return; const id = li.dataset.brev; if (id === 'drottningen') showIntro(); else if (id === 'fiskesallskapet') readFishLetter(); else readLetter2(); };
 $('#letters').addEventListener('click', ev => openLetter(ev.target.closest('li[data-brev]')));
 $('#letters').addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key === ' '){ const li = ev.target.closest('li[data-brev]'); if (li){ ev.preventDefault(); openLetter(li); } } });
+
+// The collection in six tabs (Peter 2026-10-30). A yellow dot on a tab when something new has come there since he last looked:
+// a thing, an animal, a new kind of fish, a rune or scroll or ticket, a letter or a rumour. The open tab and what he has seen are
+// kept in this browser only, never in his game, and in debug and looking mode only for this visit.
+const FLIK_KEY = 'glimmerdal:flik', SETT_KEY = 'glimmerdal:sett';
+const FLIK_COUNT = {
+  saker: () => S.saker.length,
+  djur: () => S.djur.length,
+  fiskar: () => Object.keys(S.fiskbok).length,
+  runor: () => S.log.length + S.kistor.length + pendingTickets().length,
+  brev: () => 1 + (S.brev2 ? 1 : 0) + (S.brevFiske ? 1 : 0),
+  rykten: () => S.rykten.filter(rumorText).length,
+};
+const readStore = (key, fallback) => { if (TEST) return fallback; try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch (e) { return fallback; } };
+const writeStore = (key, v) => { if (!TEST) try { localStorage.setItem(key, JSON.stringify(v)); } catch (e) { /* only this time */ } };
+let flik = readStore(FLIK_KEY, 'saker'), tabSeen = readStore(SETT_KEY, {});
+const freshTabs = new Set();   // tabs first counted before his game had loaded
+if (!FLIK_COUNT[flik]) flik = 'saker';
+function updateTabs(){
+  let changed = false;
+  for (const [id, count] of Object.entries(FLIK_COUNT)){
+    let n = 0; try { n = count(); } catch (e) { /* not loaded yet */ }
+    // the first time, everything he has counts as seen; when something is used up or he starts again, the count goes down with it
+    if (tabSeen[id] === undefined) freshTabs.add(id);
+    if (tabSeen[id] === undefined || id === flik || tabSeen[id] > n){ if (tabSeen[id] !== n){ tabSeen[id] = n; changed = true; } }
+    $(`#flik-${id} .ny`).hidden = n <= tabSeen[id];
+  }
+  $('#flik-djur [data-antal]').textContent = `${S.djur.length}/${Object.keys(berattelse.djur).length}`;
+  $('#flik-fiskar [data-antal]').textContent = `${Object.keys(S.fiskbok).length}/${Object.keys(FISKE.fiskar).length}`;
+  if (changed) writeStore(SETT_KEY, tabSeen);
+}
+// when his saved game has loaded, what was counted before it (an empty game) is counted again, so nothing old looks new
+function tabsLoaded(){ for (const id of freshTabs) delete tabSeen[id]; freshTabs.clear(); updateTabs(); }
+function openTab(id, focus){
+  flik = id; writeStore(FLIK_KEY, id);
+  for (const b of document.querySelectorAll('.flikar [data-flik]')){
+    const on = b.dataset.flik === id;
+    b.setAttribute('aria-selected', String(on)); b.tabIndex = on ? 0 : -1;
+    $('#sida-' + b.dataset.flik).hidden = !on;
+    if (on && focus) b.focus();
+  }
+  updateTabs();
+}
+$('.flikar').addEventListener('click', ev => { const b = ev.target.closest('[data-flik]'); if (b) openTab(b.dataset.flik); });
+$('.flikar').addEventListener('keydown', ev => {
+  const ids = Object.keys(FLIK_COUNT), i = ids.indexOf(flik);
+  const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[ev.key];
+  if (step){ ev.preventDefault(); openTab(ids[(i + step + ids.length) % ids.length], true); }
+});
+// every list redraws itself when something changes, so the dots follow without each render knowing about the tabs
+const tabWatch = new MutationObserver(() => updateTabs());
+for (const id of ['pack', 'book', 'fishbook', 'log', 'tickets', 'letters', 'rykten']) tabWatch.observe($('#' + id), { childList: true });
+openTab(flik);
 $('#btnReset').addEventListener('click', () => {
   stopSaving(); restart(); toast('Kartan är återställd.');
   try { localStorage.removeItem(INTRO_KEY); } catch (e) { /* nothing to clear */ }
