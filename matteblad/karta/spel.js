@@ -1391,7 +1391,12 @@ const fluteNotes = (dur, n) => { for (let i = 0; i < n; i++) setTimeout(() => FX
 function playFlute(){
   if (!window.Musik || performance.now() < flojtTill) return;
   // once he knows it, the whole melody is played only at Ihåliga eken; everywhere else just the beginning (Peter 2026-10-26)
-  if (S.melodi && S.node === MELODI.vind && !LEVEL){ const dur = Musik.trad('flojt'); flojtTill = performance.now() + dur * 1000; fluteNotes(dur, 14); return; }
+  if (S.melodi && S.node === MELODI.vind && !LEVEL){
+    const dur = Musik.trad('flojt'); flojtTill = performance.now() + dur * 1000; fluteNotes(dur, 14);
+    // the whole melody played at the oak: the oak opens (the cave behind it comes later) and the place has nothing left (Peter 2026-10-30)
+    if (!S.ekenOppen) setTimeout(() => { S.ekenOppen = true; saveSoon(); }, dur * 1000);
+    return;
+  }
   const dur = Musik.trad('borjan');
   flojtTill = performance.now() + dur * 1000;
   fluteNotes(dur, 5);
@@ -1521,6 +1526,9 @@ const PLACE_PARTS = [
   { on: id => !isDay() && !!BUTIKER[id], block: id => `<div class="plot"><div><b>${esc(BUTIKER[id].rubrikNatt)}</b><span>${esc(BUTIKER[id].stangt)}</span></div></div>`, active: () => false },
   { on: id => isDay() && LOCKA.some(r => r.plats === id), block: id => LOCKA.filter(r => r.plats === id).map(lureBlock).join(''), active: id => LOCKA.some(r => r.plats === id && !S.djur.includes(r.djur)) },
   { on: id => isDay() && id === CHEST_AT.node && pendingTickets().length > 0, block: () => `<div class="plot"><div><b>En guldkista står vid skolan</b></div><button class="btn" type="button" data-kista="1">Öppna kistan</button></div>`, active: () => true },
+  // Ihåliga eken is yellow until the whole melody has been played there and the oak has opened, whether or not he has the flute
+  // or knows the melody yet; the panel shows no button, he plays the flute from his things (Peter 2026-10-30)
+  { on: id => !!MELODI && id === MELODI.vind, block: () => '', active: () => !S.ekenOppen },
   { on: id => isDay() && id === 'slott', block: () => `<div><button class="btn" type="button" data-slott="1">${esc(berattelse.dialog.slottKnapp)}</button></div>`, active: () => false },
 ];
 // Is there still something to do at a place? Colours the centre of the plate (yellow, or grey when all is done).
@@ -2243,7 +2251,7 @@ function tellNews(){
 // encrypted in the page (#lasNyckel) and opens with the password, like the portraits. Without the key nothing is saved.
 // Stars and stardust are never saved: they are counted from the runes and scrolls. Only what he has spent is saved.
 const SAVE = { repo: '', file: '', key: '', sha: null, timer: 0, off: false, loaded: false };
-const SAVED_FIELDS = ['node', 'built', 'valda', 'saker', 'steg', 'handlat', 'djur', 'fram', 'stopp', 'hittat', 'spent', 'kistor', 'agnAnvant', 'fiskbok', 'namn', 'bytt', 'intro', 'natt', 'salt', 'lasta', 'pa', 'tant', 'brev2', 'rykten', 'brevFiske', 'rekord', 'agnLager', 'damm', 'melodi'];
+const SAVED_FIELDS = ['node', 'built', 'valda', 'saker', 'steg', 'handlat', 'djur', 'fram', 'stopp', 'hittat', 'spent', 'kistor', 'agnAnvant', 'fiskbok', 'namn', 'bytt', 'intro', 'natt', 'salt', 'lasta', 'pa', 'tant', 'brev2', 'rykten', 'brevFiske', 'rekord', 'agnLager', 'damm', 'melodi', 'ekenOppen'];
 const b64 = text => { const bytes = new TextEncoder().encode(text); let s = ''; for (const b of bytes) s += String.fromCharCode(b); return btoa(s); };
 const unb64 = data => new TextDecoder().decode(Uint8Array.from(atob(data.replace(/\s/g, '')), c => c.charCodeAt(0)));
 function spend(n){ S.coins -= n; S.spent += n; }
