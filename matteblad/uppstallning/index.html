@@ -1,0 +1,598 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Öva uppställning</title>
+<style>
+  :root { --c: 56px; --blue: #2a75bb; --green: #3f9a3a; --red: #c8372d; --ink: #1d1d1f; --line: #c9d6e6; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Segoe UI", Arial, sans-serif; background: #f3f6fa; color: var(--ink); }
+  main { max-width: 960px; margin: 0 auto; padding: 24px 16px 40px; }
+  .back { color: var(--blue); text-decoration: none; font-weight: 600; }
+  .head { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap; margin: 8px 0 18px; }
+  h1 { margin: 0; color: var(--blue); font-size: 32px; }
+  .progress { display: flex; align-items: center; gap: 10px; font-weight: 600; color: #555; }
+  .dots { display: flex; gap: 6px; }
+  .dot { width: 14px; height: 14px; border-radius: 50%; background: #d5dde7; }
+  .dot.done { background: var(--green); }
+  .dot.now { background: #fff; box-shadow: inset 0 0 0 3px var(--blue); }
+  .card { background: #fff; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,.08); padding: 20px; }
+
+  /* Game: the uppställning on the left, thought bubble and answer on the right */
+  .game { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 360px); gap: 28px; align-items: start; }
+  .left { display: flex; flex-direction: column; align-items: center; gap: 12px; min-width: 0; }
+  .task-title { font-size: 22px; font-weight: 600; color: #555; }
+  /* Squared paper. The board starts one square in, so the digits sit in the squares. */
+  .paper { padding: var(--c); background-color: #fff; border: 1px solid #dde7f2; border-radius: 10px;
+           background-image: linear-gradient(#dde7f2 1px, transparent 1px), linear-gradient(90deg, #dde7f2 1px, transparent 1px);
+           background-size: var(--c) var(--c); }
+  .board { display: grid; grid-auto-rows: var(--c); }
+  .cell { width: var(--c); height: var(--c); position: relative; display: flex; align-items: center; justify-content: center;
+          font-size: calc(var(--c) * .72); line-height: 1; font-variant-numeric: tabular-nums; border-radius: 8px;
+          transition: background .25s; }
+  .cell.small { font-size: calc(var(--c) * .42); color: var(--red); align-items: flex-end; padding-bottom: 4px; }
+  .cell .carry { position: absolute; top: 3px; left: 4px; font-size: calc(var(--c) * .36); color: var(--red); }
+  .cell.dv { color: #555; }
+  .cell.sign span { font-weight: 700; transform: scale(1.6); display: inline-block; }
+  .cell.ans { color: var(--blue); }
+  .cell.win { color: var(--green); }
+  .cell.hl { background: #d6e8fb; }
+  .lt::before { content: ""; position: absolute; left: 0; right: 0; top: -2px; height: 4px; background: var(--ink); border-radius: 2px; }
+  .ll::after { content: ""; position: absolute; left: -2px; top: -2px; bottom: 6px; width: 4px; background: var(--ink); border-radius: 2px; }
+  .pop { display: inline-block; animation: pop .35s ease-out; }
+  @keyframes pop { 0% { transform: scale(.3); opacity: 0; } 70% { transform: scale(1.18); opacity: 1; } 100% { transform: scale(1); } }
+
+  .right { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+  .bubble { position: relative; background: #f7f9fc; border: 2px solid var(--line); border-radius: 26px; padding: 14px 20px 16px; min-height: 130px; }
+  .puff { position: absolute; background: #f7f9fc; border: 2px solid var(--line); border-radius: 50%; }
+  .p1 { width: 20px; height: 20px; left: -30px; top: 44px; }
+  .p2 { width: 11px; height: 11px; left: -48px; top: 62px; }
+  .think { font-size: 13px; color: #7a8796; margin-bottom: 4px; }
+  .line { font-size: 19px; line-height: 1.45; }
+  .line.q { font-weight: 600; }
+  .line.ok { color: var(--green); }
+  .line.no { color: var(--red); font-weight: 600; }
+  .line.tip { color: #8a6a00; font-size: 16px; margin-top: 2px; }
+
+  .answer { height: 72px; border: 3px solid var(--line); border-radius: 14px; background: #fff; display: flex; align-items: center;
+            justify-content: center; font-size: 44px; font-weight: 600; color: var(--blue); font-variant-numeric: tabular-nums; }
+  .answer.empty::after { content: "?"; color: #c3ccd7; }
+  .shake { animation: shake .35s; border-color: var(--red) !important; }
+  @keyframes shake { 20%, 60% { transform: translateX(-8px); } 40%, 80% { transform: translateX(8px); } }
+  .pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .pad button, .yn button, .big { font: inherit; font-size: 26px; font-weight: 600; min-height: 60px; border-radius: 14px;
+          border: 2px solid var(--line); background: #fff; color: var(--ink); cursor: pointer; touch-action: manipulation; }
+  .pad button:hover, .yn button:hover { border-color: var(--blue); }
+  .pad button:active, .yn button:active, .big:active { transform: scale(.96); }
+  .pad .ok { background: var(--green); border-color: var(--green); color: #fff; font-size: 22px; }
+  .pad .del { color: #666; }
+  .yn { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .yn button { min-height: 84px; font-size: 30px; }
+  .big { width: 100%; min-height: 68px; background: var(--green); border-color: var(--green); color: #fff; }
+  .hidden { display: none !important; }
+
+  /* Summary after the round */
+  .summary { text-align: center; padding: 28px 20px; }
+  .summary h2 { color: var(--green); font-size: 30px; margin: 0 0 8px; }
+  .score { font-size: 20px; margin: 0 0 18px; }
+  .list { list-style: none; padding: 0; margin: 0 auto 24px; max-width: 380px; text-align: left; }
+  .list li { display: flex; justify-content: space-between; gap: 12px; padding: 8px 12px; border-bottom: 1px solid #e6ecf3; font-size: 19px; }
+  .list .miss { color: #8a96a3; font-size: 15px; align-self: center; }
+  .actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .actions a, .actions button { padding: 14px 24px; border-radius: 999px; font: inherit; font-weight: 600; font-size: 18px; text-decoration: none;
+          border: 2px solid var(--blue); color: var(--blue); background: #fff; cursor: pointer; }
+  .actions .primary { background: var(--green); border-color: var(--green); color: #fff; }
+
+  @media (max-width: 760px) {
+    .game { grid-template-columns: 1fr; gap: 46px; }
+    .p1 { left: 56px; top: -28px; }
+    .p2 { left: 42px; top: -44px; }
+  }
+  @media (max-width: 420px) {
+    :root { --c: 42px; }
+    .card { padding: 14px; }
+    h1 { font-size: 26px; }
+    .pad button { min-height: 52px; }
+    .answer { height: 60px; font-size: 38px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .pop, .shake { animation: none; } }
+</style>
+</head>
+<body>
+<main>
+  <a class="back" href="../">← Mattebladen</a>
+  <div class="head">
+    <h1>Öva uppställning</h1>
+    <div class="progress"><span id="count"></span><div class="dots" id="dots"></div></div>
+  </div>
+
+  <section class="card game" id="game">
+    <div class="left">
+      <div class="task-title" id="title"></div>
+      <div class="paper"><div class="board" id="board"></div></div>
+    </div>
+    <div class="right">
+      <div class="bubble" aria-live="polite">
+        <span class="puff p1"></span><span class="puff p2"></span>
+        <div class="think">Tänker i huvudet:</div>
+        <div id="lines"></div>
+      </div>
+      <div class="answer empty" id="answer"></div>
+      <div class="pad" id="pad">
+        <button type="button" data-k="1">1</button><button type="button" data-k="2">2</button><button type="button" data-k="3">3</button>
+        <button type="button" data-k="4">4</button><button type="button" data-k="5">5</button><button type="button" data-k="6">6</button>
+        <button type="button" data-k="7">7</button><button type="button" data-k="8">8</button><button type="button" data-k="9">9</button>
+        <button type="button" data-k="del" class="del" aria-label="Sudda">⌫</button><button type="button" data-k="0">0</button>
+        <button type="button" data-k="ok" class="ok">OK</button>
+      </div>
+      <div class="yn hidden" id="yn">
+        <button type="button" data-yn="1">Ja</button><button type="button" data-yn="0">Nej</button>
+      </div>
+      <button type="button" class="big hidden" id="next">Nästa tal →</button>
+    </div>
+  </section>
+
+  <section class="card summary hidden" id="summary"></section>
+</main>
+
+<script>
+// Inställningar
+const ANTAL_TAL = 6;                       // tal i en omgång
+const BONUS_TAL = 4;                       // extra tal man kan välja efter omgången
+const FAKTORER = [3, 4, 5, 6, 7, 8, 9];    // det ensiffriga talet, samma nivå som Pokémon-matte blad 5
+const VISA_SVARET_EFTER = 3;               // antal fel innan tankebubblan säger svaret
+
+const rnd = (lo, hi) => lo + Math.floor(Math.random() * (hi - lo + 1));
+const pick = list => list[Math.floor(Math.random() * list.length)];
+const digitsOf = n => String(n).split("").map(Number);
+const hasZero = n => String(n).includes("0");
+const shuffle = list => {
+  for (let i = list.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [list[i], list[j]] = [list[j], list[i]]; }
+  return list;
+};
+const tooLowHigh = (v, right) => v < right ? `Nej, ${v} är för lite.` : `Nej, ${v} är för mycket.`;
+
+// Making new tasks at the same level as the latest worksheet: 236 · 4, 58 · 7, 96 / 4, 846 / 3, 735 / 5.
+// Divisions always go even. No zeros in the answer of a division or in the factor of a multiplication,
+// and every task has at least one minnessiffra so there is something to practise.
+
+function divHasCarry(n, d) {
+  let r = 0;
+  for (const x of digitsOf(n)) {
+    const cur = r * 10 + x;
+    r = cur % d;
+    if (r > 0 && cur >= d) return true;
+  }
+  return false;
+}
+
+function mulHasCarry(a, b) {
+  const A = digitsOf(a).reverse();
+  let c = 0;
+  for (let k = 0; k < A.length - 1; k++) {
+    const total = b * A[k] + c;
+    if (total >= 10) return true;
+    c = Math.floor(total / 10);
+  }
+  return false;
+}
+
+function newDivision(used) {
+  for (let t = 0; t < 2000; t++) {
+    const d = pick(FAKTORER);
+    const three = Math.random() < 0.75;
+    const q = three ? rnd(Math.ceil(100 / d), Math.floor(999 / d)) : rnd(Math.ceil(10 / d), Math.floor(99 / d));
+    const n = q * d;
+    if (q < 11 || hasZero(q)) continue;
+    if (three ? n < 100 : n > 99) continue;
+    if (!divHasCarry(n, d) || used.has(n + "/" + d) || used.has(q + "*" + d)) continue;
+    used.add(n + "/" + d);
+    return { kind: "div", n, d, text: `${n} / ${d}`, answer: q };
+  }
+}
+
+function newMultiplication(used) {
+  for (let t = 0; t < 2000; t++) {
+    const b = pick(FAKTORER);
+    const a = Math.random() < 0.5 ? rnd(23, 98) : rnd(112, 599);
+    if (a > 99 && a * b > 1999) continue;   // keep 3-digit products close to the worksheet (236 · 4 = 944)
+    if (hasZero(a) || !mulHasCarry(a, b) || used.has(a + "*" + b) || used.has(a * b + "/" + b)) continue;
+    used.add(a + "*" + b);
+    return { kind: "mul", a, b, text: `${a} · ${b}`, answer: a * b };
+  }
+}
+
+// Steps. Each step is one question in the thought bubble.
+// type: "num" (keypad) or "yesno"; ask: lines, the last one is the question; hl: cells to light up;
+// ok: shown in green when solved; wrong(v): shown in red; tip(tries): extra help after a few misses; apply(): writes on the paper.
+
+function buildDivision(task) {
+  const { n, d } = task;
+  const D = digitsOf(n);
+  const st = task.st = { D, q: D.map(() => null), carry: D.map(() => null), fresh: new Set() };
+  const steps = task.steps = [];
+  const goes = D[0] >= d;
+  const table = Array.from({ length: 9 }, (_, k) => (k + 1) * d).join(", ");
+
+  steps.push({
+    type: "yesno",
+    ask: [`Går ${d} i ${D[0]}?`],
+    hl: ["dv", "d0"],
+    answer: goes,
+    ok: goes ? `Ja, ${d} får plats i ${D[0]}.` : `Nej, ${D[0]} är mindre än ${d}. Vi tar med nästa siffra och delar ${D[0]}${D[1]} i stället.`,
+    wrong: () => goes
+      ? (D[0] === d ? `Jo! ${d} får plats i ${d} precis en gång.` : `Jo! ${D[0]} är större än ${d}, så ${d} får plats.`)
+      : `Nej, ${D[0]} är mindre än ${d}, så ${d} får inte plats.`,
+    apply: () => {}
+  });
+
+  let pos = goes ? 0 : 1;
+  let cur = goes ? D[0] : D[0] * 10 + D[1];
+  let first = true;
+  while (pos < D.length) {
+    const p = pos, now = cur, qd = Math.floor(now / d), prod = qd * d, r = now - prod;
+    const last = p === D.length - 1;
+    const next = last ? null : r * 10 + D[p + 1];
+    const hl = ["dv"].concat(!goes && first ? ["d0", "d1"] : ["d" + p]);
+
+    steps.push({
+      type: "num",
+      ask: [`Hur många ${d}:or får plats i ${now}?`],
+      hl,
+      answer: qd,
+      ok: `${d} · ${qd} = ${prod}, det passar.`,
+      wrong: v => v * d > now
+        ? `Nej, ${d} · ${v} = ${v * d}. Det blir för mycket.`
+        : `Nej, ${d} · ${v} = ${v * d}. Det får plats ${qd - v === 1 ? `en ${d}:a till` : "fler"}.`,
+      tip: t => t >= 2 ? `Tips, ${d}:ans tabell: ${table}` : null,
+      apply: () => { st.q[p] = qd; st.fresh.add("q" + p); }
+    });
+
+    steps.push({
+      type: "num",
+      ask: ["Hur mycket blir över?", `${now} − ${prod} = ?`],
+      hl,
+      answer: r,
+      ok: last ? `${now} − ${prod} = 0. Inget blir över.`
+        : r > 0 ? `${now} − ${prod} = ${r}. ${r}:an flyttar till nästa siffra, så det blir ${next}.`
+        : `${now} − ${prod} = 0. Inget blir över, så vi fortsätter med ${D[p + 1]}.`,
+      wrong: v => tooLowHigh(v, r),
+      tip: t => t >= 2 ? `Tips: räkna uppåt från ${prod} till ${now}.` : null,
+      apply: () => { if (!last && r > 0) { st.carry[p + 1] = r; st.fresh.add("c" + (p + 1)); } }
+    });
+
+    first = false;
+    pos = p + 1;
+    cur = next;
+  }
+  task.check = `Kontroll: ${d} · ${task.answer} = ${n} ✓`;
+}
+
+function buildMultiplication(task) {
+  const { a, b } = task;
+  const A = digitsOf(a), n = A.length;
+  const W = Math.max(n, String(a * b).length);
+  const st = task.st = { A, W, carry: Array(W).fill(null), res: Array(W).fill(null), fresh: new Set() };
+  const steps = task.steps = [];
+  const names = ["entalen", "tiotalen", "hundratalen"];
+  let c = 0;
+
+  for (let k = 0; k < n; k++) {
+    const x = A[n - 1 - k], col = W - 1 - k, p = b * x, carryIn = c, total = p + carryIn, last = k === n - 1;
+
+    steps.push({
+      type: "num",
+      ask: [k === 0 ? "Börja med entalen." : `Nu ${names[k]}.`, `Vad är ${b} · ${x}?`],
+      hl: ["a" + col, "b"],
+      answer: p,
+      ok: `${b} · ${x} = ${p}`,
+      wrong: v => tooLowHigh(v, p),
+      tip: t => t >= 2 ? (x > 1 ? `Tips: ${b} · ${x - 1} = ${b * (x - 1)}. Lägg på en ${b}:a till.` : "Tips: 1 gång ett tal är talet självt.") : null,
+      apply: () => {}
+    });
+
+    if (carryIn > 0) steps.push({
+      type: "num",
+      ask: [`Lägg till minnessiffran ${carryIn}.`, `Vad är ${p} + ${carryIn}?`],
+      hl: ["a" + col, "c" + col],
+      answer: total,
+      ok: `${p} + ${carryIn} = ${total}`,
+      wrong: v => tooLowHigh(v, total),
+      tip: t => t >= 2 ? `Tips: räkna uppåt ${carryIn} steg från ${p}.` : null,
+      apply: () => {}
+    });
+
+    if (last) {
+      const T = digitsOf(total);
+      steps.push({
+        type: "num",
+        ask: ["Det här var sista siffran.", "Vad skriver du under strecket?"],
+        hl: T.map((_, j) => "r" + (col - j)),
+        answer: total,
+        ok: total >= 10 ? `Hela ${total} skrivs under strecket.` : `${total} skrivs under strecket.`,
+        wrong: v => total >= 10 && v === total % 10
+          ? `Nej, det finns ingen nästa siffra att flytta minnessiffran till. Då skrivs hela ${total} ner.`
+          : "Nej, skriv det du just räknade ut.",
+        tip: () => null,
+        apply: () => T.forEach((t, j) => { const cc = col - (T.length - 1 - j); st.res[cc] = t; st.fresh.add("r" + cc); })
+      });
+    } else if (total >= 10) {
+      const ones = total % 10, tens = Math.floor(total / 10);
+      steps.push({
+        type: "num",
+        ask: [`${total} får inte plats i en ruta.`, "Vilken siffra skriver du under strecket?"],
+        hl: ["r" + col],
+        answer: ones,
+        ok: `${ones} skrivs under strecket.`,
+        wrong: v => v === total ? `Nej, hela ${total} får inte plats. Bara entalet skrivs ner.`
+          : v === tens ? `Nej, ${v} är tiotalet. Det är entalet som skrivs ner.`
+          : `Nej, titta på entalet i ${total}.`,
+        tip: t => t >= 2 ? `Tips: entalet är den sista siffran i ${total}.` : null,
+        apply: () => { st.res[col] = ones; st.fresh.add("r" + col); }
+      });
+      steps.push({
+        type: "num",
+        ask: ["Vilken siffra blir minnessiffra?"],
+        hl: ["c" + (col - 1)],
+        answer: tens,
+        ok: `${tens}:an skrivs litet ovanför nästa siffra.`,
+        wrong: v => v === ones ? `Nej, ${v} har du redan skrivit ner. Minnessiffran är tiotalet i ${total}.`
+          : `Nej, minnessiffran är tiotalet i ${total}.`,
+        tip: t => t >= 2 ? `Tips: tiotalet är den första siffran i ${total}.` : null,
+        apply: () => { st.carry[col - 1] = tens; st.fresh.add("c" + (col - 1)); }
+      });
+    } else {
+      steps.push({
+        type: "num",
+        ask: ["Vilken siffra skriver du under strecket?"],
+        hl: ["r" + col],
+        answer: total,
+        ok: `${total} skrivs under strecket. Ingen minnessiffra den här gången.`,
+        wrong: () => "Nej, skriv det du just räknade ut.",
+        tip: () => null,
+        apply: () => { st.res[col] = total; st.fresh.add("r" + col); }
+      });
+    }
+    c = last ? 0 : Math.floor(total / 10);
+  }
+  const rough = Math.round(a / 10) * 10;
+  task.check = `Överslag: ${b} · ${rough} = ${b * rough}. Det är nära ${a * b}, så det verkar stämma ✓`;
+}
+
+// Round
+
+const used = new Set();
+let round, step, typed, tries, okMsg, wrongMsg, done;
+
+function makeTasks(count) {
+  const divs = Math.floor(count / 2);
+  const kinds = shuffle([...Array(count - divs).fill("mul"), ...Array(divs).fill("div")]);
+  return kinds.map(kind => {
+    const task = kind === "div" ? newDivision(used) : newMultiplication(used);
+    (kind === "div" ? buildDivision : buildMultiplication)(task);
+    Object.assign(task, { questions: 0, firstTry: 0, mistakes: 0 });
+    return task;
+  });
+}
+
+function newRound() {
+  round = { tasks: makeTasks(ANTAL_TAL), index: 0, target: ANTAL_TAL, bonusTaken: false };
+  showGame();
+  startTask();
+}
+
+const task = () => round.tasks[round.index];
+
+function startTask() {
+  step = 0; typed = ""; tries = 0; okMsg = null; wrongMsg = null; done = false;
+  render();
+}
+
+function submit(value) {
+  if (done) return;
+  const t = task(), s = t.steps[step];
+  if (value === s.answer) {
+    t.questions++;
+    if (tries === 0) t.firstTry++;
+    s.apply();
+    okMsg = s.ok; wrongMsg = null; tries = 0; typed = "";
+    step++;
+    if (step >= t.steps.length) done = true;
+  } else {
+    tries++;
+    t.mistakes++;
+    wrongMsg = s.wrong(value);
+    typed = "";
+    shake(s.type === "yesno" ? els.yn : els.answer);
+  }
+  render();
+}
+
+function nextTask() {
+  if (round.index + 1 >= round.target) { showSummary(); return; }
+  round.index++;
+  startTask();
+}
+
+function takeBonus() {
+  round.tasks = round.tasks.concat(makeTasks(BONUS_TAL));
+  round.target += BONUS_TAL;
+  round.bonusTaken = true;
+  round.index++;
+  showGame();
+  startTask();
+}
+
+// Drawing
+
+const $ = id => document.getElementById(id);
+const els = { game: $("game"), summary: $("summary"), board: $("board"), title: $("title"), lines: $("lines"), answer: $("answer"),
+              pad: $("pad"), yn: $("yn"), next: $("next"), count: $("count"), dots: $("dots") };
+
+function shake(el) {
+  el.classList.remove("shake");
+  void el.offsetWidth;
+  el.classList.add("shake");
+}
+
+function render() {
+  renderProgress();
+  renderBoard();
+  renderBubble();
+  renderControls();
+}
+
+function renderProgress(allDone = false) {
+  els.count.textContent = allDone ? "Klart!" : `Tal ${round.index + 1} av ${round.target}`;
+  let html = "";
+  for (let j = 0; j < round.target; j++) {
+    const cls = allDone || j < round.index || (j === round.index && done) ? "done" : j === round.index ? "now" : "";
+    html += `<span class="dot ${cls}"></span>`;
+  }
+  els.dots.innerHTML = html;
+}
+
+function renderBoard() {
+  const t = task(), st = t.st;
+  const hl = new Set(done ? [] : t.steps[step].hl);
+  const cell = (key, text, cls = "") => {
+    const has = text !== null && text !== undefined && text !== "";
+    const pop = key && st.fresh.has(key);
+    return `<div class="cell ${cls}${key && hl.has(key) ? " hl" : ""}">${has ? `<span class="${pop ? "pop" : ""}">${text}</span>` : ""}</div>`;
+  };
+  let html = "";
+  if (t.kind === "div") {
+    const D = st.D;
+    els.board.style.gridTemplateColumns = `repeat(${D.length + 1}, var(--c))`;
+    html += cell(null, "");
+    D.forEach((_, j) => html += cell("q" + j, st.q[j], "ans" + (done ? " win" : "")));
+    html += cell("dv", t.d, "dv");
+    D.forEach((digit, j) => {
+      const carry = st.carry[j];
+      const carryHtml = carry !== null ? `<span class="carry${st.fresh.has("c" + j) ? " pop" : ""}">${carry}</span>` : "";
+      html += `<div class="cell lt${j === 0 ? " ll" : ""}${hl.has("d" + j) ? " hl" : ""}">${carryHtml}<span>${digit}</span></div>`;
+    });
+  } else {
+    const { A, W } = st, n = A.length, rowEnd = done ? " win" : "";
+    els.board.style.gridTemplateColumns = `repeat(${W + 1}, var(--c))`;
+    html += cell(null, "", "small");
+    for (let j = 0; j < W; j++) html += cell("c" + j, st.carry[j], "small");
+    html += cell(null, "");
+    for (let j = 0; j < W; j++) html += cell("a" + j, j - (W - n) >= 0 ? A[j - (W - n)] : "");
+    html += cell(null, "·", "dv sign");
+    for (let j = 0; j < W; j++) html += j === W - 1 ? cell("b", t.b) : cell(null, "");
+    html += cell(null, "", "lt");
+    for (let j = 0; j < W; j++) html += cell("r" + j, st.res[j], "lt ans" + rowEnd);
+  }
+  els.board.innerHTML = html;
+  els.title.textContent = t.text;
+  st.fresh.clear();
+}
+
+function renderBubble() {
+  const t = task(), lines = [];
+  if (okMsg) lines.push(`<div class="line ok">✓ ${okMsg}</div>`);
+  if (done) {
+    lines.push(`<div class="line q">Klart! Svaret är ${t.answer}.</div>`);
+    lines.push(`<div class="line">${t.check}</div>`);
+  } else {
+    const s = t.steps[step];
+    s.ask.forEach((l, i) => lines.push(`<div class="line${i === s.ask.length - 1 ? " q" : ""}">${l}</div>`));
+    if (wrongMsg) lines.push(`<div class="line no">${wrongMsg}</div>`);
+    const tip = tries >= VISA_SVARET_EFTER
+      ? `Psst! Svaret är ${s.type === "yesno" ? (s.answer ? "Ja" : "Nej") : s.answer}.`
+      : s.tip ? s.tip(tries) : null;
+    if (tip) lines.push(`<div class="line tip">${tip}</div>`);
+  }
+  els.lines.innerHTML = lines.join("");
+}
+
+function renderControls() {
+  const s = done ? null : task().steps[step];
+  els.pad.classList.toggle("hidden", done || s.type !== "num");
+  els.answer.classList.toggle("hidden", done || s.type !== "num");
+  els.yn.classList.toggle("hidden", done || s.type !== "yesno");
+  els.next.classList.toggle("hidden", !done);
+  els.next.textContent = round.index + 1 >= round.target ? "Se hur det gick →" : "Nästa tal →";
+  els.answer.textContent = typed;
+  els.answer.classList.toggle("empty", typed === "");
+}
+
+function showGame() {
+  els.summary.classList.add("hidden");
+  els.game.classList.remove("hidden");
+}
+
+function showSummary() {
+  const list = round.tasks.slice(0, round.target);
+  const questions = list.reduce((sum, t) => sum + t.questions, 0);
+  const firstTry = list.reduce((sum, t) => sum + t.firstTry, 0);
+  els.summary.innerHTML = `
+    <h2>${round.bonusTaken ? `Alla ${round.target} tal klara!` : "Bra jobbat!"}</h2>
+    <p class="score">Du räknade ${round.target} tal. <strong>${firstTry} av ${questions}</strong> frågor rätt på första försöket.</p>
+    <ul class="list">${list.map(t => `<li><span>${t.text} = ${t.answer}</span><span class="miss">${t.mistakes ? t.mistakes + " fel" : "inga fel"}</span></li>`).join("")}</ul>
+    <div class="actions">
+      ${round.bonusTaken
+        ? `<button type="button" class="primary" id="again">Ny omgång</button>`
+        : `<button type="button" class="primary" id="more">${BONUS_TAL} till!</button>`}
+      <a href="../">Klar för idag</a>
+    </div>`;
+  els.game.classList.add("hidden");
+  els.summary.classList.remove("hidden");
+  renderProgress(true);
+  const more = $("more"), again = $("again");
+  if (more) more.onclick = takeBonus;
+  if (again) again.onclick = newRound;
+}
+
+// Input
+
+function press(key) {
+  if (done) return;
+  if (task().steps[step].type !== "num") return;
+  if (key === "del") typed = typed.slice(0, -1);
+  else if (key === "ok") { if (typed === "") { shake(els.answer); return; } submit(Number(typed)); return; }
+  else if (typed.length < 4) typed = typed === "0" ? key : typed + key;
+  renderControls();
+}
+
+els.pad.addEventListener("click", e => {
+  const b = e.target.closest("button");
+  if (!b) return;
+  b.blur();
+  press(b.dataset.k);
+});
+
+els.yn.addEventListener("click", e => {
+  const b = e.target.closest("button");
+  if (!b) return;
+  b.blur();
+  submit(b.dataset.yn === "1");
+});
+
+els.next.addEventListener("click", e => { e.currentTarget.blur(); nextTask(); });
+
+document.addEventListener("keydown", e => {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  if (!els.summary.classList.contains("hidden")) return;
+  if (done) {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); nextTask(); }
+    return;
+  }
+  if (task().steps[step].type === "yesno") {
+    const k = e.key.toLowerCase();
+    if (k === "j") submit(true);
+    else if (k === "n") submit(false);
+    return;
+  }
+  if (/^[0-9]$/.test(e.key)) { e.preventDefault(); press(e.key); }
+  else if (e.key === "Backspace") { e.preventDefault(); press("del"); }
+  else if (e.key === "Enter") { e.preventDefault(); press("ok"); }
+});
+
+newRound();
+</script>
+</body>
+</html>
