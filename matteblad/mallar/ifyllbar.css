@@ -107,3 +107,14 @@ body.erasing .rutor canvas { cursor: cell; }
 @media print {
   .fill-bar, .fill-dialog { display: none !important; }
 }
+
+/* The offer to load stjärnbläck before the sheet (mallar/stjarnblack.js), never printed */
+.black-erbjud { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; max-width: 210mm; margin: 10px auto 0;
+  box-sizing: border-box; background: #eeedfe; border: 2px solid #534ab7; border-radius: 12px; padding: 12px 16px;
+  color: #26215c; font-family: "Segoe UI", Arial, sans-serif; }
+.black-erbjud span { flex: 1 1 300px; color: #3c3489; }
+.black-erbjud a, .black-erbjud button { font: inherit; font-weight: 600; padding: 8px 16px; border-radius: 999px; cursor: pointer;
+  text-decoration: none; border: 2px solid #534ab7; }
+.black-erbjud a { background: #534ab7; color: #fff; }
+.black-erbjud button { background: #fff; color: #3c3489; }
+@media print { .black-erbjud { display: none !important; } }

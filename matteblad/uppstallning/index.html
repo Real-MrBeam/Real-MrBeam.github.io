@@ -84,6 +84,13 @@
   .actions a, .actions button { padding: 14px 24px; border-radius: 999px; font: inherit; font-weight: 600; font-size: 18px; text-decoration: none;
           border: 2px solid var(--blue); color: var(--blue); background: #fff; cursor: pointer; }
   .actions .primary { background: var(--green); border-color: var(--green); color: #fff; }
+  /* Stjärnbläck: practice for one sheet (?blad=<mapp>) loads ink that boosts the sheet (Peter 2026-10-31) */
+  .ink { display: inline-flex; align-items: center; gap: 8px; background: #eeedfe; border: 2px solid #534ab7; color: #26215c;
+         border-radius: 999px; padding: 6px 14px; font-weight: 600; }
+  .ink b { color: #534ab7; letter-spacing: 2px; }
+  .notice { background: #eeedfe; border: 2px solid #534ab7; color: #26215c; border-radius: 14px; padding: 18px 20px; margin-bottom: 16px; }
+  .notice p { margin: 0 0 12px; font-size: 18px; }
+  .actions .violet { background: #534ab7; border-color: #534ab7; color: #fff; }
 
   @media (max-width: 760px) {
     .game { grid-template-columns: 1fr; gap: 46px; }
@@ -138,9 +145,28 @@
 </main>
 
 <script>
+// Stjärnbläck: with ?blad=<mapp>&typ=mul|div|blandat the practice belongs to a sheet. 5 tal load ✦ (+1 per right task with a
+// bläckdroppe on the sheet), 5 more load ✦✦ (+2). The ink is saved in this browser for the sheet (mallar/stjarnblack.js shows it
+// on the sheet), and only while nothing is written on the sheet yet.
+const PARAMS = new URLSearchParams(location.search);
+const BLAD = /^[0-9a-z-]+$/.test(PARAMS.get("blad") || "") ? PARAMS.get("blad") : null;
+const TYP = ["mul", "div"].includes(PARAMS.get("typ")) ? PARAMS.get("typ") : "blandat";
+const INK_KEY = BLAD && "matteblad:stjarnblack:" + BLAD;
+const SHEET_URL = BLAD && `../blad/${BLAD}/blad.html`;
+const store = { get: k => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };
+const inkNow = () => (BLAD && Number(store.get(INK_KEY))) || 0;
+const sheetStarted = () => {
+  if (!BLAD) return false;
+  try {
+    const s = JSON.parse(store.get("matteblad:" + new URL(SHEET_URL, location.href).pathname)) || {};
+    return (s.fields || []).some(v => v) || (s.strokes || []).some(a => a.length) || s.opt >= 0;
+  } catch { return false; }
+};
+let inkOpen = BLAD && !sheetStarted();   // ink can be loaded: a sheet, and nothing written on it yet
+
 // Inställningar
-const ANTAL_TAL = 6;                       // tal i en omgång
-const BONUS_TAL = 4;                       // extra tal man kan välja efter omgången
+const ANTAL_TAL = BLAD ? 5 : 6;            // tal i en omgång
+const BONUS_TAL = BLAD ? 5 : 4;            // extra tal man kan välja efter omgången
 const FAKTORER = [3, 4, 5, 6, 7, 8, 9];    // det ensiffriga talet, samma nivå som Pokémon-matte blad 5
 const VISA_SVARET_EFTER = 3;               // antal fel innan tankebubblan säger svaret
 
@@ -367,7 +393,7 @@ const used = new Set();
 let round, step, typed, tries, okMsg, wrongMsg, done;
 
 function makeTasks(count) {
-  const divs = Math.floor(count / 2);
+  const divs = TYP === "div" ? count : TYP === "mul" ? 0 : Math.floor(count / 2);
   const kinds = shuffle([...Array(count - divs).fill("mul"), ...Array(divs).fill("div")]);
   return kinds.map(kind => {
     const task = kind === "div" ? newDivision(used) : newMultiplication(used);
@@ -526,6 +552,7 @@ function showGame() {
 }
 
 function showSummary() {
+  if (BLAD) return showInkSummary();
   const list = round.tasks.slice(0, round.target);
   const questions = list.reduce((sum, t) => sum + t.questions, 0);
   const firstTry = list.reduce((sum, t) => sum + t.firstTry, 0);
@@ -545,6 +572,43 @@ function showSummary() {
   const more = $("more"), again = $("again");
   if (more) more.onclick = takeBonus;
   if (again) again.onclick = newRound;
+}
+
+// The summary for a sheet: the ink he has loaded, 5 more for ✦✦, and the way to the sheet
+function showInkSummary() {
+  const list = round.tasks.slice(0, round.target);
+  if (inkOpen && !sheetStarted()) store.set(INK_KEY, String(Math.max(inkNow(), round.target >= 10 || round.toFull ? 10 : 5)));
+  const ink = inkNow(), full = ink >= 10;
+  els.summary.innerHTML = `
+    <h2>${!inkOpen ? "Bra jobbat!" : full ? "Stjärnbläcket är fullt!" : "Stjärnbläck laddat!"}</h2>
+    ${inkOpen ? `<p class="score"><span class="ink"><b>${full ? "✦✦" : "✦"}</b> ${full ? "+2" : "+1"} stjärnstoft för varje rätt uppgift med bläckdroppe</span></p>` : ""}
+    <ul class="list">${list.map(t => `<li><span>${t.text} = ${t.answer}</span><span class="miss">${t.mistakes ? t.mistakes + " fel" : "inga fel"}</span></li>`).join("")}</ul>
+    <div class="actions">
+      ${inkOpen && !full && !round.bonusTaken ? `<button type="button" class="violet" id="more">${BONUS_TAL} till för ✦✦</button>` : ""}
+      <a class="primary" href="${SHEET_URL}">Till bladet</a>
+    </div>`;
+  els.game.classList.add("hidden");
+  els.summary.classList.remove("hidden");
+  renderProgress(true);
+  const more = $("more");
+  if (more) more.onclick = takeBonus;
+}
+
+// Before a sheet's practice: the sheet is already started (no ink then), or the ink is already full
+function startSheetPractice() {
+  const ink = inkNow();
+  document.querySelector("h1").textContent = "Ladda stjärnbläck";
+  document.querySelector(".back").href = SHEET_URL;
+  document.querySelector(".back").textContent = "← Till bladet";
+  if (inkOpen && ink < 10) { if (ink >= 5) { round = { tasks: makeTasks(BONUS_TAL), index: 0, target: BONUS_TAL, bonusTaken: true, toFull: true }; showGame(); startTask(); } else newRound(); return; }   // ✦ already: the 5 more for ✦✦
+  const why = inkOpen ? "Stjärnbläcket för bladet är redan fullt ✦✦." : "Du har redan börjat på bladet. Stjärnbläck laddas innan man börjar, men du kan öva ändå.";
+  inkOpen = false;
+  els.game.classList.add("hidden");
+  const box = document.createElement("div");
+  box.className = "notice";
+  box.innerHTML = `<p>${why}</p><div class="actions" style="justify-content:flex-start"><button type="button" class="primary" id="anyway">Öva ändå</button><a href="${SHEET_URL}">Till bladet</a></div>`;
+  els.game.before(box);
+  $("anyway").onclick = () => { box.remove(); newRound(); };
 }
 
 // Input
@@ -592,7 +656,7 @@ document.addEventListener("keydown", e => {
   else if (e.key === "Enter") { e.preventDefault(); press("ok"); }
 });
 
-newRound();
+if (BLAD) startSheetPractice(); else newRound();
 </script>
 </body>
 </html>

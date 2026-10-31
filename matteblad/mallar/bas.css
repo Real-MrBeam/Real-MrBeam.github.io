@@ -227,3 +227,38 @@ body {
 }
 .feedback .wish { flex: 1 0 100%; display: flex; align-items: flex-end; gap: 2mm; padding: 0 4mm; }
 .feedback .wish .grow { flex: 1; height: 6mm; border-bottom: .4mm solid #333; }
+
+/* Stjärnbläck (Peter 2026-10-31): practice before the sheet boosts it. A task with a bläckdroppe gives extra stardust
+   when it is right and the ink is loaded; the stamp in the name row says how much ink (mallar/stjarnblack.js). Both print,
+   and both read without colour (the drop has an outline, the stamp says it in words). */
+.task.droppe .num { position: relative; }
+.task.droppe .num::after {
+  content: "";
+  position: absolute;
+  right: -1.6mm;
+  top: -1.4mm;
+  width: 3.4mm;
+  height: 3.4mm;
+  background: #7f77dd;
+  border: .35mm solid #26215c;
+  border-radius: 0 50% 50% 50%;
+  transform: rotate(45deg);
+}
+.blackstampel {
+  flex: none;
+  align-self: flex-end;
+  border: .5mm solid #534ab7;
+  border-radius: 2mm;
+  color: #3c3489;
+  background: #eeedfe;
+  padding: .6mm 2.5mm;
+  font-size: 9pt;
+  font-weight: 700;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+.blackstampel b { letter-spacing: .5mm; }
+/* with the stamp, the name row shares its width: the lines may shrink and the date is a little shorter */
+.meta:has(.blackstampel) { gap: 5mm; }
+.meta:has(.blackstampel) label, .meta:has(.blackstampel) label > * { min-width: 0; }
+.meta:has(.blackstampel) label.date { flex-basis: 42mm; }

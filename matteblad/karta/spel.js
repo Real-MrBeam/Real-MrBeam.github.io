@@ -2211,7 +2211,7 @@ function renderLog(fresh){
       ? `<img class="pix" src="${e.skarva ? SHARD_URL : RUNE_URL}" alt=""><span><b>${esc(e.amne || (e.skarva ? 'Runskärva' : 'Runa'))}</b> ${[where ? 'vid ' + esc(where) : '', e.procent != null ? e.procent + ' %' : ''].filter(Boolean).join(', ')}</span>`
       : `<img class="pix" src="${SCROLL_URL}" alt=""><span><b>${esc(e.amne || 'Pergamentrulle')}</b> ${where ? 'vid ' + esc(where) + ', ' : ''}${e.ratt} av ${e.av} rätt</span>`;
     // the stars are the same pixel star as up in the corner, with a number, like the stardust on the scrolls
-    const right = e.typ === 'runa' ? `<img class="pix" src="${STAR_URL}" alt="">${e.stjarnor + (e.bonus || 0)}<span class="sr"> stjärnor</span>` : `<img class="pix" src="${DUST_URL}" alt="">${e.stoft}`;
+    const right = e.typ === 'runa' ? `<img class="pix" src="${STAR_URL}" alt="">${e.stjarnor + (e.bonus || 0)}<span class="sr"> stjärnor</span>` : `${e.black ? '<span class="black-st" title="Stjärnbläck">✦</span>' : ''}<img class="pix" src="${DUST_URL}" alt="">${e.stoft}`;
     const n = S.log.length - 1 - i;
     return `<li class="${fresh && i === 0 ? 'new' : ''}${e.text ? ' readable' : ''}"${e.text ? ` data-las="${n}" role="button" tabindex="0" title="Läs historien"` : ''}>${left}<span class="st">${right}</span></li>`;
   }).join('') : '<li><span>Inga runor eller rullar ännu.</span></li>';
@@ -2364,10 +2364,13 @@ function eventSteps(e, last){
   ];
   const reward = rune
     ? `Runan gav ${e.stjarnor} ${e.stjarnor === 1 ? 'stjärna' : 'stjärnor'}${e.bonus ? ', och en extra för att du tolkade bättre än förra gången' : ''}.`
+    : e.black ? `${e.ratt} rätt gav ${e.ratt} stjärnstoft. Stjärnbläcket lyste i ${e.black.ratt} rätta ${e.black.ratt === 1 ? 'uppgift' : 'uppgifter'} med bläckdroppe och gav ${e.black.plus} till. Rullen gav ${e.stoft} stjärnstoft.`
     : `Rullen gav ${e.stoft} stjärnstoft.`;
+  // a scroll boosted with stjärnbläck (practice before the sheet, Peter 2026-10-31) glitters violet
+  const glitter = !rune && !!e.black;
   return [
-    { icon: rune ? RUNE_BIG : SCROLL_BIG, title, text: where ? `Den låg vid ${where}.` : '', button: rune ? 'Tolka runan' : 'Öppna rullen' },
-    { icon: rune ? RUNE_BIG : SCROLL_BIG, title, text: e.text, reward, button: last ? 'Till kartan' : 'Nästa' },
+    { icon: rune ? RUNE_BIG : SCROLL_BIG, title, text: where ? `Den låg vid ${where}.` : '', button: rune ? 'Tolka runan' : 'Öppna rullen', glitter },
+    { icon: rune ? RUNE_BIG : SCROLL_BIG, title, text: e.text, reward, button: last ? 'Till kartan' : 'Nästa', glitter },
   ];
 }
 function showNews(){
@@ -2394,7 +2397,7 @@ function openModal(steps, done){
   const show = () => {
     const s = steps[i];
     if (s.ljud && window.Musik && Musik.jingel) Musik.jingel(s.ljud);   // a step can have a jingle, the stars or the stardust of the news
-    $('#modalIcon').src = s.icon; $('#modalTitle').textContent = s.title; $('#modalText').textContent = s.text;
+    $('#modalIcon').src = s.icon; $('#modalIcon').classList.toggle('glitter', !!s.glitter); $('#modalTitle').textContent = s.title; $('#modalText').textContent = s.text;
     $('#modalReward').textContent = s.reward || ''; $('#modalReward').hidden = !s.reward;
     $('#modalBtn').textContent = s.button; $('#modal').hidden = false;
     const field = $('#modalName'); field.hidden = s.input === undefined; field.value = s.input ?? '';
