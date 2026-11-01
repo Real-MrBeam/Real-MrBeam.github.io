@@ -81,7 +81,10 @@
   .lines { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
   .lines line { stroke: var(--ink); stroke-width: .07; stroke-linecap: round; }
   .lines line.draft { stroke: var(--blue); }
-  .pad .sign { grid-column: 1 / -1; font-size: 34px; line-height: 1; }
+  .pad .sign { font-size: 34px; line-height: 1; }
+  .pad .erase { grid-column: span 2; font-size: 18px; }
+  .pad .erase.wide { grid-column: 1 / -1; }
+  .pad .erase:disabled { color: #aab4c0; cursor: default; }
   .mini { display: inline-grid; grid-auto-rows: 26px; margin-top: 6px; font-size: 20px; }
   .mini span { width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; }
   .mini .t { border-top: 3px solid var(--ink); }
@@ -148,7 +151,8 @@
         <button type="button" data-k="7">7</button><button type="button" data-k="8">8</button><button type="button" data-k="9">9</button>
         <button type="button" data-k="del" class="del" aria-label="Sudda">⌫</button><button type="button" data-k="0">0</button>
         <button type="button" data-k="ok" class="ok" id="okKey">OK</button>
-        <button type="button" data-k="sign" class="sign hidden" id="signKey" aria-label="Gångertecken">·</button>
+        <button type="button" data-k="sign" class="sign hidden" id="signKey" aria-label="Gångertecken">∗</button>
+        <button type="button" data-k="erase" class="erase hidden" id="eraseKey">Sudda streck</button>
       </div>
       <div class="yn hidden" id="yn">
         <button type="button" data-yn="1">Ja</button><button type="button" data-yn="0">Nej</button>
@@ -196,7 +200,7 @@ const shuffle = list => {
 };
 const tooLowHigh = (v, right) => v < right ? `Nej, ${v} är för lite.` : `Nej, ${v} är för mycket.`;
 
-// Making new tasks at the same level as the latest worksheet: 236 · 4, 58 · 7, 96 / 4, 846 / 3, 735 / 5.
+// Making new tasks at the same level as the latest worksheet: 236 ∗ 4, 58 ∗ 7, 96 / 4, 846 / 3, 735 / 5.
 // Divisions always go even. No zeros in the answer of a division or in the factor of a multiplication,
 // and every task has at least one minnessiffra so there is something to practise.
 
@@ -239,10 +243,10 @@ function newMultiplication(used) {
   for (let t = 0; t < 2000; t++) {
     const b = pick(FAKTORER);
     const a = Math.random() < 0.5 ? rnd(23, 98) : rnd(112, 599);
-    if (a > 99 && a * b > 1999) continue;   // keep 3-digit products close to the worksheet (236 · 4 = 944)
+    if (a > 99 && a * b > 1999) continue;   // keep 3-digit products close to the worksheet (236 ∗ 4 = 944)
     if (hasZero(a) || !mulHasCarry(a, b) || used.has(a + "*" + b) || used.has(a * b + "/" + b)) continue;
     used.add(a + "*" + b);
-    return { kind: "mul", a, b, text: `${a} · ${b}`, answer: a * b };
+    return { kind: "mul", a, b, text: `${a} ∗ ${b}`, answer: a * b };
   }
 }
 
@@ -284,10 +288,10 @@ function buildDivision(task) {
       ask: [`Hur många ${d}:or får plats i ${now}?`],
       hl,
       answer: qd,
-      ok: `${d} · ${qd} = ${prod}, det passar.`,
+      ok: `${d} ∗ ${qd} = ${prod}, det passar.`,
       wrong: v => v * d > now
-        ? `Nej, ${d} · ${v} = ${v * d}. Det blir för mycket.`
-        : `Nej, ${d} · ${v} = ${v * d}. Det får plats ${qd - v === 1 ? `en ${d}:a till` : "fler"}.`,
+        ? `Nej, ${d} ∗ ${v} = ${v * d}. Det blir för mycket.`
+        : `Nej, ${d} ∗ ${v} = ${v * d}. Det får plats ${qd - v === 1 ? `en ${d}:a till` : "fler"}.`,
       tip: t => t >= 2 ? `Tips, ${d}:ans tabell: ${table}` : null,
       apply: () => { st.q[p] = qd; st.fresh.add("q" + p); }
     });
@@ -309,7 +313,7 @@ function buildDivision(task) {
     pos = p + 1;
     cur = next;
   }
-  task.check = `Kontroll: ${d} · ${task.answer} = ${n} ✓`;
+  task.check = `Kontroll: ${d} ∗ ${task.answer} = ${n} ✓`;
 }
 
 function buildMultiplication(task) {
@@ -326,12 +330,12 @@ function buildMultiplication(task) {
 
     steps.push({
       type: "num",
-      ask: [k === 0 ? "Börja med entalen." : `Nu ${names[k]}.`, `Vad är ${b} · ${x}?`],
+      ask: [k === 0 ? "Börja med entalen." : `Nu ${names[k]}.`, `Vad är ${b} ∗ ${x}?`],
       hl: ["a" + col, "b"],
       answer: p,
-      ok: `${b} · ${x} = ${p}`,
+      ok: `${b} ∗ ${x} = ${p}`,
       wrong: v => tooLowHigh(v, p),
-      tip: t => t >= 2 ? (x > 1 ? `Tips: ${b} · ${x - 1} = ${b * (x - 1)}. Lägg på en ${b}:a till.` : "Tips: 1 gång ett tal är talet självt.") : null,
+      tip: t => t >= 2 ? (x > 1 ? `Tips: ${b} ∗ ${x - 1} = ${b * (x - 1)}. Lägg på en ${b}:a till.` : "Tips: 1 gång ett tal är talet självt.") : null,
       apply: () => {}
     });
 
@@ -400,7 +404,7 @@ function buildMultiplication(task) {
     c = last ? 0 : Math.floor(total / 10);
   }
   const rough = Math.round(a / 10) * 10;
-  task.check = `Överslag: ${b} · ${rough} = ${b * rough}. Det är nära ${a * b}, så det verkar stämma ✓`;
+  task.check = `Överslag: ${b} ∗ ${rough} = ${b * rough}. Det är nära ${a * b}, så det verkar stämma ✓`;
 }
 
 // Round
@@ -529,7 +533,7 @@ function renderBoard() {
     for (let j = 0; j < W; j++) html += cell("c" + j, st.carry[j], "small");
     html += cell(null, "");
     for (let j = 0; j < W; j++) html += cell("a" + j, j - (W - n) >= 0 ? A[j - (W - n)] : "");
-    html += cell(null, "·", "dv sign");
+    html += cell(null, "∗", "dv sign");
     for (let j = 0; j < W; j++) html += j === W - 1 ? cell("b", t.b) : cell(null, "");
     html += cell(null, "", "lt");
     for (let j = 0; j < W; j++) html += cell("r" + j, st.res[j], "lt ans" + rowEnd);
@@ -562,6 +566,7 @@ function renderBubble() {
 function renderControls() {
   const s = done ? null : task().steps[step];
   $("signKey").classList.add("hidden");
+  $("eraseKey").classList.add("hidden");
   $("okKey").textContent = "OK";
   els.pad.classList.toggle("hidden", done || s.type !== "num");
   els.answer.classList.toggle("hidden", done || s.type !== "num");
@@ -606,7 +611,7 @@ function showSummary() {
 // squares. Nothing turns red: what is wrong gets a blue mark and a tip, and after three tries the bubble shows how it should look.
 
 const SETUP_COLS = 7, SETUP_ROWS = 5;
-function newSetup() { return { cells: new Map(), edges: new Set(), sel: null, marks: new Set(), msg: null, tries: 0, done: false }; }
+function newSetup() { return { cells: new Map(), edges: new Set(), strokes: [], sel: null, marks: new Set(), msg: null, tries: 0, done: false }; }
 const setupActive = () => !done && round && !!task().setup && !task().setup.done;
 const horiz = (y, x) => `h:${y}:${x}`, vert = (x, y) => `v:${x}:${y}`;
 
@@ -640,9 +645,9 @@ function checkSetup(t) {
 
   const spot = `${last},${at.y + 1}`;
   if (cells.get(spot) !== other) return problem(`Entalen ska stå under varandra. ${other} ska stå under ${number.at(-1)}.`, elsewhere(other, own));
-  const signs = filled.filter(k => cells.get(k) === "·");
+  const signs = filled.filter(k => cells.get(k) === "∗");
   const sign = signs.find(k => { const [x, y] = k.split(",").map(Number); return y === at.y + 1 && x < last; });
-  if (!sign) return problem(`Skriv gångertecknet · till vänster om ${other}.`, signs);
+  if (!sign) return problem(`Skriv gångertecknet ∗ till vänster om ${other}.`, signs);
   const extra = filled.filter(k => k !== spot && k !== sign && !own.includes(k));
   if (extra.length) return problem("Det står något extra. Ta bort det som inte hör dit.", extra);
   // the answer can be one digit longer than the number, so the line goes one square further to the left
@@ -657,7 +662,7 @@ function setupExample(t) {
   const digits = String(t.kind === "div" ? t.n : t.a).split("");
   if (t.kind === "div") return `<div class="mini" style="grid-template-columns:repeat(${digits.length + 1},26px)"><span>${t.d}</span>${digits.map((c, i) => `<span class="t${i ? "" : " l"}">${c}</span>`).join("")}</div>`;
   const row2 = digits.map((_, i) => i === digits.length - 1 ? t.b : "");
-  return `<div class="mini" style="grid-template-columns:repeat(${digits.length + 1},26px)"><span></span>${digits.map(c => `<span>${c}</span>`).join("")}<span class="b">·</span>${row2.map(c => `<span class="b">${c}</span>`).join("")}</div>`;
+  return `<div class="mini" style="grid-template-columns:repeat(${digits.length + 1},26px)"><span></span>${digits.map(c => `<span>${c}</span>`).join("")}<span class="b">∗</span>${row2.map(c => `<span class="b">${c}</span>`).join("")}</div>`;
 }
 
 function renderSetup(draft) {
@@ -680,7 +685,7 @@ function renderSetup(draft) {
   if (draft) return;
 
   const lines = [`<div class="line q">Ställ upp ${t.text} själv.</div>`];
-  if (!su.msg) lines.push(`<div class="line">Tryck på en ruta och skriv en siffra. Dra med fingret eller musen längs rutorna för att göra ett streck.</div>`);
+  if (!su.msg) lines.push(`<div class="line">Tryck på en ruta och skriv en siffra. Dra med fingret eller musen längs rutorna för att göra ett streck. Tryck på ett streck för att sudda det.</div>`);
   else lines.push(`<div class="line">${su.msg}</div>`);
   if (su.tries >= VISA_SVARET_EFTER) lines.push(`<div class="line tip">Så här ska det se ut:</div>${setupExample(t)}`);
   els.lines.innerHTML = lines.join("");
@@ -690,11 +695,24 @@ function renderSetup(draft) {
   els.next.classList.add("hidden");
   els.pad.classList.remove("hidden");
   $("signKey").classList.toggle("hidden", t.kind !== "mul");
+  $("eraseKey").classList.remove("hidden");
+  $("eraseKey").classList.toggle("wide", t.kind !== "mul");
+  $("eraseKey").disabled = !su.edges.size;
   $("okKey").textContent = "Klar";
 }
 
 function setupKey(key) {
   const t = task(), su = t.setup;
+  if (key === "erase") {
+    // the latest line that is still there
+    while (su.strokes.length) {
+      const left = su.strokes.pop().filter(edge => su.edges.has(edge));
+      if (left.length) { left.forEach(edge => su.edges.delete(edge)); break; }
+    }
+    su.marks.clear();
+    renderSetup();
+    return;
+  }
   if (key === "ok") {
     const bad = checkSetup(t);
     t.questions++;
@@ -717,7 +735,7 @@ function setupKey(key) {
   su.marks.clear();
   if (key === "del") su.cells.delete(su.sel);
   else {
-    su.cells.set(su.sel, key === "sign" ? "·" : key);
+    su.cells.set(su.sel, key === "sign" ? "∗" : key);
     const [x, y] = su.sel.split(",").map(Number);
     if (x + 1 < SETUP_COLS) su.sel = `${x + 1},${y}`;
   }
@@ -765,14 +783,20 @@ els.board.addEventListener("pointermove", e => {
 els.board.addEventListener("pointerup", e => {
   if (!pull || !setupActive()) { pull = null; return; }
   const su = task().setup, made = pull.moved ? pullEdges(e) : [];
-  if (made.length) {
-    made.forEach(edge => su.edges.add(edge));
+  if (made.length && made.every(edge => su.edges.has(edge))) {
+    // drawing over a line that is already there erases it
+    made.forEach(edge => su.edges.delete(edge));
     su.marks.clear();
-  } else if (!pull.moved) {
-    const { gx, gy } = gridPoint(e), rx = Math.round(gx), ry = Math.round(gy), near = .18;
+  } else if (made.length) {
+    made.forEach(edge => su.edges.add(edge));
+    su.strokes.push(made);
+    su.marks.clear();
+  } else {
+    // a finger moves a little on a tap, so a drag too short for a line counts as a tap
+    const { gx, gy } = gridPoint(e), rx = Math.round(gx), ry = Math.round(gy), near = .3;
     const h = horiz(ry, Math.floor(gx)), v = vert(rx, Math.floor(gy));
-    if (Math.abs(gy - ry) < near && su.edges.has(h)) removeLine(h);
-    else if (Math.abs(gx - rx) < near && su.edges.has(v)) removeLine(v);
+    const dh = su.edges.has(h) ? Math.abs(gy - ry) : 9, dv = su.edges.has(v) ? Math.abs(gx - rx) : 9;
+    if (Math.min(dh, dv) < near) removeLine(dh <= dv ? h : v);
     else su.sel = `${clamp(Math.floor(gx), 0, SETUP_COLS - 1)},${clamp(Math.floor(gy), 0, SETUP_ROWS - 1)}`;
   }
   pull = null;
