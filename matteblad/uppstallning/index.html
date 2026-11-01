@@ -73,6 +73,21 @@
   .big { width: 100%; min-height: 68px; background: var(--green); border-color: var(--green); color: #fff; }
   .hidden { display: none !important; }
 
+  /* He sets up the task himself (Peter 2026-11-01): empty squares, he writes the digits and draws the lines */
+  .paper.setup { padding: 0; }
+  .board.setup { position: relative; touch-action: none; cursor: crosshair; user-select: none; -webkit-user-select: none; }
+  .board.setup .cell { font-size: calc(var(--c) * .66); }
+  .board.setup .cell.mark { box-shadow: inset 0 0 0 3px var(--blue); }
+  .lines { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+  .lines line { stroke: var(--ink); stroke-width: .07; stroke-linecap: round; }
+  .lines line.draft { stroke: var(--blue); }
+  .pad .sign { grid-column: 1 / -1; font-size: 34px; line-height: 1; }
+  .mini { display: inline-grid; grid-auto-rows: 26px; margin-top: 6px; font-size: 20px; }
+  .mini span { width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; }
+  .mini .t { border-top: 3px solid var(--ink); }
+  .mini .l { border-left: 3px solid var(--ink); }
+  .mini .b { border-bottom: 3px solid var(--ink); }
+
   /* Summary after the round */
   .summary { text-align: center; padding: 28px 20px; }
   .summary h2 { color: var(--green); font-size: 30px; margin: 0 0 8px; }
@@ -132,7 +147,8 @@
         <button type="button" data-k="4">4</button><button type="button" data-k="5">5</button><button type="button" data-k="6">6</button>
         <button type="button" data-k="7">7</button><button type="button" data-k="8">8</button><button type="button" data-k="9">9</button>
         <button type="button" data-k="del" class="del" aria-label="Sudda">⌫</button><button type="button" data-k="0">0</button>
-        <button type="button" data-k="ok" class="ok">OK</button>
+        <button type="button" data-k="ok" class="ok" id="okKey">OK</button>
+        <button type="button" data-k="sign" class="sign hidden" id="signKey" aria-label="Gångertecken">·</button>
       </div>
       <div class="yn hidden" id="yn">
         <button type="button" data-yn="1">Ja</button><button type="button" data-yn="0">Nej</button>
@@ -390,6 +406,7 @@ function buildMultiplication(task) {
 // Round
 
 const used = new Set();
+const setupSeen = new Set();   // the first multiplication and the first division of a round are set up by himself
 let round, step, typed, tries, okMsg, wrongMsg, done;
 
 function makeTasks(count) {
@@ -399,11 +416,13 @@ function makeTasks(count) {
     const task = kind === "div" ? newDivision(used) : newMultiplication(used);
     (kind === "div" ? buildDivision : buildMultiplication)(task);
     Object.assign(task, { questions: 0, firstTry: 0, mistakes: 0 });
+    if (!setupSeen.has(kind)) { setupSeen.add(kind); task.setup = newSetup(); }
     return task;
   });
 }
 
 function newRound() {
+  setupSeen.clear();
   round = { tasks: makeTasks(ANTAL_TAL), index: 0, target: ANTAL_TAL, bonusTaken: false };
   showGame();
   startTask();
@@ -467,6 +486,7 @@ for (const el of [els.answer, els.yn]) el.addEventListener("animationend", () =>
 
 function render() {
   renderProgress();
+  if (setupActive()) { renderSetup(); return; }
   renderBoard();
   renderBubble();
   renderControls();
@@ -514,6 +534,8 @@ function renderBoard() {
     html += cell(null, "", "lt");
     for (let j = 0; j < W; j++) html += cell("r" + j, st.res[j], "lt ans" + rowEnd);
   }
+  els.board.classList.remove("setup");
+  els.board.parentElement.classList.remove("setup");
   els.board.innerHTML = html;
   els.title.textContent = t.text;
   st.fresh.clear();
@@ -539,6 +561,8 @@ function renderBubble() {
 
 function renderControls() {
   const s = done ? null : task().steps[step];
+  $("signKey").classList.add("hidden");
+  $("okKey").textContent = "OK";
   els.pad.classList.toggle("hidden", done || s.type !== "num");
   els.answer.classList.toggle("hidden", done || s.type !== "num");
   els.yn.classList.toggle("hidden", done || s.type !== "yesno");
@@ -575,6 +599,186 @@ function showSummary() {
   if (more) more.onclick = takeBonus;
   if (again) again.onclick = newRound;
 }
+
+// Setting up the task (Peter 2026-11-01): the first multiplication and the first division of a round start with empty squares.
+// He taps a square and writes with the keypad, and draws the lines by dragging along the squares; a drag snaps to the nearest
+// grid line and a tap on a line takes it away. Klar checks how it stands relative to itself, so it may stand anywhere on the
+// squares. Nothing turns red: what is wrong gets a blue mark and a tip, and after three tries the bubble shows how it should look.
+
+const SETUP_COLS = 7, SETUP_ROWS = 5;
+function newSetup() { return { cells: new Map(), edges: new Set(), sel: null, marks: new Set(), msg: null, tries: 0, done: false }; }
+const setupActive = () => !done && round && !!task().setup && !task().setup.done;
+const horiz = (y, x) => `h:${y}:${x}`, vert = (x, y) => `v:${x}:${y}`;
+
+function findNumber(cells, text) {
+  for (let y = 0; y < SETUP_ROWS; y++) for (let x = 0; x + text.length <= SETUP_COLS; x++)
+    if ([...text].every((ch, i) => cells.get(`${x + i},${y}`) === ch)) return { x, y };
+  return null;
+}
+
+// Returns null when it is right, otherwise the tip and the squares to mark
+function checkSetup(t) {
+  const { cells, edges } = t.setup, filled = [...cells.keys()];
+  const problem = (msg, marks = []) => ({ msg, marks });
+  const elsewhere = (ch, ok) => filled.filter(k => cells.get(k) === ch && !ok.includes(k));
+  const number = t.kind === "div" ? String(t.n) : String(t.a), other = String(t.kind === "div" ? t.d : t.b);
+  const at = findNumber(cells, number);
+  if (!at) return problem(`Skriv ${number} på en rad, med siffrorna bredvid varandra.`, filled);
+  const own = [...number].map((_, i) => `${at.x + i},${at.y}`), last = at.x + number.length - 1;
+
+  if (t.kind === "div") {
+    const spot = `${at.x - 1},${at.y}`;
+    if (cells.get(spot) !== other) return problem(`${other} ska stå precis till vänster om ${number}.`, elsewhere(other, own));
+    const extra = filled.filter(k => k !== spot && !own.includes(k));
+    if (extra.length) return problem("Det står något extra. Ta bort det som inte hör dit.", extra);
+    if (at.y < 1) return problem("Lämna en tom rad ovanför talet. Där skrivs svaret.", own);
+    for (let x = at.x; x <= last; x++) if (!edges.has(horiz(at.y, x))) return problem(`Dra ett streck ovanför hela ${number}.`, own);
+    if (!edges.has(vert(at.x, at.y))) return problem(`Dra ett lodrätt streck mellan ${other} och ${number}.`, [spot]);
+    const stray = [...edges].some(e => { const [k, a] = e.split(":"); return !(k === "h" ? Number(a) === at.y : Number(a) === at.x); });
+    return stray ? problem("Ta bort strecket som inte hör dit. Tryck på det.") : null;
+  }
+
+  const spot = `${last},${at.y + 1}`;
+  if (cells.get(spot) !== other) return problem(`Entalen ska stå under varandra. ${other} ska stå under ${number.at(-1)}.`, elsewhere(other, own));
+  const signs = filled.filter(k => cells.get(k) === "·");
+  const sign = signs.find(k => { const [x, y] = k.split(",").map(Number); return y === at.y + 1 && x < last; });
+  if (!sign) return problem(`Skriv gångertecknet · till vänster om ${other}.`, signs);
+  const extra = filled.filter(k => k !== spot && k !== sign && !own.includes(k));
+  if (extra.length) return problem("Det står något extra. Ta bort det som inte hör dit.", extra);
+  // the answer can be one digit longer than the number, so the line goes one square further to the left
+  const lineY = at.y + 2, from = Math.max(0, Math.min(at.x - 1, Number(sign.split(",")[0])));
+  if (lineY >= SETUP_ROWS) return problem("Lämna plats under strecket. Där skrivs svaret.", own);
+  for (let x = from; x <= last; x++) if (!edges.has(horiz(lineY, x))) return problem("Dra ett streck under hela talet och en ruta till åt vänster, så att svaret får plats.", [spot, sign]);
+  const stray = [...edges].some(e => { const [k, a] = e.split(":"); return k !== "h" || Number(a) !== lineY; });
+  return stray ? problem("Ta bort strecket som inte hör dit. Tryck på det.") : null;
+}
+
+function setupExample(t) {
+  const digits = String(t.kind === "div" ? t.n : t.a).split("");
+  if (t.kind === "div") return `<div class="mini" style="grid-template-columns:repeat(${digits.length + 1},26px)"><span>${t.d}</span>${digits.map((c, i) => `<span class="t${i ? "" : " l"}">${c}</span>`).join("")}</div>`;
+  const row2 = digits.map((_, i) => i === digits.length - 1 ? t.b : "");
+  return `<div class="mini" style="grid-template-columns:repeat(${digits.length + 1},26px)"><span></span>${digits.map(c => `<span>${c}</span>`).join("")}<span class="b">·</span>${row2.map(c => `<span class="b">${c}</span>`).join("")}</div>`;
+}
+
+function renderSetup(draft) {
+  const t = task(), su = t.setup;
+  els.board.classList.add("setup");
+  els.board.parentElement.classList.add("setup");
+  els.board.style.gridTemplateColumns = `repeat(${SETUP_COLS}, var(--c))`;
+  let html = "";
+  for (let y = 0; y < SETUP_ROWS; y++) for (let x = 0; x < SETUP_COLS; x++) {
+    const k = `${x},${y}`;
+    html += `<div class="cell${su.sel === k ? " hl" : ""}${su.marks.has(k) ? " mark" : ""}">${su.cells.get(k) ?? ""}</div>`;
+  }
+  const seg = (e, cls = "") => {
+    const [kind, a, b] = e.split(":"), A = Number(a), B = Number(b);
+    return kind === "h" ? `<line class="${cls}" x1="${B}" y1="${A}" x2="${B + 1}" y2="${A}"/>` : `<line class="${cls}" x1="${A}" y1="${B}" x2="${A}" y2="${B + 1}"/>`;
+  };
+  html += `<svg class="lines" viewBox="0 0 ${SETUP_COLS} ${SETUP_ROWS}" aria-hidden="true">${[...su.edges].map(e => seg(e)).join("")}${(draft || []).map(e => seg(e, "draft")).join("")}</svg>`;
+  els.board.innerHTML = html;
+  els.title.textContent = t.text;
+  if (draft) return;
+
+  const lines = [`<div class="line q">Ställ upp ${t.text} själv.</div>`];
+  if (!su.msg) lines.push(`<div class="line">Tryck på en ruta och skriv en siffra. Dra med fingret eller musen längs rutorna för att göra ett streck.</div>`);
+  else lines.push(`<div class="line">${su.msg}</div>`);
+  if (su.tries >= VISA_SVARET_EFTER) lines.push(`<div class="line tip">Så här ska det se ut:</div>${setupExample(t)}`);
+  els.lines.innerHTML = lines.join("");
+
+  els.answer.classList.add("hidden");
+  els.yn.classList.add("hidden");
+  els.next.classList.add("hidden");
+  els.pad.classList.remove("hidden");
+  $("signKey").classList.toggle("hidden", t.kind !== "mul");
+  $("okKey").textContent = "Klar";
+}
+
+function setupKey(key) {
+  const t = task(), su = t.setup;
+  if (key === "ok") {
+    const bad = checkSetup(t);
+    t.questions++;
+    if (!bad) {
+      if (su.tries === 0) t.firstTry++;
+      su.done = true;
+      okMsg = "Snyggt uppställt!";
+      render();
+      return;
+    }
+    t.questions--;
+    su.tries++;
+    t.mistakes++;
+    su.msg = bad.msg;
+    su.marks = new Set(bad.marks);
+    renderSetup();
+    return;
+  }
+  if (!su.sel) { su.msg = "Tryck först på rutan där siffran ska stå."; renderSetup(); return; }
+  su.marks.clear();
+  if (key === "del") su.cells.delete(su.sel);
+  else {
+    su.cells.set(su.sel, key === "sign" ? "·" : key);
+    const [x, y] = su.sel.split(",").map(Number);
+    if (x + 1 < SETUP_COLS) su.sel = `${x + 1},${y}`;
+  }
+  renderSetup();
+}
+
+// Drawing: a drag along the squares makes a line, a tap on a line takes it away, a tap on a square selects it
+let pull = null;
+function gridPoint(e) {
+  const r = els.board.getBoundingClientRect(), c = r.width / SETUP_COLS;
+  return { gx: (e.clientX - r.left) / c, gy: (e.clientY - r.top) / c, c };
+}
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+function pullEdges(e) {
+  const { gx, gy } = gridPoint(e), dx = gx - pull.gx, dy = gy - pull.gy, out = [];
+  if (Math.abs(dx) >= Math.abs(dy)) {
+    const y = clamp(Math.round(pull.gy), 0, SETUP_ROWS);
+    const a = clamp(Math.round(pull.gx), 0, SETUP_COLS), b = clamp(Math.round(gx), 0, SETUP_COLS);
+    for (let x = Math.min(a, b); x < Math.max(a, b); x++) out.push(horiz(y, x));
+  } else {
+    const x = clamp(Math.round(pull.gx), 0, SETUP_COLS);
+    const a = clamp(Math.round(pull.gy), 0, SETUP_ROWS), b = clamp(Math.round(gy), 0, SETUP_ROWS);
+    for (let y = Math.min(a, b); y < Math.max(a, b); y++) out.push(vert(x, y));
+  }
+  return out;
+}
+// the whole straight line a tapped piece belongs to
+function removeLine(edge) {
+  const { edges } = task().setup, [kind, a, b] = edge.split(":"), fixed = Number(a);
+  const make = n => `${kind}:${fixed}:${n}`;
+  for (let n = Number(b); edges.has(make(n)); n--) edges.delete(make(n));
+  for (let n = Number(b) + 1; edges.has(make(n)); n++) edges.delete(make(n));
+}
+els.board.addEventListener("pointerdown", e => {
+  if (!setupActive()) return;
+  e.preventDefault();
+  pull = { ...gridPoint(e), px: e.clientX, py: e.clientY, moved: false };
+  try { els.board.setPointerCapture(e.pointerId); } catch {}
+});
+els.board.addEventListener("pointermove", e => {
+  if (!pull || !setupActive()) return;
+  if (Math.hypot(e.clientX - pull.px, e.clientY - pull.py) > 12) pull.moved = true;
+  if (pull.moved) renderSetup(pullEdges(e));
+});
+els.board.addEventListener("pointerup", e => {
+  if (!pull || !setupActive()) { pull = null; return; }
+  const su = task().setup, made = pull.moved ? pullEdges(e) : [];
+  if (made.length) {
+    made.forEach(edge => su.edges.add(edge));
+    su.marks.clear();
+  } else if (!pull.moved) {
+    const { gx, gy } = gridPoint(e), rx = Math.round(gx), ry = Math.round(gy), near = .18;
+    const h = horiz(ry, Math.floor(gx)), v = vert(rx, Math.floor(gy));
+    if (Math.abs(gy - ry) < near && su.edges.has(h)) removeLine(h);
+    else if (Math.abs(gx - rx) < near && su.edges.has(v)) removeLine(v);
+    else su.sel = `${clamp(Math.floor(gx), 0, SETUP_COLS - 1)},${clamp(Math.floor(gy), 0, SETUP_ROWS - 1)}`;
+  }
+  pull = null;
+  renderSetup();
+});
+els.board.addEventListener("pointercancel", () => { pull = null; if (setupActive()) renderSetup(); });
 
 // The summary for a sheet: the ink he has loaded, 5 more for ✦✦, and the way to the sheet
 function showInkSummary() {
@@ -617,6 +821,7 @@ function startSheetPractice() {
 
 function press(key) {
   if (done) return;
+  if (setupActive()) { setupKey(key); return; }
   if (task().steps[step].type !== "num") return;
   if (key === "del") typed = typed.slice(0, -1);
   else if (key === "ok") { if (typed === "") { shake(els.answer); return; } submit(Number(typed)); return; }
@@ -643,6 +848,19 @@ els.next.addEventListener("click", e => { e.currentTarget.blur(); nextTask(); })
 document.addEventListener("keydown", e => {
   if (e.ctrlKey || e.metaKey || e.altKey) return;
   if (!els.summary.classList.contains("hidden")) return;
+  if (setupActive()) {
+    const su = task().setup, arrows = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.key];
+    if (arrows && su.sel) {
+      e.preventDefault();
+      const [x, y] = su.sel.split(",").map(Number);
+      su.sel = `${clamp(x + arrows[0], 0, SETUP_COLS - 1)},${clamp(y + arrows[1], 0, SETUP_ROWS - 1)}`;
+      renderSetup();
+    } else if (/^[0-9]$/.test(e.key)) { e.preventDefault(); setupKey(e.key); }
+    else if (["*", ".", "x", "·"].includes(e.key) && task().kind === "mul") { e.preventDefault(); setupKey("sign"); }
+    else if (e.key === "Backspace" || e.key === "Delete") { e.preventDefault(); setupKey("del"); }
+    else if (e.key === "Enter") { e.preventDefault(); setupKey("ok"); }
+    return;
+  }
   if (done) {
     if (e.key === "Enter" || e.key === " ") { e.preventDefault(); nextTask(); }
     return;
