@@ -32,8 +32,8 @@
   .cell { width: var(--c); height: var(--c); position: relative; display: flex; align-items: center; justify-content: center;
           font-size: calc(var(--c) * .72); line-height: 1; font-variant-numeric: tabular-nums; border-radius: 8px;
           transition: background .25s; }
-  .cell.small { font-size: calc(var(--c) * .42); color: var(--red); align-items: flex-end; padding-bottom: 4px; }
-  .cell .carry { position: absolute; top: 3px; left: 4px; font-size: calc(var(--c) * .36); color: var(--red); }
+  .cell.small { font-size: calc(var(--c) * .42); color: var(--green); align-items: flex-end; padding-bottom: 4px; }
+  .cell .carry { position: absolute; top: 3px; left: 4px; font-size: calc(var(--c) * .36); color: var(--green); }
   .cell.dv { color: #555; }
   .cell.sign span { font-weight: 700; transform: scale(1.6); display: inline-block; }
   .cell.ans { color: var(--blue); }
@@ -56,7 +56,7 @@
   .line.no { color: var(--red); font-weight: 600; }
   .line.tip { color: #8a6a00; font-size: 16px; margin-top: 2px; }
 
-  .answer { height: 72px; border: 3px solid var(--line); border-radius: 14px; background: #fff; display: flex; align-items: center;
+  .answer { height: 72px; border: 3px solid var(--blue); border-radius: 14px; background: #fff; display: flex; align-items: center;
             justify-content: center; font-size: 44px; font-weight: 600; color: var(--blue); font-variant-numeric: tabular-nums; }
   .answer.empty::after { content: "?"; color: #c3ccd7; }
   .shake { animation: shake .35s; border-color: var(--red) !important; }
@@ -462,6 +462,8 @@ function shake(el) {
   void el.offsetWidth;
   el.classList.add("shake");
 }
+// the class must go when the shake is over: left on, the box stays red and shakes again each time it comes back into view
+for (const el of [els.answer, els.yn]) el.addEventListener("animationend", () => el.classList.remove("shake"));
 
 function render() {
   renderProgress();
