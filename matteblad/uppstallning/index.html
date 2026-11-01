@@ -637,7 +637,8 @@ function checkSetup(t) {
     const extra = filled.filter(k => k !== spot && !own.includes(k));
     if (extra.length) return problem("Det står något extra. Ta bort det som inte hör dit.", extra);
     if (at.y < 1) return problem("Lämna en tom rad ovanför talet. Där skrivs svaret.", own);
-    for (let x = at.x; x <= last; x++) if (!edges.has(horiz(at.y, x))) return problem(`Dra ett streck ovanför hela ${number}.`, own);
+    // the place of a line matters, not its length (Peter 2026-11-01)
+    if (!own.some((_, i) => edges.has(horiz(at.y, at.x + i)))) return problem(`Dra ett streck ovanför ${number}.`, own);
     if (!edges.has(vert(at.x, at.y))) return problem(`Dra ett lodrätt streck mellan ${other} och ${number}.`, [spot]);
     const stray = [...edges].some(e => { const [k, a] = e.split(":"); return !(k === "h" ? Number(a) === at.y : Number(a) === at.x); });
     return stray ? problem("Ta bort strecket som inte hör dit. Tryck på det.") : null;
@@ -650,10 +651,9 @@ function checkSetup(t) {
   if (!sign) return problem(`Skriv gångertecknet ∗ till vänster om ${other}.`, signs);
   const extra = filled.filter(k => k !== spot && k !== sign && !own.includes(k));
   if (extra.length) return problem("Det står något extra. Ta bort det som inte hör dit.", extra);
-  // the answer can be one digit longer than the number, so the line goes one square further to the left
-  const lineY = at.y + 2, from = Math.max(0, Math.min(at.x - 1, Number(sign.split(",")[0])));
+  const lineY = at.y + 2;
   if (lineY >= SETUP_ROWS) return problem("Lämna plats under strecket. Där skrivs svaret.", own);
-  for (let x = from; x <= last; x++) if (!edges.has(horiz(lineY, x))) return problem("Dra ett streck under hela talet och en ruta till åt vänster, så att svaret får plats.", [spot, sign]);
+  if (!own.some((_, i) => edges.has(horiz(lineY, at.x + i)))) return problem(`Dra ett streck under ${other}.`, [spot]);
   const stray = [...edges].some(e => { const [k, a] = e.split(":"); return k !== "h" || Number(a) !== lineY; });
   return stray ? problem("Ta bort strecket som inte hör dit. Tryck på det.") : null;
 }
