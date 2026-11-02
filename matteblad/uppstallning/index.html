@@ -75,6 +75,7 @@
 
   /* He sets up the task himself (Peter 2026-11-01): empty squares, he writes the digits and draws the lines */
   .paper.setup { padding: 0; }
+  .paper.tabell { padding: var(--c) 0; }
   .board.setup { position: relative; touch-action: none; cursor: crosshair; user-select: none; -webkit-user-select: none; }
   .board.setup .cell { font-size: calc(var(--c) * .66); }
   .board.setup .cell.mark { box-shadow: inset 0 0 0 3px var(--blue); }
@@ -188,6 +189,8 @@ let inkOpen = BLAD && !sheetStarted();   // ink can be loaded: a sheet, and noth
 const ANTAL_TAL = BLAD ? 5 : 6;            // tal i en omgång
 const BONUS_TAL = BLAD ? 5 : 4;            // extra tal man kan välja efter omgången
 const FAKTORER = [3, 4, 5, 6, 7, 8, 9];    // det ensiffriga talet, samma nivå som Pokémon-matte blad 5
+const TABELLER = [3, 4, 6, 7, 8, 9];        // tabellerna som har tips
+const TABELL = TABELLER.includes(Number(PARAMS.get("tabell"))) ? Number(PARAMS.get("tabell")) : 8;   // vald per blad
 const VISA_SVARET_EFTER = 3;               // antal fel innan tankebubblan säger svaret
 
 const rnd = (lo, hi) => lo + Math.floor(Math.random() * (hi - lo + 1));
@@ -425,6 +428,33 @@ function makeTasks(count) {
   });
 }
 
+// The last 5 for ✦✦ are times-table questions from the sheet's table (Peter 2026-11-02), each with a way to think about it
+function tableHints(n, f) {
+  const hints = {
+    3: [`Dubbla ${f} och lägg på en ${f} till.`, `${f} dubbelt är ${2 * f}. Lägg på en ${f}.`],
+    4: [`Dubbla ${f}, och dubbla en gång till.`, `${f} dubbelt är ${2 * f}. Dubbla det.`],
+    6: [`Räkna 5 ∗ ${f} och lägg på en ${f} till.`, `5 ∗ ${f} = ${5 * f}. Lägg på en ${f}.`],
+    7: [`Räkna 5 ∗ ${f} och 2 ∗ ${f}. Lägg ihop dem.`, `5 ∗ ${f} = ${5 * f} och 2 ∗ ${f} = ${2 * f}. Lägg ihop dem.`],
+    8: [`Dubbla ${f} tre gånger.`, `${f} dubbelt är ${2 * f}, och dubbelt igen ${4 * f}. Dubbla en gång till.`],
+    9: [`Räkna 10 ∗ ${f} och ta bort en ${f}.`, `10 ∗ ${f} = ${10 * f}. Ta bort en ${f}.`]
+  };
+  return hints[n];
+}
+
+function makeTableTasks(count) {
+  return shuffle(TABELLER).slice(0, count).map(f => {
+    const answer = TABELL * f, [think, worked] = tableHints(TABELL, f);
+    const st = { res: "", fresh: new Set() };
+    return { kind: "tabell", a: TABELL, b: f, text: `${TABELL} ∗ ${f}`, title: `${TABELL}:ans tabell`, answer, st,
+      check: f === TABELL ? "Bra jobbat!" : `${f} ∗ ${TABELL} blir lika mycket. Ordningen spelar ingen roll.`,
+      steps: [{ type: "num", ask: [`Så kan du tänka: ${think}`, `Vad är ${TABELL} ∗ ${f}?`], hl: ["r"], answer,
+        ok: `${TABELL} ∗ ${f} = ${answer}`, wrong: () => "Inte riktigt. Försök igen.", tip: n => n >= 1 ? worked : null,
+        apply: () => { st.res = String(answer); st.fresh.add("r"); } }],
+      questions: 0, firstTry: 0, mistakes: 0 };
+  });
+}
+const bonusTasks = () => BLAD ? makeTableTasks(BONUS_TAL) : makeTasks(BONUS_TAL);
+
 function newRound() {
   setupSeen.clear();
   round = { tasks: makeTasks(ANTAL_TAL), index: 0, target: ANTAL_TAL, bonusTaken: false };
@@ -466,7 +496,7 @@ function nextTask() {
 }
 
 function takeBonus() {
-  round.tasks = round.tasks.concat(makeTasks(BONUS_TAL));
+  round.tasks = round.tasks.concat(bonusTasks());
   round.target += BONUS_TAL;
   round.bonusTaken = true;
   round.index++;
@@ -515,7 +545,12 @@ function renderBoard() {
     return `<div class="cell ${cls}${key && hl.has(key) ? " hl" : ""}">${has ? `<span class="${pop ? "pop" : ""}">${text}</span>` : ""}</div>`;
   };
   let html = "";
-  if (t.kind === "div") {
+  if (t.kind === "tabell") {
+    els.board.style.gridTemplateColumns = "repeat(6, var(--c))";
+    html += cell(null, t.a) + cell(null, "∗", "dv sign") + cell(null, t.b) + cell(null, "=", "dv sign");
+    const res = st.res.padStart(2, " ");
+    [0, 1].forEach(j => html += cell("r", res[j].trim(), "ans" + (done ? " win" : "")));
+  } else if (t.kind === "div") {
     const D = st.D;
     els.board.style.gridTemplateColumns = `repeat(${D.length + 1}, var(--c))`;
     html += cell(null, "");
@@ -540,8 +575,9 @@ function renderBoard() {
   }
   els.board.classList.remove("setup");
   els.board.parentElement.classList.remove("setup");
+  els.board.parentElement.classList.toggle("tabell", t.kind === "tabell");
   els.board.innerHTML = html;
-  els.title.textContent = t.text;
+  els.title.textContent = t.title ?? t.text;
   st.fresh.clear();
 }
 
@@ -669,6 +705,7 @@ function renderSetup(draft) {
   const t = task(), su = t.setup;
   els.board.classList.add("setup");
   els.board.parentElement.classList.add("setup");
+  els.board.parentElement.classList.remove("tabell");
   els.board.style.gridTemplateColumns = `repeat(${SETUP_COLS}, var(--c))`;
   let html = "";
   for (let y = 0; y < SETUP_ROWS; y++) for (let x = 0; x < SETUP_COLS; x++) {
@@ -830,7 +867,7 @@ function startSheetPractice() {
   document.querySelector("h1").textContent = "Ladda stjärnbläck";
   document.querySelector(".back").href = SHEET_URL;
   document.querySelector(".back").textContent = "← Till bladet";
-  if (inkOpen && ink < 10) { if (ink >= 5) { round = { tasks: makeTasks(BONUS_TAL), index: 0, target: BONUS_TAL, bonusTaken: true, toFull: true }; showGame(); startTask(); } else newRound(); return; }   // ✦ already: the 5 more for ✦✦
+  if (inkOpen && ink < 10) { if (ink >= 5) { round = { tasks: bonusTasks(), index: 0, target: BONUS_TAL, bonusTaken: true, toFull: true }; showGame(); startTask(); } else newRound(); return; }   // ✦ already: the 5 more for ✦✦
   const why = inkOpen ? "Stjärnbläcket för bladet är redan fullt ✦✦." : "Du har redan börjat på bladet. Stjärnbläck laddas innan man börjar, men du kan öva ändå.";
   inkOpen = false;
   els.game.classList.add("hidden");

@@ -4,6 +4,7 @@
 // sees it. Ink can only be loaded before anything is written on the sheet. Only sheets with <meta name="stjarnblack"> use it.
 (() => {
   const meta = document.querySelector('meta[name="stjarnblack"]');
+  const tabell = document.querySelector('meta[name="stjarnblack-tabell"]');
   if (!meta) return;
   const dir = location.pathname.split("/").slice(-2, -1)[0];
   const INK = "matteblad:stjarnblack:" + dir;
@@ -33,7 +34,7 @@
   box.innerHTML = `
     <b>Ladda stjärnbläck innan du börjar?</b>
     <span>Öva 5 tal så ger varje rätt uppgift med bläckdroppe +1 stjärnstoft. Öva 10 så ger den +2.</span>
-    <a href="../../uppstallning/index.html?blad=${encodeURIComponent(dir)}&typ=${encodeURIComponent(meta.content)}">Öva först</a>
+    <a href="../../uppstallning/index.html?blad=${encodeURIComponent(dir)}&typ=${encodeURIComponent(meta.content)}${tabell ? `&tabell=${encodeURIComponent(tabell.content)}` : ""}">Öva först</a>
     <button type="button">Hoppa över</button>`;
   box.querySelector("button").onclick = () => box.remove();
   document.body.prepend(box);
