@@ -357,7 +357,8 @@ function buildTerrain(){
     }
   }
   // The fires are out in the terrain (by day). At night drawNight puts the burning ones on top.
-  for (const ob of OBJ) stamps.push({ x: ob.x*TS, y: ob.y*TS, i: FIRE_OUT[ob.i] || ob.i, obj: true });
+  // Ihåliga eken is a whole tree until the melody has opened it, then the trunk has its hollow (karta.json ekHal, Peter 2026-11-03)
+  for (const ob of OBJ) stamps.push({ x: ob.x*TS, y: ob.y*TS, i: (S.ekenOppen && karta.ekHal[ob.x + ',' + ob.y]) || FIRE_OUT[ob.i] || ob.i, obj: true });
   stamps.sort((a, b) => a.y - b.y || (a.obj ? 1 : 0) - (b.obj ? 1 : 0));
   for (const st of stamps){ if (st.top !== undefined) tile(o, st.top, st.x, st.y - TS); tile(o, st.i, st.x, st.y); }
   o.fillStyle = '#262b44'; o.fillRect(CASTLE_X + 3*TS + 6, CASTLE_Y + 2*TS + 6, 20, 26);
@@ -1394,7 +1395,7 @@ function playFlute(){
   if (S.melodi && S.node === MELODI.vind && !LEVEL){
     const dur = Musik.trad('flojt'); flojtTill = performance.now() + dur * 1000; fluteNotes(dur, 14);
     // the whole melody played at the oak: the oak opens (the cave behind it comes later) and the place has nothing left (Peter 2026-10-30)
-    if (!S.ekenOppen) setTimeout(() => { S.ekenOppen = true; saveSoon(); }, dur * 1000);
+    if (!S.ekenOppen) setTimeout(() => { S.ekenOppen = true; saveSoon(); buildTerrain(); sparkle(NODES[MELODI.vind].x*TS + 16, NODES[MELODI.vind].y*TS - 10, 26); }, dur * 1000);
     return;
   }
   const dur = Musik.trad('borjan');
