@@ -79,11 +79,11 @@
       "natt": "Bron står svart mot himlen. Under den lyser det grönt i leran."
     },
     "norrabron": {
-      "namn": "Norra bron",
-      "text": "En bro över älven, nära tornet. Här är strömmen stark och vattnet mörkt och djupt.",
-      "natt": "En bro över älven, nära tornet. Från det mörka vattnet hörs något som liknar fiol.",
-      "rykteNatt": "Vid Norra bron spelar någon fiol i älven om nätterna. Om man ändå hade något som kunde ta en ut på vattnet.",
-      "rykte": "I forsen vid Norra bron hoppar öringen. Ibland syns en lila glans, det är harren."
+      "namn": "Forsstranden",
+      "text": "En sandstrand vid älven, nära tornet. Här är strömmen stark och vattnet mörkt och djupt.",
+      "natt": "En sandstrand vid älven, nära tornet. Från det mörka vattnet hörs något som liknar fiol.",
+      "rykteNatt": "På Forsstranden hörs någon spela fiol i älven om nätterna. Om man ändå hade något som kunde ta en ut på vattnet.",
+      "rykte": "I forsen vid Forsstranden hoppar öringen. Ibland syns en lila glans, det är harren."
     },
     "vassen": {
       "namn": "Vassen",
@@ -128,9 +128,6 @@
     },
     "sodrabron|fiske": {
       "stjarnor": 12
-    },
-    "host|norrabron": {
-      "stjarnor": 14
     },
     "torn|slott": {
       "stjarnor": 20
@@ -421,7 +418,7 @@
       "namn": "Flotte",
       "text": "En flotte av timmer, stadig nog för en.",
       "typ": "verktyg",
-      "rykte": "Om nätterna hörs något som liknar fiol från älven vid Norra bron."
+      "rykte": "Om nätterna hörs något som liknar fiol från älven vid Forsstranden."
     },
     "snorkel": {
       "namn": "Snorkel",
@@ -2384,7 +2381,7 @@
           "fynd": "glasflaska",
           "person": "ebbe",
           "prat": [
-            "Harr och regnbåge tar bara fluga. Dem hittar du uppe vid Norra bron, där forsen sjunger.",
+            "Harr och regnbåge tar bara fluga. Dem hittar du uppe vid Forsstranden, där forsen sjunger.",
             "Bakom berget simmar röding och öring i det kalla vattnet. Men de vill ha fluga, inte mask.",
             "Om nätterna jagar aspen vid ytan på Udden. Den hugger bara på fluga.",
             "Sarven tar insekter vid stranden bakom berget när solen står högt.",
@@ -2407,7 +2404,7 @@
           "regnbage"
         ],
         "lan": {
-          "rubrik": "En fiskare står vid räcket",
+          "rubrik": "En fiskare står i strandkanten",
           "knapp": "Prata med fiskaren",
           "ger": "flugspo",
           "tack": "Fiskaren ler. \"Ta väl hand om det. Forsen är snällare mot den som har tålamod.\"",
@@ -3054,7 +3051,7 @@
     "efterKop": [
       {
         "sak": "flojt",
-        "t": "Vassen till flöjten skar jag vid Norra bron. Där spelar någon fiol om nätterna, samma melodi varje gång.",
+        "t": "Vassen till flöjten skar jag vid Forsstranden. Där spelar någon fiol om nätterna, samma melodi varje gång.",
         "rykte": "rykte:flojt"
       },
       {
@@ -3333,7 +3330,7 @@
             ]
           },
           "e": {
-            "t": "\"Jag har sett den\", säger Vira tyst. \"Den går genom skogen när månen är full, alltid mot Norra bron. Den bär något som lyser under kappan.\"",
+            "t": "\"Jag har sett den\", säger Vira tyst. \"Den går genom skogen när månen är full, alltid mot forsen. Den bär något som lyser under kappan.\"",
             "val": [
               {
                 "label": "Fråga vad den bär",
@@ -3696,10 +3693,10 @@
   "rykten": {
     "stalle": "Nattfiskaren har ett eget ställe vid sjön. Han visar det för den som har fångat tre olika sorters fisk.",
     "hatt": "Nattfiskaren tappade sin gamla fiskehatt med en röd fluga i sjön natten då skeppet kom. Den som hittar den får se hans ställe.",
-    "graskuggan": "Vira säger att Gråskuggan går mot Norra bron när månen är full.",
-    "skugga": "Nattfiskaren har sett en grå skugga gå över bron mot Höstskogen.",
+    "graskuggan": "Vira säger att Gråskuggan går mot forsen när månen är full.",
+    "skugga": "Nattfiskaren har sett en grå skugga gå längs älven mot Höstskogen.",
     "skeppet": "Nattfiskaren säger att konstiga nya fiskar har dykt upp i sjön sedan det lysande skeppet började segla där om nätterna.",
-    "flojt": "Nattfiskaren skar vassen till flöjten vid Norra bron. Där spelar någon fiol om nätterna, samma melodi varje gång.",
+    "flojt": "Nattfiskaren skar vassen till flöjten vid Forsstranden. Där spelar någon fiol om nätterna, samma melodi varje gång.",
     "stjarnsvalan": "Siri säger att det lysande skeppet är hennes Stjärnsvalan. Om nätterna kommer det närmast land vid Sjöviken.",
     "gammelgaddan": "Nattfiskaren säger att Gammelgäddan vid Udden bara hugger på det som blänker.",
     "mansik": "Vira säger att månsiken i Vassen bara nappar på hennes månbete.",

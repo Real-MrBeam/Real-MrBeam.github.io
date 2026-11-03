@@ -166,7 +166,7 @@
 </main>
 
 <script>
-// Stjärnbläck: with ?blad=<mapp>&typ=mul|div|blandat the practice belongs to a sheet. 5 tal load ✦ (+1 per right task with a
+// Stjärnbläck: with ?blad=<mapp>&typ=mul|div|blandat the practice belongs to a sheet. 5 tal load ✦ (+1 per task with at least one right and a
 // bläckdroppe on the sheet), 5 more load ✦✦ (+2). The ink is saved in this browser for the sheet (mallar/stjarnblack.js shows it
 // on the sheet), and only while nothing is written on the sheet yet.
 const PARAMS = new URLSearchParams(location.search);
@@ -848,7 +848,7 @@ function showInkSummary() {
   const ink = inkNow(), full = ink >= 10;
   els.summary.innerHTML = `
     <h2>${!inkOpen ? "Bra jobbat!" : full ? "Stjärnbläcket är fullt!" : "Stjärnbläck laddat!"}</h2>
-    ${inkOpen ? `<p class="score"><span class="ink"><b>${full ? "✦✦" : "✦"}</b> ${full ? "+2" : "+1"} stjärnstoft för varje rätt uppgift med bläckdroppe</span></p>` : ""}
+    ${inkOpen ? `<p class="score"><span class="ink"><b>${full ? "✦✦" : "✦"}</b> ${full ? "+2" : "+1"} stjärnstoft för varje uppgift med bläckdroppe där du har minst ett rätt</span></p>` : ""}
     <ul class="list">${list.map(t => `<li><span>${t.text} = ${t.answer}</span><span class="miss">${t.mistakes ? t.mistakes + " fel" : "inga fel"}</span></li>`).join("")}</ul>
     <div class="actions">
       ${inkOpen && !full && !round.bonusTaken ? `<button type="button" class="violet" id="more">${BONUS_TAL} till för ✦✦</button>` : ""}

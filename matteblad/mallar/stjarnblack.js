@@ -1,5 +1,5 @@
 // Stjärnbläck (Peter 2026-10-31): before he starts a sheet he can practise 5 or 10 tasks on the practice page. 5 give +1 and
-// 10 give +2 stardust for every right task with a bläckdroppe (class "droppe" on the task). The ink is kept in this browser
+// 10 give +2 stardust for every task with a bläckdroppe (class "droppe" on the task) and at least one right answer. The ink is kept in this browser
 // under matteblad:stjarnblack:<sheet> and shown as a stamp in the name row, which prints with the sheet, so the correction
 // sees it. Ink can only be loaded before anything is written on the sheet. Only sheets with <meta name="stjarnblack"> use it.
 (() => {
@@ -33,7 +33,7 @@
   box.className = "black-erbjud";
   box.innerHTML = `
     <b>Ladda stjärnbläck innan du börjar?</b>
-    <span>Öva 5 tal så ger varje rätt uppgift med bläckdroppe +1 stjärnstoft. Öva 10 så ger den +2.</span>
+    <span>Öva 5 tal så ger varje uppgift med bläckdroppe +1 stjärnstoft om du har minst ett rätt på den. Öva 10 så ger den +2.</span>
     <a href="../../uppstallning/index.html?blad=${encodeURIComponent(dir)}&typ=${encodeURIComponent(meta.content)}${tabell ? `&tabell=${encodeURIComponent(tabell.content)}` : ""}">Öva först</a>
     <button type="button">Hoppa över</button>`;
   box.querySelector("button").onclick = () => box.remove();

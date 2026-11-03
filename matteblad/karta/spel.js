@@ -313,6 +313,14 @@ function buildTerrain(){
   const hiddenRoad = new Set(EDGES.filter(e => !edgeShown(e)).flatMap(e => e.tiles.map(([x, y]) => key(x, y))).filter(k => !shownRoad.has(k)));
   const isShownPath = (x, y) => isPath(x, y) && !hiddenRoad.has(key(x, y));
   for (let y = 0; y < MH; y++) for (let x = 0; x < MW; x++) if (M[y][x] === 'p' && !hiddenRoad.has(key(x, y))) auto(b, DIRT, isShownPath, x, y);
+  // A road across a beach (Forsstranden, Peter 2026-11-03): the grass edge of the road tile becomes sand
+  for (const k of SAND){
+    const [x, y] = k.split(',').map(Number);
+    if (M[y][x] !== 'p' || hiddenRoad.has(k)) continue;
+    const im = b.getImageData(x*TS, y*TS, TS, TS), d = im.data;
+    for (let i = 0; i < d.length; i += 4) if (d[i + 1] > d[i]) { d[i] = 232; d[i + 1] = 207; d[i + 2] = 154; }
+    b.putImageData(im, x*TS, y*TS);
+  }
   // A path (stig) is drawn by hand: a narrow, faint band of trodden earth with a few pebbles. It only joins the tiles before and
   // after it on its own path, so it does not reach out to a road that runs beside it.
   const links = new Map();
@@ -1384,7 +1392,7 @@ $('#log').addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key =
 
 // Putting clothes on and off from the bag: one hat and one pair of boots at a time
 // The flute plays the beginning of the tree's melody, all he knows of it (Peter 2026-10-26, before: five short tunes). Notes
-// rise from the boy while it plays. The tree's melody (Peter 2026-10-26): at Norra bron at night Näcken answers the flute under the water and plays the whole
+// rise from the boy while it plays. The tree's melody (Peter 2026-10-26): at Forsstranden at night Näcken answers the flute under the water and plays the whole
 // melody on his fiddle; he knows it is the one the wind whistles in Ihåliga eken. From then on (S.melodi) the flute plays it at the oak.
 const MELODI = berattelse.melodi;
 let flojtTill = 0;
@@ -2366,7 +2374,7 @@ function eventSteps(e, last){
   ];
   const reward = rune
     ? `Runan gav ${e.stjarnor} ${e.stjarnor === 1 ? 'stjärna' : 'stjärnor'}${e.bonus ? ', och en extra för att du tolkade bättre än förra gången' : ''}.`
-    : e.black ? `${e.ratt} rätt gav ${e.ratt} stjärnstoft. Stjärnbläcket lyste i ${e.black.ratt} rätta ${e.black.ratt === 1 ? 'uppgift' : 'uppgifter'} med bläckdroppe och gav ${e.black.plus} till. Rullen gav ${e.stoft} stjärnstoft.`
+    : e.black ? `${e.ratt} rätt gav ${e.ratt} stjärnstoft. Stjärnbläcket lyste i ${e.black.ratt} ${e.black.ratt === 1 ? 'uppgift' : 'uppgifter'} med bläckdroppe och gav ${e.black.plus} till. Rullen gav ${e.stoft} stjärnstoft.`
     : `Rullen gav ${e.stoft} stjärnstoft.`;
   // a scroll boosted with stjärnbläck (practice before the sheet, Peter 2026-10-31) glitters violet
   const glitter = !rune && !!e.black;
@@ -2484,7 +2492,7 @@ function sellOrSwap(o){
   };
   // a fisherman can also sell packs of flies (packs), again and again (Peter 2026-10-26)
   startDialog([{ p: o.who, t: has && o.hejIgen ? o.hejIgen : o.hej }, ...(o.tip ? [{ p: o.who, t: o.tip }] : [])], () => [
-    { rubrik: 'Köp' }, ...(has || !o.pris ? [] : [buyChoice(o.ger, o.pris, 0, () => give('pris'))]),   // the fisherman on Norra bron only swaps
+    { rubrik: 'Köp' }, ...(has || !o.pris ? [] : [buyChoice(o.ger, o.pris, 0, () => give('pris'))]),   // the fisherman on Forsstranden only swaps
     ...(o.more || []).filter(([id]) => !S.saker.includes(id)).map(([id, pris]) => buyChoice(id, pris, 0, () => give('pris', id, pris))),
     ...(o.packs || []).map(([id, po]) => buyChoice(id, po.pris, po.antal, () => buyPack(id, po, o.who, o.packTack, o.again))),
     ...(finds.length ? [{ rubrik: 'Byt' }, ...finds.map(id => swapChoice(o.ger, id, 0, () => give(id)))] : []),
