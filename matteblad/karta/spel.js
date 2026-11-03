@@ -1424,7 +1424,8 @@ const windNotes = () => {
   for (const t of Musik.tradToner('vind')) setTimeout(() => FX.push({ k: 'not', x: n.x * TS + 2 + Math.random() * 8, y: n.y * TS - 10, vx: 0, vy: -9, t: 0, life: 3.2 }), t * 1000);
 };
 setInterval(() => {
-  if (LEVEL || document.hidden || !window.Musik || !Musik.trad) return;
+  // once the melody has opened the oak the wind is silent and no more notes rise (Peter 2026-11-03)
+  if (S.ekenOppen || LEVEL || document.hidden || !window.Musik || !Musik.trad) return;
   const now = performance.now(), here = S.node === MELODI.vind && !boy.route;
   if (here && windNode !== S.node && windNext - now > 2500) windNext = now + 2500;   // soon after he arrives
   windNode = here ? S.node : '';
