@@ -180,7 +180,7 @@ const sheetStarted = () => {
   if (!BLAD) return false;
   try {
     const s = JSON.parse(store.get("matteblad:" + new URL(SHEET_URL, location.href).pathname)) || {};
-    return (s.fields || []).some(v => v) || (s.strokes || []).some(a => a.length) || s.opt >= 0;
+    return (s.fields || []).some(v => v) || (s.strokes || []).some(a => a.length) || s.opt >= 0 || (s.ringa || []).some(i => i >= 0);
   } catch { return false; }
 };
 let inkOpen = BLAD && !sheetStarted();   // ink can be loaded: a sheet, and nothing written on it yet

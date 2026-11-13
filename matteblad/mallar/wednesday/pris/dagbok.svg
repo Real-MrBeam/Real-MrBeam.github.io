@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" overflow="visible">
+  <g class="base">
+    <rect x="16" y="8" width="72" height="86" rx="3" fill="#f7f4ee" stroke="#1b1b22" stroke-width="3"/>
+    <path d="M24 26 H80 M24 38 H80 M24 50 H80 M24 62 H80 M24 74 H80" stroke="#c9c2d6" stroke-width="2"/>
+  </g>
+  <g class="lid">
+    <rect x="12" y="6" width="76" height="90" rx="4" fill="#1b1b22" stroke="#0b0b0f" stroke-width="3.5"/>
+    <g class="front">
+      <rect x="12" y="6" width="12" height="90" rx="3" fill="#2b2238" stroke="#0b0b0f" stroke-width="3"/>
+      <path d="M0 0 L100.0 0.0 M0 0 L92.4 38.3 M0 0 L70.7 70.7 M0 0 L38.3 92.4 M0 0 L0.0 100.0 M30.0 0.0 Q23.7 4.7 27.7 11.5 Q20.1 13.4 21.2 21.2 Q13.4 20.1 11.5 27.7 Q4.7 23.7 0.0 30.0 M60.0 0.0 Q47.3 9.4 55.4 23.0 Q40.1 26.8 42.4 42.4 Q26.8 40.1 23.0 55.4 Q9.4 47.3 0.0 60.0 M90.0 0.0 Q71.0 14.1 83.1 34.4 Q60.2 40.2 63.6 63.6 Q40.2 60.2 34.4 83.1 Q14.1 71.0 0.0 90.0" fill="none" stroke="#6b6480" stroke-width="3" stroke-linecap="round" transform="translate(86 8) scale(-.24 .24)"/>
+      <rect x="29" y="30" width="54" height="22" rx="2" fill="#f7f4ee" stroke="#7b4fb0" stroke-width="2.5"/>
+      <text x="56" y="45" text-anchor="middle" font-family="Courier New, monospace" font-weight="700" font-size="9" fill="#1b1b22">DAGBOK</text>
+      <text x="56" y="82" text-anchor="middle" font-family="Georgia, serif" font-style="italic" font-weight="700" font-size="22" fill="#c58bff">W</text>
+    </g>
+    <rect class="inside" x="16" y="10" width="68" height="82" rx="2" fill="#ece6f4" opacity="0"/>
+  </g>
+</svg>

@@ -48,6 +48,22 @@
     });
   });
 
+  // Circle an answer inside a task (Peter 2026-11-13): <span class="ringa"><span class="opt">Ja</span> / <span class="opt">Nej</span></span>.
+  // One choice per group, saved as its index (-1 when nothing is circled).
+  const groups = [...document.querySelectorAll(".ringa")].map((group, g) => {
+    const choices = [...group.querySelectorAll(".opt")];
+    choices.forEach((opt, i) => {
+      opt.classList.toggle("chosen", saved.ringa?.[g] === i);
+      opt.addEventListener("click", () => {
+        const chosen = !opt.classList.contains("chosen");
+        choices.forEach(o => o.classList.remove("chosen"));
+        opt.classList.toggle("chosen", chosen);
+        save();
+      });
+    });
+    return choices;
+  });
+
   buildToolbar();
   fit();
   window.addEventListener("resize", fit);
@@ -157,6 +173,7 @@
     fields.forEach(f => (f.value = ""));
     areas.forEach(a => { a.strokes = []; redraw(a); });
     opts.forEach(o => o.classList.remove("chosen"));
+    groups.flat().forEach(o => o.classList.remove("chosen"));
     history.length = 0;
     save();
   }
@@ -170,6 +187,7 @@
       fields: fields.map(f => f.value),
       strokes: areas.map(a => a.strokes),
       opt: opts.findIndex(o => o.classList.contains("chosen")),
+      ringa: groups.map(choices => choices.findIndex(o => o.classList.contains("chosen"))),
     };
     let ok = true;
     try { localStorage.setItem(KEY, JSON.stringify(data)); } catch { ok = false; }

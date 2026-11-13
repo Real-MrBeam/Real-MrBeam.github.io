@@ -225,6 +225,15 @@ body {
   border: .4mm solid #999;
   border-radius: 10mm;
 }
+/* Circle an answer inside a task: <span class="ringa"><span class="opt">Ja</span> / <span class="opt">Nej</span></span>.
+   On paper he circles one, on screen he taps it (mallar/ifyllbar.js). */
+.ringa .opt {
+  display: inline-block;
+  padding: 0 3mm;
+  border: .5mm solid transparent;
+  border-radius: 10mm;
+  font-weight: 600;
+}
 .feedback .wish { flex: 1 0 100%; display: flex; align-items: flex-end; gap: 2mm; padding: 0 4mm; }
 .feedback .wish .grow { flex: 1; height: 6mm; border-bottom: .4mm solid #333; }
 

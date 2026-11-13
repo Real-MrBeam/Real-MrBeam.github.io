@@ -41,6 +41,9 @@ body.erasing .rutor canvas { cursor: cell; }
 /* Circled feedback option */
 .feedback .opt { cursor: pointer; user-select: none; }
 .feedback .opt.chosen { border: .7mm solid #1d4ed8; color: #1d4ed8; }
+/* Circled answer inside a task (.ringa, mallar/ifyllbar.js) */
+.ringa .opt { cursor: pointer; user-select: none; }
+.ringa .opt.chosen { border-color: #1d4ed8; color: #1d4ed8; }
 
 @media screen {
   body { padding-top: 16mm; }

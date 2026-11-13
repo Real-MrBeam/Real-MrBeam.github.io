@@ -1,0 +1,51 @@
+/* Wednesday theme (Peter 2026-11-13): Wednesday's diary at Nevermore. Black ink, a double frame, spider webs in the
+   top corners, black dahlias below, and a typewriter font like the manuscript she writes. */
+@import url("https://fonts.googleapis.com/css2?family=Special+Elite&family=UnifrakturMaguntia&display=block");
+
+:root {
+  --frame: #1b1b22;
+  --frame-inner: #1b1b22;
+  --accent: #5b2a86;
+  --part-1: #4a4a55; /* grey ink */
+  --part-2: #5b2a86; /* violet */
+  --part-3: #8b1e3f; /* dahlia red */
+  --grid: #e3dcec;
+  --grid-edge: #a99cbc;
+}
+
+.frame {
+  border: 1.4mm solid #1b1b22;
+  border-radius: 1.5mm;
+  box-shadow: inset 0 0 0 .9mm #fff, inset 0 0 0 1.3mm #1b1b22;
+}
+
+/* Spider webs fill the top corners inside the frame, dahlias sit on the bottom corners */
+.corner.web { width: 26mm; height: 26mm; }
+.corner.web.tl { top: 8.4mm; left: 8.4mm; }
+.corner.web.tr { top: 8.4mm; right: 8.4mm; transform: scaleX(-1); }
+.corner.bl, .corner.br { width: 16mm; height: 16mm; }
+
+/* Blackletter for the title, typewriter for everything Wednesday "types" */
+.sheet-head h1 {
+  font-family: "UnifrakturMaguntia", "Old English Text MT", serif;
+  font-weight: 400;
+  font-size: 36pt;
+  color: #1b1b22;
+}
+.sheet-head.small h1 { font-size: 22pt; }
+.sheet-head .sub, .part h2 .tag, .part h2 .type, .num, .foot, .meta label, .feedback > span:first-child, .feedback .wish {
+  font-family: "Special Elite", "Courier New", monospace;
+  font-weight: 400;
+}
+.sheet-head .sub { font-size: 13pt; color: var(--accent); }
+.sheet-head .icon { height: 16mm; image-rendering: pixelated; }
+.sheet-head.small .icon { height: 10mm; }
+
+/* Section tags like typed labels, task numbers like round typewriter keys */
+.part h2 .tag { border-radius: 1mm; letter-spacing: .4mm; text-transform: uppercase; font-size: 12pt; }
+.part h2 .type { font-size: 11pt; }
+.num { font-size: 12pt; box-shadow: inset 0 0 0 .45mm #fff; }
+
+.tips { background: #f4f0fa; border-color: #c9b8e0; }
+.feedback { border-color: var(--accent); }
+.foot { font-size: 10pt; color: #1b1b22; }
