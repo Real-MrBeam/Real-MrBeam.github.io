@@ -49,3 +49,9 @@
 .tips { background: #f4f0fa; border-color: #c9b8e0; }
 .feedback { border-color: var(--accent); }
 .foot { font-size: 10pt; color: #1b1b22; }
+
+/* One large blood splatter per page in a bottom corner, cut off by the paper edge (Peter 2026-11-13).
+   It sprays along the bottom edge, never over tasks, and lets clicks through to the sheet. */
+.blod { position: absolute; width: 120mm; bottom: -56mm; pointer-events: none; }
+.blod.hoger { right: -50mm; }
+.blod.vanster { left: -50mm; }
