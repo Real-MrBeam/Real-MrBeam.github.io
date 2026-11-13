@@ -38,7 +38,7 @@
   font-weight: 400;
 }
 .sheet-head .sub { font-size: 13pt; color: var(--accent); }
-.sheet-head .icon { height: 16mm; image-rendering: pixelated; }
+.sheet-head .icon { height: 16mm; }
 .sheet-head.small .icon { height: 10mm; }
 
 /* Section tags like typed labels, task numbers like round typewriter keys */

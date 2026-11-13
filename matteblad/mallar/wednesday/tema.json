@@ -20,9 +20,9 @@
     }
   },
   "pris": [
-    { "minProcent": 100, "niva": "Nevermore", "namn": "Nattkorpen", "bild": "pris/korp-nevermore.svg", "farg": "#5b2a86", "text": "Alla rätt, Nevermore-nivå! Öppna dagboken och se vad du fått!" },
-    { "minProcent": 90, "niva": "Guld", "namn": "Guldkorpen", "bild": "pris/korp-guld.svg", "farg": "#c49a1c", "text": "Nästan alla rätt! Öppna dagboken och se vad du fått i guld!" },
-    { "minProcent": 70, "niva": "Silver", "namn": "Silverkorpen", "bild": "pris/korp-silver.svg", "farg": "#7d848c", "text": "Snyggt jobbat! Öppna dagboken och se vad du fått i silver!" },
-    { "minProcent": 0, "niva": "Brons", "namn": "Bronskorpen", "bild": "pris/korp-brons.svg", "farg": "#b0682a", "text": "Bra kämpat! Öppna dagboken och se vad du fått i brons! Kolla tipsen nedan." }
+    { "minProcent": 100, "niva": "Nevermore", "namn": "Nattkorpen", "bild": "pris/korp-nevermore.jpg", "farg": "#5b2a86", "text": "Alla rätt, Nevermore-nivå! Öppna dagboken och se vad du fått!" },
+    { "minProcent": 90, "niva": "Guld", "namn": "Guldkorpen", "bild": "pris/korp-guld.png", "farg": "#c49a1c", "text": "Nästan alla rätt! Öppna dagboken och se vad du fått i guld!" },
+    { "minProcent": 70, "niva": "Silver", "namn": "Silverkorpen", "bild": "pris/korp-silver.png", "farg": "#7d848c", "text": "Snyggt jobbat! Öppna dagboken och se vad du fått i silver!" },
+    { "minProcent": 0, "niva": "Brons", "namn": "Bronskorpen", "bild": "pris/korp-brons.png", "farg": "#b0682a", "text": "Bra kämpat! Öppna dagboken och se vad du fått i brons! Kolla tipsen nedan." }
   ]
 }
