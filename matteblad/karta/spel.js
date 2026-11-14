@@ -572,6 +572,12 @@ function drawFX(dt){
     p.x += p.vx * dt; p.y += p.vy * dt;
     if (p.k === 'spark'){ p.vy += 60 * dt; ctx.fillStyle = p.col; const s = p.t < p.life * .6 ? 2 : 1; ctx.fillRect(Math.round(p.x), Math.round(p.y), s, s); }
     else if (p.k === 'drop'){ ctx.fillStyle = '#c0eaff'; ctx.fillRect(Math.round(p.x), Math.round(p.y), 1, 2); }
+    else if (p.k === 'ring'){   // a ring that spreads on the water where a fish went in or out, flat like the surface
+      const q = p.t / p.life, r = 1.5 + q * 5;
+      ctx.globalAlpha = .85 * (1 - q); ctx.fillStyle = '#ffffff';
+      for (let i = 0; i < 16; i++){ const a = i / 16 * Math.PI * 2; ctx.fillRect(Math.round(p.x + Math.cos(a) * r), Math.round(p.y + Math.sin(a) * r * .45), 1, 1); }
+      ctx.globalAlpha = 1;
+    }
     else if (p.k === 'not'){   // a white note that sways up from the tree and fades
       const a = Math.min(1, p.t * 3, (p.life - p.t) * 1.5), x = Math.round(p.x + Math.sin(p.t * 3) * 3), y = Math.round(p.y);
       ctx.globalAlpha = Math.max(0, a);
@@ -807,6 +813,7 @@ function frame(now){
     if (!chestOpening && glow){ ctx.fillStyle = 'rgba(254,231,97,.35)'; ctx.fillRect(CHEST_AT.x*TS - 1, CHEST_AT.y*TS + 1, 18, 13); }
     ctx.drawImage(chestOpening && t >= .6 ? CHEST_OPEN : CHEST, CHEST_AT.x*TS + shake, CHEST_AT.y*TS);
   }
+  drawJumps(now, null);
   drawActors(now);
   drawScene(now);
   drawFX(dt);
@@ -1134,6 +1141,7 @@ function levelFrame(now, dt){
     ctx.drawImage((Math.cos(t) > 0 ? P.right : P.left)[f], wet[0] * TS + Math.round(Math.sin(t) * 5), wet[1] * TS - 3);
     ctx.restore();
   }
+  drawJumps(now, L);
   drawActors(now);
   drawLevelDark(now);
   // drops fall from the roof now and then, close to him
@@ -1516,7 +1524,10 @@ document.addEventListener('visibilitychange', () => { if (window.Musik) Musik.pa
 const isDay = () => !S.natt;
 const plotsAt = id => PLOTS.filter(p => p.node === id);
 const plotLeft = p => { if (p.prebuilt) return false; if (!S.built[p.id]) return true; const v = valOf(p); return !!(v && (!S.handlat[p.id] || (v.byte && !S.bytt[p.id]))); };
-const newFishAt = id => { const fp = FISKE.platser[id]; return toolsAt(id).some(t => (FISKE.fangar[t] || []).some(f => fp.fiskar.includes(f) && S.fiskbok[f] === undefined)); };
+// A kind he has not caught that he can take here with what he has (Peter 2026-11-14): a tool he has takes it (fiske.fangar, no
+// fly rod where there are no flies), a night fish only at night, and a fish that bites on one bait only (bara) only when he has
+// that bait. The plate by day, the level and the jumping fish all ask this.
+const newFishAt = id => { const tools = toolsAt(id); return placeFish(id).some(f => S.fiskbok[f] === undefined && (!FISKE.fiskar[f].bara || hasBait(FISKE.fiskar[f].bara)) && tools.some(t => (FISKE.fangar[t] || []).includes(f))); };
 const PLACE_PARTS = [
   { on: id => isDay() && plotsAt(id).length > 0, block: id => plotsAt(id).map(plotBlock).join(''), active: id => plotsAt(id).some(plotLeft) },
   { on: id => isDay() && !!STOPP[id], block: id => stopBlock(id), active: id => !S.stopp[id] },
@@ -2547,6 +2558,70 @@ const maxOf = id => FISKE.fiskar[id].max || MAXFISK;   // a fish of its own kind
 // at night some places have fish that only swim in the dark (fiske.platser fiskarNatt)
 const placeFish = plats => { const p = FISKE.platser[plats]; return S.natt && p.fiskarNatt ? [...p.fiskar, ...p.fiskarNatt] : p.fiskar; };
 const catchList = fz => { const can = FISKE.fangar && FISKE.fangar[fz.redskap]; return placeFish(fz.plats).filter(id => !can || can.includes(id)); };
+
+/* ---------- hoppande fisk ---------- */
+// A fish jumps now and then in the water by a fishing place while there is a kind there that he has not caught and can take
+// with what he has (newFishAt), a hint that there is something new to fetch (Peter 2026-11-14). It is an effect in the water
+// like the ship and the stars, not a figure. It goes up in an arc, splashes, and a small plop is heard when it lands on the
+// screen (if the sound effects are on). Also in the lake of a level with fishing (the cave), close to him. No jumps with
+// reduced motion. The test checks that every fishing place has water close by where a fish can jump.
+const JUMPER = sprite(["o...oooo..", "oo.obbbbo.", ".ooowwwwko", "oo.owwwwo.", "o...oooo.."],
+  { o: '#3a4466', b: '#8b9bb4', w: '#c0cbdc', k: '#262b44' });
+const JUMP_MS = 850, JUMP_AGAIN = [5000, 10000], JUMP_W = 12, JUMP_H = 9;
+const JUMPS = [], jumpNext = {};
+// water with room to jump to one side: by a place on the map the water nearest to it (within 7 tiles, not under the plate),
+// in a level within 6 tiles of him
+function jumpSpot(id, L){
+  const wet = L ? (x, y) => lvCell(x, y) === '~' : (x, y) => !!M[y] && M[y][x] === 'w' && seenAt(x, y);
+  const c = L ? { x: Math.round(boy.x / TS), y: Math.round(boy.y / TS) } : NODES[id], R = L ? 6 : 7, spots = [];
+  for (let y = Math.floor(c.y - R); y <= c.y + R; y++) for (let x = Math.floor(c.x - R); x <= c.x + R; x++){
+    const d = Math.hypot(x - c.x, y - c.y);
+    if (d > R || (!L && d < 1.5) || !wet(x, y)) continue;
+    for (const dir of [1, -1]) if (wet(x + dir, y)) spots.push({ x: x*TS + 8 - dir * JUMP_W / 2, y: y*TS + 10, dir, d });
+  }
+  const near = spots.filter(s => L || s.d <= Math.min(...spots.map(t => t.d)) + 2);
+  return near.length ? near[Math.floor(Math.random() * near.length)] : null;
+}
+const splash = (x, y, n) => {
+  FX.push({ k: 'ring', x, y, vx: 0, vy: 0, t: 0, life: .7 });
+  for (let i = 0; i < n; i++) FX.push({ k: 'spark', x: x + (Math.random() - .5) * 4, y, vx: (Math.random() - .5) * 30, vy: -22 - Math.random() * 20, t: 0, life: .4 + Math.random() * .2, col: Math.random() < .5 ? '#ffffff' : '#c0eaff' });
+};
+const onScreen = (x, y) => x > cam.x - 8 && x < cam.x + viewW + 8 && y > cam.y - 8 && y < cam.y + viewH + 8;
+function drawJumps(now, L){
+  if (reduceMotion) return;
+  // which water can have a fish now: the fishing places on the map he can see, or the lake of this level
+  const places = L ? (L.def.fiske ? [L.def.fiske] : []) : Object.keys(FISKE.platser).filter(id => NODES[id] && nodeShown(id) && !pondHidden(id));
+  for (const id of places){
+    const k = (L ? 'bana:' : '') + id;
+    if (!jumpNext[k]){ jumpNext[k] = now + 1500 + Math.random() * 3500; continue; }
+    if (now < jumpNext[k]) continue;
+    jumpNext[k] = now + JUMP_AGAIN[0] + Math.random() * (JUMP_AGAIN[1] - JUMP_AGAIN[0]);
+    const at = newFishAt(id) && jumpSpot(id, L);
+    if (!at) continue;
+    JUMPS.push({ ...at, t0: now, L: !!L });
+    splash(at.x, at.y, 3);
+  }
+  for (let i = JUMPS.length - 1; i >= 0; i--){
+    const j = JUMPS[i], p = (now - j.t0) / JUMP_MS;
+    if (j.L !== !!L){ JUMPS.splice(i, 1); continue; }   // he went into a level or came out of one
+    if (p >= 1){
+      JUMPS.splice(i, 1);
+      const ex = j.x + j.dir * JUMP_W;
+      splash(ex, j.y, 6);
+      if (window.Musik && Musik.plopp && onScreen(ex, j.y)) Musik.plopp(Math.max(.3, 1 - Math.hypot(ex - boy.x - 8, j.y - boy.y - 8) / (12 * TS)));
+      continue;
+    }
+    // up in an arc and down again, the nose along the way it moves; in and out of the water it is half seen
+    const x = j.x + j.dir * JUMP_W * p, y = j.y - JUMP_H * Math.sin(Math.PI * p);
+    ctx.save();
+    ctx.globalAlpha = Math.min(1, p * 5, (1 - p) * 5);
+    ctx.translate(Math.round(x), Math.round(y));
+    if (j.dir < 0) ctx.scale(-1, 1);
+    ctx.rotate(Math.atan2(-JUMP_H * Math.PI * Math.cos(Math.PI * p), JUMP_W));
+    ctx.drawImage(JUMPER, -5, -3);
+    ctx.restore();
+  }
+}
 // what bites with this bait: the list of a place repeats a fish as many times as it is common there, and the bait makes a kind
 // some times more common (gillar) or keeps it away (nej). A thing for an animal takes no ordinary fish.
 const bites = fz => {

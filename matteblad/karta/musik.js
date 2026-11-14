@@ -13,6 +13,7 @@
 //   Musik.grotta(true | false)   the cave song while he is in a level
 //   Musik.jingel(sort)   a short tune when he gets something, 'djur' a longer one for a new animal, 'fisk' one for a new fish
 //                        in the fish book, 'stjarnor' or 'stoft' for stars and stardust (the same) (only when the sound is on)
+//   Musik.plopp(vol)   a small plop when a fish jumps and lands in the water, vol 0 to 1 (only when the sound is on)
 //   Musik.trad(sort)   the tree's melody: 'flojt', 'fiol' (Näcken), 'vind' (the wind in the oak) or 'borjan' (the flute
 //                      before he has learnt it), returns its length
 //   Musik.spela(ctx, dest, index, t0)   schedules one whole song on any AudioContext (also an OfflineAudioContext), returns its length
@@ -425,6 +426,22 @@ function jingelPa(ctx, dest, t0, sort) {
   tone(ctx, out, { f: freq('G6'), t: t0 + .34, len: .5, vol: .1, kind: 'klocka' });
   return out;
 }
+// A small plop when a fish lands after a jump (Peter 2026-11-14): a sine that falls fast like a drop, and a little noise for
+// the splash. It does not duck the music.
+function plopp(vol = 1) {
+  if (!P.fx || !ctxFx()) return;
+  const ctx = P.ctx, t = ctx.currentTime + .01, out = ctx.createGain();
+  out.gain.value = .2 * Math.max(0, Math.min(1, vol)); out.connect(ctx.destination);
+  const o = ctx.createOscillator(), g = ctx.createGain();
+  o.type = 'sine'; o.frequency.setValueAtTime(760, t); o.frequency.exponentialRampToValueAtTime(190, t + .09);
+  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(1, t + .005); g.gain.exponentialRampToValueAtTime(.001, t + .15);
+  o.connect(g); g.connect(out); o.start(t); o.stop(t + .17);
+  const n = ctx.createBufferSource(), f = ctx.createBiquadFilter(), ng = ctx.createGain();
+  n.buffer = noise(ctx); f.type = 'bandpass'; f.frequency.value = 2600; f.Q.value = .8;
+  ng.gain.setValueAtTime(.0001, t); ng.gain.linearRampToValueAtTime(.3, t + .025); ng.gain.exponentialRampToValueAtTime(.001, t + .2);
+  n.connect(f); f.connect(ng); ng.connect(out); n.start(t); n.stop(t + .22);
+  setTimeout(() => out.disconnect(), 500);
+}
 function jingel(sort) {
   if (!P.fx || !ctxFx()) return;
   const ctx = P.ctx, out = jingelPa(ctx, ctx.destination, ctx.currentTime + .03, sort);
@@ -477,5 +494,5 @@ function trad(sort) {
   return dur;
 }
 
-root.Musik = { effekter, get effekterPa() { return P.fx; }, trad, tradPa, tradToner, jingel, jingelPa, nasta, grotta, start, stop, paus, spela, natt, get spelar() { return P.on; }, get lat() { return P.lat || ''; }, lattar: SONGS.map(s => s.namn) };
+root.Musik = { effekter, get effekterPa() { return P.fx; }, trad, tradPa, tradToner, jingel, jingelPa, plopp, nasta, grotta, start, stop, paus, spela, natt, get spelar() { return P.on; }, get lat() { return P.lat || ''; }, lattar: SONGS.map(s => s.namn) };
 })(typeof window !== 'undefined' ? window : globalThis);
