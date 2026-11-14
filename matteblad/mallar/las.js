@@ -205,7 +205,7 @@
     if (!pill) return;
     const open = Boolean(stored);
     pill.className = "las-pill" + (open ? " open" : "");
-    pill.innerHTML = `${LOCK_ICON}${open ? "Upplåst · Lås" : "Låst"}`;
+    pill.innerHTML = `${LOCK_ICON}${open ? "Upplåst · Lås" : "Låst · Lås upp"}`;
   }
 
   async function start() {
