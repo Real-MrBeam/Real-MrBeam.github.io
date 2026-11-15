@@ -36,7 +36,8 @@
     },
     "torn": {
       "namn": "Tornet",
-      "text": "Ett gammalt torn med en trappa som slingrar sig ända upp. Från toppen syns slottet, och det är inte långt kvar nu."
+      "text": "Ett gammalt torn med en trappa som slingrar sig ända upp. Högst upp ligger observatoriet, där drottningens astronomer läser himlen. Från toppen syns slottet.",
+      "natt": "Högst upp i tornet lyser ett svagt ljus. Någon är vaken i observatoriet."
     },
     "slott": {
       "namn": "Slottet",
@@ -838,6 +839,24 @@
       "namn": "Mästerfiskarmedalj",
       "text": "Fiskesällskapets finaste medalj, i guld med en krona över fisken. Tjugo sorter, tre av varje.",
       "typ": "medalj"
+    },
+    "fallenstjarna": {
+      "namn": "Fallen stjärna",
+      "text": "En stjärna som föll från Svalan ner i Sjöviken. Den är varm och lyser svagt, som om den väntar på något.",
+      "typ": "fynd",
+      "varde": 5
+    },
+    "stjarnkarta": {
+      "namn": "Stjärnkarta",
+      "text": "En karta över himlen med Svalan inritad. I hörnet står ett namn du aldrig har hört: Strac.",
+      "typ": "fynd",
+      "varde": 4
+    },
+    "vaktarmarke": {
+      "namn": "Stjärnväktarnas märke",
+      "text": "En liten silverstjärna med ett öga. Stella fäste den på din jacka. Visa den aldrig på dagen.",
+      "typ": "fynd",
+      "varde": 3
     }
   },
   "bygg": {
@@ -1250,7 +1269,7 @@
               {
                 "label": "Sätt dig och titta på stjärnorna",
                 "kostnad": 0,
-                "text": "Du sätter dig och tittar upp, och duvorna kurar ihop sig vid dina fötter. Stella, astronomen, kommer upp med ett teleskop under armen: ”Så få stjärnor kvar. Härifrån skulle jag kunna se vart de andra tog vägen.”",
+                "text": "Du sätter dig och tittar upp, och duvorna kurar ihop sig vid dina fötter. Stella, astronomen, kommer upp med ett teleskop under armen: ”I observatoriet får jag bara titta dit drottningen säger. Med en egen kupol skulle jag kunna se vart de andra stjärnorna tog vägen.”",
                 "till": {
                   "bygg": "observatorium"
                 }
@@ -1263,11 +1282,11 @@
         {
           "id": "observatorium",
           "person": "stella",
-          "namn": "Observatorium",
-          "byggs": "En kupol med teleskop",
+          "namn": "Stjärnkupolen",
+          "byggs": "En egen kupol med ett stort teleskop",
           "kostnad": 20,
           "byggnad": "observatorium",
-          "tack": "Tack. Sedan stjärnorna föll har himlen varit svår att läsa, och det har hållit mig vaken om nätterna. Nu kan jag börja förstå vad som hände.",
+          "tack": "Tack. Teleskopet i observatoriet pekar bara dit drottningen vill. Genom det här kan jag själv se vart stjärnorna tog vägen.",
           "gava": [
             "stjarnuggla"
           ],
@@ -1472,7 +1491,7 @@
       "namn": "Hoo",
       "art": "Stjärnuggla",
       "text": "En liten uggla med violetta fjädrar och en stjärna i pannan. Den sitter helst uppe i kupolen och tittar på himlen.",
-      "hur": "Flög in genom observatoriets kupol och ville inte flytta."
+      "hur": "Flög in genom Stellas kupol och ville inte flytta."
     },
     "mana": {
       "namn": "Måna",
@@ -3156,7 +3175,63 @@
         "Den som fångar Gråskuggan, eller vet något om var han håller till, får en stor belöning av drottningen. Berätta för vakterna vid slottet.\n\nDrottningen av Glimmerdal"
       ],
       "rykte": "rykte:efterlyst"
+    },
+    "vaktarna2": {
+      "plats": "hem",
+      "villkor": [
+        "stjarnor:8",
+        "brev:stjarnvaktarna"
+      ],
+      "rubrik": "Ett nytt brev ligger på trappan",
+      "text": "Det är förseglat med en silverstjärna med ett öga.",
+      "knapp": "Ta upp brevet",
+      "titel": "Stjärnväktarnas andra brev",
+      "lista": "Möt oss på observatoriet vid slottet på natten.",
+      "fran": "stjarnvaktarna",
+      "stycken": [
+        "Till dig som läser runor. Nu har du släppt ut åtta stjärnor. Vi har räknat dem, en efter en, när de steg mot himlen.",
+        "Förr fanns en stjärnbild över Sjöviken som seglarna styrde efter. Den hette Svalan, och den slocknade natten då stjärnorna föll. Gå ner till sjön en natt och titta i vattnet. Om vi har räknat rätt tänds den igen.",
+        "Det finns saker vi inte kan skriva i ett brev. Möt oss på observatoriet vid slottet på natten. Det ligger högst upp i Tornet.",
+        "Berätta inte för någon. Vi vet fortfarande inte vem som lyssnar.\n\nStjärnväktarna"
+      ],
+      "rykte": "rykte:svalan"
+    },
+    "lapp_graskuggan": {
+      "titel": "Lappen från stranden",
+      "lista": "Låg i sanden bakom berget. Ingen underskrift.",
+      "stycken": [
+        "En hopvikt lapp, fuktig av sjövatten. Någon har skrivit med snabb och sned handstil:",
+        "Lita inte på drottningen. Jag är inte fienden."
+      ]
     }
+  },
+  "svalan": {
+    "plats": "sjo",
+    "brev": "vaktarna2",
+    "cx": 26.5,
+    "cy": 18,
+    "fx": 26.2,
+    "fy": 20.6,
+    "rubrik": "Svalan tänds",
+    "text": "Åtta stjärnor tänds i vattnet, en efter en, och bildar en svala med kluven stjärt. Sedan lossnar en stjärna från himlen och faller rakt ner i Sjöviken. Där den slog ner lyser något svagt under ytan.",
+    "siri": [
+      {
+        "p": null,
+        "t": "Siri kommer springande längs stranden med kikaren i handen."
+      },
+      {
+        "p": "siri",
+        "t": "Svalan! Den har inte lyst sedan natten då stjärnorna föll."
+      },
+      {
+        "p": "siri",
+        "t": "Förr styrde alla seglare efter den. Det var efter den jag döpte mitt skepp, Stjärnsvalan. Nu kanske hon hittar hem."
+      }
+    ],
+    "fynd": "fallenstjarna",
+    "lysRubrik": "Något lyser under ytan",
+    "lysText": "Där stjärnan föll glimmar det i vattnet.",
+    "knapp": "Vada ut och ta upp det"
   },
   "nattstopp": {
     "angen": {
@@ -3688,18 +3763,20 @@
               {
                 "label": "Ta repbiten",
                 "kostnad": 0,
-                "text": "Nu förstår du. Stjärnsvalan slet sig aldrig. Gråskuggan brände av repet och tog henne.",
+                "text": "Under repbiten ligger en hopvikt lapp: ”Lita inte på drottningen. Jag är inte fienden.” Stjärnsvalan slet sig aldrig. Gråskuggan brände av repet och tog henne.",
                 "till": {
-                  "fynd": "brantrep"
+                  "fynd": "brantrep",
+                  "brev": "lapp_graskuggan"
                 }
               },
               {
                 "label": "Följ stövelspåren",
                 "kostnad": 0,
-                "text": "Spåren går upp mot gruvan och tar slut vid berget. Där ligger repbiten, och bredvid den en blå glaskula som har fallit ur den grå kappan. Stjärnsvalan slet sig aldrig. Gråskuggan tog henne.",
+                "text": "Spåren går upp mot gruvan och tar slut vid berget. Där ligger repbiten, en blå glaskula som har fallit ur den grå kappan och en hopvikt lapp: ”Lita inte på drottningen. Jag är inte fienden.” Stjärnsvalan slet sig aldrig. Gråskuggan tog henne.",
                 "till": {
                   "fynd": "brantrep",
-                  "extra": "glaskula"
+                  "extra": "glaskula",
+                  "brev": "lapp_graskuggan"
                 }
               }
             ]
@@ -3716,9 +3793,82 @@
               {
                 "label": "Ropa efter skeppet",
                 "kostnad": 0,
-                "text": "Ropet ekar över vattnet, men ingen svarar. När du vänder dig om ligger en repbit i sanden, bränd i ena änden. Stjärnsvalan slet sig aldrig. Gråskuggan tog henne.",
+                "text": "Ropet ekar över vattnet, men ingen svarar. När du vänder dig om ligger en repbit i sanden, bränd i ena änden, och under den en hopvikt lapp: ”Lita inte på drottningen. Jag är inte fienden.” Stjärnsvalan slet sig aldrig. Gråskuggan tog henne.",
                 "till": {
-                  "fynd": "brantrep"
+                  "fynd": "brantrep",
+                  "brev": "lapp_graskuggan"
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    "torn": {
+      "rubrik": "Ljus i observatoriet",
+      "knapp": "Gå upp i tornet",
+      "villkor": [
+        "brev:vaktarna2"
+      ],
+      "aventyr": {
+        "start": "a",
+        "steg": {
+          "a": {
+            "t": "Trappan slingrar sig uppåt i mörkret. Högst upp står en dörr på glänt, och innanför lyser ett svagt ljus. På dörren sitter en silverstjärna med ett öga.",
+            "val": [
+              {
+                "label": "Knacka på dörren",
+                "kostnad": 0,
+                "text": "Du knackar tre gånger. Det blir tyst där inne, och sedan öppnas dörren.",
+                "till": "b"
+              },
+              {
+                "label": "Kika in genom springan",
+                "kostnad": 0,
+                "text": "Runt ett stort teleskop står några personer i mörka kappor. En av dem vänder sig om och ser rakt på dig.",
+                "till": "b"
+              }
+            ]
+          },
+          "b": {
+            "p": "stella",
+            "t": "Kom in, och stäng dörren efter dig. Jag heter Stella. På dagen läser jag himlen åt drottningen. På natten är vi Stjärnväktarna.",
+            "val": [
+              {
+                "label": "Fråga varför stjärnorna föll",
+                "kostnad": 0,
+                "p": "stella",
+                "text": "Det var vi som drog ner dem, med teleskopen här uppe. Drottningen tvingade oss. Hon ville ha deras kraft, och vi vågade inte säga nej.",
+                "till": "c"
+              },
+              {
+                "label": "Fråga vilka de andra är",
+                "kostnad": 0,
+                "p": "stella",
+                "text": "Astronomer, som jag. Drottningen tvingade oss att dra ner stjärnorna, och sedan dess har vi försökt göra det ogjort.",
+                "till": "c"
+              }
+            ]
+          },
+          "c": {
+            "p": "stella",
+            "t": "Varje runa du tolkar släpper ut en stjärna. Vi ser dem stiga härifrån. Fortsätt, men berätta aldrig för drottningen att du har varit här.",
+            "val": [
+              {
+                "label": "Fråga om Gråskuggan",
+                "kostnad": 0,
+                "text": "Stella tittar bort mot fönstret. ”Det vet vi inte mycket om. Var försiktig med vem du litar på.” Sedan fäster hon en liten silverstjärna med ett öga på din jacka.",
+                "till": {
+                  "fynd": "vaktarmarke"
+                }
+              },
+              {
+                "label": "Titta i teleskopet",
+                "kostnad": 0,
+                "text": "Genom teleskopet ser du Svalan över Sjöviken, och långt bortom den ett land du aldrig har sett. Stella drar snabbt för luckan. ”Inte än.” Hon fäster en liten silverstjärna med ett öga på din jacka och stoppar en hoprullad karta i din hand.",
+                "till": {
+                  "fynd": "vaktarmarke",
+                  "extra": "stjarnkarta"
                 }
               }
             ]
@@ -3774,7 +3924,9 @@
     "gammelgaddan": "Nattfiskaren säger att Gammelgäddan vid Udden bara hugger på det som blänker.",
     "mansik": "Vira säger att månsiken i Vassen bara nappar på hennes månbete.",
     "sjoodjur": "Bertil säger att något stort simmar runt i sjön och gömmer sig i Vassen.",
-    "efterlyst": "Drottningen lovar en belöning till den som fångar Gråskuggan. Han har setts runt den gamla gruvan under berget."
+    "efterlyst": "Drottningen lovar en belöning till den som fångar Gråskuggan. Han har setts runt den gamla gruvan under berget.",
+    "gruvan": "Holger såg en gråklädd gestalt smita in i gruvan en natt.",
+    "svalan": "Stjärnväktarna skriver att du ska titta ner i vattnet i Sjöviken en natt."
   },
   "personRykten": {
     "vira": [
@@ -4013,6 +4165,20 @@
       "klar": [
         "sak:gratyg"
       ]
+    },
+    "rykte:gruvan": {
+      "pekar": "berget",
+      "natt": true,
+      "klar": [
+        "sak:gratyg"
+      ]
+    },
+    "rykte:svalan": {
+      "pekar": "sjo",
+      "natt": true,
+      "klar": [
+        "skett:svalan"
+      ]
     }
   },
   "vakt": {
@@ -4036,6 +4202,11 @@
       {
         "label": "Fråga om han står här hela tiden",
         "svar": "Dag och natt. En riktig vakt vilar aldrig."
+      },
+      {
+        "label": "Fråga om någon har gått in i gruvan",
+        "svar": "Ingen kommer förbi mig. Fast en natt smet en gråklädd gestalt förbi, med huvan uppdragen. Jag blundade bara ett ögonblick, och sedan var den borta i mörkret. Säg inget till drottningen.",
+        "rykte": "rykte:gruvan"
       }
     ],
     "knappNatt": "Smyg närmare",
