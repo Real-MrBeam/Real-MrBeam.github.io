@@ -388,7 +388,7 @@ const START = () => ({
   stars: REAL ? REAL.stars : startData.stjarnor, coins: REAL ? REAL.stoft : startData.stjarnstoft, node: startData.plats,
   built: Object.fromEntries(startData.byggt.map(id => [id, true])),
   valda: {}, saker: [], steg: {}, handlat: {}, djur: [], fram: [], stopp: {}, hittat: [], spent: 0, kistor: [], agnAnvant: [], agnLager: {}, fiskbok: {}, rekord: {}, namn: {}, bytt: {}, salt: {}, pa: {}, rykten: [],
-  sett: new Uint8Array(MW*MH), damm: false, medaljer: 0, brevTagna: [], svalan: false,
+  sett: new Uint8Array(MW*MH), damm: false, medaljer: 0, brevTagna: [],
   log: REAL ? REAL.handelser.slice() : startData.logg.map(r => ({ typ: 'runa', amne: r.amne, procent: Math.round(r.poang / r.max * 100), stjarnor: r.stjarnor, bonus: r.bonus })),
   testIdx: 0,
 });
@@ -498,7 +498,6 @@ function onArrive(){
   S.node = boy.target; boy.route = null; boy.dir = 'down'; saveSoon();
   if (pendingPlot && PLOTS.find(p => p.id === pendingPlot).node === S.node){ showPlot(PLOTS.find(p => p.id === pendingPlot)); pendingPlot = null; }
   else showNode();
-  maybeSvalan();
 }
 let pendingPlot = null;
 
@@ -838,7 +837,6 @@ function frame(now){
   if (Math.abs(nightLevel - (S.natt ? 1 : 0)) < .005) nightLevel = S.natt ? 1 : 0;
   if (nightLevel > 0) drawNight(now, nightLevel);
   drawStarfall(now, dt);
-  drawSvalan(now, dt);
   drawLetterMarks(now, reach);
   // etiketter i skärmskala
   ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -1263,7 +1261,7 @@ function drawScene(now){
 /* ---------- natten då stjärnorna föll ---------- */
 const DAMM = berattelse.dammen;
 const pondHidden = id => !!DAMM && id === DAMM.plats && !S.damm;
-let STARFALL = null, SVALAN = null;
+let STARFALL = null;
 function maybeStarfall(){
   if (!DAMM || S.damm || !S.natt || !S.built[DAMM.tomt] || STARFALL || !$('#modal').hidden) return;
   const d = karta.vatten.dammar[0], t0 = performance.now() + 900;
@@ -1271,7 +1269,7 @@ function maybeStarfall(){
   lastRevealKey = ''; revealAround(STARFALL.x, STARFALL.y, 4); lastRevealKey = '';
   cam.follow = false; cam.focus = { x: STARFALL.x, y: STARFALL.y, until: t0 + 6500 };
 }
-const shake = now => !reduceMotion && ((STARFALL && now > STARFALL.t0 + 2600 && now < STARFALL.t0 + 3900) || (SVALAN && now > SVALAN.hit && now < SVALAN.hit + 900)) ? Math.sin(now / 22) * 2.5 : 0;
+const shake = now => !reduceMotion && STARFALL && now > STARFALL.t0 + 2600 && now < STARFALL.t0 + 3900 ? Math.sin(now / 22) * 2.5 : 0;
 function drawStarfall(now, dt){
   const F = STARFALL; if (!F || now < F.t0) return;
   const t = now - F.t0;
@@ -1299,98 +1297,6 @@ function drawStarfall(now, dt){
     F.told = true;
     openModal([{ icon: iconURL(STAR, 8), title: DAMM.rubrik, text: DAMM.text, button: 'Fortsätt' }], () => { STARFALL = null; showNode(); });
   }
-}
-
-/* ---------- Svalan tänds (2026-11-15) ---------- */
-// Stjärnväktarnas second letter says: go down to the lake one night and look in the water. The first night he stands in Sjöviken
-// after reading it, eight stars light one by one in the water and make a swallow, the constellation Svalan that the sailors
-// steered by. It blinks, a star comes loose from the sky and falls into the lake (the ground shakes), and Siri comes running.
-// Afterwards Svalan shines in the lake every night, and where the star fell something glows until he wades out and takes it
-// (berattelse.svalan, S.svalan). Effects in the water and the sky, no figures. The positions are in tiles in the data.
-const SV = berattelse.svalan;
-const SWALLOW = [[0, -9], [0, -2], [-11, -4], [-22, -9], [11, -4], [22, -9], [-6, 9], [6, 9]];   // head, body, wings, forked tail
-const SWALLOW_LINES = [[0, 1], [1, 2], [2, 3], [1, 4], [4, 5], [1, 6], [1, 7]];
-const starWaiting = () => !!SV && !!S.svalan && !S.saker.includes(SV.fynd) && !S.salt['fynd:' + SV.fynd];
-function maybeSvalan(){
-  if (!SV || S.svalan || !S.natt || S.node !== SV.plats || boy.route || LEVEL || SVALAN || STARFALL || !$('#modal').hidden || !S.brevTagna.includes(SV.brev)) return;
-  if (current && current.type === 'dialog') return;
-  const t0 = performance.now() + 900, x = SV.cx * TS, y = SV.cy * TS;
-  SVALAN = { t0, x, y, fx: SV.fx * TS, fy: SV.fy * TS, hit: t0 + 5900, lit: 0 };
-  lastRevealKey = ''; revealAround(x, y, 4); lastRevealKey = '';
-  cam.follow = false; cam.focus = { x, y: (y + SVALAN.fy) / 2, until: t0 + 7400 };
-}
-// the swallow with its first `lit` stars, faint dotted lines between them
-function drawSwallow(cx, cy, lit, a, now){
-  ctx.save(); ctx.globalCompositeOperation = 'lighter';
-  ctx.fillStyle = `rgba(190,210,255,${.35 * a})`;
-  for (const [i, j] of SWALLOW_LINES){
-    if (i >= lit || j >= lit) continue;
-    const [x0, y0] = SWALLOW[i], [x1, y1] = SWALLOW[j], n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0));
-    for (let k = 2; k < n - 1; k += 2) ctx.fillRect(Math.round(cx + x0 + (x1 - x0) * k / n), Math.round(cy + y0 + (y1 - y0) * k / n), 1, 1);
-  }
-  SWALLOW.slice(0, lit).forEach(([dx, dy], i) => {
-    const tw = reduceMotion ? 1 : .75 + .25 * Math.sin(now / 420 + i * 1.7), x = Math.round(cx + dx), y = Math.round(cy + dy);
-    const g = ctx.createRadialGradient(x + .5, y + .5, 0, x + .5, y + .5, 7);
-    g.addColorStop(0, `rgba(255,245,200,${.5 * a * tw})`); g.addColorStop(1, 'rgba(255,245,200,0)');
-    ctx.fillStyle = g; ctx.fillRect(x - 7, y - 7, 15, 15);
-    ctx.fillStyle = `rgba(255,240,170,${a * tw})`; ctx.fillRect(x - 1, y, 3, 1); ctx.fillRect(x, y - 1, 1, 3);
-    ctx.fillStyle = `rgba(255,255,255,${a})`; ctx.fillRect(x, y, 1, 1);
-  });
-  ctx.restore();
-}
-// the star under the surface, until he has taken it
-function drawUnderGlow(now, lv){
-  const x = SV.fx * TS, y = SV.fy * TS, p = reduceMotion ? 1 : .8 + .2 * Math.sin(now / 500);
-  ctx.save(); ctx.globalCompositeOperation = 'lighter';
-  const g = ctx.createRadialGradient(x, y, 0, x, y, 9); g.addColorStop(0, `rgba(160,240,255,${(.3 + .35 * lv) * p})`); g.addColorStop(1, 'rgba(160,240,255,0)');
-  ctx.fillStyle = g; ctx.fillRect(x - 9, y - 9, 18, 18);
-  ctx.fillStyle = `rgba(255,255,255,${.6 * p})`; ctx.fillRect(Math.round(x), Math.round(y), 1, 1);
-  ctx.restore();
-}
-function drawSvalan(now, dt){
-  if (!SV) return;
-  const E = SVALAN, x = SV.cx * TS, y = SV.cy * TS;
-  if (!E){
-    if (S.svalan && nightLevel > 0 && (DEBUG.mode || seenAt(Math.floor(SV.cx), Math.floor(SV.cy)))) drawSwallow(x, y, SWALLOW.length, nightLevel, now);
-    if (starWaiting() && (DEBUG.mode || seenAt(Math.floor(SV.fx), Math.floor(SV.fy)))) drawUnderGlow(now, nightLevel);
-    return;
-  }
-  if (now < E.t0) return;
-  const t = now - E.t0, lit = Math.max(0, Math.min(SWALLOW.length, Math.floor((t - 600) / 450) + 1));
-  for (; E.lit < lit; E.lit++) sparkle(x + SWALLOW[E.lit][0], y + SWALLOW[E.lit][1], 6);
-  drawSwallow(x, y, lit, 1, now);
-  // Svalan blinks, brighter for a moment
-  if (t > 4200 && t < 5000) drawSwallow(x, y, lit, Math.sin((t - 4200) / 800 * Math.PI * 2) ** 2, now);
-  // a star comes loose from the sky and falls into the lake
-  const k = (now - (E.hit - 700)) / 700;
-  if (k > 0 && k < 1){
-    const sx = E.fx - 110, sy = E.fy - 190, px = sx + (E.fx - sx) * k, py = sy + (E.fy - sy) * k, ddx = (E.fx - sx) / 40, ddy = (E.fy - sy) / 40;
-    ctx.save(); ctx.globalCompositeOperation = 'lighter';
-    for (let j = 14; j >= 0; j--){ ctx.fillStyle = `rgba(255,${245 - j * 6},${200 - j * 8},${1 - j * .06})`; const s = j ? (j < 5 ? 2 : 1) : 4; ctx.fillRect(Math.round(px - ddx * j * .8 - s / 2), Math.round(py - ddy * j * .8 - s / 2), s, s); }
-    const g = ctx.createRadialGradient(px, py, 0, px, py, 12); g.addColorStop(0, 'rgba(255,245,200,.6)'); g.addColorStop(1, 'rgba(255,245,200,0)'); ctx.fillStyle = g; ctx.fillRect(px - 12, py - 12, 24, 24);
-    ctx.restore();
-  }
-  if (now >= E.hit && !S.svalan){
-    S.svalan = true; saveSoon(); renderRumors();
-    sparkle(E.fx, E.fy, 40, '#2ce8f5'); sparkle(E.fx, E.fy, 26); dust(E.fx, E.fy);
-  }
-  if (S.svalan) drawUnderGlow(now, 1);
-  if (t > 7400 && !E.told){
-    E.told = true;
-    openModal([{ icon: iconURL(STAR, 8), title: SV.rubrik, text: SV.text, button: 'Fortsätt' }], () => {
-      SVALAN = null;
-      startDialog(SV.siri.map(l => ({ p: l.p, t: l.t })), () => [{ label: 'Tillbaka till kartan', alt: true, run: toNode }]);
-    });
-  }
-}
-function fallenStarBlock(){
-  const here = S.node === SV.plats && !boy.route;
-  return `<div class="plot"><div><b>${esc(SV.lysRubrik)}</b><span>${esc(SV.lysText)}</span></div>${here ? `<button class="btn" type="button" data-svalan="1">${esc(SV.knapp)}</button>` : ''}</div>`;
-}
-function takeFallenStar(){
-  if (!starWaiting()) return;
-  S.saker.push(SV.fynd); saveSoon(); renderPack(); sparkle(boy.x + 8, boy.y + 2, 18, '#2ce8f5');
-  itemModal(SV.fynd, showNode);
 }
 
 /* ---------- natten ---------- */
@@ -1654,7 +1560,6 @@ const PLACE_PARTS = [
   { brev: true, on: id => !!FS && id === FS.plats && !S.brevFiske, block: () => fishLetterBlock(), active: () => true },
   { brev: true, on: id => id === 'hem' && !!medalWaiting(), block: () => medalLetterBlock(), active: () => true },
   { brev: true, on: id => mapLettersAt(id).length > 0, block: id => mapLettersAt(id).map(mapLetterBlock).join(''), active: () => true },
-  { on: id => !!SV && id === SV.plats && starWaiting(), block: () => fallenStarBlock(), active: () => true },   // the star from Svalan
   { on: id => !!berattelse.handel && id === berattelse.handel.plats, block: () => tentBlock(), active: () => !!S.natt },   // a shop at night
   // fishing: at night a fishing place is light as long as he has something to fish with; by day while a water animal or a kind
   // he has not caught is left there
@@ -1971,7 +1876,6 @@ panel.addEventListener('click', ev => {
   else if (b.dataset.fbrev) readFishLetter();
   else if (b.dataset.medalj) readMedalLetter(S.medaljer || 0, true);
   else if (b.dataset.mbrev) readMapLetter(b.dataset.mbrev);
-  else if (b.dataset.svalan) takeFallenStar();
   else if (b.dataset.handel) startTrade();
   else if (b.dataset.vira) startVira();
   else if (b.dataset.granne) talkNeighbour();
@@ -2336,7 +2240,7 @@ let MOON_URL = '', showDoneRumors = false;
 function condOk(c){
   return c.split('|').some(x => {
     const i = x.indexOf(':'), k = x.slice(0, i), v = x.slice(i + 1);
-    return k === 'djur' ? S.djur.includes(v) : k === 'fisk' ? S.fiskbok[v] !== undefined : k === 'sak' ? S.saker.includes(v) : k === 'hittat' ? S.hittat.includes(v) : k === 'stopp' ? !!S.stopp[v] : k === 'skett' ? v === 'svalan' && !!S.svalan : false;
+    return k === 'djur' ? S.djur.includes(v) : k === 'fisk' ? S.fiskbok[v] !== undefined : k === 'sak' ? S.saker.includes(v) : k === 'hittat' ? S.hittat.includes(v) : k === 'stopp' ? !!S.stopp[v] : false;
   });
 }
 const rumorInfo = k => (berattelse.ryktesInfo || {})[k] || {};
@@ -2438,14 +2342,14 @@ function tellNews(){
   if (!REAL) return;
   const seen = seenEvents();
   newsQueue = REAL.handelser.filter(e => !seen.includes(e.id));
-  if (!introSeen()) showIntro(); else if (newsQueue.length) showNews(); else { maybeStarfall(); maybeSvalan(); }
+  if (!introSeen()) showIntro(); else if (newsQueue.length) showNews(); else maybeStarfall();
 }
 /* ---------- sparning ---------- */
 // His game is saved as spel.json in the private repo Real-MrBeam/stjarnkartan-data through GitHub's API. The key arrives
 // encrypted in the page (#lasNyckel) and opens with the password, like the portraits. Without the key nothing is saved.
 // Stars and stardust are never saved: they are counted from the runes and scrolls. Only what he has spent is saved.
 const SAVE = { repo: '', file: '', key: '', sha: null, timer: 0, off: false, loaded: false };
-const SAVED_FIELDS = ['node', 'built', 'valda', 'saker', 'steg', 'handlat', 'djur', 'fram', 'stopp', 'hittat', 'spent', 'kistor', 'agnAnvant', 'fiskbok', 'namn', 'bytt', 'intro', 'natt', 'salt', 'lasta', 'pa', 'tant', 'brev2', 'rykten', 'brevFiske', 'rekord', 'agnLager', 'damm', 'melodi', 'ekenOppen', 'medaljer', 'brevTagna', 'svalan'];
+const SAVED_FIELDS = ['node', 'built', 'valda', 'saker', 'steg', 'handlat', 'djur', 'fram', 'stopp', 'hittat', 'spent', 'kistor', 'agnAnvant', 'fiskbok', 'namn', 'bytt', 'intro', 'natt', 'salt', 'lasta', 'pa', 'tant', 'brev2', 'rykten', 'brevFiske', 'rekord', 'agnLager', 'damm', 'melodi', 'ekenOppen', 'medaljer', 'brevTagna'];
 const b64 = text => { const bytes = new TextEncoder().encode(text); let s = ''; for (const b of bytes) s += String.fromCharCode(b); return btoa(s); };
 const unb64 = data => new TextDecoder().decode(Uint8Array.from(atob(data.replace(/\s/g, '')), c => c.charCodeAt(0)));
 function spend(n){ S.coins -= n; S.spent += n; }
@@ -3080,17 +2984,13 @@ $('#btnNasta').addEventListener('click', () => { if (window.Musik){ if (!Musik.s
 if (new URLSearchParams(location.search).has('debug')) setInterval(() => { $('#debugLat').textContent = window.Musik && Musik.spelar ? `Spelar: ${Musik.lat}` : 'Musiken är av'; }, 500);
 // Debug: switch day and night at once, without sleeping in Hemmet
 const nattLabel = () => { $('#btnNatt').textContent = S.natt ? 'Dag' : 'Natt'; };
-$('#btnNatt').addEventListener('click', () => { S.natt = !S.natt; musicSync(); showNode(); nattLabel(); maybeSvalan(); });
-// Svalan again from the start: their first letter counts as read (so the second one waits in Hemmet), it turns night, and
-// once the second letter is taken it plays when he comes to Sjöviken
-$('#btnSvalan').addEventListener('click', () => {
-  if (!SV) return;
-  S.svalan = false; S.brev2 = true;
-  S.saker = S.saker.filter(x => x !== SV.fynd); renderLetters(); renderPack(); renderRumors();
+$('#btnNatt').addEventListener('click', () => { S.natt = !S.natt; musicSync(); showNode(); nattLabel(); });
+// Stjärnväktarnas second letter waits in Hemmet again: their first letter counts as read, and it turns night so that the
+// meeting in the tower can be tried once the letter is taken
+$('#btnVaktarbrev').addEventListener('click', () => {
+  S.brev2 = true; S.brevTagna = S.brevTagna.filter(k => k !== 'vaktarna2'); renderLetters();
   if (!S.natt){ S.natt = true; musicSync(); nattLabel(); }
-  if (!S.brevTagna.includes(SV.brev)){ showNode(); toast('Ta upp Stjärnväktarnas andra brev i Hemmet och gå sedan till Sjöviken.'); }
-  else if (S.node !== SV.plats){ showNode(); toast('Gå till Sjöviken, så tänds Svalan när du kommer fram.'); }
-  else maybeSvalan();
+  showNode(); toast('Stjärnväktarnas andra brev ligger på trappan i Hemmet.');
 });
 const DEBUG_LABEL = ['Debug: av', 'Debug: bygg A, ingen dimma', 'Debug: bygg B, ingen dimma', 'Debug: tomma tomter, ingen dimma'];
 $('#btnDebug').addEventListener('click', () => {
