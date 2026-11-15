@@ -388,7 +388,7 @@ const START = () => ({
   stars: REAL ? REAL.stars : startData.stjarnor, coins: REAL ? REAL.stoft : startData.stjarnstoft, node: startData.plats,
   built: Object.fromEntries(startData.byggt.map(id => [id, true])),
   valda: {}, saker: [], steg: {}, handlat: {}, djur: [], fram: [], stopp: {}, hittat: [], spent: 0, kistor: [], agnAnvant: [], agnLager: {}, fiskbok: {}, rekord: {}, namn: {}, bytt: {}, salt: {}, pa: {}, rykten: [],
-  sett: new Uint8Array(MW*MH), damm: false,
+  sett: new Uint8Array(MW*MH), damm: false, medaljer: 0,
   log: REAL ? REAL.handelser.slice() : startData.logg.map(r => ({ typ: 'runa', amne: r.amne, procent: Math.round(r.poang / r.max * 100), stjarnor: r.stjarnor, bonus: r.bonus })),
   testIdx: 0,
 });
@@ -609,6 +609,18 @@ function drawNode(n, now, reachable){
   ellipse(cx, cy, 3.5, 2, !reachable ? '#5a6988' : n.id === 'slott' ? '#e43b44' : nodeActive(n.id) ? '#feae34' : '#8b9bb4');
   ctx.fillStyle = reachable ? '#ffffff' : '#c0cbdc'; ctx.fillRect(cx - 4, cy - 2, 2, 1);
 }
+// A letter waiting at a place (a part with brev: true in PLACE_PARTS) floats as an envelope over the plate, above the boy's head
+// when he stands there (Peter 2026-11-15). It bobs slowly, and stands still with reduced motion.
+const letterAt = id => PLACE_PARTS.some(part => part.brev && part.on(id));
+function drawLetterMarks(now){
+  const bob = reduceMotion ? 0 : Math.round(Math.sin(now / 380) * 1.5);
+  for (const id in NODES){
+    if (!nodeShown(id) || !letterAt(id)) continue;
+    const n = NODES[id], x = n.x*TS + 8 - ENVELOPE.width / 2, y = n.y*TS - 13 + bob;
+    ctx.fillStyle = 'rgba(24,20,37,.3)'; ctx.fillRect(x + 2, n.y*TS + 6, ENVELOPE.width - 4, 1);   // its shadow on the plate
+    ctx.drawImage(ENVELOPE, x, y);
+  }
+}
 const FLAG_PLOT = FLAGS.map(f => PLOTS.find(p => f.x >= p.x*TS && f.x < (p.x + 3)*TS && f.y >= p.y*TS && f.y < (p.y + 3)*TS));
 // Gamla kvarnen (Peter 2026-10-28): a small wooden tower on the roof with four sails that turn slowly. The sails reach up over
 // the trees, so they are drawn here and not as tiles. karta.json kvarn gives the hub in tiles. The frames are turned pixel by
@@ -824,6 +836,7 @@ function frame(now){
   if (Math.abs(nightLevel - (S.natt ? 1 : 0)) < .005) nightLevel = S.natt ? 1 : 0;
   if (nightLevel > 0) drawNight(now, nightLevel);
   drawStarfall(now, dt);
+  drawLetterMarks(now);
   // etiketter i skärmskala
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   const sx = wx => wx * scaleDev - ox, sy = wy => wy * scaleDev - oy;
@@ -1537,8 +1550,10 @@ const PLACE_PARTS = [
   { on: id => !!viraHere() && id === VIRA.plats, block: () => viraBlock(), active: () => true },                       // a shop
   { on: id => !!neighbour() && id === GRANNE.plats, block: () => neighbourBlock(), active: () => !S.saker.includes(GRANNE.ger) },
   { on: id => id === 'hem', block: () => sleepBlock(), active: () => true },   // he can always sleep at home (Peter 2026-10-23)
-  { on: id => id === 'hem' && letterWaiting(), block: () => letterBlock(), active: () => true },
-  { on: id => !!FS && id === FS.plats && !S.brevFiske, block: () => fishLetterBlock(), active: () => true },
+  // a letter waiting to be picked up (brev: true) also floats over the plate as an envelope (Peter 2026-11-15)
+  { brev: true, on: id => id === 'hem' && letterWaiting(), block: () => letterBlock(), active: () => true },
+  { brev: true, on: id => !!FS && id === FS.plats && !S.brevFiske, block: () => fishLetterBlock(), active: () => true },
+  { brev: true, on: id => id === 'hem' && !!medalWaiting(), block: () => medalLetterBlock(), active: () => true },
   { on: id => !!berattelse.handel && id === berattelse.handel.plats, block: () => tentBlock(), active: () => !!S.natt },   // a shop at night
   // fishing: at night a fishing place is light as long as he has something to fish with; by day while a water animal or a kind
   // he has not caught is left there
@@ -1602,6 +1617,31 @@ function readFishLetter(){
   if (!S.brevFiske){ S.brevFiske = true; saveSoon(); renderLetters(); renderFishBook(); }
   emblemPortrait('fiskesallskapet', FISH_EMBLEM);
   startDialog(FS.stycken.map(t => ({ p: 'fiskesallskapet', t })), () => [{ label: 'Tillbaka till kartan', alt: true, run: toNode }]);
+}
+// Fiskesällskapets medaljer (Peter 2026-11-15): when he has three of five kinds (as many of each as the fish book asks) a letter
+// from the society lies on the step in Hemmet, day and night, with a bronze medal, and at ten kinds one with a silver medal
+// (fiskesallskapet.medaljer). The medal goes in the bag. It gives no stars and no stardust. S.medaljer is how many medal letters
+// he has taken up, and they can be read again among the letters.
+function medals(){ return (FS && FS.medaljer) || []; }
+function kindsDone(){ return Object.keys(FISKE.fiskar).filter(id => (S.fiskbok[id] || 0) >= maxOf(id)).length; }
+function medalWaiting(){ const m = medals()[S.medaljer || 0]; return m && kindsDone() >= m.sorter ? m : null; }
+function medalLetterBlock(){
+  const m = medalWaiting(), here = S.node === 'hem' && !boy.route;
+  return `<div class="plot"><div><b>${esc(m.rubrik)}</b></div>${here ? `<button class="btn" type="button" data-medalj="1">${esc(m.knapp)}</button>` : ''}</div>`;
+}
+// fresh: taken up from the step, so the letter ends with the medal; read again among the letters it just ends
+function readMedalLetter(i, fresh){
+  const m = medals()[i]; if (!m) return;
+  emblemPortrait('fiskesallskapet', FISH_EMBLEM);
+  startDialog(m.stycken.map(t => ({ p: 'fiskesallskapet', t })), () => fresh
+    ? [{ label: 'Ta medaljen', run: () => takeMedal(i) }]
+    : [{ label: 'Tillbaka till kartan', alt: true, run: toNode }]);
+}
+function takeMedal(i){
+  const m = medals()[i];
+  if ((S.medaljer || 0) <= i){ S.medaljer = i + 1; if (!S.saker.includes(m.sak)) S.saker.push(m.sak); saveSoon(); renderPack(); renderLetters(); renderFishBook(); }
+  if (window.Musik && Musik.jingel) Musik.jingel('fisk');
+  itemModal(m.sak, toNode);
 }
 function tentBlock(){
   const H = berattelse.handel, here = S.node === H.plats && !boy.route;
@@ -1803,6 +1843,7 @@ panel.addEventListener('click', ev => {
   else if (b.dataset.banaut && LEVEL) levelWalkTo(...LEVEL.pos[LEVEL.door]);
   else if (b.dataset.brev) readLetter2();
   else if (b.dataset.fbrev) readFishLetter();
+  else if (b.dataset.medalj) readMedalLetter(S.medaljer || 0, true);
   else if (b.dataset.handel) startTrade();
   else if (b.dataset.vira) startVira();
   else if (b.dataset.granne) talkNeighbour();
@@ -2131,7 +2172,8 @@ const KAT = {
   klader: { namn: 'Kläder', ico: sprite(["........", "...yy...", "..yyyy..", "..yyyy..", "..RRRR..", "yyyyyyyy", ".yyyyyy.", "........"], { y:'#f4d27a', R:'#e43b44' }) },
   fynd: { namn: 'Fynd', ico: sprite(["........", ".cccccc.", "cwCccCcc", "cCccccCc", ".cCccCc.", "..cCCc..", "...cc...", "........"], { c:'#2ce8f5', C:'#0e5cae', w:'#ffffff' }) },
 };
-const KAT_ORDER = ['sarskilt', 'redskap', 'agn', 'lockbete', 'klader', 'fynd'];
+KAT.medalj = { namn: 'Medaljer', ico: sprite(["bb....bb", ".bb..bb.", "..bbbb..", "..oooo..", ".oYYyyo.", ".oYyyko.", ".oyykko.", "..oooo.."], { b:'#0e5cae', o:'#733e39', y:'#feae34', Y:'#fee761', k:'#f77622' }) };
+const KAT_ORDER = ['sarskilt', 'medalj', 'redskap', 'agn', 'lockbete', 'klader', 'fynd'];
 const katOf = id => SPECIAL.includes(id) ? 'sarskilt' : SAKER[id].typ === 'lock' ? 'lockbete' : SAKER[id].typ === 'verktyg' ? 'redskap' : SAKER[id].typ;
 let KAT_URL = null;
 const katIcon = k => { if (!KAT_URL) KAT_URL = Object.fromEntries(Object.entries(KAT).map(([key, v]) => [key, iconURL(v.ico, 3)])); return KAT_URL[k]; };
@@ -2272,7 +2314,7 @@ function tellNews(){
 // encrypted in the page (#lasNyckel) and opens with the password, like the portraits. Without the key nothing is saved.
 // Stars and stardust are never saved: they are counted from the runes and scrolls. Only what he has spent is saved.
 const SAVE = { repo: '', file: '', key: '', sha: null, timer: 0, off: false, loaded: false };
-const SAVED_FIELDS = ['node', 'built', 'valda', 'saker', 'steg', 'handlat', 'djur', 'fram', 'stopp', 'hittat', 'spent', 'kistor', 'agnAnvant', 'fiskbok', 'namn', 'bytt', 'intro', 'natt', 'salt', 'lasta', 'pa', 'tant', 'brev2', 'rykten', 'brevFiske', 'rekord', 'agnLager', 'damm', 'melodi', 'ekenOppen'];
+const SAVED_FIELDS = ['node', 'built', 'valda', 'saker', 'steg', 'handlat', 'djur', 'fram', 'stopp', 'hittat', 'spent', 'kistor', 'agnAnvant', 'fiskbok', 'namn', 'bytt', 'intro', 'natt', 'salt', 'lasta', 'pa', 'tant', 'brev2', 'rykten', 'brevFiske', 'rekord', 'agnLager', 'damm', 'melodi', 'ekenOppen', 'medaljer'];
 const b64 = text => { const bytes = new TextEncoder().encode(text); let s = ''; for (const b of bytes) s += String.fromCharCode(b); return btoa(s); };
 const unb64 = data => new TextDecoder().decode(Uint8Array.from(atob(data.replace(/\s/g, '')), c => c.charCodeAt(0)));
 function spend(n){ S.coins -= n; S.spent += n; }
@@ -2780,7 +2822,8 @@ function renderFishBook(){
   const ids = Object.keys(FISKE.fiskar).filter(id => S.fiskbok[id] !== undefined);
   const all = Object.keys(FISKE.fiskar), done = all.filter(id => (S.fiskbok[id] || 0) >= maxOf(id)).length;
   // the society's line wraps on its own: the name and what they want, and under it how far he has come (Peter 2026-10-24)
-  const head = S.brevFiske ? `<li class="fs-head"><span><b>Fiskesällskapet</b> vill ha tre av varje sort.</span><span class="st">${done} av ${all.length} sorter klara</span></li>` : '';
+  const next = medals().find(m => done < m.sorter);
+  const head = S.brevFiske ? `<li class="fs-head"><span><b>Fiskesällskapet</b> vill ha tre av varje sort.</span><span class="st">${done} av ${all.length} sorter klara${next ? `, medalj vid ${next.sorter}` : ''}</span></li>` : '';
   $('#fishbook').innerHTML = head + (ids.length
     ? ids.map(id => `<li><span class="fishico"><img class="pix" src="${fishIcon(id)}" alt=""></span><span><b>${esc(FISKE.fiskar[id].namn)}</b> ${esc(FISKE.fiskar[id].text)}${S.rekord[id] !== undefined ? ` <span class="rek">Rekord ${kgText(S.rekord[id])} kg</span>` : ''}</span><span class="st">${S.fiskbok[id] || 0} / ${maxOf(id)}</span></li>`).join('')
     : '<li><span>Inga fiskar ännu.</span></li>');
@@ -2894,6 +2937,12 @@ $('#btnGeRykten').addEventListener('click', () => {
 $('#btnGeFisk').addEventListener('click', () => { for (const id in FISKE.fiskar){ S.fiskbok[id] = Math.min(maxOf(id), (S.fiskbok[id] || 0) + 1); S.rekord[id] = Math.max(S.rekord[id] || 0, weigh(id)); } renderFishBook(); toast('En av varje fisk lades i fiskboken.'); });
 $('#btnGe').addEventListener('click', showGive);
 $('#btnGeAlla').addEventListener('click', () => { for (const id in SAKER) if (SAKER[id].typ !== 'djur') debugGive(id); renderPack(); toast('Alla saker lades i väskan.'); });
+// five more kinds in the fish book, as many of each as it asks, to try the medals (Peter 2026-11-15)
+$('#btnGeFisk').addEventListener('click', () => {
+  Object.keys(FISKE.fiskar).filter(id => (S.fiskbok[id] || 0) < maxOf(id)).slice(0, 5).forEach(id => { S.fiskbok[id] = maxOf(id); });
+  renderFishBook(); toast(`${kindsDone()} sorter är klara i fiskboken.`);
+  if (current && current.type !== 'walk' && current.type !== 'dialog') renderPanel(current);
+});
 $('#btnGeDjur').addEventListener('click', () => { for (const id in SAKER) if (SAKER[id].typ === 'djur') debugGive(id); for (const id in berattelse.djur) if (!S.djur.includes(id)) S.djur.push(id); renderBook(); toast('Alla djur skrevs in i djurboken.'); });
 $('#btnNasta').addEventListener('click', () => { if (window.Musik){ if (!Musik.spelar){ musicSync(); Musik.start(); musicButton(); } else Musik.nasta(); } });
 // Debug: which song is playing
@@ -2909,15 +2958,17 @@ $('#btnDebug').addEventListener('click', () => {
   $('#debugBtns').hidden = DEBUG.mode === 0;
   if (current && current.type !== 'walk' && current.type !== 'dialog') renderPanel(current);
 });
-// The letters in the collection: the queen's, and Stjärnväktarnas once he has picked it up. Tapped like the runes.
+// The letters in the collection: the queen's, and Stjärnväktarnas, Fiskesällskapets and its medal letters once he has picked
+// them up. Tapped like the runes.
 const ENVELOPE = sprite(["oooooooooooo", "owwwwwwwwwwo", "oowwwwwwwwoo", "owowwwwwwowo", "owwowwwwowwo", "owwwoyyowwwo", "owwwwyywwwwo", "owwwwwwwwwwo", "oooooooooooo"], { o:'#3f2631', w:'#ead4aa', y:'#e43b44' });
 function renderLetters(){
   const list = [{ id: 'drottningen', namn: 'Drottningens brev', text: 'Om djuren som gömmer sig i Glimmerdal.' }];
   if (S.brev2 && V) list.push({ id: 'stjarnvaktarna', namn: V.titel, text: 'Förseglat med en silverstjärna med ett öga.' });
   if (S.brevFiske && FS) list.push({ id: 'fiskesallskapet', namn: FS.titel, text: 'Fäst på tältduken bakom lägerelden.' });
+  medals().slice(0, S.medaljer || 0).forEach((m, i) => list.push({ id: 'medalj:' + i, namn: m.titel, text: m.lista }));
   $('#letters').innerHTML = list.map(l => `<li class="readable" data-brev="${l.id}" role="button" tabindex="0" title="Läs brevet"><span><b>${esc(l.namn)}</b> ${esc(l.text)}</span></li>`).join('');
 }
-const openLetter = li => { if (!li) return; const id = li.dataset.brev; if (id === 'drottningen') showIntro(); else if (id === 'fiskesallskapet') readFishLetter(); else readLetter2(); };
+const openLetter = li => { if (!li) return; const id = li.dataset.brev; if (id === 'drottningen') showIntro(); else if (id === 'fiskesallskapet') readFishLetter(); else if (id.startsWith('medalj:')) readMedalLetter(+id.slice(7), false); else readLetter2(); };
 $('#letters').addEventListener('click', ev => openLetter(ev.target.closest('li[data-brev]')));
 $('#letters').addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key === ' '){ const li = ev.target.closest('li[data-brev]'); if (li){ ev.preventDefault(); openLetter(li); } } });
 
@@ -2930,7 +2981,7 @@ const FLIK_COUNT = {
   djur: () => S.djur.length,
   fiskar: () => Object.keys(S.fiskbok).length,
   runor: () => S.log.length + S.kistor.length + pendingTickets().length,
-  brev: () => 1 + (S.brev2 ? 1 : 0) + (S.brevFiske ? 1 : 0),
+  brev: () => 1 + (S.brev2 ? 1 : 0) + (S.brevFiske ? 1 : 0) + (S.medaljer || 0),
   rykten: () => S.rykten.filter(rumorText).length,
 };
 const readStore = (key, fallback) => { if (TEST) return fallback; try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch (e) { return fallback; } };

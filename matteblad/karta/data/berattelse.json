@@ -823,6 +823,16 @@
       "text": "En åra som har gått av på mitten, grå av ålder. Vems båt var den från?",
       "typ": "fynd",
       "varde": 1
+    },
+    "fiskmedalj_brons": {
+      "namn": "Bronsmedalj",
+      "text": "Fiskesällskapets medalj i brons, med en fisk över vågor. Fem sorter, tre av varje.",
+      "typ": "medalj"
+    },
+    "fiskmedalj_silver": {
+      "namn": "Silvermedalj",
+      "text": "Fiskesällskapets medalj i silver, med en fisk över vågor. Tio sorter, tre av varje.",
+      "typ": "medalj"
     }
   },
   "bygg": {
@@ -3083,6 +3093,34 @@
       "Till dig som fiskar i Glimmerdal. Fiskesällskapet vid älven vill veta vad som simmar i våra vatten.",
       "Fånga tre av varje sort som finns och skriv in dem i din fiskbok. Fler än tre av samma behöver du inte, släpp tillbaka resten.",
       "Vi räknar med dig.\n\nNattfiskaren, för Fiskesällskapet"
+    ],
+    "medaljer": [
+      {
+        "sorter": 5,
+        "sak": "fiskmedalj_brons",
+        "rubrik": "Ett brev från Fiskesällskapet ligger på trappan",
+        "knapp": "Ta upp brevet",
+        "titel": "Fiskesällskapets bronsmedalj",
+        "lista": "Med en medalj i brons för fem sorter.",
+        "stycken": [
+          "Till dig som fiskar i Glimmerdal. Vi har räknat i din fiskbok: fem sorter, tre av varje. Det är fler än de flesta i sällskapet hann med sitt första år.",
+          "Därför får du Fiskesällskapets medalj i brons. Bär den med stolthet, eller åtminstone i fickan.",
+          "Den som har tre av tio sorter får nästa medalj. Vi räknar fortfarande med dig.\n\nNattfiskaren, för Fiskesällskapet"
+        ]
+      },
+      {
+        "sorter": 10,
+        "sak": "fiskmedalj_silver",
+        "rubrik": "Ett nytt brev från Fiskesällskapet ligger på trappan",
+        "knapp": "Ta upp brevet",
+        "titel": "Fiskesällskapets silvermedalj",
+        "lista": "Med en medalj i silver för tio sorter.",
+        "stycken": [
+          "Till dig som fiskar i Glimmerdal. Tio sorter, tre av varje. Vid älven har folk börjat undra om fiskarna pratar om dig.",
+          "Därför får du Fiskesällskapets medalj i silver. Den är tyngre än den ser ut, som det mesta som är värt något.",
+          "Vi räknar fortfarande med dig.\n\nNattfiskaren, för Fiskesällskapet"
+        ]
+      }
     ]
   },
   "nattstopp": {
