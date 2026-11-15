@@ -833,6 +833,11 @@
       "namn": "Silvermedalj",
       "text": "Fiskesällskapets medalj i silver, med en fisk över vågor. Tio sorter, tre av varje.",
       "typ": "medalj"
+    },
+    "fiskmedalj_guld": {
+      "namn": "Mästerfiskarmedalj",
+      "text": "Fiskesällskapets finaste medalj, i guld med en krona över fisken. Tjugo sorter, tre av varje.",
+      "typ": "medalj"
     }
   },
   "bygg": {
@@ -3118,10 +3123,40 @@
         "stycken": [
           "Till dig som fiskar i Glimmerdal. Tio sorter, tre av varje. Vid älven har folk börjat undra om fiskarna pratar om dig.",
           "Därför får du Fiskesällskapets medalj i silver. Den är tyngre än den ser ut, som det mesta som är värt något.",
-          "Vi räknar fortfarande med dig.\n\nNattfiskaren, för Fiskesällskapet"
+          "Den som har tre av tjugo sorter blir mästerfiskare och får sällskapets finaste medalj. Vi räknar fortfarande med dig.\n\nNattfiskaren, för Fiskesällskapet"
+        ]
+      },
+      {
+        "sorter": 20,
+        "sak": "fiskmedalj_guld",
+        "rubrik": "Ett tjockt brev från Fiskesällskapet ligger på trappan",
+        "knapp": "Ta upp brevet",
+        "titel": "Fiskesällskapets mästerfiskarmedalj",
+        "lista": "Med en mästerfiskarmedalj i guld för tjugo sorter.",
+        "stycken": [
+          "Till dig som fiskar i Glimmerdal. Tjugo sorter, tre av varje. Ingen i sällskapet har klarat det sedan nattfiskaren själv var ung, och han är inte ung längre.",
+          "Därför får du sällskapets finaste medalj, mästerfiskarmedaljen i guld. Från och med i dag är du mästerfiskare i Glimmerdal.",
+          "En mästerfiskare får se saker i vattnet som andra aldrig ser. Vad det är får du snart veta. Håll ögonen öppna.\n\nNattfiskaren, för Fiskesällskapet"
         ]
       }
     ]
+  },
+  "brev": {
+    "efterlysning": {
+      "plats": "sjo",
+      "rubrik": "En lapp sitter uppklistrad på skylten",
+      "text": "Överst står det EFTERLYST med stora bokstäver. Längst ner sitter drottningens sigill.",
+      "knapp": "Läs lappen",
+      "titel": "Efterlysning från drottningen",
+      "lista": "Uppklistrad på skylten vid Sjöviken.",
+      "fran": "drottningen",
+      "stycken": [
+        "EFTERLYST: GRÅSKUGGAN. En gestalt i lång grå kappa, med huvan uppdragen. Syns mest på natten.",
+        "Gråskuggan har setts i området runt den gamla gruvan, under berget mellan Sjöviken och Södra bron.",
+        "Den som fångar Gråskuggan, eller vet något om var han håller till, får en stor belöning av drottningen. Berätta för vakterna vid slottet.\n\nDrottningen av Glimmerdal"
+      ],
+      "rykte": "rykte:efterlyst"
+    }
   },
   "nattstopp": {
     "angen": {
@@ -3738,7 +3773,8 @@
     "stjarnsvalan": "Siri säger att det lysande skeppet är hennes Stjärnsvalan. Om nätterna kommer det närmast land vid Sjöviken.",
     "gammelgaddan": "Nattfiskaren säger att Gammelgäddan vid Udden bara hugger på det som blänker.",
     "mansik": "Vira säger att månsiken i Vassen bara nappar på hennes månbete.",
-    "sjoodjur": "Bertil säger att något stort simmar runt i sjön och gömmer sig i Vassen."
+    "sjoodjur": "Bertil säger att något stort simmar runt i sjön och gömmer sig i Vassen.",
+    "efterlyst": "Drottningen lovar en belöning till den som fångar Gråskuggan. Han har setts runt den gamla gruvan under berget."
   },
   "personRykten": {
     "vira": [
@@ -3970,6 +4006,12 @@
       "pekar": "vassen",
       "klar": [
         "djur:sigge"
+      ]
+    },
+    "rykte:efterlyst": {
+      "pekar": "berget",
+      "klar": [
+        "sak:gratyg"
       ]
     }
   },
