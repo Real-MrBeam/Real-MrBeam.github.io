@@ -1308,7 +1308,7 @@ const FIRE_OUT = { 'o:18,10': 'o:8,16', 'o:21,12': 'o:9,16' };
 // The burning ones flicker between three pictures (own drawings in row 16, Peter 2026-10-23), each fire in its own time
 const FIRE_FRAMES = { 'o:18,10': ['o:18,10', 'o:19,16', 'o:20,16'], 'o:21,12': ['o:21,12', 'o:21,16', 'o:22,16'] };
 const fireFrame = (i, now, px) => { const f = FIRE_FRAMES[i]; return !f || reduceMotion ? i : f[Math.floor(now / 160 + px * .013) % f.length]; };
-const LIGHT_TILES = { 84: [8, 8, 'win'], 88: [8, 8, 'win'], 'o:27,2': [8, 8, 'win'], 125: [8, 8, 'slit'], 51: [8, 10, 'small'], 55: [8, 10, 'small'], 'o:18,10': [8, 4, 'fire'], 'o:21,12': [8, 9, 'fire'], 'o:28,15': [8, 8, 'tent'], 'o:9,17': [8, 6, 'fyr'], 'o:24,2': [8, 8, 'rosa'] };   // the last two: the lamp of Siri's small lighthouse by the water, the church window (faint pink)
+const LIGHT_TILES = { 84: [8, 8, 'win'], 88: [8, 8, 'win'], 'o:27,2': [8, 8, 'win'], 125: [8, 8, 'slit'], 'o:0,18': [16, 8, 'slit'], 51: [8, 10, 'small'], 55: [8, 10, 'small'], 'o:18,10': [8, 4, 'fire'], 'o:21,12': [8, 9, 'fire'], 'o:28,15': [8, 8, 'tent'], 'o:9,17': [8, 6, 'fyr'], 'o:24,2': [8, 8, 'rosa'] };   // the last two: the lamp of Siri's small lighthouse by the water, the church window (faint pink)
 const lightIn = i => { for (const j of Array.isArray(i) ? i : [i]) if (LIGHT_TILES[j]) return LIGHT_TILES[j]; return null; };
 function nightLights(){
   if (!STATIC_LIGHTS){
@@ -1786,7 +1786,13 @@ function plotPreview(p){
   const c = document.createElement('canvas'); c.width = 48; c.height = 48; c.className = 'pix';
   const x = c.getContext('2d'); x.imageSmoothingEnabled = false;
   for (let dy = 0; dy < 3; dy++) for (let dx = 0; dx < 3; dx++) tile(x, 0, dx*16, dy*16);
-  plotTiles(p).forEach((row, dy) => row.forEach((i, dx) => { if (filled(i)) tile(x, i, dx*16, dy*16); }));
+  // a plot on a roof (tak, the tower at Tornet): the empty rows at the top are skipped and the building under it fills the picture
+  const rows = plotTiles(p); let skip = 0;
+  if (p.tak) while (skip < 2 && rows[skip].every(i => !filled(i))) skip++;
+  for (let dy = 0; dy < 3; dy++) for (let dx = 0; dx < 3; dx++){
+    const r = dy + skip, i = r < 3 ? rows[r][dx] : OBJ.find(o => o.x === p.x + dx && o.y === p.y + r)?.i;
+    if (i !== undefined && filled(i)) tile(x, i, dx*16, dy*16);
+  }
   return c;
 }
 function renderPanel(view){
