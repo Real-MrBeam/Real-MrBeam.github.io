@@ -299,7 +299,7 @@ function spela(ctx, dest, index, t0, skip = 0) {
 // ---------- the player on the page: the songs take turns with a short pause between them
 // Each time the game starts, the first song of the day and of the night is picked at random (Peter 2026-10-22), then they take turns
 const LAST_KEY = 'glimmerdal:senastLat';
-const P = { fx: true, ctx: null, master: null, bus: null, next: { dag: Math.floor(Math.random() * 60), natt: Math.floor(Math.random() * 60) }, end: 0, timer: 0, on: false, vol: .35, natt: false };
+const P = { fx: true, ctx: null, master: null, bus: null, next: { dag: Math.floor(Math.random() * 60), natt: Math.floor(Math.random() * 60), grotta: 0 }, end: 0, timer: 0, on: false, vol: .35, natt: false };
 // Off and on again carries on in the same song where it stopped (the sound is only paused). Day and night switch the song at once.
 function start() {
   if (P.on) return;
@@ -458,18 +458,33 @@ const TRAD = { step: .22,
     + 'D5 - E5 G5 A5 - G5 E5 D5 - C5 D5 E5 - - - G5 - E5 D5 C5 - D5 B4 A4 - - - - - - -').trim().split(' '),
   ack: [['A2', 'E3', 'A3', 'C4'], ['E2', 'B2', 'E3', 'G3'], ['A2', 'E3', 'A3', 'C4'], ['E2', 'B2', 'E3', 'G3'],
     ['D3', 'A3', 'D4', 'F4'], ['A2', 'E3', 'A3', 'C4'], ['C3', 'G3', 'C4', 'E4'], ['A2', 'E3', 'A3', 'C4']],
-  vind: 16 };   // the wind (and the flute away from the oak) only gets this far (Peter 2026-10-26: three more notes, the first phrase), and stops, as if it waits for the rest
+  vind: 16,   // the wind (and the flute away from the oak) only gets this far (Peter 2026-10-26: three more notes, the first phrase), and stops, as if it waits for the rest
+  kristall: .62, spets: .45 };   // the crystals in the mine answer the beginning one note at a time, this far apart (Kristallporten, Peter 2026-11-17)
+const beginning = () => TRAD.mel.slice(0, TRAD.vind).filter(tok => tok !== '-');
+const STJARNA = ['E6', 'G6', 'A6', 'C7', 'E7'];
 // tradPa(ctx, dest, t0, sort) schedules it on any AudioContext: 'flojt' (the flute with the guitar), 'fiol' (Näcken's fiddle
 // over a low drone), 'vind' (the beginning, whistled by the wind) or 'borjan' (the beginning on the flute, all he can play
 // before he has learnt it, Peter 2026-10-26). Returns its length in seconds.
+// 'kristall' is the crystals in the mine answering the beginning one note at a time, ringing like bells and a little louder for
+// each note, and 'eko' the crystals ringing faintly along with the flute's beginning, an octave up (Peter 2026-11-17).
 function tradPa(ctx, dest, t0, sort) {
-  const st = TRAD.step, toks = sort === 'vind' || sort === 'borjan' ? TRAD.mel.slice(0, TRAD.vind) : TRAD.mel;
+  if (sort === 'stjarna') {   // the star's five points light up one at a time in Stjärnbrunnen, each with a bell, higher and higher
+    STJARNA.forEach((n, i) => tone(ctx, dest, { f: freq(n), t: t0 + i * TRAD.spets, len: .6, vol: .1, kind: 'klocka' }));
+    return STJARNA.length * TRAD.spets + 1.2;
+  }
+  if (sort === 'kristall') {
+    const notes = beginning();
+    notes.forEach((tok, i) => tone(ctx, dest, { f: freq(tok) * 2, t: t0 + i * TRAD.kristall, len: .5, vol: .08 + i * .012, kind: 'klocka' }));
+    return notes.length * TRAD.kristall + 1.2;
+  }
+  const st = TRAD.step, toks = sort === 'vind' || sort === 'borjan' || sort === 'eko' ? TRAD.mel.slice(0, TRAD.vind) : TRAD.mel;
   toks.forEach((tok, i) => {
     if (tok === '-') return;
     let n = 1; while (i + n < toks.length && toks[i + n] === '-') n++;
     const t = t0 + i * st, len = n * st * .95, f = freq(tok);
     if (sort === 'fiol') tone(ctx, dest, { f, t, len: len + .05, vol: .14, kind: 'strak' });
     else if (sort === 'vind') tone(ctx, dest, { f: f * 2, t, len: len * 1.2, vol: .05, kind: 'flojt' });
+    else if (sort === 'eko') tone(ctx, dest, { f: f * 2, t: t + .09, len: .3, vol: .025, kind: 'klocka' });
     else tone(ctx, dest, { f, t, len, vol: .16, kind: 'flojt' });
   });
   if (sort === 'flojt') TRAD.ack.forEach((ch, b) => [0, 1, 2, 3, 2, 1].forEach((k, q) =>
@@ -479,7 +494,9 @@ function tradPa(ctx, dest, t0, sort) {
 }
 // tradToner(sort): when each note of it starts, in seconds from the beginning (for notes rising from the tree in time)
 function tradToner(sort) {
-  const toks = sort === 'vind' || sort === 'borjan' ? TRAD.mel.slice(0, TRAD.vind) : TRAD.mel;
+  if (sort === 'kristall') return beginning().map((tok, i) => i * TRAD.kristall);
+  if (sort === 'stjarna') return STJARNA.map((n, i) => i * TRAD.spets);
+  const toks = sort === 'vind' || sort === 'borjan' || sort === 'eko' ? TRAD.mel.slice(0, TRAD.vind) : TRAD.mel;
   return toks.map((tok, i) => tok === '-' ? null : i * TRAD.step).filter(t => t !== null);
 }
 // Musik.trad(sort) plays it now and returns its length. It is a sound effect: it plays when the sound effects are on, whether

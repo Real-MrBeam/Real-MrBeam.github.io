@@ -49,6 +49,7 @@ const HATS = {
   blomsterkrans: { rows: ["................", ".....oooooo.....", "....ohhhhhho....", "...orhyhrhyho...", "...ohhhhhhhho..."], pal: { r: '#e43b44', y: '#fee761' } },
   seglarmossa: { rows: ["................", ".....oooooo.....", "....onnnnnno....", "...ovvvvvvvvo...", "...oNNNNNNNNNo.."], pal: { n: '#2a4a8a', N: '#1b2f5a', v: '#ffffff' } },
   nattmossa: { rows: ["...........uu...", "......ooooJJo...", ".....ojjjjjjjo..", "....oJJJJJJJJo..", "...oUUUUUUUUUo.."], pal: { J: '#3b5dc9', j: '#c0cbdc', u: '#ffffff', U: '#f4f4f4' } },
+  kristallkrona: { rows: [".......cc.......", "....c.oCCo.c....", "...oCcoCCocCo...", "...ogggbbgggo...", "...ohhhhhhhho..."], pal: { c: '#dcf7f9', C: '#208ef8', g: '#c0cbdc', b: '#6fb1ff' } },
   mjolnarmossa: { rows: ["................", "....ooooooo.....", "...ommmmmmmo....", "...ommmmmmmmo...", "...oMMMMMMMMo..."], pal: { m: '#f4f4f4', M: '#c0cbdc' } },
 };
 const BOOTS = { stovel: { k: '#6b3a20' } };
@@ -398,7 +399,7 @@ const START = () => ({
   stars: REAL ? REAL.stars : startData.stjarnor, coins: REAL ? REAL.stoft : startData.stjarnstoft, node: startData.plats,
   built: Object.fromEntries(startData.byggt.map(id => [id, true])),
   valda: {}, saker: [], steg: {}, handlat: {}, djur: [], fram: [], stopp: {}, hittat: [], spent: 0, kistor: [], agnAnvant: [], agnLager: {}, fiskbok: {}, rekord: {}, namn: {}, bytt: {}, salt: {}, pa: {}, rykten: [],
-  sett: new Uint8Array(MW*MH), damm: false, medaljer: 0, brevTagna: [],
+  sett: new Uint8Array(MW*MH), damm: false, medaljer: 0, brevTagna: [], brunnen: null,
   log: REAL ? REAL.handelser.slice() : startData.logg.map(r => ({ typ: 'runa', amne: r.amne, procent: Math.round(r.poang / r.max * 100), stjarnor: r.stjarnor, bonus: r.bonus })),
   testIdx: 0,
 });
@@ -838,7 +839,7 @@ function frame(now){
     ctx.drawImage(chestOpening && t >= .6 ? CHEST_OPEN : CHEST, CHEST_AT.x*TS + shake, CHEST_AT.y*TS);
   }
   drawJumps(now, null);
-  drawActors(now);
+  if (!FLIGHT) drawActors(now);
   drawScene(now);
   drawFX(dt);
 
@@ -848,6 +849,7 @@ function frame(now){
   if (Math.abs(nightLevel - (S.natt ? 1 : 0)) < .005) nightLevel = S.natt ? 1 : 0;
   if (nightLevel > 0) drawNight(now, nightLevel);
   drawStarfall(now, dt);
+  drawFlight(now); drawRuinStar(now);
   drawLetterMarks(now, reach);
   // etiketter i skärmskala
   ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -895,15 +897,24 @@ function drawMist(now){
 // way), ljus (something that shines by itself), saker (a thing he picks up) and aventyr (an adventure next to that letter).
 // Along the water he can fish (fiske, a place in berattelse.json fiske.platser). He is still at his place on the big map
 // (S.node) while he is in a level, so a reload puts him back outside.
-const LIGHTS = { lykta: '255,210,120', flaskat: '90,170,255', eldflugor: '150,230,90' };
+const LIGHTS = { lyskristall: '160,215,255', lykta: '255,210,120', flaskat: '90,170,255', eldflugor: '150,230,90' };
+// The Lyskristall from Stjärnbrunnen (2026-11-17) reaches further into the dark than the lantern: the light hole in tiles (LIGHT_FAR,
+// otherwise 3.6) and how far he sees with it (LIGHT_SEE, otherwise 3)
+const LIGHT_FAR = { lyskristall: 5 }, LIGHT_SEE = { lyskristall: 4 };
+const LIGHT_TEXT = { lykta: ['Du tände lyktan.', 'Du släckte lyktan.'], eldflugor: ['Du öppnar locket lite, och eldflugorna börjar blinka.', 'Du skruvar på locket, och eldflugorna somnar.'],
+  flaskat: ['Irrblosset vaknar och lyser blått.', 'Irrblosset somnar i burken.'], lyskristall: ['Lyskristallen vaknar och lyser klart och blått.', 'Lyskristallen slocknar.'] };
 const litLight = () => Object.keys(LIGHTS).find(id => S.tant && S.tant[id] && S.saker.includes(id)) || null;
 const levelAt = id => Object.entries(BANOR).find(([, d]) => d.ingang === id || d.utgang === id) || null;
 const levelStops = lid => Object.keys(BANOR[lid].aventyr || {}).map(ch => `bana:${lid}:${ch}`);
 // something is left in a level while a thing lies there, an adventure is not played or a fish there is not in the book
-const levelLeft = lid => { const d = BANOR[lid]; return Object.values(d.saker || {}).some(id => !S.saker.includes(id)) || levelStops(lid).some(k => !S.stopp[k]) || (!!d.fiske && newFishAt(d.fiske)); };
+const levelLeft = lid => { const d = BANOR[lid]; return Object.values(d.saker || {}).some(id => !S.saker.includes(id)) || levelStops(lid).some(k => !S.stopp[k]) || (!!d.fiske && newFishAt(d.fiske))
+  || (!!d.brunn && !S.brunnen && Object.keys(d.portar || {}).every(ch => portOpen(d, ch)) && d.brunn.stjarnfynd.some(id => S.saker.includes(id))); };
 let LEVEL = null;   // { id, def, w, h, door, seen, held, path, move, spot, img, lamps, glints, pos }
 const DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
-const lvCell = (x, y) => LEVEL && y >= 0 && y < LEVEL.h && x >= 0 && x < LEVEL.w ? LEVEL.def.rutor[y][x] : '#';
+// A port in a level (portar in banor.json, Kristallporten 2026-11-17) is a crystal cluster in the way until the flute opens it.
+// Its id is then kept in S.hittat, and its letter is floor.
+const portOpen = (d, ch) => !!(d.portar && d.portar[ch] && S.hittat.includes(d.portar[ch].id));
+const lvCell = (x, y) => { if (!LEVEL || y < 0 || y >= LEVEL.h || x < 0 || x >= LEVEL.w) return '#'; const ch = LEVEL.def.rutor[y][x]; return portOpen(LEVEL.def, ch) ? '.' : ch; };
 const lvFree = (x, y) => { const c = lvCell(x, y); return c !== '#' && c !== '~' && !(LEVEL.def.hinder || '').includes(c); };
 const lvTile = () => [Math.round(boy.x / TS), Math.round(boy.y / TS)];
 // without a lit light: only near an opening (L.near) or where he has seen with his light
@@ -965,8 +976,8 @@ function enterLevel(lid, side){
   const r = rng(31);
   d.rutor.forEach((row, y) => [...row].forEach((ch, x) => {
     const l = d.ljus && d.ljus[ch];
-    if (l) LEVEL.lamps.push({ x: x * TS + 8, y: y * TS + 8, r: l[0] * TS, a: l[1], c: l[2], k: l[3] });
-    if (ch === '~' && r() < .5) LEVEL.glints.push({ x: x * TS + 2 + Math.floor(r() * 12), y: y * TS + 4 + Math.floor(r() * 10), ph: r() * 6.3, sp: 400 + r() * 700 });
+    if (l && !portOpen(d, ch)) LEVEL.lamps.push({ x: x * TS + 8, y: y * TS + 8, r: l[0] * TS, a: l[1], c: l[2], k: l[3], ch });
+    if ((ch === '~' || (d.brunn && ch === d.brunn.bokstav)) && r() < .5) LEVEL.glints.push({ x: x * TS + 2 + Math.floor(r() * 12), y: y * TS + 4 + Math.floor(r() * 10), ph: r() * 6.3, sp: 400 + r() * 700 });
   }));
   markLevelSeen();
   cam.follow = true; cam.focus = null; centerOn(boy.x + 8, boy.y + 8, true);
@@ -991,7 +1002,10 @@ function leaveLevel(door){
 function levelPicture(){
   const L = LEVEL, B = L.def.bild, c = document.createElement('canvas'); c.width = L.w * TS; c.height = L.h * TS;
   const x = c.getContext('2d'); x.imageSmoothingEnabled = false;
-  const wall = (cx, cy) => lvCell(cx, cy) === '#', water = (cx, cy) => lvCell(cx, cy) === '~';
+  // the pool in Stjärnbrunnen (brunn) is drawn like the lake, as water of its own: he cannot fish or walk there
+  const POOL = L.def.brunn && L.def.brunn.bokstav;
+  let wet = '~';
+  const wall = (cx, cy) => lvCell(cx, cy) === '#', water = (cx, cy) => lvCell(cx, cy) === wet;
   const near = (cx, cy) => { for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if (!wall(cx + dx, cy + dy)) return true; return false; };
   for (let cy = 0; cy < L.h; cy++) for (let cx = 0; cx < L.w; cx++){
     const ch = lvCell(cx, cy), px = cx * TS, py = cy * TS;
@@ -1000,7 +1014,8 @@ function levelPicture(){
       else { x.fillStyle = '#140e12'; x.fillRect(px, py, TS, TS); }
       continue;
     }
-    if (ch === '~'){
+    if (ch === '~' || ch === POOL){
+      wet = ch;
       const col = !water(cx - 1, cy) ? 0 : !water(cx + 1, cy) ? 2 : 1, row = !water(cx, cy - 1) ? 0 : !water(cx, cy + 1) ? 2 : 1;
       tile(x, B.vatten[row * 3 + col], px, py);
       x.fillStyle = 'rgba(20,12,16,.55)';
@@ -1053,7 +1068,7 @@ function drawRail(c, cx, cy, px, py){
 }
 function markLevelSeen(){
   if (!litLight()) return;
-  const L = LEVEL, [x0, y0] = lvTile(), r = 3;
+  const L = LEVEL, [x0, y0] = lvTile(), r = LIGHT_SEE[litLight()] || 3;
   for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++){
     const x = x0 + dx, y = y0 + dy;
     if (x < 0 || y < 0 || x >= L.w || y >= L.h || dx * dx + dy * dy > (r + .5) ** 2 || L.seen[y * L.w + x]) continue;
@@ -1065,6 +1080,7 @@ function levelSpot(){
   const [x, y] = lvTile(), near = (ch, r) => { for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) if (lvCell(x + dx, y + dy) === ch) return true; return false; };
   let sp = Object.keys(LEVEL.def.aventyr || {}).filter(ch => near(ch, 1)).join('');
   if (LEVEL.def.fiske && Object.values(DIRS).some(([dx, dy]) => lvCell(x + dx, y + dy) === '~')) sp += '~';
+  if (LEVEL.def.brunn && [...LEVEL.def.brunn.bokstav + LEVEL.def.brunn.kristall].some(ch => near(ch, 1))) sp += '*';
   if (near('E', 2)) sp += 'E';
   if (near('X', 2)) sp += 'X';
   return sp + (litLight() ? '' : '!');
@@ -1171,8 +1187,10 @@ function levelFrame(now, dt){
     ctx.restore();
   }
   drawJumps(now, L);
+  drawBrunn(now, L, false);
   drawActors(now);
   drawLevelDark(now);
+  drawBrunn(now, L, true);
   // drops fall from the roof now and then, close to him
   if (now > L.drip){
     L.drip = now + 700 + Math.random() * 1400;
@@ -1197,16 +1215,18 @@ function drawLevelDark(now){
   d.globalCompositeOperation = 'destination-out';
   const hole = (x, y, r, a) => { const g = d.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, `rgba(0,0,0,${a})`); g.addColorStop(.5, `rgba(0,0,0,${a})`); g.addColorStop(1, 'rgba(0,0,0,0)'); d.fillStyle = g; d.fillRect(x - r, y - r, r * 2, r * 2); };
   const lit = litLight(), bx = boy.x + 8, by = boy.y + 6, flick = 1 + .03 * Math.sin(now / 170) * Math.sin(now / 97);
-  const lampA = l => l.k === 'eld' ? .88 + .12 * Math.sin(now / 90 + l.x) * Math.sin(now / 53 + l.y) : l.k === 'kristall' ? .8 + .2 * Math.sin(now / 900 + l.x * .1) : 1;
-  hole(bx, by, (lit ? 3.6 : 1.2) * TS * flick, 1);
+  // a crystal ringing along with the flute flickers brighter (ring), a cluster answering grows brighter with each note (glow)
+  const lampA = l => (l.k === 'eld' ? .88 + .12 * Math.sin(now / 90 + l.x) * Math.sin(now / 53 + l.y) : l.k === 'kristall' ? .8 + .2 * Math.sin(now / 900 + l.x * .1) : 1)
+    * (l.ring > now ? 1.2 + .35 * Math.max(0, Math.sin(now / 80 + l.x * .37)) : 1) * (1 + (l.glow || 0) * .2);
+  hole(bx, by, (lit ? LIGHT_FAR[lit] || 3.6 : 1.2) * TS * flick, 1);
   // something that shines lights its surroundings only where he has been; before that only itself shows, as a small light
   const seenAt = l => !!L.seen[Math.floor(l.y / TS) * L.w + Math.floor(l.x / TS)];
   for (const l of L.lamps) hole(l.x, l.y, (seenAt(l) ? l.r * (l.k === 'kristall' ? .55 : 1) : TS * .55) * lampA(l), l.a);
   ctx.drawImage(L.dark, 0, 0);
   ctx.save(); ctx.globalCompositeOperation = 'lighter';
   const glow = (x, y, r, c, a) => { const g = ctx.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, `rgba(${c},${a})`); g.addColorStop(1, `rgba(${c},0)`); ctx.fillStyle = g; ctx.fillRect(x - r, y - r, r * 2, r * 2); };
-  if (lit) glow(bx, by, 3.2 * TS * flick, LIGHTS[lit], .16);
-  for (const l of L.lamps) glow(l.x, l.y, (seenAt(l) ? l.r * (l.k === 'kristall' ? 1.3 : 1) : TS) * lampA(l), l.c, (l.k === 'kristall' ? .5 : .22) * l.a);   // the crystals glow faintly blue
+  if (lit) glow(bx, by, ((LIGHT_FAR[lit] || 3.6) - .4) * TS * flick, LIGHTS[lit], .16);
+  for (const l of L.lamps) glow(l.x, l.y, (seenAt(l) ? l.r * (l.k === 'kristall' ? 1.3 : 1) : TS) * lampA(l), l.c, Math.min(1, (l.k === 'kristall' ? .5 : .22) * l.a * (1 + (l.glow || 0) * .15)));   // the crystals glow faintly blue
   ctx.restore();
 }
 // The arrows on the map (shown only in a level) and the arrow keys or WASD
@@ -1267,6 +1287,152 @@ function drawScene(now){
   }
   // the boat lies on the beach until he has seen it row away (the adventure has begun) or played it
   if (!S.stopp['natt:bakom'] && !S.steg['stopp:natt:bakom'] && seenAt(NODES.bakom.x, NODES.bakom.y)) drawRowboat(ROW_FROM.x, ROW_FROM.y, 0, false);
+}
+
+/* ---------- Stjärnbrunnen ---------- */
+// The room behind Kristallporten (banor.json brunn, Peter 2026-11-17): a small pool by a giant crystal with a star of crystal on its
+// top. He drops a find in the pool. Any of the star finds (stjarnfynd) lights the star, and the light rises through the crystal in
+// one scene: the bottom (the crown clinks against the stone), the middle (a Lyskristall comes loose) and the top, where the five
+// points light one at a time. Then the star comes loose, rises up through the mountain and the map shows the light flying to the
+// narrow stone tower by Sjöviken, Ruintornet, where it stays (S.brunnen). Other finds float up again. Nothing here gives stardust.
+let BRUNN_SCENE = null, FLIGHT = null;
+const RUIN = karta.ruintornet;
+// A star of pixels: each pixel knows if it is on the edge and which point it belongs to (0 the middle, 1 to 5 the points from the
+// top round), so the points can light up one at a time
+function makeStar(R, r){
+  const n = 2 * Math.ceil(R) + 1, c = n / 2, pts = [];
+  for (let i = 0; i < 10; i++){ const a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r : R; pts.push([c + rr * Math.cos(a), c + rr * Math.sin(a)]); }
+  const inside = (x, y) => { let k = false; for (let i = 0, j = 9; i < 10; j = i++){ const [xi, yi] = pts[i], [xj, yj] = pts[j]; if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) k = !k; } return k; };
+  const px = [];
+  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++){
+    if (!inside(x + .5, y + .5)) continue;
+    const dx = x + .5 - c, dy = y + .5 - c, part = Math.hypot(dx, dy) < r * .95 ? 0 : 1 + ((Math.round((Math.atan2(dy, dx) + Math.PI / 2) / (Math.PI * 2 / 5)) % 5) + 5) % 5;
+    px.push({ x, y, part, edge: !(inside(x - .5, y + .5) && inside(x + 1.5, y + .5) && inside(x + .5, y - .5) && inside(x + .5, y + 1.5)) });
+  }
+  return { n, px };
+}
+const STAR_BIG = makeStar(7, 3.1), STAR_SMALL = makeStar(4, 1.9);
+// lit: how many points shine (0 to 5), only: draw only what shines (over the dark)
+function drawStarPix(st, cx, cy, lit, only){
+  const x0 = Math.round(cx - st.n / 2), y0 = Math.round(cy - st.n / 2);
+  for (const p of st.px){
+    const on = p.part === 0 ? lit >= 5 : p.part <= lit;
+    if (only && !on) continue;
+    ctx.fillStyle = p.edge ? (on ? '#9fdcff' : '#1d2c33') : on ? '#f2fbff' : p.part === 0 ? '#6fb1ff' : '#3f78b0';
+    ctx.fillRect(x0 + p.x, y0 + p.y, 1, 1);
+  }
+}
+function drawBrunn(now, L, over){
+  const Bn = L.def.brunn; if (!Bn || !L.pos[Bn.kristall[0]]) return;
+  const [kx, ky] = L.pos[Bn.kristall[0]];
+  if (!L.seen[ky * L.w + kx] && !L.seen[(ky + 1) * L.w + kx] && !L.seen[(ky + 2) * L.w + kx]) return;   // not before he has seen it
+  const Sc = BRUNN_SCENE && BRUNN_SCENE.L === L ? BRUNN_SCENE : null, done = !!S.brunnen && !Sc;
+  const ljus = Sc ? Sc.ljus : done ? 3 : 0, lit = Sc ? Sc.spetsar : 0;
+  const sx = kx * TS + 16, sy = ky * TS - 6;   // the star sits on the tip of the crystal
+  let rise = 0, fade = 1;
+  if (Sc && Sc.stiger){ const t = Math.min(1, (now - Sc.stiger) / 2600); rise = 150 * t * t; fade = 1 - t; }
+  const star = !S.brunnen || (Sc && fade > 0);
+  if (!over){
+    const lamp = L.lamps.find(l => l.ch === Bn.ljus); if (lamp) lamp.glow = done ? 1 : ljus * 1.4;
+    if (star) drawStarPix(STAR_BIG, sx, sy - rise, lit, false);
+    return;
+  }
+  // over the dark: the lit parts of the crystal shine (bottom, middle, top), and the points of the star that are lit
+  ctx.save(); ctx.globalCompositeOperation = 'lighter';
+  const rows = [Bn.kristall.slice(4, 6), Bn.kristall.slice(2, 4), Bn.kristall.slice(0, 2)];
+  for (let i = 0; i < ljus; i++) for (const ch of rows[i]){ const [x, y] = L.pos[ch]; ctx.globalAlpha = (done ? .14 : .38) + .1 * Math.sin(now / 300 + i); tile(ctx, L.def.bild[ch], x * TS, y * TS); }
+  if (star && lit){
+    ctx.globalAlpha = fade;
+    const g = ctx.createRadialGradient(sx, sy - rise, 0, sx, sy - rise, 10 + lit * 3); g.addColorStop(0, 'rgba(190,230,255,.55)'); g.addColorStop(1, 'rgba(190,230,255,0)');
+    ctx.fillStyle = g; ctx.fillRect(sx - 30, sy - rise - 30, 60, 60);
+    ctx.globalCompositeOperation = 'source-over'; drawStarPix(STAR_BIG, sx, sy - rise, lit, true);
+  }
+  ctx.restore();
+}
+// The finds he carries, to drop in the pool
+function brunnChoose(){
+  const Bn = LEVEL.def.brunn, finds = S.saker.filter(id => SAKER[id] && SAKER[id].typ === 'fynd');
+  if (!finds.length) return startDialog([{ p: null, t: Bn.inget }], () => [{ label: 'Tillbaka', alt: true, run: toNode }]);
+  startDialog([{ p: null, t: Bn.fraga }], () => [
+    ...finds.map(id => ({ label: `${esc(SAKER[id].namn)}<small>${esc(SAKER[id].text)}</small>`, run: () => dropIn(id) })),
+    { label: 'Tillbaka', alt: true, run: toNode },
+  ]);
+}
+function dropIn(id){
+  const L = LEVEL, Bn = L.def.brunn, name = SAKER[id].bestamd || SAKER[id].namn, [px, py] = L.pos[Bn.bokstav];
+  sparkle(px * TS + 16, py * TS + 12, 10, '#9fdcff');
+  if (S.brunnen || !Bn.stjarnfynd.includes(id)) return startDialog([{ p: null, t: (S.brunnen ? Bn.flyterEfter : Bn.flyter).replace('{namn}', name) }], () => [{ label: 'Tillbaka', alt: true, run: toNode }]);
+  // the star is lit: the find is gone for good, and what the crystal gives is his at once (the scene only shows it)
+  S.saker = S.saker.filter(x => x !== id);
+  S.brunnen = { fynd: id };
+  for (const g of Bn.ger) if (!S.saker.includes(g)) S.saker.push(g);
+  saveSoon(); renderPack(); renderRumors();
+  BRUNN_SCENE = { L, ljus: 0, spetsar: 0, stiger: 0 };
+  brunnStep(0, name);
+}
+function brunnStep(i, name){
+  const Sc = BRUNN_SCENE; if (!Sc || LEVEL !== Sc.L) return;
+  const Bn = Sc.L.def.brunn, [kx, ky] = Sc.L.pos[Bn.kristall[0]], sx = kx * TS + 16, sy = ky * TS - 6;
+  if (i < 3){ Sc.ljus = i + 1; sparkle(sx, (ky + 3 - i) * TS - 8, 14, '#9fdcff'); buzz([60]); }
+  if (i === 2) setTimeout(() => {
+    Musik.trad('stjarna');
+    Musik.tradToner('stjarna').forEach((t, k) => setTimeout(() => { if (BRUNN_SCENE !== Sc) return; Sc.spetsar = k + 1; sparkle(sx, sy, 6, '#ffffff'); }, t * 1000 + 60));
+  }, 500);
+  if (i === 3){ Sc.stiger = performance.now(); setTimeout(() => starFlight(Sc), 2800); }
+  const next = i < 2 ? () => itemModal(Bn.ger[i], () => brunnStep(i + 1, name)) : () => brunnStep(i + 1, name);
+  startDialog([{ p: null, t: Bn.steg[i].replace('{namn}', name) }], () => i === 3 ? [] : [{ label: 'Fortsätt', run: next }]);
+}
+// The star's flight: the map shows the light rising from the mountain and gliding to Ruintornet, where it takes the fog away round
+// itself. He is not drawn (he is still in the mine), and afterwards he stands in the room again.
+function starFlight(Sc){
+  if (BRUNN_SCENE !== Sc || LEVEL !== Sc.L) return;
+  const L = LEVEL, d = L.def, n = NODES[d.ingang], home = NODES[S.node];
+  const from = { x: n.x * TS + 8, y: (n.y - 3) * TS }, to = { x: RUIN.x * TS + 8, y: RUIN.y * TS - 8 };
+  const keep = { L, x: boy.x, y: boy.y, dir: boy.dir, trail: trail.slice() };
+  LEVEL = null; $('#dpad').hidden = true; boy.x = home.x * TS; boy.y = home.y * TS;
+  const t0 = performance.now(), dur = 7000;
+  FLIGHT = { t0, dur, from, to, keep, landed: false, next: 0 };
+  lastRevealKey = ''; revealAround(from.x, from.y, 2); lastRevealKey = '';
+  cam.follow = false; cam.focus = { x: (from.x + to.x) / 2, y: (from.y + to.y) / 2 - 8, until: t0 + 600000 };
+  centerOn(cam.focus.x, cam.focus.y, true);
+  setTimeout(() => {
+    if (!FLIGHT) return;
+    FLIGHT.landed = true; lastRevealKey = ''; revealAround(to.x, to.y + 8, 3); lastRevealKey = '';
+    sparkle(to.x, to.y, 30, '#e8f8ff'); buzz([80, 60, 200]); saveSoon();
+    setTimeout(() => startDialog([{ p: null, t: d.brunn.landat }], () => [{ label: esc(d.brunn.tillbaka), run: backToRoom }]), 900);
+  }, dur);
+}
+function backToRoom(){
+  const F = FLIGHT; BRUNN_SCENE = null;
+  if (!F) return toNode();
+  const k = F.keep; FLIGHT = null;
+  LEVEL = k.L; boy.x = k.x; boy.y = k.y; boy.dir = k.dir; trail.length = 0; trail.push(...k.trail); petState.clear();
+  $('#dpad').hidden = false; cam.follow = true; cam.focus = null; centerOn(boy.x + 8, boy.y + 8, true);
+  musicSync(); toNode();
+}
+// the light on its way: straight up out of the mountain first, then gliding to the tower and slowing down
+function drawFlight(now){
+  const F = FLIGHT; if (!F || F.landed) return;
+  const p = Math.min(1, (now - F.t0) / F.dur), rise = Math.min(1, p / .3), g = Math.max(0, (p - .3) / .7), e = g * g * (3 - 2 * g);
+  const x = F.from.x + (F.to.x - F.from.x) * e, y = F.from.y - 40 * rise + (F.to.y - F.from.y + 40) * e;
+  if (now > F.next){ F.next = now + 70; FX.push({ k: 'spark', x: x + (Math.random() - .5) * 4, y: y + (Math.random() - .5) * 4, vx: (Math.random() - .5) * 6, vy: 4 + Math.random() * 6, t: 0, life: .6, col: Math.random() < .5 ? '#ffffff' : '#c0eaff' }); }
+  ctx.save(); ctx.globalAlpha = Math.min(1, p * 8);
+  ctx.globalCompositeOperation = 'lighter';
+  const gr = ctx.createRadialGradient(x, y, 0, x, y, 16); gr.addColorStop(0, 'rgba(200,235,255,.8)'); gr.addColorStop(1, 'rgba(200,235,255,0)');
+  ctx.fillStyle = gr; ctx.fillRect(x - 16, y - 16, 32, 32);
+  ctx.globalCompositeOperation = 'source-over'; drawStarPix(STAR_SMALL, x, y, 5, false);
+  ctx.restore();
+}
+// the star over Ruintornet: it bobs a little and shines brighter at night. Under the fog it is hidden like everything else.
+function drawRuinStar(now){
+  if (!RUIN || !S.brunnen || (FLIGHT && !FLIGHT.landed)) return;
+  if (!DEBUG.mode && !seenAt(RUIN.x, RUIN.y)) return;
+  const x = RUIN.x * TS + 8, y = RUIN.y * TS - 8 + Math.round(Math.sin(now / 600) * 1.5), r = 9 + 7 * nightLevel;
+  ctx.save(); ctx.globalCompositeOperation = 'lighter';
+  const gr = ctx.createRadialGradient(x, y, 0, x, y, r); gr.addColorStop(0, `rgba(200,235,255,${.35 + .4 * nightLevel})`); gr.addColorStop(1, 'rgba(200,235,255,0)');
+  ctx.fillStyle = gr; ctx.fillRect(x - r, y - r, r * 2, r * 2);
+  ctx.restore();
+  drawStarPix(STAR_SMALL, x, y, 5, false);
 }
 
 /* ---------- natten då stjärnorna föll ---------- */
@@ -1378,7 +1544,7 @@ function drawNight(now, lv){
     g.addColorStop(0, `rgba(${c},${(L.k === 'rosa' ? .42 : .5) * lv})`); g.addColorStop(1, `rgba(${c},0)`);   // the church window only faintly
     ctx.fillStyle = g; ctx.fillRect(L.x - rad, L.y - rad, rad * 2, rad * 2);
   }
-  for (const [id, col] of [['lykta', '255,210,120'], ['flaskat', '90,170,255'], ['eldflugor', '150,230,90']]){
+  for (const [id, col] of Object.entries(LIGHTS)){
     if (!S.tant || !S.tant[id] || !S.saker.includes(id)) continue;
     const bx = boy.x + 8, by = boy.y + 4, rad = 22 + Math.sin(now / 300 + (id === 'flaskat' ? 2 : 0)) * 1.5;
     const g = ctx.createRadialGradient(bx, by, 0, bx, by, rad);
@@ -1448,7 +1614,8 @@ function playFlute(){
   fluteNotes(dur, 5);
   // at the oak before he knows the whole melody: the right place, but only the beginning (Peter 2026-10-28)
   if (!S.melodi && S.node === MELODI.vind && !LEVEL){ setTimeout(() => toast(MELODI.nastan), dur * 1000 + 400); return; }
-  if (S.melodi || S.node !== MELODI.plats || !S.natt || LEVEL) return;
+  if (LEVEL){ levelFlute(dur); return; }
+  if (S.melodi || S.node !== MELODI.plats || !S.natt) return;
   flojtTill += 60000;   // no flute while Näcken answers
   setTimeout(() => {
     toast(MELODI.hor);
@@ -1459,6 +1626,43 @@ function playFlute(){
       openModal([{ icon: itemPicture('flojt'), title: MELODI.rubrik, text: MELODI.svar, reward: MELODI.lart, button: 'Fortsätt' }], () => showNode());
     }, d2 * 1000);
   }, dur * 1000 + 700);
+}
+// The flute in a level (Kristallporten, Peter 2026-11-17): the crystals close to him ring faintly along and flicker, and at a
+// port that is still closed (portar in banor.json) the cluster answers with the beginning of the melody, one note at a time in
+// the ringing of bells, glows brighter with each and shatters to glittering dust on the last. Nothing tells him beforehand.
+function levelFlute(dur){
+  const L = LEVEL, now = performance.now(), bx = boy.x + 8, by = boy.y + 8;
+  const near = L.lamps.filter(l => l.k === 'kristall' && Math.hypot(l.x - bx, l.y - by) < 4.5 * TS);
+  if (near.length){
+    Musik.trad('eko');
+    for (const l of near) l.ring = now + dur * 1000;
+    Musik.tradToner('eko').forEach((t, i) => setTimeout(() => { if (LEVEL !== L) return; const l = near[i % near.length]; sparkle(l.x, l.y - 3, 2, '#9fdcff'); }, t * 1000 + 90));
+  }
+  const port = Object.entries(L.def.portar || {}).find(([ch, p]) => !S.hittat.includes(p.id) && L.pos[ch] && Math.hypot(L.pos[ch][0] * TS + 8 - bx, L.pos[ch][1] * TS + 8 - by) < 1.6 * TS);
+  if (!port) return;
+  const [ch, p] = port, lamp = L.lamps.find(l => l.ch === ch), [px, py] = L.pos[ch];
+  flojtTill += 60000;   // no flute while the crystals answer
+  setTimeout(() => {
+    if (LEVEL !== L){ flojtTill = 0; return; }
+    const d2 = Musik.trad('kristall'), times = Musik.tradToner('kristall');
+    flojtTill = performance.now() + d2 * 1000;
+    times.forEach((t, i) => setTimeout(() => {
+      if (LEVEL !== L) return;
+      if (lamp){ lamp.glow = i + 1; lamp.ring = performance.now() + 300; }
+      sparkle(px * TS + 8, py * TS + 6, 4 + i * 2, '#9fdcff');
+      if (i === times.length - 1) setTimeout(() => openPort(L, ch, p), 500);
+    }, t * 1000 + 50));
+  }, dur * 1000 + 600);
+}
+function openPort(L, ch, p){
+  if (LEVEL !== L || S.hittat.includes(p.id)) return;
+  S.hittat.push(p.id); saveSoon(); renderRumors();
+  const [px, py] = L.pos[ch];
+  sparkle(px * TS + 8, py * TS + 8, 40, '#c0eaff'); setTimeout(() => sparkle(px * TS + 8, py * TS + 12, 24, '#ffffff'), 200);
+  buzz([60, 40, 60, 40, 220]);
+  L.lamps = L.lamps.filter(l => l.ch !== ch);
+  L.img = levelPicture();
+  toast(p.oppnad); showNode();
 }
 // The wind in Ihåliga eken whistles the beginning of the tree's melody about every 20 seconds. It is heard only when he stands
 // there (with the sound effects on), but a white note rises from the oak with each of its notes wherever he is, so he sees from afar
@@ -1482,9 +1686,9 @@ setInterval(() => {
 function useItem(id){
   const it = SAKER[id]; if (!it) return;
   if (id === 'flojt') return playFlute();
-  if (id === 'lykta' || id === 'flaskat' || id === 'eldflugor'){
+  if (id in LIGHTS){
     S.tant = S.tant || {}; S.tant[id] = !S.tant[id];
-    toast(id === 'lykta' ? (S.tant[id] ? 'Du tände lyktan.' : 'Du släckte lyktan.') : id === 'eldflugor' ? (S.tant[id] ? 'Du öppnar locket lite, och eldflugorna börjar blinka.' : 'Du skruvar på locket, och eldflugorna somnar.') : (S.tant[id] ? 'Irrblosset vaknar och lyser blått.' : 'Irrblosset somnar i burken.'));
+    toast(LIGHT_TEXT[id][S.tant[id] ? 0 : 1]);
     renderPack(); saveSoon(); if (LEVEL) markLevelSeen(); return;
   }
   if (it.typ !== 'klader') return;
@@ -1829,9 +2033,10 @@ function renderPanel(view){
     // In a level: what is around him (levelSpot), a way back out, and how to walk
     const L = LEVEL, d = L.def, T = d.texter, sp = L.spot || levelSpot();
     const advs = Object.keys(d.aventyr || {}).filter(ch => sp.includes(ch)), done = ch => S.stopp[`bana:${L.id}:${ch}`];
-    const text = sp.includes('!') ? T.ljusAv : advs.length ? T[advs[0] + (done(advs[0]) ? 'Klar' : '')] : sp.includes('~') ? T.vatten : sp.includes('E') ? T.E : sp.includes('X') ? T.X : d.text;
+    const text = sp.includes('!') ? T.ljusAv : advs.length ? T[advs[0] + (done(advs[0]) ? 'Klar' : '')] : sp.includes('*') ? (S.brunnen ? d.brunn.textEfter : d.brunn.text) : sp.includes('~') ? T.vatten : sp.includes('E') ? T.E : sp.includes('X') ? T.X : d.text;
     h = `<span class="tag">Du är här</span><h2>${esc(d.namn)}</h2><p>${esc(text)}</p><div class="panel-body">`;
     for (const ch of advs) h += stopBlock(`bana:${L.id}:${ch}`);
+    if (sp.includes('*') && !sp.includes('!')) h += `<div class="plot"><div><b>${esc(d.brunn.rubrik)}</b></div>${BRUNN_SCENE ? '' : `<button class="btn" type="button" data-brunn="1">${esc(d.brunn.knapp)}</button>`}</div>`;
     if (sp.includes('~')) h += fishBlock(d.fiske);
     h += `<div class="roads"><button class="btn alt" type="button" data-banaut="1">${esc(T.tillbaka)}</button></div><p class="sub" style="text-transform:none;letter-spacing:0">${esc(T.styr)}</p></div>`;
   } else if (view.type === 'gate'){
@@ -1889,6 +2094,7 @@ panel.addEventListener('click', ev => {
   else if (b.dataset.vaktnatt){ const [lid, side] = b.dataset.vaktnatt.split(':'); sneakGuard(lid, side); }
   else if (b.dataset.bana){ const [lid, side] = b.dataset.bana.split(':'); enterLevel(lid, side); showMap(); }   // on a phone the map is above the panel
   else if (b.dataset.banaut && LEVEL) levelWalkTo(...LEVEL.pos[LEVEL.door]);
+  else if (b.dataset.brunn && LEVEL && !BRUNN_SCENE) brunnChoose();
   else if (b.dataset.brev) readLetter2();
   else if (b.dataset.fbrev) readFishLetter();
   else if (b.dataset.medalj) readMedalLetter(S.medaljer || 0, true);
@@ -2303,7 +2509,7 @@ function renderPack(){
   $('#pack').innerHTML = own.length
     ? own.map((id, i) => { const it = SAKER[id], on = it.typ === 'klader' && S.pa[it.plats] === id;
         // Things that can be used are tapped like the runes in the list: clothes go on and off, the lantern is lit, the flute plays
-        const light = id === 'lykta' || id === 'flaskat' || id === 'eldflugor';
+        const light = id in LIGHTS;
         const usable = it.typ === 'klader' || light || id === 'flojt';
         const lit = light && S.tant && S.tant[id];
         const title = it.typ === 'klader' ? (on ? 'Ta av' : 'Ta på') : light ? (lit ? 'Släck' : 'Tänd') : id === 'flojt' ? 'Spela' : '';
@@ -2372,7 +2578,7 @@ function tellNews(){
 // encrypted in the page (#lasNyckel) and opens with the password, like the portraits. Without the key nothing is saved.
 // Stars and stardust are never saved: they are counted from the runes and scrolls. Only what he has spent is saved.
 const SAVE = { repo: '', file: '', key: '', sha: null, timer: 0, off: false, loaded: false };
-const SAVED_FIELDS = ['node', 'built', 'valda', 'saker', 'steg', 'handlat', 'djur', 'fram', 'stopp', 'hittat', 'spent', 'kistor', 'agnAnvant', 'fiskbok', 'namn', 'bytt', 'intro', 'natt', 'salt', 'lasta', 'pa', 'tant', 'brev2', 'rykten', 'brevFiske', 'rekord', 'agnLager', 'damm', 'melodi', 'ekenOppen', 'medaljer', 'brevTagna'];
+const SAVED_FIELDS = ['node', 'built', 'valda', 'saker', 'steg', 'handlat', 'djur', 'fram', 'stopp', 'hittat', 'spent', 'kistor', 'agnAnvant', 'fiskbok', 'namn', 'bytt', 'intro', 'natt', 'salt', 'lasta', 'pa', 'tant', 'brev2', 'rykten', 'brevFiske', 'rekord', 'agnLager', 'damm', 'melodi', 'ekenOppen', 'medaljer', 'brevTagna', 'brunnen'];
 const b64 = text => { const bytes = new TextEncoder().encode(text); let s = ''; for (const b of bytes) s += String.fromCharCode(b); return btoa(s); };
 const unb64 = data => new TextDecoder().decode(Uint8Array.from(atob(data.replace(/\s/g, '')), c => c.charCodeAt(0)));
 function spend(n){ S.coins -= n; S.spent += n; }
@@ -2774,7 +2980,7 @@ function pull(){
     stopFishing(); giveAnimal(rule.djur, rule.text, () => showNode());
     return saveSoon();
   }
-  const finds = (FISKE.fynd || []).filter(id => !S.saker.includes(id) && !S.salt['fynd:' + id] && (!FISKE.fyndPlatser || !FISKE.fyndPlatser[id] || FISKE.fyndPlatser[id].includes(fz.plats)));
+  const finds = (FISKE.fynd || []).filter(id => !S.saker.includes(id) && !S.salt['fynd:' + id] && !(S.brunnen && S.brunnen.fynd === id) && (!FISKE.fyndPlatser || !FISKE.fyndPlatser[id] || FISKE.fyndPlatser[id].includes(fz.plats)));
   if (finds.length && Math.random() < .2){
     const id = finds[Math.floor(Math.random() * finds.length)]; S.saker.push(id); renderPack(); saveSoon(); stopFishing();
     sparkle(boy.x + 8, boy.y + 2, 20, '#2ce8f5');
@@ -3120,6 +3326,7 @@ cv.addEventListener('pointerup', e => {
 });
 cv.addEventListener('pointercancel', () => { down = null; });
 function tapAt(wx, wy){
+  if (FLIGHT) return;
   if (LEVEL) return levelWalkTo(Math.floor(wx / TS), Math.floor(wy / TS));
   const tx = Math.floor(wx / TS), ty = Math.floor(wy / TS);
   if (pendingTickets().length && tx === CHEST_AT.x && ty === CHEST_AT.y){ if (S.node === CHEST_AT.node && !boy.route) openChest(); else { walkTo(CHEST_AT.node); toast('Kistan står vid Skolan.'); } return; }
@@ -3130,7 +3337,7 @@ function tapAt(wx, wy){
 addEventListener('keydown', e => { if (fishing && (fishing.phase === 'vanta' || fishing.phase === 'nu') && (e.key === ' ' || e.key === 'Enter')){ e.preventDefault(); pull(); } });
 cv.addEventListener('keydown', e => {
   const dirs = { ArrowUp: [0,-1], ArrowDown: [0,1], ArrowLeft: [-1,0], ArrowRight: [1,0] };
-  const d = dirs[e.key]; if (!d || boy.route || LEVEL) return;
+  const d = dirs[e.key]; if (!d || boy.route || LEVEL || FLIGHT) return;
   e.preventDefault();
   for (const ed of edgesOf(S.node)){
     const t = ed.a === S.node ? ed.tiles : [...ed.tiles].reverse();

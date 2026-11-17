@@ -22,12 +22,12 @@
       "####.....R..s.##.k...q.k######",
       "####.s...R............~~######",
       "###r.....RRRRRRRRRRRRRK~######",
-      "###.b....R....##q.q.....######",
-      "####.....R.s.r####....########",
-      "########.R.###################",
-      "########rR.###################",
-      "########.R.###################",
-      "########.R.###################",
+      "###.b....R....##q.q.....P.####",
+      "####.....R.s.r####....###.####",
+      "########.R.############....fg#",
+      "########rR.############....hi#",
+      "########.R.############mm..jl#",
+      "########.R.############mm....#",
       "#########E####################"
     ],
     "bild": {
@@ -51,7 +51,14 @@
       "b": "d:29,9",
       "t": "d:23,8",
       "ralsLodrat": "d:24,4",
-      "ralsVagrat": "d:26,3"
+      "ralsVagrat": "d:26,3",
+      "P": "d:22,8",
+      "f": "o:21,18",
+      "g": "o:22,18",
+      "h": "o:23,18",
+      "i": "o:24,18",
+      "j": "o:25,18",
+      "l": "o:26,18"
     },
     "ljus": {
       "k": [
@@ -83,6 +90,18 @@
         0.8,
         "255,255,230",
         "dag"
+      ],
+      "P": [
+        1.4,
+        0.55,
+        "90,170,255",
+        "kristall"
+      ],
+      "f": [
+        2.6,
+        0.55,
+        "120,190,255",
+        "kristall"
       ]
     },
     "saker": {
@@ -175,7 +194,45 @@
       "inMorkt": "Du går in i gruvan. Längre in är det becksvart.",
       "morkt": "Det är för mörkt för att gå längre."
     },
-    "hinder": "kqsrt",
-    "rals": "R"
+    "hinder": "kqsrtPfghijlm",
+    "rals": "R",
+    "portar": {
+      "P": {
+        "id": "kristallporten",
+        "oppnad": "Kristallerna rasar till glittrande damm. Bakom dem går sprickan vidare in i berget."
+      }
+    },
+    "brunn": {
+      "bokstav": "m",
+      "kristall": "fghijl",
+      "ljus": "f",
+      "rubrik": "En liten pool vid en jättelik kristall",
+      "knapp": "Släpp något i vattnet",
+      "text": "En liten pool med stilla, klart vatten. Bredvid den reser sig en jättelik kristall, och på toppen sitter en kristall formad som en stjärna.",
+      "textEfter": "En liten pool med stilla, klart vatten. Den jättelika kristallen lyser svagt. Stjärnan på toppen är borta.",
+      "fraga": "Vad vill du släppa i vattnet?",
+      "inget": "Du har inget som går att släppa i vattnet.",
+      "flyter": "{namn} flyter upp till ytan. Kristallen har smak.",
+      "flyterEfter": "{namn} flyter upp till ytan.",
+      "stjarnfynd": [
+        "stjarnkristall",
+        "stjarnskarva",
+        "glaskula",
+        "glittersten",
+        "daggparla"
+      ],
+      "ger": [
+        "kristallkrona",
+        "lyskristall"
+      ],
+      "steg": [
+        "{namn} sjunker långsamt och lyser upp hela poolen. Ljuset glider över till den jättelika kristallen, och den nedre delen börjar lysa. Något klirrar mot stenen vid din fot.",
+        "Ljuset stiger till mitten av kristallen. En liten bit lossnar och faller ner i din hand. Den lyser.",
+        "Ljuset når toppen. Stjärnans fem spetsar tänds, en i taget.",
+        "Stjärnan lossnar från kristallen och stiger sakta rakt upp genom berget."
+      ],
+      "landat": "Långt borta stannar ljuset och svävar ovanför det smala stentornet mellan sjön och älven. Från och med nu heter det Ruintornet.",
+      "tillbaka": "Tillbaka i gruvan"
+    }
   }
 }
