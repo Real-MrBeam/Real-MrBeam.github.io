@@ -6,7 +6,6 @@ const [karta, berattelse, PORTRAITS, PETDATA, BANOR] = await Promise.all(['data/
   fetch(u, { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error(u + ' ' + r.status); return r.json(); })));
 const TS = karta.ruta, MW = karta.bredd, MH = karta.hojd;
 const $ = s => document.querySelector(s);
-const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ---------- liten deterministisk slump ---------- */
 function rng(seed){ let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
@@ -285,6 +284,14 @@ function placeDecor(){
     else if (v < 0.072) put(29, x, y);
   }
 }
+const LEDGE = [[0, 8], [5, 4], [11, 11], [16, 8]];   // the ledge's middle (row, column) in a tile: down left, down right, back
+function drawLedge(o, x, y){
+  const X = x*TS, Y = y*TS, at = r => { const i = LEDGE.findIndex(p => p[0] >= r) || 1, [r0, c0] = LEDGE[i - 1], [r1, c1] = LEDGE[i]; return Math.round(c0 + (c1 - c0) * (r - r0) / (r1 - r0)); };
+  o.save(); o.globalCompositeOperation = 'source-atop';
+  for (let r = 0; r < TS; r++){ const c = at(r); o.fillStyle = '#2a3150'; o.fillRect(X + c - 2, Y + r + 1, 5, 1); }
+  for (let r = 0; r < TS; r++){ const c = at(r); o.fillStyle = '#c9d1e0'; o.fillRect(X + c - 1, Y + r, 3, 1); o.fillStyle = '#8d98b4'; if (r % 5 === 2) o.fillRect(X + c, Y + r, 1, 1); }
+  o.restore();
+}
 function buildTerrain(){
   placeDecor();
   const base = document.createElement('canvas'); base.width = MW*TS; base.height = MH*TS;
@@ -371,6 +378,9 @@ function buildTerrain(){
   for (const st of stamps){ if (st.top !== undefined) tile(o, st.top, st.x, st.y - TS); tile(o, st.i, st.x, st.y); }
   o.fillStyle = '#262b44'; o.fillRect(CASTLE_X + 3*TS + 6, CASTLE_Y + 2*TS + 6, 20, 26);
   CASTLE.forEach((row, dy) => row.forEach((i, dx) => { if (filled(i)) tile(o, i, CASTLE_X + dx*TS, CASTLE_Y + dy*TS); }));
+  // A path over the mountain (overBerg, Getstigen 2026-11-17) is a narrow ledge of light stone that zigzags down the rock. It is
+  // drawn on the mountain itself (source-atop), so where the peak is open grass the trodden path below shows instead.
+  for (const e of EDGES) if (e.overBerg && edgeShown(e)) for (const [x, y] of e.tiles) if (OBJ.some(ob => ob.x === x && ob.y === y)) drawLedge(o, x, y);
   const frames = [];
   for (let f = 0; f < 3; f++){
     const c = document.createElement('canvas'); c.width = base.width; c.height = base.height;
@@ -452,7 +462,8 @@ const edgeOpen = e => !e.gate || gateOpen(e.gate);
 const otherEnd = (e, id) => e.a === id ? e.b : e.a;
 // A hidden stop (a secret fishing place) cannot be seen or walked to until an adventure has found it. In debug mode it shows.
 const hiddenNode = id => !!NODES[id].hidden && !DEBUG.mode && !S.hittat.includes(id);
-const edgeShown = e => !hiddenNode(e.a) && !hiddenNode(e.b);
+// A hidden road (dold in karta.json, Getstigen 2026-11-17) shows once an adventure has found it (its name in S.hittat)
+const edgeShown = e => !hiddenNode(e.a) && !hiddenNode(e.b) && (!e.dold || DEBUG.mode > 0 || S.hittat.includes(e.dold));
 function edgesOf(id){ return EDGES.filter(e => (e.a === id || e.b === id) && edgeShown(e)); }
 // In the dark, only what can be reached from where he stands is shown: the dots of the neighbouring places and the gates
 // on those roads (Peter 2026-10-18). Everything he has seen stays visible.
@@ -588,7 +599,7 @@ function drawFX(dt){
   }
 }
 const gateAnim = new Map(), plotAnim = new Map();
-function showMap(){ const r = stage.getBoundingClientRect(); if (r.top < 0 || r.bottom > innerHeight) stage.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' }); }
+function showMap(){ const r = stage.getBoundingClientRect(); if (r.top < 0 || r.bottom > innerHeight) stage.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
 function focusGate(g){ cam.follow = false; cam.focus = { x: g.x*TS + 8, y: g.y*TS + 8, until: performance.now() + 2200 }; }
 
 /* ---------- ritning ---------- */
@@ -611,10 +622,10 @@ function drawNode(n, now, reachable){
 }
 // A letter waiting at a place (a part with brev: true in PLACE_PARTS) floats as an envelope over the plate, above the boy's head
 // when he stands there (Peter 2026-11-15). Only where he can walk now (reach): where he cannot fetch a letter, or once it is
-// taken, there is no envelope at all. It bobs slowly, and stands still with reduced motion.
+// taken, there is no envelope at all. It bobs slowly.
 const letterAt = id => PLACE_PARTS.some(part => part.brev && part.on(id));
 function drawLetterMarks(now, reach){
-  const bob = reduceMotion ? 0 : Math.round(Math.sin(now / 380) * 1.5);
+  const bob = Math.round(Math.sin(now / 380) * 1.5);
   for (const id in NODES){
     if (!nodeShown(id) || !reach.has(id) || !letterAt(id)) continue;
     const n = NODES[id], x = n.x*TS + 8 - ENVELOPE.width / 2, y = n.y*TS - 13 + bob;
@@ -669,7 +680,7 @@ function drawMill(now){
   ctx.fillStyle = '#733e39'; ctx.fillRect(hx - 5, hy - 2, 10, roof - hy + 1);
   ctx.fillStyle = '#9e5b4a'; for (let y = hy; y < roof; y += 3) ctx.fillRect(hx - 5, y, 10, 1);
   ctx.fillStyle = '#3f2631'; for (let i = 0; i < 6; i++) ctx.fillRect(hx - 6 + i, hy - 4 - i, 12 - 2 * i, 1);
-  const k = reduceMotion ? 0 : Math.floor(now / 200) % MILL_STEPS;
+  const k = Math.floor(now / 200) % MILL_STEPS;
   ctx.drawImage(MILL_FRAMES[k], hx - 32, hy - 32);
   ctx.fillStyle = '#3f2631'; ctx.fillRect(hx - 2, hy - 2, 4, 4);
   ctx.fillStyle = '#c0cbdc'; ctx.fillRect(hx - 1, hy - 1, 2, 2);
@@ -775,7 +786,7 @@ function frame(now){
   else if (cam.focus){ cam.focus = null; cam.follow = true; [tx, ty] = centerOn(boy.x + 8, boy.y + 8); }
   else if (cam.follow){ [tx, ty] = centerOn(boy.x + 8, boy.y + 8); }
   else { [tx, ty] = clampCam(cam.x, cam.y); }
-  const k = reduceMotion ? 1 : 1 - Math.exp(-dt * 7);
+  const k = 1 - Math.exp(-dt * 7);
   cam.x += (tx - cam.x) * k; cam.y += (ty - cam.y) * k;
   if (Math.abs(tx - cam.x) < .05) cam.x = tx; if (Math.abs(ty - cam.y) < .05) cam.y = ty;
 
@@ -818,7 +829,7 @@ function frame(now){
     const t = chestOpening ? (now - chestOpening) / 1000 : 0, shake = chestOpening && t < .6 ? (Math.floor(t * 30) % 2 ? 1 : -1) : 0;
     const glow = Math.floor(now / 400) % 2;
     // Gold glitter that rises from the closed chest now and then, so that it is easy to see and tempting to tap
-    if (!chestOpening && !reduceMotion && now - chestGlitter > 80){
+    if (!chestOpening && now - chestGlitter > 80){
       chestGlitter = now;
       const gx = CHEST_AT.x*TS + 2 + Math.random() * 12, gy = CHEST_AT.y*TS + 3 + Math.random() * 8;
       FX.push({ k: 'spark', x: gx, y: gy, vx: (Math.random() - .5) * 8, vy: -14 - Math.random() * 14, t: 0, life: .7 + Math.random() * .5, col: Math.random() < .6 ? '#fee761' : '#ffffff' });
@@ -859,7 +870,7 @@ function frame(now){
 // only drawn once the place has been seen, so it never lies on top of the black of the unexplored map.
 function drawMist(now){
   const n = NODES.dimmossen; if (!n || (!DEBUG.mode && !seenAt(n.x, n.y))) return;
-  const t = reduceMotion ? 0 : now / 1000, mx = (n.x + .5) * TS, my = (n.y + .3) * TS;
+  const t = now / 1000, mx = (n.x + .5) * TS, my = (n.y + .3) * TS;
   const blob = (cx, cy, rx, ry, a) => {
     ctx.save(); ctx.translate(cx, cy); ctx.scale(1, ry / rx);
     const g = ctx.createRadialGradient(0, 0, 0, 0, 0, rx);
@@ -924,7 +935,7 @@ function levelEntryBlock(id){
   const [lid, d] = levelAt(id), T = d.texter, side = d.ingang === id ? 'in' : 'ut', here = S.node === id && !boy.route;
   if (guardHere(id) && !S.natt) return `<div class="plot"><div><b>${esc(VAKT.rubrik)}</b></div>${here ? `<button class="btn" type="button" data-vakt="1">${esc(VAKT.knapp)}</button>` : ''}</div>`;
   if (guardHere(id)) return `<div class="plot"><div><b>${esc(VAKT.rubrikNatt)}</b></div>${here ? `<button class="btn" type="button" data-vaktnatt="${lid}:${side}">${esc(VAKT.knappNatt)}</button>` : ''}</div>`;
-  return `<div class="plot"><div><b>${esc(side === 'in' ? T.rubrik : T.rubrikTillbaka)}</b></div>${here ? `<button class="btn" type="button" data-bana="${lid}:${side}">${esc(side === 'in' ? T.gaIn : T.gaTillbaka)}</button>` : ''}</div>`;
+  return `<div class="plot"><div><b>${esc(T.rubrik)}</b></div>${here ? `<button class="btn" type="button" data-bana="${lid}:${side}">${esc(T.gaIn)}</button>` : ''}</div>`;
 }
 function enterLevel(lid, side){
   const d = BANOR[lid], door = side === 'ut' ? 'X' : 'E';
@@ -1132,7 +1143,7 @@ function levelFrame(now, dt){
   if (sp !== L.spot){ L.spot = sp; if (current && current.type === 'bana') showNode(); }
   // the camera follows him as on the big map
   const [tx, ty] = cam.follow ? centerOn(boy.x + 8, boy.y + 8) : clampCam(cam.x, cam.y);
-  const k = reduceMotion ? 1 : 1 - Math.exp(-dt * 7);
+  const k = 1 - Math.exp(-dt * 7);
   cam.x += (tx - cam.x) * k; cam.y += (ty - cam.y) * k;
   if (Math.abs(tx - cam.x) < .05) cam.x = tx; if (Math.abs(ty - cam.y) < .05) cam.y = ty;
   const ox = Math.round(cam.x * scaleDev), oy = Math.round(cam.y * scaleDev);
@@ -1141,20 +1152,20 @@ function levelFrame(now, dt){
   ctx.setTransform(scaleDev, 0, 0, scaleDev, -ox, -oy);
   ctx.imageSmoothingEnabled = false;
   ctx.drawImage(L.img, 0, 0);
-  for (const g of L.glints){ const a = reduceMotion ? .7 : Math.sin(now / g.sp + g.ph); if (a > .6){ ctx.fillStyle = `rgba(200,235,255,${a})`; ctx.fillRect(g.x, g.y, a > .93 ? 2 : 1, 1); } }
+  for (const g of L.glints){ const a = Math.sin(now / g.sp + g.ph); if (a > .6){ ctx.fillStyle = `rgba(200,235,255,${a})`; ctx.fillRect(g.x, g.y, a > .93 ? 2 : 1, 1); } }
   // a thing lies where its letter is until he picks it up: the picture of its kind, bobbing, with a glint now and then
   for (const [ch, id] of Object.entries(L.def.saker || {})){
     if (S.saker.includes(id) || !L.pos[ch]) continue;
-    const ico = KAT[katOf(id)].ico, [ix, iy] = L.pos[ch], bob = reduceMotion ? 0 : Math.round(Math.sin(now / 300));
+    const ico = KAT[katOf(id)].ico, [ix, iy] = L.pos[ch], bob = Math.round(Math.sin(now / 300));
     ctx.drawImage(ico, ix * TS + (TS - ico.width) / 2, iy * TS + (TS - ico.height) / 2 - 1 + bob);
-    if (!reduceMotion && Math.random() < dt * 1.5 && Math.hypot(ix * TS - boy.x, iy * TS - boy.y) < 6 * TS) FX.push({ k: 'spark', x: ix * TS + 4 + Math.random() * 8, y: iy * TS + 4, vx: 0, vy: -10, t: 0, life: .5, col: '#ffffff' });
+    if (Math.random() < dt * 1.5 && Math.hypot(ix * TS - boy.x, iy * TS - boy.y) < 6 * TS) FX.push({ k: 'spark', x: ix * TS + 4 + Math.random() * 8, y: iy * TS + 4, vx: 0, vy: -10, t: 0, life: .5, col: '#ffffff' });
   }
   // the animal of an adventure (syns) swims in the water next to its letter until the adventure is played
   for (const [ch, a] of Object.entries(L.def.aventyr || {})){
     if (!a.syns || !PETS[a.syns] || S.stopp[`bana:${L.id}:${ch}`] || !L.pos[ch]) continue;
     const [ax, ay] = L.pos[ch], wet = Object.values(DIRS).map(([dx, dy]) => [ax + dx, ay + dy]).find(([x, y]) => lvCell(x, y) === '~');
     if (!wet) continue;
-    const t = reduceMotion ? 0 : now / 1400, P = PETS[a.syns], f = Math.floor(now / 300) % 2;
+    const t = now / 1400, P = PETS[a.syns], f = Math.floor(now / 300) % 2;
     ctx.save(); ctx.globalAlpha = .75;
     ctx.drawImage((Math.cos(t) > 0 ? P.right : P.left)[f], wet[0] * TS + Math.round(Math.sin(t) * 5), wet[1] * TS - 3);
     ctx.restore();
@@ -1163,7 +1174,7 @@ function levelFrame(now, dt){
   drawActors(now);
   drawLevelDark(now);
   // drops fall from the roof now and then, close to him
-  if (!reduceMotion && now > L.drip){
+  if (now > L.drip){
     L.drip = now + 700 + Math.random() * 1400;
     const x = boy.x + 8 + (Math.random() - .5) * 5 * TS, y = boy.y + 8 + (Math.random() - .5) * 4 * TS;
     if (lvCell(Math.floor(x / TS), Math.floor(y / TS)) !== '#') FX.push({ k: 'drop', x, y: y - 26, vx: 0, vy: 80, t: 0, life: .32 });
@@ -1185,8 +1196,8 @@ function drawLevelDark(now){
   d.globalCompositeOperation = 'source-over'; d.clearRect(0, 0, W, H); d.drawImage(L.memory, 0, 0);
   d.globalCompositeOperation = 'destination-out';
   const hole = (x, y, r, a) => { const g = d.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, `rgba(0,0,0,${a})`); g.addColorStop(.5, `rgba(0,0,0,${a})`); g.addColorStop(1, 'rgba(0,0,0,0)'); d.fillStyle = g; d.fillRect(x - r, y - r, r * 2, r * 2); };
-  const lit = litLight(), bx = boy.x + 8, by = boy.y + 6, flick = reduceMotion ? 1 : 1 + .03 * Math.sin(now / 170) * Math.sin(now / 97);
-  const lampA = l => reduceMotion ? 1 : l.k === 'eld' ? .88 + .12 * Math.sin(now / 90 + l.x) * Math.sin(now / 53 + l.y) : l.k === 'kristall' ? .8 + .2 * Math.sin(now / 900 + l.x * .1) : 1;
+  const lit = litLight(), bx = boy.x + 8, by = boy.y + 6, flick = 1 + .03 * Math.sin(now / 170) * Math.sin(now / 97);
+  const lampA = l => l.k === 'eld' ? .88 + .12 * Math.sin(now / 90 + l.x) * Math.sin(now / 53 + l.y) : l.k === 'kristall' ? .8 + .2 * Math.sin(now / 900 + l.x * .1) : 1;
   hole(bx, by, (lit ? 3.6 : 1.2) * TS * flick, 1);
   // something that shines lights its surroundings only where he has been; before that only itself shows, as a small light
   const seenAt = l => !!L.seen[Math.floor(l.y / TS) * L.w + Math.floor(l.x / TS)];
@@ -1245,7 +1256,7 @@ function drawRowboat(x, y, f, rowing){
 }
 function drawScene(now){
   if (!S.natt || !ROW_FROM) return;
-  const f = reduceMotion ? 0 : Math.floor(now / 320) % 2;
+  const f = Math.floor(now / 320) % 2;
   if (SCENE){
     const p = Math.min(1, (now - SCENE.t0) / SCENE.dur), bt = boatAt(now);
     if (p >= 1){ SCENE = null; return; }
@@ -1269,13 +1280,13 @@ function maybeStarfall(){
   lastRevealKey = ''; revealAround(STARFALL.x, STARFALL.y, 4); lastRevealKey = '';
   cam.follow = false; cam.focus = { x: STARFALL.x, y: STARFALL.y, until: t0 + 6500 };
 }
-const shake = now => !reduceMotion && STARFALL && now > STARFALL.t0 + 2600 && now < STARFALL.t0 + 3900 ? Math.sin(now / 22) * 2.5 : 0;
+const shake = now => STARFALL && now > STARFALL.t0 + 2600 && now < STARFALL.t0 + 3900 ? Math.sin(now / 22) * 2.5 : 0;
 function drawStarfall(now, dt){
   const F = STARFALL; if (!F || now < F.t0) return;
   const t = now - F.t0;
   // stars fall from the sky for a while, most of them towards the pond
   while (t < 2800 && now >= F.next){
-    F.next += reduceMotion ? 300 : 70;
+    F.next += 70;
     const tx = F.x + (Math.random() - .5) * (Math.random() < .7 ? 50 : 260), ty = F.y + (Math.random() - .5) * (Math.random() < .7 ? 24 : 160);
     F.stars.push({ x: tx - 90 - Math.random() * 60, y: ty - 170 - Math.random() * 60, tx, ty, t: 0, life: .55 + Math.random() * .35 });
   }
@@ -1307,7 +1318,7 @@ let nightLevel = 0, STATIC_LIGHTS = null, WATER_STARS = null;
 const FIRE_OUT = { 'o:18,10': 'o:8,16', 'o:21,12': 'o:9,16' };
 // The burning ones flicker between three pictures (own drawings in row 16, Peter 2026-10-23), each fire in its own time
 const FIRE_FRAMES = { 'o:18,10': ['o:18,10', 'o:19,16', 'o:20,16'], 'o:21,12': ['o:21,12', 'o:21,16', 'o:22,16'] };
-const fireFrame = (i, now, px) => { const f = FIRE_FRAMES[i]; return !f || reduceMotion ? i : f[Math.floor(now / 160 + px * .013) % f.length]; };
+const fireFrame = (i, now, px) => { const f = FIRE_FRAMES[i]; return !f ? i : f[Math.floor(now / 160 + px * .013) % f.length]; };
 const LIGHT_TILES = { 84: [8, 8, 'win'], 88: [8, 8, 'win'], 'o:27,2': [8, 8, 'win'], 125: [8, 8, 'slit'], 'o:0,18': [16, 8, 'slit'], 51: [8, 10, 'small'], 55: [8, 10, 'small'], 'o:18,10': [8, 4, 'fire'], 'o:21,12': [8, 9, 'fire'], 'o:28,15': [8, 8, 'tent'], 'o:9,17': [8, 6, 'fyr'], 'o:24,2': [8, 8, 'rosa'] };   // the last two: the lamp of Siri's small lighthouse by the water, the church window (faint pink)
 const lightIn = i => { for (const j of Array.isArray(i) ? i : [i]) if (LIGHT_TILES[j]) return LIGHT_TILES[j]; return null; };
 function nightLights(){
@@ -1324,7 +1335,7 @@ function nightLights(){
 // A small sailing ship drifts on the lake by Vassen, only at night (Peter 2026-10-20). bild/skepp.png is CyanShip from Mini World
 // Sprites (Shade, CC0, opengameart.org/content/miniworld-sprites): three frames of 32 x 32, the bow to the left.
 const SHIP = new Image(); SHIP.src = 'bild/skepp.png';
-const boatAt = now => ({ x: 23*TS - 12 + Math.round(Math.sin(now / 5200) * 22), y: 17*TS + 4 + (reduceMotion ? 0 : Math.round(Math.sin(now / 700))), right: Math.cos(now / 5200) > 0 });
+const boatAt = now => ({ x: 23*TS - 12 + Math.round(Math.sin(now / 5200) * 22), y: 17*TS + 4 + Math.round(Math.sin(now / 700)), right: Math.cos(now / 5200) > 0 });
 function drawNight(now, lv){
   if (!WATER_STARS){
     const r = rng(11); WATER_STARS = [];
@@ -1334,7 +1345,7 @@ function drawNight(now, lv){
   const lights = nightLights().filter(L => seen(L.x, L.y));
   const bt = boatAt(now), boatSeen = SHIP.complete && seen(bt.x + 16, bt.y + 16);
   if (boatSeen){
-    const f = reduceMotion ? 0 : Math.floor(now / 350) % 3;
+    const f = Math.floor(now / 350) % 3;
     ctx.save(); ctx.globalAlpha = lv;
     if (bt.right){ ctx.translate(bt.x + 32, bt.y); ctx.scale(-1, 1); ctx.drawImage(SHIP, f*32, 0, 32, 32, 0, 0, 32, 32); }   // sailing to the right: the bow turns
     else ctx.drawImage(SHIP, f*32, 0, 32, 32, bt.x, bt.y, 32, 32);
@@ -1352,7 +1363,7 @@ function drawNight(now, lv){
   ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'lighter';
   // Siri's lighthouse sweeps two beams slowly round over Sjöviken (2026-10-24)
   for (const L of lights) if (L.k === 'fyr'){
-    const a0 = reduceMotion ? .6 : now / 1600, len = 150, w = .14;
+    const a0 = now / 1600, len = 150, w = .14;
     for (const side of [0, Math.PI]){
       const g = ctx.createRadialGradient(L.x, L.y, 0, L.x, L.y, len);
       g.addColorStop(0, `rgba(255,240,190,${.34 * lv})`); g.addColorStop(1, 'rgba(255,240,190,0)');
@@ -1360,7 +1371,7 @@ function drawNight(now, lv){
     }
   }
   for (const L of lights){
-    const fire = L.k === 'fire', flick = fire && !reduceMotion ? .85 + .15 * Math.sin(now / 90 + L.x) * Math.sin(now / 53 + L.y) : 1;
+    const fire = L.k === 'fire', flick = fire ? .85 + .15 * Math.sin(now / 90 + L.x) * Math.sin(now / 53 + L.y) : 1;
     // the ship on the lake glows a mysterious blue, everything else warm
     const rad = (fire ? 30 : L.k === 'lamp' ? 26 : L.k === 'fyr' ? 24 : L.k === 'win' || L.k === 'tent' ? 20 : L.k === 'plate' ? 13 : L.k === 'rosa' ? 16 : 12) * flick, c = fire ? '255,140,50' : L.k === 'rosa' ? '255,100,200' : L.k === 'lamp' ? '90,170,255' : L.k === 'fyr' ? '255,240,190' : L.k === 'plate' ? '255,235,180' : '255,200,100';
     const g = ctx.createRadialGradient(L.x, L.y, 0, L.x, L.y, rad);
@@ -1369,7 +1380,7 @@ function drawNight(now, lv){
   }
   for (const [id, col] of [['lykta', '255,210,120'], ['flaskat', '90,170,255'], ['eldflugor', '150,230,90']]){
     if (!S.tant || !S.tant[id] || !S.saker.includes(id)) continue;
-    const bx = boy.x + 8, by = boy.y + 4, rad = 22 + (reduceMotion ? 0 : Math.sin(now / 300 + (id === 'flaskat' ? 2 : 0)) * 1.5);
+    const bx = boy.x + 8, by = boy.y + 4, rad = 22 + Math.sin(now / 300 + (id === 'flaskat' ? 2 : 0)) * 1.5;
     const g = ctx.createRadialGradient(bx, by, 0, bx, by, rad);
     g.addColorStop(0, `rgba(${col},${.32 * lv})`); g.addColorStop(1, `rgba(${col},0)`);
     ctx.fillStyle = g; ctx.fillRect(bx - rad, by - rad, rad * 2, rad * 2);
@@ -1385,7 +1396,7 @@ function drawNight(now, lv){
     const ax = NODES.angen.x*TS, ay = NODES.angen.y*TS, r = rng(17);
     for (let i = 0; i < 22; i++){
       const fx = ax - 40 + r()*96 + Math.sin(now / (900 + i*37) + i) * 6, fy = ay - 30 + r()*70 + Math.cos(now / (1100 + i*29) + i) * 4;
-      const a = reduceMotion ? .6 : Math.sin(now / (380 + i*23) + i*2);
+      const a = Math.sin(now / (380 + i*23) + i*2);
       if (a < .3 || !seen(fx, fy)) continue;
       ctx.fillStyle = `rgba(190,255,120,${Math.min(1, a) * lv})`; ctx.fillRect(Math.round(fx), Math.round(fy), 1, 1);
       if (a > .85){ ctx.fillStyle = `rgba(190,255,120,${.35 * lv})`; ctx.fillRect(Math.round(fx) - 1, Math.round(fy), 3, 1); ctx.fillRect(Math.round(fx), Math.round(fy) - 1, 1, 3); }
@@ -1393,7 +1404,7 @@ function drawNight(now, lv){
   }
   for (const st of WATER_STARS){
     if (!seen(st.x, st.y)) continue;
-    const a = reduceMotion ? .6 : Math.sin(now / st.sp + st.ph);
+    const a = Math.sin(now / st.sp + st.ph);
     if (a < .35) continue;
     ctx.fillStyle = `rgba(255,255,255,${Math.min(1, a) * lv})`; ctx.fillRect(st.x, st.y, 1, 1);
     if (a > .9){ ctx.fillStyle = `rgba(255,255,255,${.5 * lv})`; ctx.fillRect(st.x - 1, st.y, 3, 1); ctx.fillRect(st.x, st.y - 1, 1, 3); }
@@ -1454,7 +1465,7 @@ function playFlute(){
 // that something can be heard there (Peter 2026-10-26). Under the fog the notes are hidden like everything else.
 let windNode = '', windNext = 0;
 const windNotes = () => {
-  const n = NODES[MELODI.vind]; if (!n || reduceMotion) return;
+  const n = NODES[MELODI.vind]; if (!n) return;
   for (const t of Musik.tradToner('vind')) setTimeout(() => FX.push({ k: 'not', x: n.x * TS + 2 + Math.random() * 8, y: n.y * TS - 10, vx: 0, vy: -9, t: 0, life: 3.2 }), t * 1000);
 };
 setInterval(() => {
@@ -1969,7 +1980,7 @@ function startTyping(){
     drawPortrait(cv, L.p, false);
     if (!PORTRAIT_IMG[L.p]) blinkTimer = setInterval(() => { if (Math.random() < .4){ drawPortrait(cv, L.p, true); setTimeout(() => drawPortrait(cv, L.p, false), 140); } }, 1500);
   }
-  const instant = reduceMotion || dlg.seen.has(dlg.i); dlg.seen.add(dlg.i);
+  const instant = dlg.seen.has(dlg.i); dlg.seen.add(dlg.i);
   if (instant){ finish(); return; }
   let n = 0;
   typeTimer = setInterval(() => { n++; say.textContent = L.t.slice(0, n); if (n >= L.t.length) finish(); }, 24);
@@ -2039,7 +2050,7 @@ function takeStep(ad, o){
 /* ---------- stoppen med äventyr ---------- */
 // The new stops are only adventures, no people and no building. Each can be played once: the ending he reaches is what he
 // gets (an animal, a bait, stardust or a secret fishing place), the other endings are lost.
-const STOPP = berattelse.stopp, NATTSTOPP = berattelse.nattstopp || {};
+const STOPP = berattelse.stopp, NATTSTOPP = berattelse.nattstopp || {}, STIGAR = berattelse.stigar || {};
 // A place can have a second adventure that only happens at night (berattelse.json nattstopp), saved as 'natt:<place>'
 // and a level has adventures next to its letters, saved as 'bana:<level>:<letter>'
 const stopDef = key => key.startsWith('natt:') ? NATTSTOPP[key.slice(5)] : key.startsWith('bana:') ? BANOR[key.split(':')[1]].aventyr[key.split(':')[2]] : STOPP[key];
@@ -2057,7 +2068,8 @@ const itemFound = id => `Du hittade ${SAKER[id].namn.toLowerCase()}.${SAKER[id].
 function rewardText(till){
   const main = rewardMain(till);
   const letter = till.brev && BREV[till.brev] ? ` ${BREV[till.brev].titel} ligger nu under Brev.` : '';
-  return (till.extra ? `${main} ${itemFound(till.extra)}` : main) + letter;
+  const path = till.stig && STIGAR[till.stig] ? ` ${STIGAR[till.stig].hittade}` : '';
+  return (till.extra ? `${main} ${itemFound(till.extra)}` : main) + letter + path;
 }
 function rewardMain(till){
   if (till.djur) return `${berattelse.djur[till.djur].art} skrevs in i djurboken.`;
@@ -2074,6 +2086,11 @@ function finishStop(id, till, out){
   if (things.length){ renderPack(); sparkle(boy.x + 8, boy.y + 2, 18); }
   if (till.djur) giveAnimal(till.djur, out[out.length - 1].t, () => itemModal(things));
   if (till.fiskeplats){ S.hittat.push(till.fiskeplats); buildTerrain(); sparkle(NODES[till.fiskeplats].x*TS + 8, NODES[till.fiskeplats].y*TS + 8, 26); toast(rewardText(till)); }
+  if (till.stig && !S.hittat.includes(till.stig)){
+    S.hittat.push(till.stig); buildTerrain(); saveSoon();
+    const road = EDGES.find(e => e.dold === till.stig);
+    if (road) road.tiles.forEach(([x, y], i) => setTimeout(() => sparkle(x*TS + 8, y*TS + 8, 10), 250 + i * 160));
+  }
   startDialog([...out, { p: null, t: rewardText(till) }], () => [{ label: LEVEL ? 'Tillbaka' : 'Tillbaka till kartan', alt: true, run: toNode }]);
   if (!till.djur) itemModal(things);
 }
@@ -2646,8 +2663,8 @@ const catchList = fz => { const can = FISKE.fangar && FISKE.fangar[fz.redskap]; 
 // A fish jumps now and then in the water by a fishing place while there is a kind there that he has not caught and can take
 // with what he has (newFishAt), a hint that there is something new to fetch (Peter 2026-11-14). It is an effect in the water
 // like the ship and the stars, not a figure. It goes up in an arc, splashes, and a small plop is heard when it lands on the
-// screen (if the sound effects are on). Also in the lake of a level with fishing (the cave), close to him. No jumps with
-// reduced motion. The test checks that every fishing place has water close by where a fish can jump.
+// screen (if the sound effects are on). Also in the lake of a level with fishing (the cave), close to him.
+// The test checks that every fishing place has water close by where a fish can jump.
 const JUMPER = sprite(["o...oooo..", "oo.obbbbo.", ".ooowwwwko", "oo.owwwwo.", "o...oooo.."],
   { o: '#3a4466', b: '#8b9bb4', w: '#c0cbdc', k: '#262b44' });
 const JUMP_MS = 850, JUMP_AGAIN = [5000, 10000], JUMP_W = 12, JUMP_H = 9;
@@ -2671,7 +2688,6 @@ const splash = (x, y, n) => {
 };
 const onScreen = (x, y) => x > cam.x - 8 && x < cam.x + viewW + 8 && y > cam.y - 8 && y < cam.y + viewH + 8;
 function drawJumps(now, L){
-  if (reduceMotion) return;
   // which water can have a fish now: the fishing places on the map he can see, or the lake of this level
   const places = L ? (L.def.fiske ? [L.def.fiske] : []) : Object.keys(FISKE.platser).filter(id => NODES[id] && nodeShown(id) && !pondHidden(id));
   for (const id of places){

@@ -337,6 +337,14 @@
       "b": "udden",
       "stig": true,
       "punkter": [[16, 13], [16, 14], [20, 14], [20, 15]]
+    },
+    {
+      "a": "bakom",
+      "b": "berget",
+      "stig": true,
+      "dold": "getstigen",
+      "overBerg": true,
+      "punkter": [[29, 20], [29, 24], [28, 24]]
     }
   ],
   "tomter": [

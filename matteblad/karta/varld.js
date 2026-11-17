@@ -57,7 +57,7 @@
 
     // Roads between places, with an optional star gate. Bridges where a road crosses water.
     const EDGES = karta.vagar.map(v => {
-      const e = { a: v.a, b: v.b, pts: v.punkter, ...(v.stig ? { stig: true } : {}) };
+      const e = { a: v.a, b: v.b, pts: v.punkter, ...(v.stig ? { stig: true } : {}), ...(v.dold ? { dold: v.dold } : {}), ...(v.overBerg ? { overBerg: true } : {}) };
       if (v.port) {
         const rule = berattelse.portar[`${v.a}|${v.b}`];
         if (!rule) throw new Error(`Porten ${v.a}|${v.b} saknas i berattelse.json`);
