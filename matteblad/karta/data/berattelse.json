@@ -909,6 +909,20 @@
       "plats": "ben",
       "varde": 2
     },
+    "blacape": {
+      "namn": "Nattblå cape",
+      "text": "En nattblå cape med silverkant. Den har legat länge i vattnet, men den fladdrar fint ändå.",
+      "typ": "klader",
+      "plats": "rygg",
+      "varde": 4
+    },
+    "regnbyxor": {
+      "namn": "Gula regnbyxor",
+      "text": "Ett par gula regnbyxor. Vattnet rinner bara av dem.",
+      "typ": "klader",
+      "plats": "ben",
+      "varde": 3
+    },
     "lyskristall": {
       "namn": "Lyskristall",
       "text": "En bit av den jättelika kristallen. Den lyser klart och blått, längre in i mörkret än lyktan.",
@@ -2936,7 +2950,9 @@
       "fiolstrang",
       "hackhuvud",
       "avbrutenara",
-      "lappbyxor"
+      "lappbyxor",
+      "blacape",
+      "regnbyxor"
     ],
     "fangar": {
       "metspo": [

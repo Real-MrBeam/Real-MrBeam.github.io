@@ -58,10 +58,10 @@ const HATS = {
 // A sweater (kropp) and trousers (ben) only change colours (Peter 2026-11-18): the shirt (b, B) with a stripe of its own colour (F)
 // across the middle row if it has one, and the trousers (p) with a patch (L) on one knee if they have one. Own colours.
 const TROJOR = { badtroja: { b: '#f4f4f4', B: '#c0cbdc', rand: '#0099db' } };
-const BYXOR = { lappbyxor: { p: '#7a5236', lapp: '#c9a06a' } };
+const BYXOR = { lappbyxor: { p: '#7a5236', lapp: '#c9a06a' }, regnbyxor: { p: '#f2c14e' } };
 const BOOTS = { stovel: { k: '#6b3a20' } };
 // A cape on the back: seen behind the arms from the front, over the whole back from behind, flowing out behind from the side
-const CAPES = { rodcape: { V: '#e43b44', W: '#a22633' } };
+const CAPES = { rodcape: { V: '#e43b44', W: '#a22633' }, blacape: { V: '#29366f', W: '#c0cbdc' } };   // W is the edge: the blue one has a silver edge (2026-11-18)
 function addCape(rows, view){
   const set = (r, x, c) => r.slice(0, x) + c + r.slice(x + 1);
   return rows.map((r, y) => {
