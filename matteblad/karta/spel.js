@@ -51,6 +51,8 @@ const HATS = {
   nattmossa: { rows: ["...........uu...", "......ooooJJo...", ".....ojjjjjjjo..", "....oJJJJJJJJo..", "...oUUUUUUUUUo.."], pal: { J: '#3b5dc9', j: '#c0cbdc', u: '#ffffff', U: '#f4f4f4' } },
   kristallkrona: { rows: [".......cc.......", "....c.oCCo.c....", "...oCcoCCocCo...", "...ogggbbgggo...", "...ohhhhhhhho..."], pal: { c: '#dcf7f9', C: '#208ef8', g: '#c0cbdc', b: '#6fb1ff' } },
   mjolnarmossa: { rows: ["................", "....ooooooo.....", "...ommmmmmmo....", "...ommmmmmmmo...", "...oMMMMMMMMo..."], pal: { m: '#f4f4f4', M: '#c0cbdc' } },
+  // the brown felt hat from the skeleton in the mine (Peter 2026-11-18): a dent in the crown, a dark band and a wide brim
+  aventyrshatt: { rows: ["................", ".....oo.oo......", "....oxxXxxxo....", "....oBBBBBBo....", ".ooxxxxxxxxxxoo."], pal: { x: '#9a6534', X: '#6e4524', B: '#2e1f16' } },
 };
 const BOOTS = { stovel: { k: '#6b3a20' } };
 // A cape on the back: seen behind the arms from the front, over the whole back from behind, flowing out behind from the side
@@ -2347,7 +2349,9 @@ function doBuild(p, v){
   ]);
 }
 // Each person thanks him for the building with a gift (one of one, or one of two), once. Torvald and Hulda also trade for a fish.
+// With gavaAlla he gets both things with one button (Siri's lighthouse: the sailor's cap and the compass, Peter 2026-11-18).
 function giftButtons(p, v){
+  if (v.gavaAlla) return [{ label: `${esc(v.gavaKnapp)}<small>${esc(v.gava.map(id => SAKER[id].text).join(' '))}</small>`, run: () => takeGift(p, v.gava[0]) }];
   return v.gava.map(id => {
     const it = SAKER[id];
     return { label: v.gava.length === 1 ? `${esc(berattelse.dialog.gavaTa.replace('{namn}', it.namn.toLowerCase()))}<small>${esc(it.text)}</small>` : `${esc(it.namn)}<small>${esc(it.text)}</small>`, run: () => takeGift(p, id) };
@@ -2377,13 +2381,15 @@ function tradeFish(p, v){
 function takeGift(p, id){
   const v = valOf(p), it = SAKER[id];
   if (S.handlat[p.id] || !v.gava.includes(id)) return;
-  S.handlat[p.id] = id; if (it.antal) S.agnLager[id] = (S.agnLager[id] || 0) + it.antal; else if (!S.saker.includes(id)) S.saker.push(id);
+  const ids = v.gavaAlla ? v.gava : [id];
+  S.handlat[p.id] = id;
+  for (const g of ids){ const gi = SAKER[g]; if (gi.antal) S.agnLager[g] = (S.agnLager[g] || 0) + gi.antal; else if (!S.saker.includes(g)) S.saker.push(g); }
   const extra = v.extra && !S.saker.includes(v.extra) ? v.extra : null;
   if (extra) S.saker.push(extra);
   saveSoon(); renderPack();
   const after = () => v.byte ? startShop(p, true) : toNode();
   if (it.djur){ if (S.djur.includes(it.djur)) return itemModal(extra, after); giveAnimal(it.djur, it.text, () => itemModal(extra, after)); return; }
-  itemModal([id, extra], after);
+  itemModal([...ids, extra], after);
 }
 
 /* ---------- djurboken ---------- */

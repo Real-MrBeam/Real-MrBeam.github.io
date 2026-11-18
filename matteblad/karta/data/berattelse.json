@@ -888,6 +888,13 @@
       "plats": "huvud",
       "varde": 5
     },
+    "aventyrshatt": {
+      "namn": "Äventyrshatt",
+      "text": "En brun filthatt med ett mörkt band. Den är dammig men hel, som om den har väntat på någon.",
+      "typ": "klader",
+      "plats": "huvud",
+      "varde": 4
+    },
     "lyskristall": {
       "namn": "Lyskristall",
       "text": "En bit av den jättelika kristallen. Den lyser klart och blått, längre in i mörkret än lyktan.",
@@ -1280,7 +1287,9 @@
             "seglarmossa",
             "kompass"
           ],
-          "gavaHej": "Ta något som tack. Min gamla seglarmössa, eller kompassen som alltid pekar mot Stjärnsvalan."
+          "gavaHej": "Ta min gamla seglarmössa som tack, och kompassen också. Den pekar alltid mot Stjärnsvalan, var hon än seglar.",
+          "gavaAlla": true,
+          "gavaKnapp": "Ta emot seglarmössan och kompassen"
         }
       ]
     },
