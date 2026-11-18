@@ -72,10 +72,10 @@ function addCape(rows, view){
     if (view === 'down' && y >= 12 && y <= 14){ r = set(r, 2, 'V'); r = set(r, 13, 'V'); r = set(r, 1, 'o'); return set(r, 14, 'o'); }   // the hem below the arms
     if (view === 'down' && y === 15){ r = set(r, 2, 'o'); return set(r, 13, 'o'); }
     // from the side it is fastened at the neck with a collar (Peter 2026-11-18), covers the backpack and hangs down to the shoes
-    if (view === 'side' && y === 7){ r = set(r, 3, 'V'); return set(r, 2, 'o'); }
-    if (view === 'side' && y === 8){ r = set(r, 3, 'V'); r = set(r, 2, 'V'); return set(r, 1, 'o'); }
-    if (view === 'side' && y >= 9 && y <= 14){ r = r.replace(/d/g, 'V'); r = set(r, 2, 'V'); return set(r, 1, 'o'); }   // narrow from the side (Peter 2026-11-18)
-    if (view === 'side' && y === 15) return set(r, 2, 'o');
+    // (one row lower at the neck, narrow, and a bottom of two dark pixels, Peter 2026-11-18)
+    if (view === 'side' && y === 8){ r = set(r, 3, 'V'); return set(r, 2, 'o'); }
+    if (view === 'side' && y >= 9 && y <= 14){ r = r.replace(/d/g, 'V'); r = set(r, 2, 'V'); return set(r, 1, 'o'); }
+    if (view === 'side' && y === 15){ r = set(r, 1, 'o'); return set(r, 2, 'o'); }
     return r;
   });
 }
