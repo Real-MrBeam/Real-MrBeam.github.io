@@ -46,14 +46,19 @@ const HATS = {
   fiskehatt: { rows: ["................", "....oooooooo....", "...oxxxxxxxxo...", "..oxxxxxxxrxxo..", "..oXXXXXXXXXXo.."], pal: { x: '#c9b27d', X: '#8b7a4a', r: '#e43b44' } },
   strahatt: { rows: ["................", ".....oooooo.....", "....oaaaaaao....", "...oaRRRRRRao...", ".ooaaaaaaaaaaoo."], pal: { a: '#f4d27a', R: '#a22633' } },
   trollkarlshatt: { rows: ["......oo........", ".....oTTo.......", "....oTTYTo......", "...oTTTTTTo.....", "..oQQQQQQQQQQo.."], pal: { T: '#3b5dc9', Q: '#29366f', Y: '#fee761' } },
-  blomsterkrans: { rows: ["................", ".....oooooo.....", "....ohhhhhho....", "...orhyhrhyho...", "...ohhhhhhhho..."], pal: { r: '#e43b44', y: '#fee761' } },
+  blomsterkrans: { rows: ["................", ".....oooooo.....", "....ohhhhhho....", "...orhYhrhYho...", "...ohhhhhhhho..."], pal: { r: '#e43b44', Y: '#fee761' } },
   seglarmossa: { rows: ["................", ".....oooooo.....", "....onnnnnno....", "...ovvvvvvvvo...", "...oNNNNNNNNNo.."], pal: { n: '#2a4a8a', N: '#1b2f5a', v: '#ffffff' } },
   nattmossa: { rows: ["...........uu...", "......ooooJJo...", ".....ojjjjjjjo..", "....oJJJJJJJJo..", "...oUUUUUUUUUo.."], pal: { J: '#3b5dc9', j: '#c0cbdc', u: '#ffffff', U: '#f4f4f4' } },
-  kristallkrona: { rows: [".......cc.......", "....c.oCCo.c....", "...oCcoCCocCo...", "...ogggbbgggo...", "...ohhhhhhhho..."], pal: { c: '#dcf7f9', C: '#208ef8', g: '#c0cbdc', b: '#6fb1ff' } },
+  kristallkrona: { rows: [".......cc.......", "....c.oCCo.c....", "...oCcoCCocCo...", "...oqqqzzqqqo...", "...ohhhhhhhho..."], pal: { c: '#dcf7f9', C: '#208ef8', q: '#c0cbdc', z: '#6fb1ff' } },
   mjolnarmossa: { rows: ["................", "....ooooooo.....", "...ommmmmmmo....", "...ommmmmmmmo...", "...oMMMMMMMMo..."], pal: { m: '#f4f4f4', M: '#c0cbdc' } },
   // the brown felt hat from the skeleton in the mine (Peter 2026-11-18): a dent in the crown, a dark band and a wide brim
-  aventyrshatt: { rows: ["................", ".....oo.oo......", "....oxxXxxxo....", "....oBBBBBBo....", ".ooxxxxxxxxxxoo."], pal: { x: '#9a6534', X: '#6e4524', B: '#2e1f16' } },
+  aventyrshatt: { rows: ["................", ".....oo.oo......", "....oxxXxxxo....", "....ozzzzzzo....", ".ooxxxxxxxxxxoo."], pal: { x: '#9a6534', X: '#6e4524', z: '#2e1f16' } },
 };
+// A hat's own colours must not use the letters of the boy's palette (BOYPAL), or the shirt and the straps change colour with it.
+// A sweater (kropp) and trousers (ben) only change colours (Peter 2026-11-18): the shirt (b, B) with a stripe of its own colour (F)
+// across the middle row if it has one, and the trousers (p) with a patch (L) on one knee if they have one. Own colours.
+const TROJOR = { badtroja: { b: '#f4f4f4', B: '#c0cbdc', rand: '#0099db' } };
+const BYXOR = { lappbyxor: { p: '#7a5236', lapp: '#c9a06a' } };
 const BOOTS = { stovel: { k: '#6b3a20' } };
 // A cape on the back: seen behind the arms from the front, over the whole back from behind, flowing out behind from the side
 const CAPES = { rodcape: { V: '#e43b44', W: '#a22633' } };
@@ -69,8 +74,15 @@ function addCape(rows, view){
 }
 let BOY = null;
 function buildBoy(pa = {}){
-  const hat = HATS[pa.huvud], cape = CAPES[pa.rygg], pal = { ...BOYPAL, ...(hat ? hat.pal : {}), ...(BOOTS[pa.fotter] || {}), ...(cape || {}) };
-  const top = (rows, view) => { const r = hat ? [...hat.rows, ...rows.slice(5)] : rows; return cape ? addCape(r, view) : r; };
+  const hat = HATS[pa.huvud], cape = CAPES[pa.rygg], shirt = TROJOR[pa.kropp], pants = BYXOR[pa.ben];
+  const pal = { ...BOYPAL, ...(hat ? hat.pal : {}), ...(BOOTS[pa.fotter] || {}), ...(cape || {}),
+    ...(shirt ? { b: shirt.b, B: shirt.B, F: shirt.rand || shirt.b } : {}), ...(pants ? { p: pants.p, L: pants.lapp || pants.p } : {}) };
+  const dress = (rows, view) => rows.map((r, y) => {
+    if (shirt && shirt.rand && y === 10 && view !== 'up') r = r.replace(/b/g, 'F');   // the stripe
+    if (pants && pants.lapp && y === 13 && view === 'down' && r[5] === 'p') r = r.slice(0, 5) + 'L' + r.slice(6);   // the patch
+    return r;
+  });
+  const top = (rows, view) => { const r = dress(hat ? [...hat.rows, ...rows.slice(5)] : rows, view); return cape ? addCape(r, view) : r; };
   BOY = {
     down: [FRONT.concat(LEGS_A), FRONT.concat(LEGS_B), FRONT.concat(LEGS_A), FRONT.concat(LEGS_C)].map(r => sprite(top(r, 'down'), pal)),
     up:   [BACK.concat(LEGS_A), BACK.concat(LEGS_B), BACK.concat(LEGS_A), BACK.concat(LEGS_C)].map(r => sprite(top(r, 'up'), pal)),

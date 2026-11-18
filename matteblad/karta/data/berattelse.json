@@ -895,6 +895,20 @@
       "plats": "huvud",
       "varde": 4
     },
+    "badtroja": {
+      "namn": "Randig badtröja",
+      "text": "En randig tröja i vitt och blått. Bertil hade den när han lärde sig simma.",
+      "typ": "klader",
+      "plats": "kropp",
+      "varde": 3
+    },
+    "lappbyxor": {
+      "namn": "Lappade byxor",
+      "text": "Ett par blöta byxor med lappar på knäna. De torkar fort i solen.",
+      "typ": "klader",
+      "plats": "ben",
+      "varde": 2
+    },
     "lyskristall": {
       "namn": "Lyskristall",
       "text": "En bit av den jättelika kristallen. Den lyser klart och blått, längre in i mörkret än lyktan.",
@@ -1271,9 +1285,12 @@
           "byggnad": "brygga",
           "tack": "Tack. Nu får sjön en riktig brygga, och härifrån ser jag varenda en som badar.",
           "gava": [
-            "snorkel"
+            "snorkel",
+            "badtroja"
           ],
-          "gavaHej": "Ta snorkeln som tack. Den kan visa dig saker under ytan."
+          "gavaHej": "Ta snorkeln som tack, och min gamla randiga badtröja också. Snorkeln kan visa dig saker under ytan.",
+          "gavaAlla": true,
+          "gavaKnapp": "Ta emot snorkeln och badtröjan"
         },
         {
           "id": "fyr",
@@ -2918,7 +2935,8 @@
       "flaskpost",
       "fiolstrang",
       "hackhuvud",
-      "avbrutenara"
+      "avbrutenara",
+      "lappbyxor"
     ],
     "fangar": {
       "metspo": [
