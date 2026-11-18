@@ -65,10 +65,17 @@ const CAPES = { rodcape: { V: '#e43b44', W: '#a22633' }, blacape: { V: '#29366f'
 function addCape(rows, view){
   const set = (r, x, c) => r.slice(0, x) + c + r.slice(x + 1);
   return rows.map((r, y) => {
+    // the cape reaches down over the trousers to the shoes (longer, Peter 2026-11-18)
     if (view === 'up' && y >= 8 && y <= 12) return r.replace(/[dgGy]/g, (c, x) => (x === 4 || x === 11) ? 'W' : 'V');
+    if (view === 'up' && y === 13){ for (let x = 4; x <= 11; x++) r = set(r, x, x === 4 || x === 11 ? 'W' : 'V'); return r; }
     if (view === 'down' && y === 9){ r = set(r, 5, 'V'); return set(r, 10, 'V'); }          // the ties over the shoulders
     if (view === 'down' && y >= 12 && y <= 14){ r = set(r, 2, 'V'); r = set(r, 13, 'V'); r = set(r, 1, 'o'); return set(r, 14, 'o'); }   // the hem below the arms
-    if (view === 'side' && y >= 9 && y <= 14){ r = set(r, 2, r[2] === '.' ? 'V' : r[2]); r = set(r, 1, 'V'); return set(r, 0, 'o'); }
+    if (view === 'down' && y === 15){ r = set(r, 2, 'o'); return set(r, 13, 'o'); }
+    // from the side it is fastened at the neck with a collar (Peter 2026-11-18), covers the backpack and hangs down to the shoes
+    if (view === 'side' && y === 7){ r = set(r, 3, 'V'); return set(r, 2, 'o'); }
+    if (view === 'side' && y === 8){ r = set(r, 3, 'V'); r = set(r, 2, 'V'); return set(r, 1, 'o'); }
+    if (view === 'side' && y >= 9 && y <= 14){ r = r.replace(/d/g, 'V'); r = set(r, 2, 'V'); r = set(r, 1, 'V'); return set(r, 0, 'o'); }
+    if (view === 'side' && y === 15){ r = set(r, 1, 'o'); return set(r, 2, 'o'); }
     return r;
   });
 }
