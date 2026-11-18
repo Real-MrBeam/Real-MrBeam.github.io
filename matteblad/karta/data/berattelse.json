@@ -2502,6 +2502,8 @@
             "Under bron står abborrarna i stim, och längre ner lurar gäddan.",
             "Ibland glittrar det i djupet under bron, som om något där nere väntar på ljus."
           ],
+          "rykteRad": "Under bron glimmar något litet, som guld. Jag har aldrig fått upp det med mitt spö.",
+          "rykte": "rykte:grodkrona",
           "hejIgen": "Välkommen tillbaka. Flugor säljer jag inte, men Fia har allt i sin butik i Fiskeläget."
         },
         "vanta": [
@@ -3087,7 +3089,7 @@
         "angen"
       ],
       "grodkrona": [
-        "vassen"
+        "sodrabron"
       ]
     },
     "flugredskap": [
@@ -3182,11 +3184,6 @@
         "sak": "glimmerskeden",
         "rykte": "rykte:gammelgaddan",
         "t": "Gammelgäddan vid Udden har slitit av fler linor än jag kan räkna. Hon hugger bara på det som blänker."
-      },
-      {
-        "sak": "metspo",
-        "t": "Hör du grodorna i Vassen? Där glimmar något litet, som guld. Jag har aldrig fått upp det.",
-        "rykte": "rykte:grodkrona"
       }
     ]
   },
@@ -3993,7 +3990,7 @@
     "gruvan": "Holger såg en gråklädd gestalt smita in i gruvan en natt.",
     "tornet": "Stjärnväktarna vill träffa dig i tornet vid slottet en natt.",
     "sjunger": "Holger säger att berget sjunger om nätterna, några toner och sedan tystnar det.",
-    "grodkrona": "Nattfiskaren säger att något litet glimmar som guld i Vassen, där grodorna kväker. Han har aldrig fått upp det."
+    "grodkrona": "Ebbe säger att något litet glimmar som guld i vattnet under Södra bron. Han har aldrig fått upp det."
   },
   "personRykten": {
     "vira": [
@@ -4005,6 +4002,9 @@
     ],
     "bertil": [
       "rykte:sjoodjur"
+    ],
+    "ebbe": [
+      "rykte:grodkrona"
     ]
   },
   "ryktesInfo": {
@@ -4247,7 +4247,7 @@
       ]
     },
     "rykte:grodkrona": {
-      "pekar": "vassen",
+      "pekar": "sodrabron",
       "klar": [
         "sak:grodkrona"
       ]

@@ -2835,8 +2835,10 @@ function lanBlock(id){
 function talkFisher(id){
   const L = LAN(id);
   if (S.saker.includes(L.ger) && !L.agn) return;
-  // a fisherman with a name (Ebbe on Södra bron) tells a tip about fish when he greets, one of several (prat, Peter 2026-10-26)
-  const tip = L.prat && L.prat[Math.floor(Math.random() * L.prat.length)];
+  // a fisherman with a name (Ebbe on Södra bron) tells a tip about fish when he greets, one of several (prat, Peter 2026-10-26),
+  // but first his rumour (rykteRad, the frog's crown under his bridge, Peter 2026-11-18) until it is heard; personRykten puts
+  // it in the list. He can only be talked to until he has given the net, so it comes in the very first talk.
+  const tip = L.rykteRad && L.rykte && !S.rykten.includes(L.rykte) ? L.rykteRad : L.prat && L.prat[Math.floor(Math.random() * L.prat.length)];
   sellOrSwap({ who: L.person || null, hej: L.hej, hejIgen: L.hejIgen, tip, tack: L.tack, ger: L.ger, pris: L.pris, fynd: L.fynd, more: Object.entries(L.saljer || {}), packs: Object.entries(L.agn || {}), packTack: L.agnTack,
     again: () => talkFisher(id), back: toNode, done: () => {} });
 }
