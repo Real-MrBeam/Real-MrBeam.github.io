@@ -1116,7 +1116,7 @@ function stepLevel(dt){
 function arriveTile(){
   const L = LEVEL, [x, y] = lvTile(), ch = lvCell(x, y);
   if (ch === 'E' || ch === 'X') return leaveLevel(ch);
-  markLevelSeen();
+  markLevelSeen(); musicSync();   // into or out of the star room
   const id = (L.def.saker || {})[ch];
   if (id && !S.saker.includes(id)){
     L.held = null; L.path = null;
@@ -1297,6 +1297,28 @@ function drawScene(now){
 // narrow stone tower by Sjöviken, Ruintornet, where it stays (S.brunnen). Other finds float up again. Nothing here gives stardust.
 let BRUNN_SCENE = null, FLIGHT = null;
 const RUIN = karta.ruintornet;
+// Is he in the star room? The room is every cell that can be reached from the pool without going through a port (worked out once
+// per visit, the same whether the port is open or not). Droppsten plays there (Peter 2026-11-18).
+function inBrunn(){
+  const L = LEVEL, Bn = L && L.def.brunn;
+  if (!Bn || !L.pos[Bn.bokstav]) return false;
+  if (!L.rum){
+    const ports = Object.keys(L.def.portar || {}), [sx, sy] = L.pos[Bn.bokstav], q = [[sx, sy]];
+    L.rum = new Uint8Array(L.w * L.h); L.rum[sy * L.w + sx] = 1;
+    while (q.length){
+      const [x, y] = q.shift();
+      for (const [dx, dy] of Object.values(DIRS)){
+        const nx = x + dx, ny = y + dy;
+        if (nx < 0 || ny < 0 || nx >= L.w || ny >= L.h || L.rum[ny * L.w + nx]) continue;
+        const ch = L.def.rutor[ny][nx];
+        if (ch === '#' || ports.includes(ch)) continue;
+        L.rum[ny * L.w + nx] = 1; q.push([nx, ny]);
+      }
+    }
+  }
+  const [x, y] = lvTile();
+  return !!L.rum[y * L.w + x];
+}
 // A star of pixels: each pixel knows if it is on the edge and which point it belongs to (0 the middle, 1 to 5 the points from the
 // top round), so the points can light up one at a time
 function makeStar(R, r){
@@ -1725,7 +1747,9 @@ function musicButton(){
   set('Vibra', 'vibra', wanted(VIB_KEY), 'Sätt på vibrationerna', 'Stäng av vibrationerna');
 }
 if (window.Musik && Musik.effekter) Musik.effekter(wanted(FX_KEY));
-function musicSync(){ if (window.Musik){ Musik.natt(!!S.natt); if (Musik.grotta) Musik.grotta(!!LEVEL); } }   // Droppsten, the cave song, in a level (an older musik.js has no grotta)
+// In a level the cave song (Djupt nere), and Droppsten in the star room and during the star's whole sequence, also while it flies
+// over the map and lands by Ruintornet, until he is back in the mine (Peter 2026-11-18). An older musik.js has no grotta.
+function musicSync(){ if (window.Musik){ Musik.natt(!!S.natt); if (Musik.grotta) Musik.grotta(FLIGHT || BRUNN_SCENE || inBrunn() ? 'brunn' : !!LEVEL); } }
 function firstGesture(ev){
   for (const t of ['pointerdown', 'touchend', 'click', 'keydown']) removeEventListener(t, firstGesture);
   if ((ev.target.closest && ev.target.closest('#btnMusik, #btnLjud, #btnVibra')) || !window.Musik || !musicWanted()) return;

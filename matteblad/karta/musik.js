@@ -1,6 +1,8 @@
 // Djuren i Glimmerdal: the music. A tiny chip synth in the browser (pulse waves, a triangle bass and noise drums, like an old
-// game console) plays seven songs of our own: three for the day ("Glimmerdal", "Ängsdans" and "Morgondagg"), three for the
-// night ("Månsken", "Nattugglan" and "Nattviol") and one for the caves ("Droppsten", the old night song Stjärnnatt on an organ). The songs of the day or of the night take turns. No sound files, nothing downloaded.
+// game console) plays eight songs of our own: three for the day ("Glimmerdal", "Ängsdans" and "Morgondagg"), three for the
+// night ("Månsken", "Nattugglan" and "Nattviol"), one for the caves ("Djupt nere") and one for the star room behind Kristallporten
+// and the star's flight ("Droppsten", the old night song Stjärnnatt on an organ, Peter 2026-11-18). The songs of the day or of the
+// night take turns. No sound files, nothing downloaded.
 //
 // A song is a list of bars. Each bar has a chord (the bass and the arpeggio are made from it) and a melody of 8 steps (eighth notes):
 // a note such as "E5", "-" holds the note before, "." is a rest. The drums are a pattern of 8 steps per bar.
@@ -10,7 +12,8 @@
 //   Musik.effekter(true | false)   the sound effects (jingles, the flute, the fiddle, the wind) on or off, apart from the music
 //   Musik.paus(true | false)   pauses while the page is hidden
 //   Musik.natt(true | false)   switches between the songs of the day and the songs of the night
-//   Musik.grotta(true | false)   the cave song while he is in a level
+//   Musik.grotta(true | 'brunn' | false)   the cave song (Djupt nere) while he is in a level, 'brunn' Droppsten in the star
+//                                          room and during the star's flight
 //   Musik.jingel(sort)   a short tune when he gets something, 'djur' a longer one for a new animal, 'fisk' one for a new fish
 //                        in the fish book, 'stjarnor' or 'stoft' for stars and stardust (the same) (only when the sound is on)
 //   Musik.plopp(vol)   a small plop when a fish jumps and lands in the water, vol 0 to 1 (only when the sound is on)
@@ -149,11 +152,29 @@ const SERENAD = (() => {
     ljud: { lead: { klang: 'flojt', vol: .06 }, arp: { klang: 'gitarr', vol: .03, oktav: 4, takt: 1 }, bas: { vol: .15 }, eko: .3 },
   };
 })();
-// Droppsten: Stjärnnatt on a soft organ, the song of the caves (Peter 2026-10-25). It plays only inside a level (Musik.grotta).
-const DROPPSTEN = { ...STJARNNATT, namn: 'Droppsten', tid: 'grotta', ljud: { ...STJARNNATT.ljud, lead: { ...STJARNNATT.ljud.lead, klang: 'orgel' }, arp: { ...STJARNNATT.ljud.arp, klang: 'orgel' } } };
+// Droppsten: Stjärnnatt on a soft organ (Peter 2026-10-25). Since 2026-11-18 it plays only in the star room behind Kristallporten
+// and during the star's whole flight (Musik.grotta('brunn')); the rest of the caves have Djupt nere.
+const DROPPSTEN = { ...STJARNNATT, namn: 'Droppsten', tid: 'brunn', ljud: { ...STJARNNATT.ljud, lead: { ...STJARNNATT.ljud.lead, klang: 'orgel' }, arp: { ...STJARNNATT.ljud.arp, klang: 'orgel' } } };
 MORGONDAGG.ljud.lead.klang = 'marimba'; MORGONDAGG.ljud.arp.klang = 'marimba';   // Morgondagg on a marimba (Peter 2026-10-25)
 GLIMMERDAL.tid = 'dag'; STJARNNATT.tid = 'natt';
-const SONGS = [GLIMMERDAL, ANGSDANS, MANSKEN, MORGONDAGG, NATTUGGLAN, SERENAD, DROPPSTEN];   // Stjärnnatt itself no longer plays (Peter 2026-10-25), only as Droppsten
+// Djupt nere: the mine's own song (Peter 2026-11-18), very minimal and low: one short, soft bass note far down at the start of
+// every bar with air after it (shorter, Peter 2026-11-18), and now and then a single drop on a marimba with a cave's echo. No
+// melody, no arpeggio, no drums.
+const DJUPT = (() => {
+  const T = [
+    bar('Am', '. . . . . . . .'), bar('Am', '. . . . E5 . . .'), bar('F', '. . . . . . . .'), bar('F', '. . A4 . . . . .'),
+    bar('Dm', '. . . . . . . .'), bar('Dm', '. . . . . . F5 .'), bar('E', '. . . . . . . .'), bar('E', '. . . G#4 . . . .'),
+    bar('Am', '. . . . . . . .'), bar('Am', '. . C5 . . . . .'), bar('F', '. . . . . . . .'), bar('F', '. . . . . A4 . .'),
+    bar('Dm', '. . . . . . . .'), bar('E', '. . . . E5 . . .'), bar('Am', '. . . . . . . .'), bar('Am', '. . . . . . . .'),
+  ];
+  return {
+    namn: 'Djupt nere', bpm: 52, tid: 'grotta',
+    takter: T,
+    trummor: {},
+    ljud: { lead: { form: .5, vol: .07, klang: 'marimba' }, arp: null, bas: { vol: .16, en: 1.8 }, eko: .4, rum: { sek: 4.5, vat: .55 } },
+  };
+})();
+const SONGS = [GLIMMERDAL, ANGSDANS, MANSKEN, MORGONDAGG, NATTUGGLAN, SERENAD, DROPPSTEN, DJUPT];   // Stjärnnatt itself no longer plays (Peter 2026-10-25), only as Droppsten
 
 // ---------- the instruments
 const waves = new WeakMap();
@@ -263,8 +284,25 @@ function drum(ctx, dest, kind, t, soft) {
 }
 
 // Schedules a whole song from time t0 and returns how long it is, in seconds
+// A cave's reverb (Peter 2026-11-18): the answer of a big stone room, made of noise that fades out over 'sek' seconds, a little
+// different in each ear. No sound file: it is computed when the song starts.
+function rumSvar(ctx, sek) {
+  const sr = ctx.sampleRate, n = Math.floor(sr * sek), buf = ctx.createBuffer(2, n, sr);
+  for (let c = 0; c < 2; c++) {
+    const d = buf.getChannelData(c);
+    for (let i = 0; i < n; i++) { const k = i / n; d[i] = (Math.random() * 2 - 1) * Math.pow(1 - k, 2.6) * Math.min(1, i / (sr * .012)); }
+  }
+  return buf;
+}
+
 function spela(ctx, dest, index, t0, skip = 0) {
   const song = SONGS[index], L = song.ljud, step = 60 / song.bpm / 2;
+  if (L.rum) {   // everything, the bass too, rings in the room; the room is a little dark (lowpass) like stone
+    const mix = ctx.createGain(), cv = ctx.createConvolver(), lp = ctx.createBiquadFilter(), wet = ctx.createGain();
+    cv.buffer = rumSvar(ctx, L.rum.sek); lp.type = 'lowpass'; lp.frequency.value = 2400; wet.gain.value = L.rum.vat;
+    mix.connect(dest); mix.connect(cv); cv.connect(lp).connect(wet).connect(dest);
+    dest = mix;
+  }
   let out = dest;
   if (L.eko) {   // a soft echo for the dreamy song
     const mix = ctx.createGain(), d = ctx.createDelay(1), fb = ctx.createGain(), wet = ctx.createGain();
@@ -284,9 +322,10 @@ function spela(ctx, dest, index, t0, skip = 0) {
     });
     // bass: the root on beat 1 and 3, the fifth on beat 2 and 4
     const root = notes[0], fifth = notes[2];
-    [root, fifth, root, fifth].forEach((nm, q) => tone(ctx, dest, { f: freq(nm + (NOTE[nm] >= NOTE.F ? '2' : '3')), t: tb + q * 2 * step, len: step * 1.7, vol: L.bas.vol, tri: true }));
+    if (L.bas.en) tone(ctx, dest, { f: freq(root + (NOTE[root] >= NOTE.F ? '2' : '3')), t: tb, len: L.bas.en * step, vol: L.bas.vol, tri: true });   // one note a bar, en steps long
+    else [root, fifth, root, fifth].forEach((nm, q) => tone(ctx, dest, { f: freq(nm + (NOTE[nm] >= NOTE.F ? '2' : '3')), t: tb + q * 2 * step, len: step * 1.7, vol: L.bas.vol, tri: true }));
     // arpeggio: the chord tones going up, one per step (or every other step in the slow song)
-    for (let i = 0; i < 8; i += L.arp.takt) {
+    if (L.arp) for (let i = 0; i < 8; i += L.arp.takt) {
       const nm = notes[(i / L.arp.takt) % 3];
       tone(ctx, out, { f: freq(nm + L.arp.oktav), t: tb + i * step, len: step * .8 * L.arp.takt, vol: L.arp.vol, duty: L.arp.form, kind: L.arp.klang });
     }
@@ -299,7 +338,7 @@ function spela(ctx, dest, index, t0, skip = 0) {
 // ---------- the player on the page: the songs take turns with a short pause between them
 // Each time the game starts, the first song of the day and of the night is picked at random (Peter 2026-10-22), then they take turns
 const LAST_KEY = 'glimmerdal:senastLat';
-const P = { fx: true, ctx: null, master: null, bus: null, next: { dag: Math.floor(Math.random() * 60), natt: Math.floor(Math.random() * 60), grotta: 0 }, end: 0, timer: 0, on: false, vol: .35, natt: false };
+const P = { fx: true, ctx: null, master: null, bus: null, next: { dag: Math.floor(Math.random() * 60), natt: Math.floor(Math.random() * 60), grotta: 0, brunn: 0 }, end: 0, timer: 0, on: false, vol: .35, natt: false };
 // Off and on again carries on in the same song where it stopped (the sound is only paused). Day and night switch the song at once.
 function start() {
   if (P.on) return;
@@ -326,7 +365,7 @@ function tick() {
     const t0 = now + (P.end ? 2 : .1);
     // the songs of the day, or of the night, take turns. The first one after the page has loaded is never the one that was
     // last heard (remembered in the browser), and it begins with its tune, without the quiet bars at the start (Peter 2026-10-25)
-    const tid = P.grotta ? 'grotta' : P.natt ? 'natt' : 'dag', list = SONGS.map((s, i) => i).filter(i => SONGS[i].tid === tid);
+    const tid = P.grotta === 'brunn' ? 'brunn' : P.grotta ? 'grotta' : P.natt ? 'natt' : 'dag', list = SONGS.map((s, i) => i).filter(i => SONGS[i].tid === tid);
     const first = !P.played;
     let index = list[P.next[tid] % list.length];
     if (first && list.length > 1){ let last = null; try { last = localStorage.getItem(LAST_KEY); } catch (e) { /* no memory */ } if (SONGS[index].namn === last) { P.next[tid]++; index = list[P.next[tid] % list.length]; } }
@@ -351,9 +390,10 @@ function ctxFx() {
   return P.ctx;
 }
 // The song that is playing fades out, and the right one for day or night starts
-// In a cave (a level) the cave songs play, whatever the time of day
+// In a cave (a level) the cave songs play, whatever the time of day: 'brunn' is Droppsten (the star room and the star's flight),
+// any other true value Djupt nere. A change fades the song out and starts the other one.
 function grotta(v) {
-  v = !!v; if (!!P.grotta === v) return;
+  v = v === 'brunn' ? 'brunn' : !!v; if ((P.grotta || false) === v) return;
   P.grotta = v;
   if (P.ctx){ const old = P.bus; P.bus = null; P.end = 0; if (old) { const t = P.ctx.currentTime; old.gain.setValueAtTime(old.gain.value, t); old.gain.linearRampToValueAtTime(0, t + .8); setTimeout(() => old.disconnect(), 1000); } tick(); }
 }
