@@ -2552,7 +2552,8 @@ function applyReal(events){
   const handelser = events.map((e, i) => {
     if (e.typ === 'rulle'){ stoft += e.stoft; return e; }
     if (e.skarva){
-      const pct = e.procent ?? Math.round(e.poang / e.max * 100), st = pct >= R.minProcent ? R.stjarnor : 0;
+      // uppmuntran: true gives the shard under the limit too, as an encouragement (Peter 2026-11-18, geography 77 %)
+      const pct = e.procent ?? Math.round(e.poang / e.max * 100), st = pct >= R.minProcent || e.uppmuntran === true ? R.stjarnor : 0;
       stars += st;
       return { ...e, procent: pct, stjarnor: st, bonus: 0, biljett: false };
     }
