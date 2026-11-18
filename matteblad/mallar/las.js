@@ -4,6 +4,8 @@
 // the private key is opened and every locked element is replaced with its decrypted HTML. The opened key is
 // kept on this device as a non-extractable CryptoKey in IndexedDB, so the password is asked once per device.
 // Add data-las="path/to/las.json" on the script tag. After unlocking, a "las:unlocked" event is dispatched.
+// data-knapp="last" on the script tag shows the lock button only while the page is locked: on a sheet and the practice page
+// the toolbar sits where the button would be (Peter 2026-11-18, the sheets are locked too). The button never prints.
 (() => {
   const SCRIPT = document.currentScript;
   const CONFIG_URL = SCRIPT?.dataset.las || "las/las.json";
@@ -124,6 +126,7 @@
                 font: 600 14px "Segoe UI", Arial, sans-serif; padding: 6px 14px; border-radius: 999px; cursor: pointer;
                 background: #fff; color: #555; border: 2px solid #c9d3df; box-shadow: 0 2px 8px rgba(0,0,0,.12); }
     .las-pill.open { color: #2e7d32; border-color: #9ccc9c; }
+    .las-pill[hidden] { display: none; }
     .las-locked { background: #fff; border-radius: 16px; padding: 28px 24px; text-align: center; color: #444;
                   box-shadow: 0 2px 8px rgba(0,0,0,.08); border: 2px dashed #c9d3df; }
     .las-locked svg { color: #8a6a00; }
@@ -145,7 +148,8 @@
     .las-dialog .las-row { display: flex; justify-content: flex-end; gap: 10px; }
     .las-dialog button.las-cancel { font: inherit; font-weight: 600; margin-top: 10px; padding: 10px 18px; border-radius: 999px;
                   border: 2px solid #bbb; background: #fff; color: #666; cursor: pointer; }
-    .las-dialog button:disabled { opacity: .6; cursor: wait; }`;
+    .las-dialog button:disabled { opacity: .6; cursor: wait; }
+    @media print { .las-pill { display: none !important; } }`;
 
   let dialog;
   let pill;
@@ -206,6 +210,7 @@
     const open = Boolean(stored);
     pill.className = "las-pill" + (open ? " open" : "");
     pill.innerHTML = `${LOCK_ICON}${open ? "Upplåst · Lås" : "Låst · Lås upp"}`;
+    pill.hidden = open && SCRIPT?.dataset.knapp === "last";
   }
 
   async function start() {

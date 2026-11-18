@@ -7,206 +7,43 @@
 <link rel="stylesheet" href="../../mallar/bas.css">
 <link rel="stylesheet" href="../../mallar/wednesday/tema.css">
 <link rel="stylesheet" href="../../mallar/ifyllbar.css">
-<script src="../../mallar/ifyllbar.js" defer></script>
 <meta name="stjarnblack" content="mul">
 <meta name="stjarnblack-tabell" content="8">
-<script src="../../mallar/stjarnblack.js" defer></script>
+<style>
+  .lassida.unlocked { display: contents; }
+  .las-vakt { max-width: 520px; margin: 48px auto; padding: 0 16px; font-family: "Segoe UI", Arial, sans-serif; text-align: center; }
+  .las-vakt h1 { margin: 0 0 4px; }
+  .las-vakt .vakt-sub { margin: 0 0 20px; color: #666; }
+</style>
 </head>
 <body>
-
-<!-- Page 1 -->
-<div class="page">
-  <div class="frame"></div>
-  <img class="blod hoger" src="../../mallar/wednesday/blodstank-1.svg" alt="">
-  <img class="corner web tl" src="../../mallar/wednesday/spindelnat.svg" alt="">
-  <img class="corner web tr" src="../../mallar/wednesday/spindelnat.svg" alt="">
-  <img class="corner bl" src="../../mallar/wednesday/dahlia.svg" alt="">
-  <img class="corner br" src="../../mallar/wednesday/dahlia.svg" alt="">
-
-  <div class="content">
-    <header class="sheet-head">
-      <img class="icon" src="../../mallar/wednesday/korphuvud.png" alt="">
-      <div>
-        <h1>Wednesdays manus</h1>
-        <p class="sub">Blad 7: Gånger med tvåsiffriga tal</p>
-      </div>
-      <img class="icon" src="../../mallar/wednesday/dahlia.svg" alt="">
-    </header>
-
-    <div class="meta">
-      <label>Elev vid Nevermore: <span class="line"></span></label>
-      <label class="date">Datum: <span class="line"></span></label>
-    </div>
-
-    <section class="part p1">
-      <h2><span class="tag">Uppvärmning</span><span class="type">lätt</span></h2>
-
-      <div class="task">
-        <span class="num">1</span>
-        <div class="body">
-          <p>Kan du dessa utantill? Skriv som decimaltal eller som bråk.</p>
-          <div class="calc-grid" style="grid-template-columns: repeat(3, 1fr)">
-            <span><span class="frac"><span>3</span><span>5</span></span> = <i class="blank"></i></span>
-            <span><span class="frac"><span>4</span><span>5</span></span> = <i class="blank"></i></span>
-            <span>0,25 = <i class="blank"></i></span>
-          </div>
-        </div>
-      </div>
-
-      <div class="task">
-        <span class="num">2</span>
-        <div class="body">
-          <p>Räkna i huvudet.</p>
-          <div class="calc-grid" style="grid-template-columns: repeat(3, auto); justify-content: space-between">
-            <span>8 · 7 = <i class="blank"></i></span>
-            <span>6 · 80 = <i class="blank"></i></span>
-            <span>20 · 30 = <i class="blank"></i></span>
-          </div>
-        </div>
-      </div>
-
-      <div class="task">
-        <span class="num">3</span>
-        <div class="body">
-          <p>Avrunda till närmaste tiotal.</p>
-          <div class="calc-grid" style="grid-template-columns: repeat(2, auto); justify-content: space-around">
-            <span>34 ≈ <i class="blank"></i></span>
-            <span>46 ≈ <i class="blank"></i></span>
-          </div>
-        </div>
-      </div>
+<div class="las lassida" id="lasSida" data-enc="v1.6d2327a95a836d5c.pA83/7NwoRPWSLbkv1b3qqgLn6AFnL0Sp0TOh3wFAXAt+1VksVxRA6USP0meE3OoU7eclvwNyxGrhD7jCmNCGRXj8AH5lbbRvIgqlmJfRdmMes0Cs0HYMOrN1U7swqtpAfzULqkDH3nenjeZErLHBOwIwJtJq1v6Gc4YrDtJ9fPVrQkfHo21zl94q4R91Hz3vjUGQZ4LzFX2aTH7XWteyClfpyG3lzhwUD9363RSNE1Mu2NzoCfQCqtW6MgaONZuQTt6DiB9ZeYlGLPY2BrAxPef9nAuXcmEXw7FOVh/xIO7/YIBcsar6GtdGHNikRiNZZDPGLyCaSa91nXWN+Pn+GrdbOC1IiD5CQquBEvK3H/v06IG6TBeJeO6Vrr25wBRC6gXI3yfgxB1FApKwlqjX3UNtESev12sBriEAlhR655nRb3iIxAqKblkErneZSIqnjmFPXgtjFseuY3sEj+UsB5AYuATA59pbATOh6OcgiivQkv6DSzdbcfVdTB8wmcJk9Toc3D6Yl2p81lF2Bp0Y3g92prwCrGXydpwKjxqoQ2sn9+XE/O4eUf8RvpsxT3uTOmDwafBpaqlcFvwWBpx9lneYNnuR+OKuIrygQ8K6Q+bPNJlfNA//QZRhe/0P6XnHAP7lMsrR/+h69REwU2/fjOP24Lekwj9vZrr9jtSBtU=.yNrhlskyPzW7iiVv.HgT9fM6CdmaVRwk4g3bxV1do72f4VwWWm5szZbeDgakay3TfqSwp6B7zc8k2yugR9m2ccapkHADO1RDPm+wgFApJoGkjUCRXgNvNWPvNB61EFqQ+6l16yY8uXwZ/0lrwPhATjXAtEFn5Dv2hhjS/3GkJWAlMTGcOO7VYhw7kJgW1vWntO0L2CY8NeUXGqxnRGX96qHW2qRSKstNitTcstBCJVCCTiH4cj/dHGri4pjqlBSpr4UemkgGRP+Zr8AHG/uclGXsUuu7m85sYgpmVFu4bpSmeMVcQ6Kf8V19w6ylEJvkcTSoxRuuIbbsSU42UarqyGdX6xSJGO3NICLrT7QWv+WvtOdt1ZHlGCRblUrS2wjqZgk4giFhaM6WMVhex/3Qq9aCDylwYli4ob3nWG48p2LHNotiURgK4dZriL4V9d05u1eTgLk0WMbWEiAzZ2YFxMpBEUt5aTR5lPx3Y0DJYyRUJSISkFPykfFvy8ONr2Xj/iaYONlLIkmsBehXmNvPJhVHartY8EGWUFbtuwPgt+PUe1Y/E+A5N14k9cGd3VnmA4MMnOhLQ6xmA7IZlIqzZ3WpKuAmogwefLEKFitnHAIMaGOqU7rZuE+k5WqNwkP7DA7jVkiOy1Cz4hPsxPV7FgGvBsBz8l8cG3b/LO7ZbFnOWXbhCtBsTZadNovEvvo6rkAF3ZOuYXU2g8rWMh92bVGr3xwTk/mWaG36Jn90cpJbp31tph+oXhG2YmOK3Icqu0Y4k3JhIVs/8b2br5ST5dtQ+07kS11AEDV4zOZe4xTcpdvlHH4vRzFonddSfaV8iZUAay3uU0ngPMRExWpJeITUpdo6/pbfmZBvk1YeX9d0GUgd/yMH+UQw/8T1rqzxKH2CRdahqvb0L4NZtnDAUcQFCWo34gGm1BM9T3cDwlIU3KCoEy/xRSAU79e7Fq2pVXJYByPAiOUbUKxaWna1iYSB5rKahSGPOYq2CQsEqkE1KmxVwVbeBzRqjbZvSHzPjbV5wsgz9tHWmOWQa3Bet9ff7PBq4rPrPD6thtHEomPy00SbIziASMbex1IenKtSRPfcsru3UMxJkd64jFyZYjBsuJICIr5gp11bolvNzkLE6LRJZdZzAugTWY5/amzcwH+0NiPpswqIXLgeE7DXYvSPRoieVQnck9Q+YSAZNM5WcAbKKvcVJ6HoDNswBFRMm3qOgUgUicoNnTHygMDk0Znn09OS+nXdOA4RkpZo44Gc4xirGyP1wmzo+0c6p/G+c2aHGnQF9kajVec7sNG5R5fmu1DIhqN5p+y9OJJTPgPGWGCUkryCGr5e0RqVptDjG32fkxnVixTrodVKiela15nlAI24LCqHFBCtxxYLyACFY3EpfLkCe6o+iU0b3jJD90EAAZhdIOW8/7YTbql3YmZ0y2y8zuHSYqIhXTIYS8ujA1Vx6TsFfPQ5mf4jZF+n2136TIHu8azUW8L0aZf0fdYcE9ma/l1coQJEfCRPe31p5h+ME8A65gbiRY8yfRZQkuIwPar6sJWc0VHjaV9j30xnlVt/D9CtcIDam6C8fUe0gZhicF7ezXJqSrFULJbw0fO3EjImgQmIpSuS/QagsNBTNIFx/7XSj2atLMMq42k5c1r54vaC6w9OBf7QPT1HUBObtxX7mUbktAJ/1PKw7ccpeslNlG469N+f91ZcPwJyz/3ogj3czrmi4opVnHYub4sDf/p15S59Doghasexf/lseOv1P0kIK68uVtbSk/mh5PS89Yivdvq5nAikcKgPRn+8Vb0n06V3bHATyL4CaCk90fP9YDGH2QLi6k+6aVfU8/p4ju/LTOv1hToCm5EHQn37Jmiezq5NpT3DIdow74MWqL1ZrpuxSR0anxTEynkh6cVRaLTVmqCDam+pw/HlI4+Y0vlBkI69TR4WqS7lI0jO55stvb+pcTDsi6ev7Gwfw9XXLr7Ut5uJt26o/BaEGQqd2r4B0bxM8wxPldtG0qOjTbpLu5KeNZJ4MiJna2boxSRflSO+b9RQFYT7+kFnwu+NruyIqDG8TWDOugaSZ690r5YTiEIsoXh3f780BmzbkW3QiJNq6lVYR8PJjO6JWJJlpqE5gzz4gWkG/7obtIj11O++Im9retm3pxXKaRnnYsfpcM1sY0AOA1ZfM/S5cpjMzEVqr8f4HNwsWSEEFurnrIDQnWW5XtNzXBoGKpSBXu0Q7wHn7LK+8eOKmqZwjSD9coWST3FpHaWrNDZ5Q68x/BCIlrEZ+ANQ/D29TNFR7yUAheiMg2wX78lw67cv/zSlhTHPqN6iD8Ym3MrwYR+h5NG5WVCOevSOFQAClUCZ0/G3Ng4wjwqI47hXwPGISTRWTM134/YfarJ+miyK8ga1gX9gGopHSPu39L5cSMHiqhGyNU5dxPnoJSpQS2a/LS2UVtK6xPrNDXmwp+yl1wZIICCKLcn8YsFsla4jHaEsEZd0hhoecosXVy7zAMa/GNLp7gyP/Zk5npXa9BbYrmFhKyfsHQlgrC6DFAFuVRZe+F1VW2Cgn3C7Ecjs52pgt6LP98WMxeD1a9WNqL28hgXLhki/HrXMlPb3+WQqpCIIjwri5iEvWmk3ZcrH9JxOGEZPB0Hu16nHMVY7LbFN6rKC3eiHT2bAiWgNXhp2oyw48q76hAPUImhSbEnCMQSCUAuCstrqKPbDJpTkbDpeB48jtjPCtpgS6BJHxlW2osuhrXzof6UrGJjIwCESX97q/zb/QmXT5ovBwKXgvB7UQEmK0OTStozGU+Vf6JAzr4lXI5RHWVJHeQ9V9znOmkE5ftGyefaTq5V7DVx/j+NA5WKITN8tMBsXM7hi6sTOFhkf+PcFCV0ESIWHRxGJiyczBRi09At4bVE/wyTXNfpFS5vUxpLYeILY6OTj/aRBemlSNpg7ya/TZ3NZzlzWgmpe+gyW8PC18LUdTPgu0MHLp1OblRKQyaC5W0UdYjBaP1p8tA2MN/c0APBBPtg2ke9KBw7RxQ/N0pRIxV/sbg5+gCSGSXRMuOBkeK3JIwfs/amiv5sXDkfWi9q+xTxbrVmgkA+9/0kVgeGjO+MGFi9j/xH+MCBOb0awYQnUbmpE0esJS/vqqlZFoE5bJo2sCeRZURvkcqJxT6ROmc5caZeV+nz/kIau7Z8KnGqf9N2+v7veBf9BlrQcSE4sXsLYNwSsPhUG1ZOYsutInsI1kinJ0D/bnDBynBxPF7IqsqkLfIBCOmRO/eAJ6EI424Ysbg3+QEiPgtaW9tRWUwhmyhgRBXKg/iIzEPSnqP7cHrmhXDIhl2mQUMHKLTBAcrfGOq2gZMTyOSJ/kCX06kfToYYwB7zeUjB1lcTIhgcOcSDJ5wNtP6k+2MFZMWgOi8G6ePoYMSVYj/noGFuPwuXKAYCij0vf5Z8h9WeXn+EvfOpQcPk/42D2NVDcK/f8bKIPSPy8fHIBqJmX7WNFv9eLjViWGn7eTstjgbW6E4irIUbPyWfFW/xav4cZAttxYzw7j4gsA0tRSaOP8F6HMjurV+Eo0E0v7A7ZkcDK7aOD6uiUuPTeT9Zjylp82ZfDVo/HSbbwLlPPQ+zl+fYGmvKqjf/pBWjyF4D0wajwU3qs18ABnaLJuXhIbGWiu5nPDiEYw1hlFlAhJefP44F7gT9mP1vFeT1k0sT30GHBq6Iwz8pCtzCBf8CThJIYspqpueqx2aQnccFdubPsdj5KHVNLIG7/Cot3s2VuQXsRxe1NGYfzjOE3JrpOxebz7/PB+y3iu249c2lQYTH+auGeGNpOLfF7JxLGWHVbksYbcp4BX40JW1WY8CyeoCkk8BD4bnLgwrOnmNIbV6N4dRCPERAbF1qghDeycoHLnf2H9lttSUYgCaHwKlSxuohdz4y6BE7eBzCHCB77jYu1AytVean159WR76eV4qHerihJpH/rVvZsd5WinWMWnoHoFCRLpCnC9IMnGp4TTJUOwHXX5XFJtloRna6OaQjoGVmjBo26u0ezyanPgHC0gagclH52RlbWR7wQ4nxc1cypjbUxArOeypKkUKhHRErrfBpjCzY1snBuTH/DonrpNfVrm2ghnCMSDfZqfXqo9gNXAiSGR8/36Y0kvIYLkK9S2oyJamCW0uQGhMCM9/BWlPS4KQ1nFtf5Kt7WuQ7KPRUmAQJlQJbJIzOoDhxrlBpChffLrlBM3m46uCN6LU7CsaWWSJ4kj+TyQyM4sOnK8s1Hxch1jLUcO6Vdwhh3On0m67cyj9cS0kAyKStvG4gagTUMATyO7Q1KENGwHsNdj5g2dzNQQk57nGMn3mJJHZF8hmUzEJbAsIA0t90m3zA2XNwnIPI/O5s+JD8k6njtJlIuKV8KxbSZhC0XAXSoDJEAps2wQ6xRMzo/vSwwKKyBMk16w9kXvRj67B22j6MsMPT/wt1dtIF5B9XnzEs897rFjst8+vmDsmFRHZIv4NOAkHTimelehivPqyk73pZCPVZyrazTVGDa2c+dc5KtaTgL9adHE22UzopNdE/mmPnsc2BQNxptzFImZne0JW9BZanD+v0xNxG1HrgWr31aJgwK7o4oteYywRxrcnWSqYj//k+VY1OoQ9sPUmFXpCx9snbbtrFRqZsR3kzrGIwXLHcyGDP2ofKqZQwFS1Ynfa+le5oO/XX7Y0SbyY5KejTpSeCYnlAThFatxcahzlKzqApItnpX8MxLo/61yYkyBJINjN5UU1nxxChIvdt1cnP9EFzEUuQ6riQ5MLFrOih82nx94B8138VWv6lmQNa6Kwl4qBoRGO4KvVq+RtdKvJAniF78EW+et6Ks0nw4nXaQQO8fs32qnaWDn6EAYclBb5V0wNVzpnBK0uSQCUD7fRhZ8QoAiNpK+IGhHV+nRsfymAA+t3DRa8a26mWa4Kv9VhEu9whidcPX/kZI6gppMJ78ggzix7wOu8CVfOBRDj6NrsSr60rH7uShc8L6eQVZr+IawAorgP8ogKHBod5zOKQW75sA1RkQHLYYfMi3aw5iE1fVz8q9z7HQw6tdixnLEANi9+Oxh+RVTfu3f3dAmwxMCQzl/b8RGUSdteR1oRWfXi0F4Ki89FpzFI9J+hJAyjnvSjTPcBW2kAPPSf/QZ/vuWK8bX9fAhgIEAxDW0ElFjiUIEE+zht0QLTv+OqNugujSxZHpt2UxJGgTsr7Epaz4luTug4G5JcFC8U+IRChJMcAe62KwzFVahTBtPDddaeg/8fwD4nBnALSZJnqqPNfNvLOJLc6T1riLUFe3YfUs4METsqckAtLdRgke1pF0yKpmBrkMZKkEA1+SQHHmr9czOaAzvP12NYQf3f9c5ax2YAhbamyEAO4s+myYyhXzdVOsCrNNkT4ra0gDQRv6yBISjVzve0yjLQoCs62je5FvF3LGhuFt5RuJZ7zQ18SBOuA8Lw0zPG/udEOlutELGxZb1uyR35MOLSsL0tc1LEwbnJkewepJuNlY/aK8cpOaCOHbKsUdF20HTT29F6AL17Fd2L0Pv0/imueGpqGZvG5ZmLFhUVBdxJDizPioxdLhxToBuvpArSS+a4LCdW+UCx1Shjav4hkgBb/ll5XcdWVE5WEyGIE606nODTpKyWZiJ6aFRF/zVi9M6iK+9vwyiYE7ENuGgTe4dXtpHcvMFSErPQ7IbGOVVL76F+TjBznfAIz2cMrHNrjW6gA8P76i+hSf07BxysPibtrp8ePHcVdNqno61bFKkQGAsf9eyUPB3dNlyqW9tyFdT1C2/B9wfoNXNawXWhbKw41WR03YZbILmSm7U+DeNKRnTeF2mgv8n4Qicu3I0Tic4v8g8kfO/FlqA3Ma41WnWHCRvbH6UfQUtdCIkIP3PnVUMzcp0tQ2U+66lDzDfClK2DZBSeATIBL7ZBnqpYdqb0TIdBSwvDOg7Kj8FHzcJcLFCfQgk6Z6FFoHB/70K0KW81CF1fD/JPQH3RomkFjGck2Fzwojd+mvDO5fUxGni75gNnPgmnAZTvZ7S8Le3+qz010nOmHxR6c5l0EqLVprDQs7gwc3DkBQpaPlIY1GkffHGLuQk4tKrdjGylaHll7i59knWxVparw1aWi+ke4BffWS+Rc2ETxkbuDoF2Rfo38gZjZ848c0ssUR1I2OYf/bt4izbdFFiae2YI6o0zi7Z+UYj+HHpHVZQGsSWFmd11bfgncEsW5TqP+s8dsFhU6CUFopW4J94lawqkF8i0dFKFqFXEMZ0DzvWCtqRba1mq2BTArObzm8Cwo1wLZXrfFc4wdRztPHxeMxDcB7ugfQdcdP0RgGzOeS2xO+z/2xAfO7D0LC4aMyOg3Fe6GlnBmN3d7DyHBHaovWSb0E9pShkf32hhCRbYA0Kuqi6DUYA7JnVZWWuna+CoxO5x7wAT1WTWsucOIS74EN+0CRcTNwU+2tyacGYu3bj6AwK+sTHGEiZeAYfYCtf1cvb+1cBhJBo54p5FJdvxC/t9rBAApmAjkj5Q3Pv2g8DAt2XINekxTas4Ya+PoFo0uUe2EF4tkz9bOJ5LhPG3Tp1k7JE7uTij3MAI76rNVnoMa5giIHVPRhpHgqCZbdeFB/vOZ48Y4PHqRz1s7TdqrHxXfwvIQSAjnGpcqhMmrt3FPlHw0unaGH2XoYr6/ObjmKf7kx8D8I2T20W/+66HjiZCsDRN/n14rpdWMAZHYikVLHyVWYdnQSq8V7FLE7AzTtW5x4nH1FA7T0whGczQz5Prdz6ioTY+YDX4EacDOk4iQ4vcy6jDR4fDqOGk134lCKc08Lcr59Z/POX9j3SKg33glz4VU4rVGWaHbgHL2lAzVMmS+E+IzNteYJpqUToTdHRqK44skyPrIjbJhUqyRqsTe39hO2VcZurUdtSyZMYsHNYh9T9GObtTjhVCrJicIoVJkYBHj1ZV38QJcXxQoH4WPdD8BqvA91T93oZH+4Q9DrOR1j+Jt3J3oHR6EbymkkVwXNy0g0klYG+OgzEwKZ1Nh0Zm2t6UUv4yaX2weVaEBQaD/T6RrTriA8RrWzWuaHGAuODjR10EgtrWi+0a8NNu9VZaP2u4L9GaW5wZiyuw+cofGPyXsQ8dRojvdeHdxto4di1akrosTZaj+TvFevMDipfzaj50QbidkI1M4VP/jrTOSd6ZMGIF7ZxeJm3Qlcu5GDuyjZR3LZzqEqjqNSvgTpJez6VXDoMcnk4kAHpKWB2aPkZFhtwW8eSH89NGaNyQPWcg10gZ+dQo3533PLndzChiJN+U7qSqDsHbiXk7+3Hfh0Tr/7nSAo2dZHyYrvTnmi8fZycYk6cyLfJ+jEspEQBX56NM9VQpt1KHBAMtN2xV8eac9uLMpnpIK+vsGxdN81LLJm/sGjoA9qQZIIp5YHHxmsnqQquQrK04NgLWI530QeM9MEjNwCzmFl8JLnguAqj5hKPid4pJnKwlNHfcJZ2G0SEW/McC4cmEh+HZXPl1HDYFGFCI+o1nWV+jXdagOf3a9mwuYXzwCR2HR9mSj8We1lPCfHBeJ20cv1R1VkLrTB7no/e96OB0R8ztEZQZEpbw+uaEEd3JmUptKI+S75RbnR87x9GO3W5OiftdiGbBsbiVX/GiWImM4DKGa12Bd/dHDu9imvwXkO+IMhL//M+NO/i4Ie7hIfK5j4ajWqV8gbEJ5I7OyxfVe246jLxt+8BO2dx60igi6pit8tZAuIhI0+a7L9JPKkw24PwRBjKdszyBLYLUmCg+kkWnEodGfLLffyqSd+gFzxretZK5/TBluPHfLi7zTU8TQV6WnkfDn0pgB1emfB+Lgt00fdQkZ5M66Jn/+rJec4eItDeSQ2UZJtiUhoNghC+WV8/uXbWvEWUAJYPDgstHJuVoZbrP8SVB21YVBQVNNtb7BcqBpXvjoyxGvKNTXK/kut3+omM8ym8mKS0k6LsN4EjjGYQ5f7TUnKhbp9eEQCpQi8c0zXUvMFM2fecUXKHe4BKShaMaa68B2S1Ca+OqeOHtyzmNPWQtjVf0/XoBt8nSEw2T/lBVoZsVJyMf+SJ4FnYz53McBGN5njkzdHJtdXbNj1qKRRyY1X9xnNGgKkFxbs8VZkqhtnQhfp4J790utPpxAKC5WMJL2aQPejKWDRm2srk8QBRXdGe5fyy12NYX5UcO7OHJUnp/yUpQKzHnbOE7x/RzS+H5Ku+epjsBaYBSGZHCoE7S9HAsj2Jn9TyJzaAZX+o/rZdt1m9gw7V4F+0ggwJD7q+6yPALhrdxu1LImhItN7uv66AlVJaMelbBOXvpJ/pZbb5Vfvi9GHeIFbgeCglhHnTBzahZQkYPjwGH8P0t5ZRKKpAXVXSzjCPpQmn6EtxEzFAKq/qGk6qLAu1JEX1UoIDZs9Sobb3NJ2XTvwrPtuAabz2MSvWmPZ4C1K5o8aAEEeeI6ih5lDT3v/gWFTDJi/+w3lHJUnr1Ne7UQp4kDlmknJ0VWQNvx5ewEoAxQ3niqXNBgMol//1i3Qa9evSudH7+Q/LGSOW6oTSsK7JzmowIHqhUnyI2zbu8kf6VbA32Jt6LomFli5/f0J6rin7L6bGWQ3GIs23Yheppflz1ergbdwH0ma4i6ENhws0LF8piese54XCww31io54m3lqh29PygX3rtr1z0N57WqXn8vYnKM7gz2wB1EkSNKe8EzDvBcPV1eeR7tjuLZIWCZ9fIzho768U0bItHGnsUeBZ4FXAcveMqw4np9wfJhFjRjF7sLzXGHSWAzTk1TOGd2ebU21juumV7wJJ2OxGQIED+pyedm22C9HyHhfx/Y/yl4P53YYC7DOL/sC8pxb60Noe8rlCaELFF4gEm1ASKSyZLpfvnlx5cxzld/sENNmdy7IngdpHEGxdnzDC0Ex177EZ7dnasrFgdLwKg1BC3r5LeMOk0+S4tAt8T0n/tDxg50+N+FyNeQw4NvaNdHSGkepvk+niB//E1Ko1kgeqjBNBiu0Lk+56vc7DYsD7DYR57/VmgSt7XcgPfrIjBmRljTzmXSlKB/9G4U4+caOYCUs2I6RCCYiAVBTu3Wa2XI4C1354TMSUS56k0rbDMKNBFo+3jpjzm3Lw6kup+r9FldLoq4vz/qZWwJWULxoOn4zfPQEV7fnFV0JXJA+KN0ZxBpt6DGAfmeUSVT8uXgv6KIdGmkcBPe2N6L4VRILSj1GV22e+v6lkQIWBCEwsAHWgajEGjjCmi9TUpBm1m/4tVtu17OZK30kOw4+cUpiTOI2N9dneG3j1DWRMCBh1LgdUqkdZtAdAEALfUQHIru8+IlDeqNSQWzIiiZ4mc979IyqQCbnbRkcb5YrDln3OXaKuFkrwRy6csCxLW41mXvFgZA1qMWCTaobxD/5j+wGSOA0lvj58gUquOre99600UpVfOgg4TtDet+BIJ7gC57paJyijGbYkMho/XeqEi6RI/AbVydfTFKFjOhDZAt01ilyHvf4aKXKloV7TgJ+5uEpAa3dqG6z+L2oXyTivfRSPzto1MKt55BvjmpSqtkdF2WEFWRVsovpammJsi8nmAw7JEqanb1hx2lG50goEAs2C4O9dUeJlDmcLN27eXoXa/T0P21+g+ibNBfgg1Y7CbhuW0pQXFp22/AE/M0cuYZ/9v9sYQ951pbmGaUMj5gmMW9Hxw9FQgfvglCbY0267VaQbe6QEBdDRb+vREVhbSkoKhYcobzNeFta7uxVHUYE7NyOmKX5zgJfYP/5385P5QUiOC4WQvhOz0geNhmuTA3ogGubrVVoj9KkzDFuRN/oj/XjXaekSfP6Wm18nRzJSkFtMgFWwpzcfzpuN9juUuoNH8mkax4H+OJfLMcFGdxLbMCrzACDJMKN49gmxK+uilBo310X8gaNnjv7orp+LAW8baf9UBAlBX4bXmQfpaHBipv02RuKgBdnpHKod+YKN4gkp3vsrOkYhWkXGVc0G3BDUHdBJIRbDZH3UyGyvcMPU3/GyuPpROCo9JCHau7VCcp3rMDCFRE8BSLr4akJtUoWKZwTFH6hlHVFun/8+duBD07mKsErXb+QBj8WZYXZrBnzJP+6KgxO8XyJ8lRVokcbHzObAs+IWCS1YAGygcfgv2SPSM35A1G4IZJTWIxlIpDid+PAhop72V9PnIU+qBh/qX5eEcswyhuSDrOypSt9GfDdx0Bc99B+98JAIu4ef2jbIvnzsk6Yf6FJYxdeQs6rVSjDk0ddVmuV0MlTLvLahISu5yBGcNKt2cRY1bjC6bje6NYM/kdKcVbO4xjpgRPhYbGivZTo8RlV0Hj4l6SObEkCu+/6mjzNwJ8ONMu6/rCugq34RJRSUjb5J/LAhyGtQ02jn/jpbt59PK4uDXiM8QXGDynsemA9kzm+el8DSC7LA/rcHPNe9mto3uc1/zN6BUI9cdYhlvrwO4d6vtKmTzDA4hYUWhXU52wLmwAKEV3m7qVuAzOUauxFWzcEI8U5uwEJr+XVyGqq/TupnAW9+xA+ROWIA6/+DPzWDFbTmWSCQc53EVRxgD/XZKS8Iz0WxGnpJxmF+PF4D9Cd34xCcG5/GyG9FIjoVuaAcXPLrbigPiB0Z0hcu/QQ0TUbwWOq3aqF+vAii1t9FR1WluqAzi2LRofDFB0IqOajr2vkU3ApXJAbdYmuhjg326weNag2ImX+IANYNFZ870wowGcfTZMQZGyPE5/qFSdB1Rh9kzHounwx/FigJJxqarhThQ34qgxvCQULNku5L27J2RPXBX6dJxuGeqmNCISsu1r/A5BK0BpvvyWZP5vSiRyeW9crx3nGVAaHAfRR+CX84VG/fEqiMLI56LyyMjR9XMRvYDZ4lRCqGn4Y0ag1KoOn33t6pezWkeM82TlmCicDXK8i7qqhceZV3HVstSApCCZfrAesFGPxaFyV1V9YMkNMRisQCDgj1VEHj12aVjABp7Fd0UfEIuSlpHsVh6jXphPzzbq3cirOV25t8jw=">
+  <main class="las-vakt">
+    <h1>Wednesdays manus, blad 7</h1>
+    <p class="vakt-sub">Blad 7: Gånger med tvåsiffriga tal</p>
+    <section class="las-locked">
+      <svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" fill="currentColor"/><path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      <p><b>Bladet är låst</b></p>
+      <p>Skriv lösenordet för att öppna det.</p>
+      <button type="button" data-las-open>Skriv lösenord</button>
     </section>
-
-    <section class="part p2">
-      <h2><span class="tag">Huvuddel</span><span class="type">lagom</span></h2>
-
-      <div class="task droppe">
-        <span class="num">4</span>
-        <div class="body">
-          <div class="tips"><b>Tips!</b> Dela upp det tvåsiffriga talet i tiotal och ental och räkna en del i taget:<br>23 · 14 = 23 · 4 + 23 · 10 = 92 + 230 = 322</div>
-          <p>Räkna 32 · 14 på samma sätt.</p>
-          <div class="calc-grid" style="grid-template-columns: repeat(3, auto); justify-content: space-between">
-            <span>32 · 4 = <i class="blank"></i></span>
-            <span>32 · 10 = <i class="blank"></i></span>
-            <span>32 · 14 = <i class="blank"></i></span>
-          </div>
-        </div>
-      </div>
-
-      <div class="task droppe">
-        <span class="num">5</span>
-        <div class="body">
-          <p>Ställ upp och räkna. Räkna först med entalen, sedan med tiotalen, och lägg ihop.</p>
-          <div class="cols2">
-            <div>
-              <div class="label">a) 43 · 12</div>
-              <div class="rutor" style="height: 38mm"></div>
-              <div class="svar">Svar: <i class="blank"></i></div>
-            </div>
-            <div>
-              <div class="label">b) 34 · 27</div>
-              <div class="rutor" style="height: 38mm"></div>
-              <div class="svar">Svar: <i class="blank"></i></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="task">
-        <span class="num">6</span>
-        <div class="body">
-          <p>Enid ska bjuda <b>50 elever</b> på muffins. Muffinsen säljs i paket med <b>6 muffins</b> i varje.</p>
-          <div class="rutor" style="height: 18mm"></div>
-          <div class="rows" style="margin-top: 3mm">
-            <div>a) Räkna: 50 / 6 = <i class="blank"></i> rest <i class="blank" style="width: 12mm"></i></div>
-            <div>b) Hur många paket måste Enid köpa för att alla ska få en muffins? <span class="grow"></span></div>
-          </div>
-        </div>
-      </div>
-    </section>
-  </div>
-
-  <div class="foot">Sida 1 av 2 · Vänd bladet!</div>
+  </main>
 </div>
-
-<!-- Page 2 -->
-<div class="page">
-  <div class="frame"></div>
-  <img class="blod vanster" src="../../mallar/wednesday/blodstank-2.svg" alt="">
-  <img class="corner web tl" src="../../mallar/wednesday/spindelnat.svg" alt="">
-  <img class="corner web tr" src="../../mallar/wednesday/spindelnat.svg" alt="">
-  <img class="corner bl" src="../../mallar/wednesday/dahlia.svg" alt="">
-  <img class="corner br" src="../../mallar/wednesday/dahlia.svg" alt="">
-
-  <div class="content">
-    <header class="sheet-head small">
-      <img class="icon" src="../../mallar/wednesday/korphuvud.png" alt="">
-      <h1>Wednesdays manus</h1>
-      <img class="icon" src="../../mallar/wednesday/dahlia.svg" alt="">
-    </header>
-
-    <section class="part p2">
-      <h2><span class="tag">Huvuddel</span><span class="type">fortsättning</span></h2>
-
-      <div class="task">
-        <span class="num">7</span>
-        <div class="body">
-          <p>Fröken Thornhill planterar svarta dahlior i växthuset. Hon gör <b>28 rader</b> med <b>12 dahlior</b> i varje rad.</p>
-          <div class="rows">
-            <div>a) Gör ett överslag: 30 · 10 = <i class="blank"></i></div>
-          </div>
-          <div class="rutor" style="height: 22mm; margin-top: 3mm"></div>
-          <div class="rows" style="margin-top: 3mm">
-            <div>b) Räkna exakt: 28 · 12 = <i class="blank"></i></div>
-            <div>c) Är svaret i b rimligt, jämfört med överslaget? Ringa in: &nbsp; <span class="ringa"><span class="opt">Ja</span> / <span class="opt">Nej</span></span></div>
-          </div>
-        </div>
-      </div>
-
-    </section>
-
-    <section class="part p3">
-      <h2><span class="tag">Utmaning</span><span class="type">klurigt</span></h2>
-
-      <div class="task">
-        <span class="num">8</span>
-        <div class="body">
-          <p><b>Pugsley:</b> "23 · 12 = 69. Jag räknade 23 · 2 = 46 och 23 · 1 = 23, och 46 + 23 = 69."<br>
-          <b>Wednesday:</b> "Det kan inte stämma."</p>
-          <div class="rows">
-            <div>a) Gör ett överslag: 20 · 10 = <i class="blank"></i></div>
-            <div>b) Vem har rätt, och varför? <span class="grow"></span></div>
-            <div><span class="grow"></span></div>
-          </div>
-          <p style="margin-top: 3mm">c) Räkna exakt: 23 · 12 = <i class="blank"></i></p>
-          <div class="rutor" style="height: 18mm"></div>
-        </div>
-      </div>
-
-      <div class="task">
-        <span class="num">9</span>
-        <div class="body">
-          <p>Ophelia Hall har <b>4 våningar</b>. På varje våning bor <b>26 elever</b>. Varje elev ska få <b>3 ljus</b> till dansen.</p>
-          <div class="rutor" style="height: 18mm"></div>
-          <div class="rows" style="margin-top: 3mm">
-            <div>a) Hur många elever bor i Ophelia Hall? <span class="grow"></span></div>
-            <div>b) Hur många ljus behövs? <span class="grow"></span></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <div class="feedback">
-      <span>Hur kändes bladet? Ringa in:</span>
-      <span class="opt">Lätt</span>
-      <span class="opt">Lagom</span>
-      <span class="opt">Svårt</span>
-      <div class="wish">Önska tema till nästa blad: <span class="grow"></span></div>
-    </div>
-  </div>
-
-  <div class="foot">Sida 2 av 2 · Bra jobbat. Wednesday blir nästan imponerad.</div>
-</div>
-
+<div class="las" id="lasNyckel" hidden data-repo="Real-MrBeam/stjarnkartan-data" data-fil="spel.json" data-enc="v1.6d2327a95a836d5c.sN2vLYULqjLUmVgbfCr8ymOznmwo//yIKOH9RgT0Qa/mwes5HFDdTlQ6/GXUKSIcGmFZzVXxI09X0fZyk/qhQf+SWi/MkoRB5Z45d6PDng+Bps08mj8/XF84zXrBeOCC+rueRg8c9m3Yeh2jQd6tABYWhDGh1oSRebQGl+S2r5V6cSOEF3ERnbxc22hy5d+si982e3aWtarNQtHRp7zGJuyyn+ecECkJfYqSITzCvYrOGNdBLN1oikZMD8jsg1JqSS5J9MzvVDsl82K3aWrtAoiPI4ESrQ167jrYQT1WiePMsjU0SQSmgn30nwE19ahcAWsqSFXVpA7CpIckUxoZgl9P3VlYvFKynzrOdd4NxDV2h6JodYNTdH53oy5qOaicVXEQkSiNI9AJVLJK0m9JAlIYjyPxixfXBNhFr5TklMCvOsrcWAGj3/3WbddsA3//ocG9oTRrlEm6ztL+Ow58meHaUCl3B05/Hl6ud2v2dV9xi/TOFOyc10i22ms6k7+zvqhSN64hq08i+qCNdDp5Ff3yodQB1LOPAAJXub0nRAAskVuD23ozg1WnKmtEOxP2wpVYbaKagyRib0WrmElzfedpN5pdhfUkRSH7/IJGzdLOsBiskPeAJANog/FzBeGObOoG91hqAVmRcIs2wSTi9NFfvBMWl4qkEp9i71UjH9M=.o7/aFuXYE7HyD4Zf.mlqGQwmN5wChhblmgpnaTC2ZAqSX4vEa0rzdBOz0VTGls94fPnZZJs2Q6oBmZ1gPQoJQT0gWx//Df8nLxDk7P836FDBe1fPP9G4fYINTH7mN7HJWcRIVPHghHjZFxp+wBPpWDZI+WAwgjff0/g=="></div>
+<noscript><p>Sidan kräver JavaScript för att låsas upp.</p></noscript>
+<script>
+  // Starts the page's own scripts once the lock has opened it, one at a time in their order
+  document.addEventListener("las:unlocked", async () => {
+    const box = document.getElementById("lasSida");
+    if (!box || !box.classList.contains("unlocked") || box.dataset.started) return;
+    box.dataset.started = "1";
+    for (const old of [...box.querySelectorAll("script")]) {
+      const s = document.createElement("script");
+      if (old.hasAttribute("src")) { s.src = old.getAttribute("src"); await new Promise(done => { s.onload = s.onerror = done; old.replaceWith(s); }); }
+      else { s.textContent = old.textContent; old.replaceWith(s); }
+    }
+  });
+</script>
+<script src="../../mallar/las.js" data-las="../../las/las.json" data-knapp="last" defer></script>
 </body>
 </html>

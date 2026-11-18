@@ -2,6 +2,9 @@
 // 10 give +2 stardust for every task with a bläckdroppe (class "droppe" on the task) and at least one right answer. The ink is kept in this browser
 // under matteblad:stjarnblack:<sheet> and shown as a stamp in the name row, which prints with the sheet, so the correction
 // sees it. Ink can only be loaded before anything is written on the sheet. Only sheets with <meta name="stjarnblack"> use it.
+// Since 2026-11-18 the ink is also kept in the data repo (mallar/datarepo.js, on the published and unlocked sheet), so the stamp
+// shows on every computer: the ink from the repo comes in, an ink only this browser has goes up, and when he starts writing the
+// repo is told (paborjat), so no other computer offers the ink after that.
 (() => {
   const meta = document.querySelector('meta[name="stjarnblack"]');
   const tabell = document.querySelector('meta[name="stjarnblack-tabell"]');
@@ -10,6 +13,8 @@
   const INK = "matteblad:stjarnblack:" + dir;
   const get = key => { try { return localStorage.getItem(key); } catch { return null; } };
   let skipped = false;
+  let repo = null;   // the sheet's entry in the data repo, once read
+  const inkNow = () => Math.max(Number(get(INK)) || 0, repo?.antal || 0);
 
   // the same key as ifyllbar.js: has he written, drawn or circled anything on the sheet yet?
   const started = () => {
@@ -20,7 +25,7 @@
   };
 
   function show() {
-    const ink = Number(get(INK)) || 0;
+    const ink = inkNow();
     if (ink) {
       document.querySelector(".black-erbjud")?.remove();
       let stamp = document.querySelector(".blackstampel");
@@ -32,7 +37,7 @@
       stamp.innerHTML = `<b>${ink >= 10 ? "✦✦" : "✦"}</b> Stjärnbläck: ${ink} övningar`;
       return;
     }
-    if (skipped || started() || document.querySelector(".black-erbjud")) return;
+    if (skipped || started() || repo?.paborjat || document.querySelector(".black-erbjud")) return;
 
     // on screen only: an offer to load ink first, which goes away once he starts writing
     const box = document.createElement("div");
@@ -55,4 +60,27 @@
   // both look again.
   addEventListener("pageshow", e => { if (e.persisted) show(); });
   addEventListener("storage", e => { if (e.key === INK) show(); });
+
+  // the data repo: read it, take in what it has, send up what only this browser has
+  let told = false;
+  const tell = () => {
+    if (told || !repo || repo.paborjat || !started()) return;
+    told = true;
+    window.Blackrepo.write(dir, { paborjat: true });
+  };
+  async function sync() {
+    if (!window.Blackrepo) return;
+    repo = await window.Blackrepo.read(dir);
+    if (!repo) return;
+    const local = Number(get(INK)) || 0;
+    if ((repo.antal || 0) > local) { try { localStorage.setItem(INK, String(repo.antal)); } catch {} }
+    if (local > (repo.antal || 0)) window.Blackrepo.write(dir, { antal: local });
+    if (repo.paborjat) document.querySelector(".black-erbjud")?.remove();
+    show();
+    tell();
+  }
+  // after the field has saved what he wrote (ifyllbar.js), so started() sees it
+  document.addEventListener("input", () => setTimeout(tell, 0));
+  document.addEventListener("pointerup", () => setTimeout(tell, 0));
+  sync();
 })();

@@ -7,189 +7,41 @@
 <link rel="stylesheet" href="../../mallar/bas.css">
 <link rel="stylesheet" href="../../mallar/starwars/tema.css">
 <link rel="stylesheet" href="../../mallar/ifyllbar.css">
-<script src="../../mallar/ifyllbar.js" defer></script>
+<style>
+  .lassida.unlocked { display: contents; }
+  .las-vakt { max-width: 520px; margin: 48px auto; padding: 0 16px; font-family: "Segoe UI", Arial, sans-serif; text-align: center; }
+  .las-vakt h1 { margin: 0 0 4px; }
+  .las-vakt .vakt-sub { margin: 0 0 20px; color: #666; }
+</style>
 </head>
 <body>
-
-<!-- Page 1 -->
-<div class="page">
-  <div class="frame"></div>
-  <img class="corner tl" src="../../mallar/starwars/planet.svg" alt="">
-  <img class="corner tr" src="../../mallar/starwars/rymdskepp.svg" alt="">
-  <img class="corner bl" src="../../mallar/starwars/rymdskepp.svg" alt="">
-  <img class="corner br" src="../../mallar/starwars/stjarna.svg" alt="">
-
-  <div class="content">
-    <header class="sheet-head">
-      <img class="saber" src="../../mallar/starwars/ljussvard-bla.svg" alt="">
-      <div>
-        <h1>Star Wars-matte</h1>
-        <p class="sub">Blad 4: Avrunda och göra överslag</p>
-      </div>
-      <img class="saber" src="../../mallar/starwars/ljussvard-gron.svg" alt="">
-    </header>
-
-    <div class="meta">
-      <label>Jedi: <span class="line"></span></label>
-      <label class="date">Datum: <span class="line"></span></label>
-    </div>
-
-    <section class="part p1">
-      <h2><span class="tag">Padawan</span><span class="type">lätt</span></h2>
-
-      <div class="task">
-        <span class="num">1</span>
-        <div class="body">
-          <p>Bråkkorten! Skriv som decimaltal eller som bråk.</p>
-          <div class="calc-grid" style="grid-template-columns: repeat(4, 1fr)">
-            <span><span class="frac"><span>2</span><span>5</span></span> = <i class="blank"></i></span>
-            <span><span class="frac"><span>1</span><span>4</span></span> = <i class="blank"></i></span>
-            <span>0,09 = <i class="blank"></i></span>
-            <span>0,7 = <i class="blank"></i></span>
-          </div>
-        </div>
-      </div>
-
-      <div class="task">
-        <span class="num">2</span>
-        <div class="body">
-          <p>Räkna i huvudet. Tänk på att 10 tiondelar är 1 hel.</p>
-          <div class="calc-grid">
-            <span>3,4 + 1,6 = <i class="blank"></i></span>
-            <span>0,8 + 0,2 = <i class="blank"></i></span>
-            <span>7,5 + 2,5 = <i class="blank"></i></span>
-          </div>
-        </div>
-      </div>
-
-      <div class="task">
-        <span class="num">3</span>
-        <div class="body">
-          <p>Gånger och delat med 10, 100 och 1&nbsp;000.</p>
-          <div class="calc-grid">
-            <span>6,3 · 100 = <i class="blank"></i></span>
-            <span>4&nbsp;500 / 1&nbsp;000 = <i class="blank"></i></span>
-            <span>0,52 · 10 = <i class="blank"></i></span>
-          </div>
-        </div>
-      </div>
+<div class="las lassida" id="lasSida" data-enc="v1.6d2327a95a836d5c.UtvXZzrwW2A0QP0LNrBtpGQXpQbpEmouynNkjqX8KpF6289cTMPTReKXNIF/uuwsbR7CYPRLjudS0aNAbbhKaTMBxoUJ/K3Q7LQJlZ0W69GWIwTelR381bMmknXSI/+NKKBE4P1R7RMi5l5Fr84jpG81oiaMbZRhGG+Z9PZjPJXIillFf23uHrjGdYymMQ5uVoZC446nPJnUceVfw9au4bAEziRNX37CyBvS6FDxNx6sfqrlgkTAgt88F7P1/Od17Fhtem/AWUoPhswCHztWdQ3m0X3G19Ns2esvcOcbyEMHs95e0FBwKRbx4J8WSvBAyZyBPbeTEL+R26I9R/71C6K45+/iZgvUvnhFI2pI7IR8Gus4IFdFqmS4McnQY38iyzpMCrbOZXHe32NuFmogi1sBpW8WjKVTrTNcZAPEsmRciezQHamAkll/9KHET8R8GOhwh8K3adMbxI7EWcHV/cKCGtBiDRDBoz1yyRypclJPql1AJEnn07Fuyk5pmqsVy+7V+3jfjeHMZDQ9dn4PA1iXpI+raWZBCG+TTankrPZiOIdhfanfP6T4/Uql6l4anNTDz7qutcoxkMLeWXgSAzN4hMYiOghqgFWGllLay8CdAmS21oJGjzfMNfvafSdf9WE2QbwCHIscfJw7JQzVrk7mHY9Qc4RjeGdC60zZFZ8=.hSxQK7BZ6MeCy6P/.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">
+  <main class="las-vakt">
+    <h1>Star Wars-matte, blad 4</h1>
+    <p class="vakt-sub">Blad 4: Avrunda och göra överslag</p>
+    <section class="las-locked">
+      <svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" fill="currentColor"/><path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      <p><b>Bladet är låst</b></p>
+      <p>Skriv lösenordet för att öppna det.</p>
+      <button type="button" data-las-open>Skriv lösenord</button>
     </section>
-
-    <section class="part p2">
-      <h2><span class="tag">Riddare</span><span class="type">lagom</span></h2>
-
-      <div class="task">
-        <span class="num">4</span>
-        <div class="body">
-          <div class="tips"><b>Så avrundar du!</b> Titta på siffran precis efter den plats du avrundar till. Är den 5 eller mer avrundar du uppåt. Är den 4 eller mindre avrundar du neråt.</div>
-          <p>Avrunda till närmaste heltal.</p>
-          <div class="calc-grid" style="grid-template-columns: repeat(4, 1fr)">
-            <span>7,3 &#8776; <i class="blank"></i></span>
-            <span>15,5 &#8776; <i class="blank"></i></span>
-            <span>28,49 &#8776; <i class="blank"></i></span>
-            <span>99,6 &#8776; <i class="blank"></i></span>
-          </div>
-        </div>
-      </div>
-
-      <div class="task">
-        <span class="num">5</span>
-        <div class="body">
-          <p>Falken har flugit <b>273,6</b> miljoner km. Avrunda sträckan till närmaste</p>
-          <div class="calc-grid">
-            <span>heltal: <i class="blank wide"></i></span>
-            <span>tiotal: <i class="blank wide"></i></span>
-            <span>hundratal: <i class="blank wide"></i></span>
-          </div>
-        </div>
-      </div>
-
-      <div class="task">
-        <span class="num">6</span>
-        <div class="body">
-          <p>Han köper en hjälm för <b>19,90 kr</b>, ett bälte för <b>39,50 kr</b> och en dryck för <b>9,75 kr</b>.<br>
-          a) Gör ett överslag. Ungefär hur mycket kostar det?<br>
-          b) Räkna exakt. Hur mycket kostar det?<br>
-          c) Han betalar med en 100-lapp. Hur mycket får han tillbaka?</p>
-          <div class="rutor" style="height: 44mm"></div>
-          <div class="svar">a) ungefär <i class="blank"></i> kr &nbsp; b) <i class="blank"></i> kr &nbsp; c) <i class="blank"></i> kr</div>
-        </div>
-      </div>
-    </section>
-  </div>
-
-  <div class="foot">Sida 1 av 2 · Vänd bladet!</div>
+  </main>
 </div>
-
-<!-- Page 2 -->
-<div class="page">
-  <div class="frame"></div>
-  <img class="corner br" src="../../mallar/starwars/planet.svg" alt="">
-
-  <div class="content">
-    <header class="sheet-head small">
-      <img class="saber" src="../../mallar/starwars/ljussvard-bla.svg" alt="">
-      <h1>Star Wars-matte</h1>
-      <img class="saber" src="../../mallar/starwars/ljussvard-gron.svg" alt="">
-    </header>
-
-    <section class="part p2">
-      <h2><span class="tag">Riddare</span><span class="type">fortsättning</span></h2>
-
-      <div class="task">
-        <span class="num">7</span>
-        <div class="body">
-          <p>Ställ upp och räkna.</p>
-          <div class="cols2">
-            <div>
-              <div class="label">a) 8,6 + 3,45</div>
-              <div class="rutor" style="height: 40mm"></div>
-            </div>
-            <div>
-              <div class="label">b) 15 − 6,35</div>
-              <div class="rutor" style="height: 40mm"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="part p3">
-      <h2><span class="tag">Mästare</span><span class="type">klurigt</span></h2>
-
-      <div class="task">
-        <span class="num">8</span>
-        <div class="body">
-          <p><b>Luke:</b> "Jag avrundade 3,46 till 3,5. Sedan avrundade jag 3,5 till 4. Alltså är 3,46 ungefär 4."<br>
-          <b>Leia:</b> "Nej, det blir fel!"<br>
-          Vem har rätt? Förklara varför, och avrunda 3,46 rätt till närmaste heltal.</p>
-          <div class="skrivrader" style="height: 32mm"></div>
-        </div>
-      </div>
-
-      <div class="task">
-        <span class="num">9</span>
-        <div class="body">
-          <p>Rymdskeppet tankar först <b>48,5 liter</b> och sedan <b>36,75 liter</b>. Tanken rymmer <b>100 liter</b>.<br>
-          a) Hur många liter har skeppet tankat?<br>
-          b) Hur många liter fattas för att tanken ska vara full?</p>
-          <div class="rutor" style="height: 56mm"></div>
-          <div class="svar">a) <i class="blank"></i> liter &nbsp; b) <i class="blank"></i> liter</div>
-        </div>
-      </div>
-    </section>
-
-    <div class="feedback">
-      <span>Hur kändes bladet? Ringa in:</span>
-      <span class="opt">Lätt</span>
-      <span class="opt">Lagom</span>
-      <span class="opt">Svårt</span>
-      <div class="wish">Önska tema till nästa blad: <span class="grow"></span></div>
-    </div>
-  </div>
-
-  <div class="foot">Sida 2 av 2 · Bra jobbat, Jedi!</div>
-</div>
-
+<div class="las" id="lasNyckel" hidden data-repo="Real-MrBeam/stjarnkartan-data" data-fil="spel.json" data-enc="v1.6d2327a95a836d5c.sN2vLYULqjLUmVgbfCr8ymOznmwo//yIKOH9RgT0Qa/mwes5HFDdTlQ6/GXUKSIcGmFZzVXxI09X0fZyk/qhQf+SWi/MkoRB5Z45d6PDng+Bps08mj8/XF84zXrBeOCC+rueRg8c9m3Yeh2jQd6tABYWhDGh1oSRebQGl+S2r5V6cSOEF3ERnbxc22hy5d+si982e3aWtarNQtHRp7zGJuyyn+ecECkJfYqSITzCvYrOGNdBLN1oikZMD8jsg1JqSS5J9MzvVDsl82K3aWrtAoiPI4ESrQ167jrYQT1WiePMsjU0SQSmgn30nwE19ahcAWsqSFXVpA7CpIckUxoZgl9P3VlYvFKynzrOdd4NxDV2h6JodYNTdH53oy5qOaicVXEQkSiNI9AJVLJK0m9JAlIYjyPxixfXBNhFr5TklMCvOsrcWAGj3/3WbddsA3//ocG9oTRrlEm6ztL+Ow58meHaUCl3B05/Hl6ud2v2dV9xi/TOFOyc10i22ms6k7+zvqhSN64hq08i+qCNdDp5Ff3yodQB1LOPAAJXub0nRAAskVuD23ozg1WnKmtEOxP2wpVYbaKagyRib0WrmElzfedpN5pdhfUkRSH7/IJGzdLOsBiskPeAJANog/FzBeGObOoG91hqAVmRcIs2wSTi9NFfvBMWl4qkEp9i71UjH9M=.o7/aFuXYE7HyD4Zf.mlqGQwmN5wChhblmgpnaTC2ZAqSX4vEa0rzdBOz0VTGls94fPnZZJs2Q6oBmZ1gPQoJQT0gWx//Df8nLxDk7P836FDBe1fPP9G4fYINTH7mN7HJWcRIVPHghHjZFxp+wBPpWDZI+WAwgjff0/g=="></div>
+<noscript><p>Sidan kräver JavaScript för att låsas upp.</p></noscript>
+<script>
+  // Starts the page's own scripts once the lock has opened it, one at a time in their order
+  document.addEventListener("las:unlocked", async () => {
+    const box = document.getElementById("lasSida");
+    if (!box || !box.classList.contains("unlocked") || box.dataset.started) return;
+    box.dataset.started = "1";
+    for (const old of [...box.querySelectorAll("script")]) {
+      const s = document.createElement("script");
+      if (old.hasAttribute("src")) { s.src = old.getAttribute("src"); await new Promise(done => { s.onload = s.onerror = done; old.replaceWith(s); }); }
+      else { s.textContent = old.textContent; old.replaceWith(s); }
+    }
+  });
+</script>
+<script src="../../mallar/las.js" data-las="../../las/las.json" data-knapp="last" defer></script>
 </body>
 </html>

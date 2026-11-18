@@ -7,189 +7,41 @@
 <link rel="stylesheet" href="../../mallar/bas.css">
 <link rel="stylesheet" href="../../mallar/dagbok/tema.css">
 <link rel="stylesheet" href="../../mallar/ifyllbar.css">
-<script src="../../mallar/ifyllbar.js" defer></script>
+<style>
+  .lassida.unlocked { display: contents; }
+  .las-vakt { max-width: 520px; margin: 48px auto; padding: 0 16px; font-family: "Segoe UI", Arial, sans-serif; text-align: center; }
+  .las-vakt h1 { margin: 0 0 4px; }
+  .las-vakt .vakt-sub { margin: 0 0 20px; color: #666; }
+</style>
 </head>
 <body>
-
-<!-- Page 1 -->
-<div class="page">
-  <div class="frame"></div>
-  <img class="corner br" src="../../mallar/dagbok/flygplan.svg" alt="">
-
-  <div class="content">
-    <header class="sheet-head">
-      <img class="doodle" src="../../mallar/dagbok/penna.svg" alt="">
-      <div>
-        <h1>Dagbok för alla mina <span class="u">mattefans</span></h1>
-        <p class="sub">Blad 3: Fyll på med nollor</p>
-      </div>
-      <img class="doodle" src="../../mallar/dagbok/gubbe.svg" alt="">
-    </header>
-
-    <div class="meta">
-      <label>Författare: <span class="line"></span></label>
-      <label class="date">Datum: <span class="line"></span></label>
-    </div>
-
-    <section class="part p1">
-      <h2><span class="tag">Måndag</span><span class="type">lätt</span></h2>
-
-      <div class="task">
-        <span class="num">1</span>
-        <div class="body">
-          <p>Bråkkorten! Skriv som decimaltal eller som bråk.</p>
-          <div class="calc-grid" style="grid-template-columns: repeat(4, 1fr)">
-            <span><span class="frac"><span>3</span><span>5</span></span> = <i class="blank"></i></span>
-            <span><span class="frac"><span>3</span><span>4</span></span> = <i class="blank"></i></span>
-            <span>0,17 = <i class="blank"></i></span>
-            <span>0,3 = <i class="blank"></i></span>
-          </div>
-        </div>
-      </div>
-
-      <div class="task">
-        <span class="num">2</span>
-        <div class="body">
-          <p>Räkna i huvudet. Tänk på att 10 tiondelar är 1 hel.</p>
-          <div class="calc-grid">
-            <span>2,7 + 1,3 = <i class="blank"></i></span>
-            <span>0,6 + 0,4 = <i class="blank"></i></span>
-            <span>5,8 + 0,2 = <i class="blank"></i></span>
-          </div>
-        </div>
-      </div>
-
-      <div class="task">
-        <span class="num">3</span>
-        <div class="body">
-          <p>Gånger och delat med 1&nbsp;000. Tre nollor betyder tre steg.</p>
-          <div class="calc-grid" style="grid-template-columns: repeat(2, 1fr)">
-            <span>4,2 · 1&nbsp;000 = <i class="blank wide"></i></span>
-            <span>3&nbsp;600 / 1&nbsp;000 = <i class="blank wide"></i></span>
-          </div>
-        </div>
-      </div>
+<div class="las lassida" id="lasSida" data-enc="v1.6d2327a95a836d5c.VJ8/8tUOQJrXs69ycc9UQrf5LeOInhqW8U9iYtt3Vroh+78Zk9zJoTJeupYv7Gvg6MpkXfwfwMoAgu0t1XBi93s2uWmXr2di8s4bdpeyhiK2soT8AhKZ4sWvfw1hLfdZ0sZU6vknIso7+FmBpnvF6N07prj9mFuLQSCy94MoTUP17ctH+ayZp4/6ijPsXiRoH1DMdUF/i6gjWChMwG9te67O37ALJisGSKtk3i+wpFOEGUy7gF71Q9iMLhWZg1TFvvBeZX1+42TjkaoDys9tNpENJkx8xsI/skSXXqqJgFnF0B+c7CK1ItqEQPUn7AVHYNRHHZKhajFo3zkWF9o1C3VZjvodozhjmyqllfElMexrmAtJY+9ia+mdpQMhzgKxF1Ft04vzalyfUMGTEnXPDKBQ8wisoY71cTRiVz/UQ0sMQPYSXEJtQbyD5wdmEk44IbLFHMV45e//ZeD+Z31bbdU6gJpiz3hiHDEy9CoK0RxoSMFhO8r9RFtxJkuM2/zb4GdivmnUAjqY6uEvC9tz5C+4qGc/PoLT4smhTXf1TDl0RemS/xv3VOmoBCaAL3HEtnPJkerkChndU6A9GCMxScVpb11jX89JOckWmhRzftNo3Ixwg/h0TOEbNDzSCttlL2pvpPyDu82aLyAzVWKI18AHRLitMc7AUi1FYbo3c7I=.UJseTw12vfWk+O8V.wnllblurWCdfeGPN3ay1xmvz5n//g74Ewwz9mT8RmKXrf155kO5Ot7PvOKFw/NUJnNDlzsUh9wgH9mPIfThaK/AfN0gNlT0wVOT1l4T6W+i977CIKQyklpdKKq2mq2WpMofa7XemtsqBAdhYSwx7Hx+4rgN19Qr18Yv/YoLi3gOV7vN8CMKYKou1IrCL8RF0Qb39lbJOFkZhWrrfORj4/8VrAkCWEEI7J/11JdmR3xjVMD6vvZoKVT6549wYm6a+S3UPGs58nVfoyh6Khssde7jy1lNElzc4DqPV98tnk/mFP6fUSnxK/mkhESc/CiWlEintrOhOs5Ou8O2L980RMWKwNjKGsZi3QAxmYs59O08ZWcnTHyBG/UOl9gjicUuvnKp6W8QFXtG6t/AsnXm/D7jTUNWiXQ2Mm663jqY0NE/KbIqsn5rAwu56/R1sFX32KKvEHpf7U/IzAEWBkEcW39A1pgVzouP3bLrpWf6QoXuiBXY8ZYW/LGKDad8HRPDKqhJz8xWSIJe1knsl3vyXDWsENMFFFhEIo4++KiYOv7sUj757hYs1nxRx07cuGIk2lq4rfAZlBPwPbU3NSCl1UuPqfT2Sti/0pYgj5IyKsu4B4JTPPsRipUTYo0UYX5j5M0uXMTzO9PajOAKsNMEXbPbC+vtHF3gBO3j1z5tJ/cEdGE8OHwrb3yrH2zcsyAmov0xyYVUw/mpeeP0b3aQ7Kdrac3oO8X2dKn8HyDaH5BDaYpEZuixzQZP/7Dtw/ZgCodOx8mtVtVzfT1vFa7Gz+vs3OanOjGJO7gPPBPor1pZvI9vfU9T/XXPndaWhWLDBRdET4n/hrvfjCfFKXx5j1KOiyia/98CDjwFaxRFpbXjbXjH+jkPhDKvy70nlZwQhX0GIEXuKQkVFRf7rq50CeIAYVNoWAxwVokRmxlr8ZblVB3OXmR5/ldWHd5fUOws66ZTKSuoZr4wfNIcgiG/EFa0slbN5x3jFhPPeiOR9uks47MYGjMLd+R1HmVSsiBmInRlIjMHz1+JC8vJgVGr4nE7FtQC/LMqAh9yAJJk85jaK4xYvMVWq0Cryu7Yp3/eRV6X0ODfdEywBcXHnClxpt5VYYhwVbBpgIbkePE/FQKjVAiHwDjMKaQSTSGUq9BVXOZ/fT9+p9MOMbHsOax2yFxtbLaFJdT/EZ9EAIwSE/obpqJOdpRjFpal9WMfnZ5prsgvw9+20/UONUKYaPJG5UWZbDPW83rSvxXahcE7WNc3nW3+w57HnVl7tZZNuF+JbKfPhqyXfDRDsz6sqlB0pu8VXGfjGWhhgF4K81Syky3jH+7LmA0eOUbQtrGrbiCs/ke2mI9CSCftXDvPjnlJ7IBfFmuSQlygP9Gs+wEac9ZaUS+B3e9Qp+nfDV619jp0yy+ERtcRgOcvvPOZggPlCi8Lox0Cf0Ul7Raf01Yk8/9/kG6WoPxYEUmVMrQn2m8WQdEN+lL16C4GiAmT9Lb9+n3THZhU2KKJ6e3Z+B3LY0uSOBelT1i8JGpns5g3XrWfQ/98sbdO6JFgtf1jS/Uw4oKtuRjU4vawycwDkGh4UtIgvNUgvO+kStqCm4LMkusecluFDLa9uRdG4xJWHN/IZds9OmRm063fRziHe4NB2wB+OfV4wL9SSc7HhmnCRWaIaGNcHNAevsgOjf/yOpURieLBP6UBAQezeVAHwNA3nhgULDkp2X36oiiKzLvrDOTSDCdsU9qFzGlWA/e5fnCmpnjuOwmUwMlaGkQ4w6LueovEzQV2U2J9kjsuoR8eClqenouJi7YLfi6qAsRFkMGJUcv6j9fnDDiOmctwXHaunHHrYgUsM9xup7DJNBIZ8ee7J4QlYFccwcO2JOnglshqoJQUqTeN/GKIE+zKKem0yWpypduh18l5ubXWRnoUf+0k0FiLJfNeQaDigsM/kqRLnLsFs/XcUclCANmEZXMK/ZID6XiEj7or6Zp1xWiZWqfRdEFcXKoov5LXDS8jPf6c7JRxeY7EkDoa2xOjhR3fjCTaOc+bsbvcmO1vwoUZFtvfHBDls6dR8L0it1KmUg/YDSv82Iaf5ogR6+IQ4NM31CGIQ/N5pTC7QG8UqspY7WUXF3R2M2YRxecJcMYyPiowCxzGyo6ir/ysAmbkNoGJoLYax2TElzH5IqyywrH4jrns5FwYQkXGp8dUNAtGFqGWVIMP3S0DqA9eLfq2f5ND14UkK+6aopXExbTZia1xaRrYmqIYXGijkz3Ycj2Ei0Eu+2CTVZ2Kyq9zHHudNFD21396UGsjTjwLACMCSiySm7xv2S9NQ+S10t5N5ZinoP2A92rUinXSyUIzVYNDEMINGHVaV1nlCqD7r1/9wnSav+b9Vp65hJcz5x/IETf7vF6o9NhHzqUgqM37bHtqMma230hkr2lkZIxHQNs3f5YU7ijh9Z8vMqYCD7s/yziYseFEHe76qZKz27kU5MjV5mu6GcMElEm9/F1DxFIyLYIAAxVWGkijbBPGvi87ivssPs8FMBUJvK/y55QfW/+1kdwUslF+r9lVgFLMO+zag3UCaG7XUsz7bd4csFFxb4zzRmXXcEEfphuPDmi6EOXl6683AdpSkpXOadGExtF4W5HCw8IRuf1knqqErolkK9CdekQ983KCUxWO5Gz4Kiqi+muvZ0TB1QE8XZdOsAAsweJICNjXnIMDpCLv4h40gOxdfB8Uy14ef1T7VPNqZMDIDlI2AC4ayy7NuspN8bI3lwedg6D8gJewLGOORXalXRYHbxA/jttgdWVzPoKl+Q9G7nOmo08kf4DSKHdbMTLAp78tmVsxn97qlUdr2YxrTKCpDJsmpKlZ5Yb1I/vLrPXTsjVoPqQpiemCS/f2sAxo6YRwaED3t2sj9XVo/XEYUPGEreNZi93ufS7WfF7kwP45K2puQ9pjz7FFueTfg4QAF+Uk7zwiIxZT2+W0KDKw+85KWuA2TF+9g8g/TAycVcXxb2a6n+TEHau2ZBI7M5RVw1hbwOjkAmKK6hzqoDWNWjRPoh748eJ3ifVWP+CN6Ca2nNP2BT3Gn4eMRquXEcycTciEnse6E8miu+mNLaeXSlaAw7pUEd+Spj61QUGHX7vgOao/gRLZWwvw0heCEWJ25uvctS9mkuQmzGMlakNasTEHGUZu/yaGVXevniNMBWjVnRBYyUVqN6xlzzPVroEWSv5KTZyKvzgzm0VmdfoA5/OeJ/nMCQSOW0BY6s0LDrA8o83NKSXvxFNDTKKvovV2EkYsm+Hi6gvYz1oeG85t5V8zle9plbx+V+wvwFiUSzBbHC2kyNSoV9ufa5e1h4XXCW62R4b4Tc8ZJA/+szfGRZI5i6JULJxQBo8AepEVkpGeRvtHyGu26IuMtHJ4jXAyb19tqjmTSA5Y2X1AYOuuUeQsm2/sj3YS3W+IUmwtWoqrKC84OdHiypJhJ07OP9lSGWMIicwQ3qf8dPJ2DRRptyeuBlvp4/4KsqectJCoAtKRSSRwENiyQBO6wooyICIUGl7u6O+EOCsARC9PTVFjRX8gZUpb0NFbLu38fc/qVGdfCQsn4ZKhzuxHaND/afiTy7o5jNsIH666EYuAZWzh2CYOeiKbTSF/9EReehBxsLL06lPQqIQfaKNM0Zhap9OyBroalTuzp78jKu1EcUhRJQfj3uB2HxpV/MbL6Zt7Fc9cLTBCC4SHje+fnxqdSW4Ny1PHuxs1L9AWR3E8h70lxsghujay84pWk1X+BhRwQO/8nbKtEo5I+VO6dBMHqEE3X99SX8tpaQTCQXDv8aT4jWlf5rnsmhS7P5xswbdEEixJPksuzImdN11GEDrj0Ufj5TAEJ3zFKe0eM+jQV0dejNOTNLi5xYQ5THoQSNs0ZFWphRnT+5nAvrqduE3OaF4gUgZC5pXVntYqG8qiQ8gn/0oFudvRHxVCIbFXtHfLsGQO5xlE54KqniimYvCGk6KUPRlhjx/Y9iRHar+uF7dVGTx00NNCsDLZ9rYT1XCWnRrRLE1KSfbZ+VrTYyTecsOvvAtsAND44oq8T3Uf/jyGpfOmCNb7nSwoW1cstwNX0kfNfFhCnO4gkiC9HlWTibNcDNxmeTqaj+xwWDCKjZOkUyj4Y+jpZY3ny9orSsQRpzUV2hLodMo1Gz9oKQqXIJESRVmlAFnHaNVk5GprFTb5ERjjaKc2HTjOx+APGdLvCr8NL2MfryiXKuh0ZvtsJk67cLJgHUSSKXlqGPMP3vOkjild6jbNrWRbW2mEpAXNUjQinNvcK1J0fMX6uCo2PgpC+OzqleTkowD0Y5w+S2AgC2XIqkTH+hHzJmJw0B2zcb9AdsE83YGb25o+igI+xPndXrbtD06fNbLTQcozSudMsA+hT/XMI+w6d49/Tj4xDOR5rdotyOU23oc2ZxeJh1dgmDQ+cLhqQKCzdOlp7fPHapri2vzNH2yp4FVXy+Jd1bvf4j8Q93noT4lYoeTDScSa+0/cVBoTMKe+GMuOQJ7lMlC7yZsCuYnuxCL0RwJJ9uag/y6OA63eafXjebrLe/yeTLRqiyuCTHNFpuQGzrQtnYRBSZFAoEU6+DFNVby3WSVaV1ZuRcwosP3/sWaqaQfCZ2cfpgIqQNvG9Als0kujrDVqTGs4v0wqqqpGhkQaBFXJLkmyyH16qU/AogI/x/uEr+qXfICUyHi5VE2rKSK430jOHCEm8mljafkDxLa8BVScjfAgJs/MmNyEvSyWh1CFxZkz51WQdTTwSbTnjLDrmsjlhq6ddyILgTMTINaUNO+QrOhftSMOBgdkQ0BOP9LLQI8/ikqy/X7Ct8IWKdinixO5c4VcxB0BQJcs6NRa1YPXPEiNHBCgjGJO+1Luh447F2EO18/+RVJ0adlJQpLf3HJHubsqYhS60WY6bCFbg2+HyL8WI3q6HVhiw81boq9cw1xuheY2Wco+r8UZhZNAKlKY5tGp9JiVvLJwMgTdP08XjG6JgsKujRlPhzaFuUbTk3jkIXUJuHL0piSnB+tWhQlz3o0+fw1mGmX2yIUVQNBeTySDsQykDagMDf2FYV4/OvLCnmMwaenFHpzDNw/vTslpAX0v2MFba7w70ymz9/IJOWpQ+wVouM6h4N2y+lYHip6Veuo+gN9gHV51xJw+oK/FI5F6uT5OQ1sXo25cQb3+pU+0PtOg3PTs0imL3V9PELRtkCCeafdXk4NTW8o3rOyhOUfopiJAzkdIfALtL6+XbpKvLUF5m/EsSzxmFssQ+/sQtS/vqXoiG9CjQNE5OI2BgTg4nu9PP190D+j7P9PU+rPvqhFyC2q9vSidky/CoSxVJRz1IvH9itz61zhB50o2boqLPjJfqp8BTTm/4aFVCORVL8vzcGkI3LlR/o9+9Ob6wjyMkkNqqrCsOuoqXND5DdG3+gV67HXoLmYiLyCNKCw/iV3IRquJEzTwlz5wU0zbUwk7X6Qy4nsxgcRvKWg15QaO8SYu9a3zzmpDRlFZ1UiWfMYJ4AKjZH+SmQZgc+CbwDfvKY+IYHjWY/8cPfrTxPwS9ecUUC850DL88POS1BniFZRcLih1VZEWcf9IA67hOptMXmAIu2HB97lh8Uqhox5GrerJcDki7Pbn9xV0RPaxn2eVt5gwTBuhv5qdo9L1znqMssE6UmlTZBpNUOtDh/FlnhH51nR5G9LyGkcDvakFF57+aNz88WPHpkjFrSgjc7JIueamMiZ8nVHXnuyCjDJbpxjHlIdNmNkaZzC8pSIlm7dZWA2R6wa+iBlO/6H2WxOLmV7wqn3RUWo4xeuhwaSxkgYLcpKaUpbAlsiuE5g+7WO2B6kf++/PZ6KvFfe6SZhLHf+CNAFLQg8xkldtu44RcjKfc7oowZRC7GEKqzUQkD3eAvXoBVOoXHSOxjSdeClqdMU7PLsNpojsrTog+3Mb5wQDYnAlQyZ3bDajxeaD6gvAKLiSpldKJPGAa9xupPHUcfC2i5s9ZHBr4FLqF69TLMhI8WDCz3R6dcjgxH4iwJ3v5P6uXm294SBIsgMEH+BD4xpivEcon2k5+JstXR6XvGM4jfwCK45JvKtnQZeIRF8in1BEpT2VJU9y8iVP9PfB0+UeJWmjD6OIxV3TZ4CiygmSRRaXc1pzgnKg0y+OYeBr/vK+nJekt+qFuKofOzCzicTWumHSeTqAF4yim1+PQo2QGl1hE3h3WrAMIK3z4E03GWzr6IzJMdmVKTg2VsEaRoYkGheD3Mhyb2DgKFcYrM1IBNIV2AKinxFqlGOWmDPGVyv50nyGXmXUApyW+qNQZNdKN1IG3M9ZS1VOZZ/mEM+tYT3GWCiWoLM35EzPZWAjAZm41bO5q+Fft5TzYE7UO14hsi9PGgyBjZVJ+prVHzYNXdJgLSWt/mrvitDq93f3D+vmkbnXb/GKTdhF6cydFQ3hQZAd0WT5wTGJCiyUqBg/hBirFIUYIWO+yw3jvZoSPHSyYOpU4A3NFprXzf1Uur7eGAMFS6m59vlPYK8HRXDDX5V5qyVR2tiLBL8KGpkn/ybD95tANwxYE6L6f2cOuvWVQzvH16EAlGrokHerN0g+JkCv+YjorJmr64lD7KRQHcbIDyXD/wGVkdlkTjBsqZwGbOXM0C45tAw9luzmWwgqoptQ9pxqK/RaBIQJSK6R3R94832rY9WjHgZKIu33LEar+WfstGirWIFKPyZzgNFA7p3+0UhtZcjY/WWKQIVpiEwBCmkBAHcZk2UxFrJu285hHo5Pb+I7EW/yRSzYqU5cw9JnB24lw/Y3OC9rrKlQ34aqPxqxy77e1cTTVsVeB1A/52a6J7k4lT8qzlh04v7dreZHLIXua9EBSKeHAlSZgtd/TkfV5qiC7q1dG6qHalCTUcO2dPzzmKnUFFweR0LZU7FY07aPza+IqXLt5IR3GtMVrTrrzQzprfbo4pajUr25ooOLE7+SHwsAjCLGC0vvOQTVi41Rjy40xWToSW/CdiRhr/bJUw6ncS/lQpfO4R9izIMFsM5H4rd2ysWXE53n1BLjKFnGmpkoCNW29y7gbDc6R6u4NVzaqDaSteMUt40i/aJgqM0q+gRIa5TT/Z8GL3vL1sHNehvPC2fFyyML9mKvdGjhIsw9if2KQNWPEg4GuY7UJZa9YYpqPVWEV6P23DyXJZj21P6JhKZ1DD0PrqyPASh5NRs7Ge69jD4ICeOE4osLsIAiurqaC4cSfFHHmtD5wR59N4KAnSzenGew8PIKHoy4VEb0X6HTQ40Fs3Q2NMLJE2c3uv9jrZv2EBDLvQkeku1ainF8fleCMeKiHVpvuQ+eK2CbNydxHh7xnxkssZmC4tnof+ceoEaexhevAqRwv9RqYKzqY+F3kGhsw4m1U1SuvSJ2lCDf3kh3BxU+Qtqlr2mZdcIjP2cBmlL0c4YqP8SAlOyw2sb0Mb6CqWNgUvM9xEAwtmSLgneu74TdYFrrxnxB11us7boDD7pSE74Y8EgsC9FFZ/7uNCZjp6/LXjog7GGLVd16F2vwycAT+daBxCyvLsKmMvM7BONV9VjAW7alFyGUsa+C+1moYu31HbIKPPmf6QgN6Nz3IAbU4yQ2mWvsANYpy1Y3ml+R9Ps7FcSDqcCRwwUoL8RIZBtQovS7FFCKlA1Q0mujkeXSqNaC7Nmd0TqinaaSGBbnNFK/anJSROvKnTHgMRfHKNV2IF9kVjzo0YjX/WnD84likQW6lAFN4hBMu8KAkfyKVVSNYZPUS57u5MJtJdUtiplby7g3L+H5QnAs1HwrjPIQTFEMTvoI8rdh4oqvR6QAvvYfRHqrhL2YDWtldhHc5/FkVKobu/ogMkArQC+3ApccYYzJ4lwX2kwB7CjC/c1cX5rqr4PYJygOVRGO03WHYlJOKw0pohs9HBx5Qb/eJeAbvd/imVztvXnqmHLxkEM8toM7TKsEke3uZ+DmRA0zw1B6QdbPX6T8kNkHIH4n70ia5yxfJ4iWVKDk5PXLofChqhDuG/x+URYW/IePVHsy/27xn7P2h6G5UfT1kgOP0YKFvwXsDNBwgkQFAzzbcwLmlVRvE75IPPGw6t/lP0bk9GoLF11oySwjqEdRKFS3i7tEXx5DPf9M0pJ+4mNtT9R6KAxraQedNiRQZLt7VgGyjK5fGUxAc0ZVBpBwCXJXmQYZjqebWb/uxpK4J+/iEpSr5dG7doomgOqqy9psgOnfZ0TSgw4blXnQgd7PhqrH2/FciwJjD4Ln3JwF8W5AqVgzpSUMcJse1IkaOiB4OPVdm47XEwVgNSa9mlsm194sKloFDwXYUFEobMJXbWS7EWaBm/sQ6QFNjhayhrwVg6QaLBDa7W9EsVNgwuFuRMVHVPGL8Bvm4TvSKEB/FjAcoe3AduRO92eFPhcx1jr/L7EenYVR06Vtg79hZYQDSQmXRymxlpDrUSj+UHaEw3Qa3+u8KsRgVCwNIxNplhSQBFweTC1YHPrBsQqyS0Forl5RN60LOiyu77kVRqRbflaSce+INNVzSU7lImt2PXtZVK7FS4THB+hBYga0SJDDY4YHk4HisHoMB+Zjul0mEUYPPlojCvYSppKBef5YlvGJBR63cydI1cBPHSw107oBAXJrcU6EyTeirfyR+T5/bYNTN2PsvKn2xjsD9nzKJLfzy/ndJ35uPHLZyPzcQLUPSlwvODjcFeznRf7OtEFYV0gq8mo4NOLbyH+Br5WnBRGFxXpVEu3Q+R3rYbwwhcnSoCklR3Euiogi6maHm3YP2HKxNvKgooVDVRW/dd5YnduD+7KXuAbwrEOF+eEAQO9Jh5Y34ZNysJzy87pup/zgcKjiUxITZhmrdFb/DCIx4A44I4w6f6unnDmkgd2v5qInDnmivggkYgB/MhGzjl/l0QLLLwzeZiJL+ICpD66e6bzSgNp4Mi+N/M6wvb52h1VAv8KYjaUW2lHBXc+MkaA8F7HICCm00I/ErpDQwq2937VBSbeMgcWW4BRcQoLRo8Z2vYtg5m/JRA6Je6/N30nD32kQ/iUP62HwbspgkxoJ/0qmSmqEGAnC4slqAHfYpPpq0w59e7pl8/R6+52v0t001/gn9ImP3iG2BLIMpWrHJYenj1m/GQ3SPZCe3Hn2Ila7wWB/wrIgy3jTSeIBTqWbShEwlf05EJiFXfFDSbvXhuiGdbOVNalM5TO3OJuj4oQRIdwQ3tSreAIjfLfXlmHf+KHhL9mnWsMlZo9+vCtSbii0rO2ChU2NcUxpzRIA80gaFUHwka7hbi0U9TmL5bVQNduCFxDgIWddp5wggIH8mSksm6cdy5sS6Iw0mHYsLxnyoWKW1zxQv">
+  <main class="las-vakt">
+    <h1>Dagbok för alla mina mattefans, blad 3</h1>
+    <p class="vakt-sub">Blad 3: Fyll på med nollor</p>
+    <section class="las-locked">
+      <svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" fill="currentColor"/><path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      <p><b>Bladet är låst</b></p>
+      <p>Skriv lösenordet för att öppna det.</p>
+      <button type="button" data-las-open>Skriv lösenord</button>
     </section>
-
-    <section class="part p2">
-      <h2><span class="tag">Onsdag</span><span class="type">lagom</span></h2>
-
-      <div class="task">
-        <span class="num">4</span>
-        <div class="body">
-          <div class="tips"><b>Fyll på med nollor!</b> 4,5 är samma sak som 4,50. Skriv talen så att de har lika många decimaler. Då kan du ställa upp med komma under komma.</div>
-          <p>Skriv talen med två decimaler.</p>
-          <div class="calc-grid" style="grid-template-columns: repeat(4, 1fr)">
-            <span>4,5 = <i class="blank"></i></span>
-            <span>12,8 = <i class="blank"></i></span>
-            <span>7 = <i class="blank"></i></span>
-            <span>0,3 = <i class="blank"></i></span>
-          </div>
-        </div>
-      </div>
-
-      <div class="task">
-        <span class="num">5</span>
-        <div class="body">
-          <p>Fyll på med nollor, ställ upp och räkna.</p>
-          <div class="cols2">
-            <div>
-              <div class="label">a) 6,5 + 2,35</div>
-              <div class="rutor" style="height: 40mm"></div>
-            </div>
-            <div>
-              <div class="label">b) 10,4 − 3,25</div>
-              <div class="rutor" style="height: 40mm"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="task">
-        <span class="num">6</span>
-        <div class="body">
-          <p>Greg köper en serietidning för <b>39,50 kr</b> och godis för <b>24,75 kr</b>.<br>
-          a) Gör ett överslag. Ungefär hur mycket kostar det?<br>
-          b) Räkna exakt. Hur mycket kostar det?<br>
-          c) Greg betalar med en 100-lapp. Hur mycket får han tillbaka?</p>
-          <div class="rutor" style="height: 24mm"></div>
-          <div class="svar">a) ungefär <i class="blank"></i> kr &nbsp; b) <i class="blank"></i> kr &nbsp; c) <i class="blank"></i> kr</div>
-        </div>
-      </div>
-    </section>
-  </div>
-
-  <div class="foot">Sida 1 av 2 · Vänd bladet!</div>
+  </main>
 </div>
-
-<!-- Page 2 -->
-<div class="page">
-  <div class="frame"></div>
-  <img class="corner br" src="../../mallar/dagbok/flygplan.svg" alt="">
-
-  <div class="content">
-    <header class="sheet-head small">
-      <img class="doodle" src="../../mallar/dagbok/penna.svg" alt="">
-      <h1>Dagbok för alla mina <span class="u">mattefans</span></h1>
-      <img class="doodle" src="../../mallar/dagbok/gubbe.svg" alt="">
-    </header>
-
-    <section class="part p2">
-      <h2><span class="tag">Onsdag</span><span class="type">fortsättning</span></h2>
-
-      <div class="task">
-        <span class="num">7</span>
-        <div class="body">
-          <p>Gregs familj körde <b>238,6 km</b> till farmor. Avrunda sträckan till närmaste</p>
-          <div class="calc-grid">
-            <span>heltal: <i class="blank wide"></i></span>
-            <span>tiotal: <i class="blank wide"></i></span>
-            <span>hundratal: <i class="blank wide"></i></span>
-          </div>
-          <div class="rows" style="margin-top: 3mm">
-            <div><span>Rodricks band repade i <b>2,75 timmar</b>. Avrunda till hela timmar:</span> <span class="grow"></span></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="part p3">
-      <h2><span class="tag">Fredag</span><span class="type">klurigt</span></h2>
-
-      <div class="task">
-        <span class="num">8</span>
-        <div class="body">
-          <p><b>Rowley:</b> "4,5 + 1,75 = 5,80. Jag tog 4 + 1 = 5 och 5 + 75 = 80."<br>
-          <b>Greg:</b> "Det där är fel!"<br>
-          Vem har rätt? Förklara vad Rowley gjorde fel och räkna rätt.</p>
-          <div class="skrivrader" style="height: 32mm"></div>
-        </div>
-      </div>
-
-      <div class="task">
-        <span class="num">9</span>
-        <div class="body">
-          <p>Greg sparar till ett tv-spel som kostar <b>499 kr</b>. Han har <b>312,50 kr</b>.
-          Mamma ger honom <b>75,50 kr</b> för att han klippt gräset.<br>
-          a) Hur mycket pengar har Greg nu?<br>
-          b) Hur mycket fattas för att han ska kunna köpa spelet?</p>
-          <div class="rutor" style="height: 54mm"></div>
-          <div class="svar">a) <i class="blank"></i> kr &nbsp; b) <i class="blank"></i> kr</div>
-        </div>
-      </div>
-    </section>
-
-    <div class="feedback">
-      <span>Hur kändes bladet? Ringa in:</span>
-      <span class="opt">Lätt</span>
-      <span class="opt">Lagom</span>
-      <span class="opt">Svårt</span>
-      <div class="wish">Önska tema till nästa blad: <span class="grow"></span></div>
-    </div>
-  </div>
-
-  <div class="foot">Sida 2 av 2 · Bra skrivet, författaren!</div>
-</div>
-
+<div class="las" id="lasNyckel" hidden data-repo="Real-MrBeam/stjarnkartan-data" data-fil="spel.json" data-enc="v1.6d2327a95a836d5c.sN2vLYULqjLUmVgbfCr8ymOznmwo//yIKOH9RgT0Qa/mwes5HFDdTlQ6/GXUKSIcGmFZzVXxI09X0fZyk/qhQf+SWi/MkoRB5Z45d6PDng+Bps08mj8/XF84zXrBeOCC+rueRg8c9m3Yeh2jQd6tABYWhDGh1oSRebQGl+S2r5V6cSOEF3ERnbxc22hy5d+si982e3aWtarNQtHRp7zGJuyyn+ecECkJfYqSITzCvYrOGNdBLN1oikZMD8jsg1JqSS5J9MzvVDsl82K3aWrtAoiPI4ESrQ167jrYQT1WiePMsjU0SQSmgn30nwE19ahcAWsqSFXVpA7CpIckUxoZgl9P3VlYvFKynzrOdd4NxDV2h6JodYNTdH53oy5qOaicVXEQkSiNI9AJVLJK0m9JAlIYjyPxixfXBNhFr5TklMCvOsrcWAGj3/3WbddsA3//ocG9oTRrlEm6ztL+Ow58meHaUCl3B05/Hl6ud2v2dV9xi/TOFOyc10i22ms6k7+zvqhSN64hq08i+qCNdDp5Ff3yodQB1LOPAAJXub0nRAAskVuD23ozg1WnKmtEOxP2wpVYbaKagyRib0WrmElzfedpN5pdhfUkRSH7/IJGzdLOsBiskPeAJANog/FzBeGObOoG91hqAVmRcIs2wSTi9NFfvBMWl4qkEp9i71UjH9M=.o7/aFuXYE7HyD4Zf.mlqGQwmN5wChhblmgpnaTC2ZAqSX4vEa0rzdBOz0VTGls94fPnZZJs2Q6oBmZ1gPQoJQT0gWx//Df8nLxDk7P836FDBe1fPP9G4fYINTH7mN7HJWcRIVPHghHjZFxp+wBPpWDZI+WAwgjff0/g=="></div>
+<noscript><p>Sidan kräver JavaScript för att låsas upp.</p></noscript>
+<script>
+  // Starts the page's own scripts once the lock has opened it, one at a time in their order
+  document.addEventListener("las:unlocked", async () => {
+    const box = document.getElementById("lasSida");
+    if (!box || !box.classList.contains("unlocked") || box.dataset.started) return;
+    box.dataset.started = "1";
+    for (const old of [...box.querySelectorAll("script")]) {
+      const s = document.createElement("script");
+      if (old.hasAttribute("src")) { s.src = old.getAttribute("src"); await new Promise(done => { s.onload = s.onerror = done; old.replaceWith(s); }); }
+      else { s.textContent = old.textContent; old.replaceWith(s); }
+    }
+  });
+</script>
+<script src="../../mallar/las.js" data-las="../../las/las.json" data-knapp="last" defer></script>
 </body>
 </html>
