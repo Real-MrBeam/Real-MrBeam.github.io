@@ -19,10 +19,11 @@
       ]
     }
   },
+  "tidigareGranser": {"fore": "2026-10-20", "minProcent": [101, 95, 90, 0]},
   "pris": [
-    { "minProcent": 95, "niva": "Guld", "namn": "Guldstjärna", "bild": "pris/guld.svg", "farg": "#b8860b", "text": "Nästan alla rätt! Öppna dagboken och se vad du fått i guld!" },
-    { "minProcent": 90, "niva": "Silver", "namn": "Silverstjärna", "bild": "pris/silver.svg", "farg": "#7d848c", "text": "Mycket bra! Öppna dagboken och se vad du fått i silver!" },
-    { "minProcent": 70, "niva": "Brons", "namn": "Bronsstjärna", "bild": "pris/brons.svg", "farg": "#8a4f1d", "text": "Snyggt jobbat! Öppna dagboken och se vad du fått i brons!" },
-    { "minProcent": 0, "niva": "Smiley", "namn": "Glad smiley", "bild": "pris/smiley.svg", "farg": "#c99a00", "text": "Bra kämpat! Öppna dagboken och se vad du fått! Kolla tipsen nedan." }
+    {"minProcent": 100, "niva": "Världsberömd", "namn": "Superstjärnan", "bild": "pris/superstjarna.svg", "farg": "#8e3bb0", "text": "Alla rätt, nu är du världsberömd! Öppna dagboken och se vad du fått!"},
+    {"minProcent": 90, "niva": "Guld", "namn": "Guldstjärna", "bild": "pris/guld.svg", "farg": "#b8860b", "text": "Nästan alla rätt! Öppna dagboken och se vad du fått i guld!"},
+    {"minProcent": 70, "niva": "Silver", "namn": "Silverstjärna", "bild": "pris/silver.svg", "farg": "#7d848c", "text": "Mycket bra! Öppna dagboken och se vad du fått i silver!"},
+    {"minProcent": 0, "niva": "Brons", "namn": "Bronsstjärna", "bild": "pris/brons.svg", "farg": "#8a4f1d", "text": "Bra kämpat! Öppna dagboken och se vad du fått i brons! Kolla tipsen nedan."}
   ]
 }

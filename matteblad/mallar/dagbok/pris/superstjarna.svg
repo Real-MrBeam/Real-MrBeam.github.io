@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs><linearGradient id="r" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#ff7a7a"/><stop offset=".25" stop-color="#ffd25a"/><stop offset=".5" stop-color="#7ee08a"/>
+    <stop offset=".75" stop-color="#6fb6ff"/><stop offset="1" stop-color="#c38bff"/></linearGradient></defs>
+  <!-- sparkles around the star -->
+  <g fill="#f2c94c" stroke="#8e3bb0" stroke-width="1.2" stroke-linejoin="round">
+    <path d="M88 6 L90.5 12.5 L97 15 L90.5 17.5 L88 24 L85.5 17.5 L79 15 L85.5 12.5 Z"/>
+    <path d="M10 70 L11.8 74.2 L16 76 L11.8 77.8 L10 82 L8.2 77.8 L4 76 L8.2 74.2 Z"/>
+    <path d="M90 74 L91.5 77.5 L95 79 L91.5 80.5 L90 84 L88.5 80.5 L85 79 L88.5 77.5 Z"/>
+  </g>
+  <path d="M50 4 L62 36 L96 37 L69 58 L79 92 L50 72 L21 92 L31 58 L4 37 L38 36 Z" fill="#fff" stroke="#fff" stroke-width="10" stroke-linejoin="round"/>
+  <path d="M50 4 L62 36 L96 37 L69 58 L79 92 L50 72 L21 92 L31 58 L4 37 L38 36 Z" fill="url(#r)" stroke="#8e3bb0" stroke-width="2.5" stroke-linejoin="round"/>
+  <path d="M40 30 L46 18" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".7"/>
+  <!-- doodled face with sunglasses, drawn with a marker like the pictures in the diary -->
+  <g fill="none" stroke="#2b2b2b" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M44 22 q1 -6 3 -2 q2 -6 3 -1 q2 -5 3 0"/>
+    <path d="M31 41 L70 41"/>
+    <path d="M33 41 h14 q0 9 -7 9 q-7 0 -7 -9 Z" fill="#2b2b2b"/>
+    <path d="M53 41 h14 q0 9 -7 9 q-7 0 -7 -9 Z" fill="#2b2b2b"/>
+    <path d="M36 43.5 l3 -1.5 M56 43.5 l3 -1.5" stroke="#fff" stroke-width="1.4"/>
+    <path d="M38 58 Q50 72 63 57" />
+    <path d="M60 55 l4 3" stroke-width="2"/>
+  </g>
+</svg>
