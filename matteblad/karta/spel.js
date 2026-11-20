@@ -869,6 +869,7 @@ function frame(now){
   nightLevel += ((S.natt ? 1 : 0) - nightLevel) * Math.min(1, dt * 1.6);
   if (Math.abs(nightLevel - (S.natt ? 1 : 0)) < .005) nightLevel = S.natt ? 1 : 0;
   if (nightLevel > 0) drawNight(now, nightLevel);
+  drawPondGlow(now);
   drawStarfall(now, dt);
   drawFlight(now); drawRuinStar(now);
   drawLetterMarks(now, reach);
@@ -1489,6 +1490,36 @@ function maybeStarfall(){
   lastRevealKey = ''; revealAround(STARFALL.x, STARFALL.y, 4); lastRevealKey = '';
   cam.follow = false; cam.focus = { x: STARFALL.x, y: STARFALL.y, until: t0 + 6500 };
 }
+// Something glimmers on the bottom of the pond as long as the star shard is still there (dammen fynd and glans, Peter 2026-11-20):
+// a soft light under the water that breathes slowly, about as strong by day as at night, and every second or two a small
+// four-pointed twinkle. It is
+// an effect in the water, not a figure.
+let pondTwinkle = null;
+function drawPondGlow(now){
+  if (!DAMM || !DAMM.glans || !S.damm || (STARFALL && !STARFALL.pond) || fyndUppe(DAMM.fynd)) return;
+  const gx = DAMM.glans.x, gy = DAMM.glans.y;
+  if (!DEBUG.mode && !seenAt(Math.floor(gx), Math.floor(gy))) return;
+  const x = Math.round(gx * TS), y = Math.round(gy * TS), breath = .55 + .45 * Math.sin(now / 750), r = 8 + 2 * nightLevel;
+  ctx.save(); ctx.globalCompositeOperation = 'lighter';
+  ctx.translate(x, y); ctx.scale(1, .55);
+  const g = ctx.createRadialGradient(0, 0, 0, 0, 0, r);
+  g.addColorStop(0, `rgba(255,240,170,${(.6 + .05 * nightLevel) * breath})`); g.addColorStop(1, 'rgba(255,240,170,0)');
+  ctx.fillStyle = g; ctx.fillRect(-r, -r, r * 2, r * 2);
+  ctx.restore();
+  // the shard itself: a few pale pixels that shimmer
+  ctx.fillStyle = breath > .75 ? '#ffffff' : '#fee761';
+  ctx.fillRect(x - 1, y, 2, 1);
+  if (breath > .5) ctx.fillRect(x, y - 1, 1, 1);
+  if (!pondTwinkle || now > pondTwinkle.t0 + 600){
+    if (!pondTwinkle || now > pondTwinkle.next) pondTwinkle = { t0: now, next: now + 900 + Math.random() * 1300, dx: Math.round((Math.random() - .5) * 6), dy: Math.round((Math.random() - .5) * 2) };
+    else return;
+  }
+  const p = (now - pondTwinkle.t0) / 600, arm = Math.round(3 * Math.sin(Math.PI * Math.min(1, p)));
+  const tx = x + pondTwinkle.dx, ty = y + pondTwinkle.dy - 1;
+  ctx.fillStyle = '#ffffff'; ctx.fillRect(tx, ty, 1, 1);
+  ctx.fillStyle = 'rgba(255,246,200,.9)';
+  for (let i = 1; i <= arm; i++){ ctx.fillRect(tx + i, ty, 1, 1); ctx.fillRect(tx - i, ty, 1, 1); if (i < arm) { ctx.fillRect(tx, ty + i, 1, 1); ctx.fillRect(tx, ty - i, 1, 1); } }
+}
 const shake = now => STARFALL && now > STARFALL.t0 + 2600 && now < STARFALL.t0 + 3900 ? Math.sin(now / 22) * 2.5 : 0;
 function drawStarfall(now, dt){
   const F = STARFALL; if (!F || now < F.t0) return;
@@ -2021,7 +2052,9 @@ function startVira(seen){
 }
 // The neighbour in Hemmet (Bosse or Mira, whoever built there) cannot sleep since the night the stars fell, when the ground
 // shook and the pond came up on Ängen. At night he or she stands by the pond and gives him a nightcap (berattelse granne,
-// Peter 2026-10-22). Later the neighbour only looks at the pond, where something glows now and then (the star crucian).
+// Peter 2026-10-22). Later the neighbour only looks at the pond, where something glows now and then (the star crucian). Once the
+// star crucian is caught, the neighbour says that something still glimmers on the bottom, and he hears a rumour about it (the
+// star shard, rykte:botten, Peter 2026-11-20). When the shard is up it has stopped glimmering.
 const GRANNE = berattelse.granne;
 const neighbour = () => { if (!GRANNE || !S.natt || !S.built[GRANNE.tomt] || pondHidden(GRANNE.plats)) return null; const p = PLOTS.find(q => q.id === GRANNE.tomt), v = p && valOf(p); return v && GRANNE.val[v.id] ? { ...GRANNE.val[v.id], person: v.person, namn: PERS[v.person].namn } : null; };
 function neighbourBlock(){
@@ -2030,7 +2063,11 @@ function neighbourBlock(){
 }
 function talkNeighbour(){
   const n = neighbour(); if (!n) return;
-  if (S.saker.includes(GRANNE.ger)) return startDialog([{ p: n.person, t: n.igen }], () => [{ label: 'Tillbaka till kartan', alt: true, run: toNode }]);
+  if (S.saker.includes(GRANNE.ger)){
+    const rudan = S.fiskbok[GRANNE.fisk] !== undefined, kvar = DAMM && DAMM.fynd && !fyndUppe(DAMM.fynd);
+    const t = !rudan ? n.igen : kvar ? n.glimmar : n.borta;
+    return startDialog([{ p: n.person, t }], () => { if (rudan && kvar) hearRumor(GRANNE.rykte); return [{ label: 'Tillbaka till kartan', alt: true, run: toNode }]; });
+  }
   startDialog([{ p: n.person, t: n.hej }, { p: n.person, t: n.ger }], () => {
     if (!S.saker.includes(GRANNE.ger)){ S.saker.push(GRANNE.ger); renderPack(); saveSoon(); itemModal(GRANNE.ger); }
     return [{ label: 'Tillbaka till kartan', alt: true, run: toNode }];
@@ -2515,10 +2552,13 @@ function hearRumor(key, quiet){
 // more, they solve themselves (Peter 2026-10-22). The ones left are on top, the done ones are folded away at the bottom.
 const MOON = sprite(["...yyy..", "..yy....", ".yy.....", ".yy.....", ".yy.....", "..yy....", "...yyy.."], { y:'#fee761' });
 let MOON_URL = '', showDoneRumors = false;
+// A find is up (fynd:) when it is no longer in the water: in the pack, sold, or dropped in Stjärnbrunnen. Then fishing does not
+// give it again, and the rumour about it stays solved.
+const fyndUppe = id => S.saker.includes(id) || !!S.salt['fynd:' + id] || !!(S.brunnen && S.brunnen.fynd === id);
 function condOk(c){
   return c.split('|').some(x => {
     const i = x.indexOf(':'), k = x.slice(0, i), v = x.slice(i + 1);
-    return k === 'djur' ? S.djur.includes(v) : k === 'fisk' ? S.fiskbok[v] !== undefined : k === 'sak' ? S.saker.includes(v) : k === 'hittat' ? S.hittat.includes(v) : k === 'stopp' ? !!S.stopp[v] : false;
+    return k === 'djur' ? S.djur.includes(v) : k === 'fisk' ? S.fiskbok[v] !== undefined : k === 'sak' ? S.saker.includes(v) : k === 'fynd' ? fyndUppe(v) : k === 'hittat' ? S.hittat.includes(v) : k === 'stopp' ? !!S.stopp[v] : false;
   });
 }
 const rumorInfo = k => (berattelse.ryktesInfo || {})[k] || {};
@@ -3033,7 +3073,7 @@ function pull(){
     stopFishing(); giveAnimal(rule.djur, rule.text, () => showNode());
     return saveSoon();
   }
-  const finds = (FISKE.fynd || []).filter(id => !S.saker.includes(id) && !S.salt['fynd:' + id] && !(S.brunnen && S.brunnen.fynd === id) && (!FISKE.fyndPlatser || !FISKE.fyndPlatser[id] || FISKE.fyndPlatser[id].includes(fz.plats)));
+  const finds = (FISKE.fynd || []).filter(id => !fyndUppe(id) && (!FISKE.fyndPlatser || !FISKE.fyndPlatser[id] || FISKE.fyndPlatser[id].includes(fz.plats)));
   if (finds.length && Math.random() < .2){
     const id = finds[Math.floor(Math.random() * finds.length)]; S.saker.push(id); renderPack(); saveSoon(); stopFishing();
     sparkle(boy.x + 8, boy.y + 2, 20, '#2ce8f5');

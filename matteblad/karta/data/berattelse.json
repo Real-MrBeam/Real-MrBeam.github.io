@@ -3961,18 +3961,24 @@
     "plats": "angen",
     "tomt": "hem",
     "ger": "nattmossa",
+    "fisk": "stjarnruda",
+    "rykte": "rykte:botten",
     "rubrik": "{namn} är vaken vid dammen",
     "knapp": "Prata med {namn}",
     "val": {
       "bikupor": {
         "hej": "Du är också vaken? Ända sedan stjärnregnet, när marken skakade till och vattnet bubblade upp ur gropen på ängen, kan jag inte sova. Bina surrar oroligt i kuporna.",
         "ger": "Ta min nattmössa, du. Jag har ändå ingen nytta av den längre.",
-        "igen": "Jag står här och tittar på dammen. Ibland lyser det därnere, som om någon har tappat en stjärna."
+        "igen": "Jag står här och tittar på dammen. Ibland lyser det därnere, som om någon har tappat en stjärna.",
+        "glimmar": "Stjärnrudan har du ju fångat. Men titta, det glimmar fortfarande på botten. Något föll nog ner i dammen med stjärnregnet.",
+        "borta": "Nu glimmar det inte längre på botten. Du hittade visst det som låg där. Bina surrar lugnare i natt."
       },
       "cirkel": {
         "hej": "Kan inte du heller sova? Ända sedan stjärnregnet, när marken skakade till och vattnet bubblade upp ur gropen på ängen, glöder stenarna i min cirkel hela nätterna. Jag får inte en blund.",
         "ger": "Här, ta min nattmössa. Den hjälper ändå inte mig.",
-        "igen": "Titta på dammen. Ibland lyser det därnere, som om någon har tappat en stjärna."
+        "igen": "Titta på dammen. Ibland lyser det därnere, som om någon har tappat en stjärna.",
+        "glimmar": "Stjärnrudan har du ju fångat. Men det glimmar fortfarande på botten, ser du? Något föll nog ner med stjärnregnet.",
+        "borta": "Nu glimmar det inte längre på botten. Du hittade visst det som låg där. Stenarna i min cirkel lyser lite svagare i natt."
       }
     }
   },
@@ -3990,7 +3996,8 @@
     "gruvan": "Holger såg en gråklädd gestalt smita in i gruvan en natt.",
     "tornet": "Stjärnväktarna vill träffa dig i tornet vid slottet en natt.",
     "sjunger": "Holger säger att berget sjunger om nätterna, några toner och sedan tystnar det.",
-    "grodkrona": "Ebbe säger att något litet glimmar som guld i vattnet under Södra bron. Han har aldrig fått upp det."
+    "grodkrona": "Ebbe säger att något litet glimmar som guld i vattnet under Södra bron. Han har aldrig fått upp det.",
+    "botten": "Grannen säger att något glimmar på botten av dammen på Ängen. Det föll nog ner med stjärnregnet."
   },
   "personRykten": {
     "vira": [
@@ -4093,6 +4100,12 @@
       "natt": true,
       "klar": [
         "fisk:stjarnruda"
+      ]
+    },
+    "rykte:botten": {
+      "pekar": "angen",
+      "klar": [
+        "fynd:stjarnskarva"
       ]
     },
     "plats:hem:natt": {
@@ -4289,6 +4302,8 @@
   "dammen": {
     "plats": "angen",
     "tomt": "hem",
+    "fynd": "stjarnskarva",
+    "glans": { "x": 10.1, "y": 27.2 },
     "rubrik": "Stjärnregnet över Ängen",
     "text": "Ett litet stjärnregn faller ner mot Ängen, och marken skakar så att stugan knakar. När det blir stilla har vatten bubblat upp ur gropen mitt på ängen. Där ligger nu en liten damm.",
     "torrText": "En äng där gräset når till midjan och blommorna står täta. Mitt på ängen finns en grop.",
