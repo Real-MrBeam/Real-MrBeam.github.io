@@ -2553,12 +2553,14 @@ function hearRumor(key, quiet){
 const MOON = sprite(["...yyy..", "..yy....", ".yy.....", ".yy.....", ".yy.....", "..yy....", "...yyy.."], { y:'#fee761' });
 let MOON_URL = '', showDoneRumors = false;
 // A find is up (fynd:) when it is no longer in the water: in the pack, sold, or dropped in Stjärnbrunnen. Then fishing does not
-// give it again, and the rumour about it stays solved.
+// give it again, and the rumour about it stays solved. gjort: is something done in the game that has its own flag: the whole
+// melody learnt at Forsstranden (melodi) or the oak opened with it (ekenOppen), 2026-11-20.
+const GJORT = ['melodi', 'ekenOppen'];
 const fyndUppe = id => S.saker.includes(id) || !!S.salt['fynd:' + id] || !!(S.brunnen && S.brunnen.fynd === id);
 function condOk(c){
   return c.split('|').some(x => {
     const i = x.indexOf(':'), k = x.slice(0, i), v = x.slice(i + 1);
-    return k === 'djur' ? S.djur.includes(v) : k === 'fisk' ? S.fiskbok[v] !== undefined : k === 'sak' ? S.saker.includes(v) : k === 'fynd' ? fyndUppe(v) : k === 'hittat' ? S.hittat.includes(v) : k === 'stopp' ? !!S.stopp[v] : false;
+    return k === 'djur' ? S.djur.includes(v) : k === 'fisk' ? S.fiskbok[v] !== undefined : k === 'sak' ? S.saker.includes(v) : k === 'fynd' ? fyndUppe(v) : k === 'gjort' ? GJORT.includes(v) && !!S[v] : k === 'hittat' ? S.hittat.includes(v) : k === 'stopp' ? !!S.stopp[v] : false;
   });
 }
 const rumorInfo = k => (berattelse.ryktesInfo || {})[k] || {};

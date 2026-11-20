@@ -89,7 +89,7 @@
     "vassen": {
       "namn": "Vassen",
       "text": "En gömd brygga i vassen. Ingen annan vet att den finns, och så får det gärna förbli.",
-      "rykte": "Det kväker i vassen hela tiden.",
+      "rykte": "Det kväker i vassen hela tiden. Grodor nappar aldrig på en krok, men de hoppar gärna i en håv.",
       "natt": "Vassen prasslar i mörkret, och vattnet blänker i månljuset.",
       "rykteNatt": "I Vassen nappar fiskar som aldrig syns på dagen."
     },
@@ -3278,11 +3278,11 @@
       "text": "Det är förseglat med en silverstjärna med ett öga.",
       "knapp": "Ta upp brevet",
       "titel": "Stjärnväktarnas andra brev",
-      "lista": "Möt oss i tornet vid slottet på natten.",
+      "lista": "Möt oss i tornet vid slottet när vägen dit är öppen.",
       "fran": "stjarnvaktarna",
       "stycken": [
         "Till dig som läser runor. Nu har du släppt ut åtta stjärnor. Vi har räknat dem, en efter en, när de steg mot himlen. Gråskuggan har säkert också räknat. Var försiktig.",
-        "Det finns saker vi inte kan skriva i ett brev. Möt oss i tornet vid slottet på natten.",
+        "Det finns saker vi inte kan skriva i ett brev. När vägen till tornet vid slottet är öppen, möt oss där på natten.",
         "Berätta inte för någon. Vi vet fortfarande inte vem som lyssnar.\n\nStjärnväktarna"
       ],
       "rykte": "rykte:tornet"
@@ -3541,7 +3541,7 @@
             ]
           },
           "e": {
-            "t": "\"Jag har sett den\", säger Vira tyst. \"Den går genom skogen när månen är full, alltid mot forsen. Den bär något som lyser under kappan.\"",
+            "t": "\"Jag har sett den\", säger Vira tyst. \"Den går genom skogen om nätterna, alltid mot berget. Den smiter in i den gamla gruvan och kommer ut vid vattnet på andra sidan. Den bär något som lyser under kappan.\"",
             "val": [
               {
                 "label": "Fråga vad den bär",
@@ -3985,8 +3985,8 @@
   "rykten": {
     "stalle": "Nattfiskaren har ett eget ställe vid sjön. Han visar det för den som har fångat tre olika sorters fisk.",
     "hatt": "Nattfiskaren tappade sin gamla fiskehatt med en röd fluga i sjön natten då skeppet kom. Den som hittar den får se hans ställe.",
-    "graskuggan": "Vira säger att Gråskuggan går mot forsen när månen är full.",
-    "skeppet": "Nattfiskaren säger att konstiga nya fiskar har dykt upp i sjön sedan det lysande skeppet började segla där om nätterna.",
+    "graskuggan": "Vira säger att Gråskuggan smyger genom gruvan under berget om nätterna, ner till vattnet på andra sidan.",
+    "skeppet": "Nattfiskaren säger att konstiga nya fiskar har dykt upp i sjön sedan det lysande skeppet började segla där om nätterna. Den största, Månkungen, hugger bara på det som blänker.",
     "flojt": "Nattfiskaren skar vassen till flöjten vid Forsstranden. Där spelar någon fiol om nätterna, samma melodi varje gång.",
     "stjarnsvalan": "Siri säger att det lysande skeppet är hennes Stjärnsvalan. Om nätterna kommer det närmast land vid Sjöviken.",
     "gammelgaddan": "Nattfiskaren säger att Gammelgäddan vid Udden bara hugger på det som blänker.",
@@ -3994,7 +3994,7 @@
     "sjoodjur": "Bertil säger att något stort simmar runt i sjön och gömmer sig i Vassen.",
     "efterlyst": "Drottningen lovar en belöning till den som fångar Gråskuggan. Han har setts runt den gamla gruvan under berget.",
     "gruvan": "Holger såg en gråklädd gestalt smita in i gruvan en natt.",
-    "tornet": "Stjärnväktarna vill träffa dig i tornet vid slottet en natt.",
+    "tornet": "Stjärnväktarna vill träffa dig i tornet vid slottet en natt, när vägen dit är öppen.",
     "sjunger": "Holger säger att berget sjunger om nätterna, några toner och sedan tystnar det.",
     "grodkrona": "Ebbe säger att något litet glimmar som guld i vattnet under Södra bron. Han har aldrig fått upp det.",
     "botten": "Grannen säger att något glimmar på botten av dammen på Ängen. Det föll nog ner med stjärnregnet."
@@ -4184,19 +4184,31 @@
       ]
     },
     "rykte:graskuggan": {
-      "pekar": "norrabron",
-      "natt": true
+      "pekar": "berget",
+      "natt": true,
+      "klar": [
+        "stopp:natt:bakom"
+      ]
     },
     "rykte:skeppet": {
       "pekar": "udden",
-      "natt": true
+      "natt": true,
+      "klar": [
+        "fisk:mankungen"
+      ]
     },
     "plats:eken:dag": {
-      "pekar": "eken"
+      "pekar": "eken",
+      "klar": [
+        "gjort:ekenOppen"
+      ]
     },
     "rykte:flojt": {
       "pekar": "norrabron",
-      "natt": true
+      "natt": true,
+      "klar": [
+        "gjort:melodi"
+      ]
     },
     "sak:gratyg": {
       "pekar": "berget"
@@ -4303,7 +4315,10 @@
     "plats": "angen",
     "tomt": "hem",
     "fynd": "stjarnskarva",
-    "glans": { "x": 10.1, "y": 27.2 },
+    "glans": {
+      "x": 10.1,
+      "y": 27.2
+    },
     "rubrik": "Stjärnregnet över Ängen",
     "text": "Ett litet stjärnregn faller ner mot Ängen, och marken skakar så att stugan knakar. När det blir stilla har vatten bubblat upp ur gropen mitt på ängen. Där ligger nu en liten damm.",
     "torrText": "En äng där gräset når till midjan och blommorna står täta. Mitt på ängen finns en grop.",
